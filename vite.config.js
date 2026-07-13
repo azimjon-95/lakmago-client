@@ -10,7 +10,9 @@ export default defineConfig({
     alias: { '@': path.resolve(__dirname, './src') },
   },
   server: {
+    host: '127.0.0.1',   // Windows'da localhost (::1) muammosini oldini oladi
     port: 5173,
+    strictPort: true,
     proxy: {
       '/api': { target: 'http://localhost:4000', changeOrigin: true },
       '/bot': { target: 'http://localhost:4000', changeOrigin: true },
