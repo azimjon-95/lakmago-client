@@ -1,0 +1,107 @@
+import { useState, useEffect } from 'react';
+
+import { Icon } from './Icon';
+
+// Har bir "photo" kaliti uchun realistik rang sxemasi. Backend integratsiyasida bu komponent
+// ichida <img src={dish.imageUrl}> bilan almashtiriladi; hozircha restoran/taom yuklagan
+// rasm o'rnini bosuvchi vizual taqlid (gradient + shaffof ikon + yorug'lik effekti).
+export const PHOTO_STYLES = {
+  plov: { grad: 'linear-gradient(145deg, #F4C468 0%, #D98A2E 55%, #B96A1A 100%)', icon: 'bowl', iconColor: 'rgba(70,35,0,0.55)' },
+  manti: { grad: 'linear-gradient(145deg, #F0DCC0 0%, #DCB98A 55%, #B98F5C 100%)', icon: 'meat', iconColor: 'rgba(60,35,10,0.5)' },
+  kabob: { grad: 'linear-gradient(145deg, #E8956B 0%, #C85A32 55%, #9A3D1D 100%)', icon: 'meat', iconColor: 'rgba(255,255,255,0.55)' },
+  sushi: { grad: 'linear-gradient(145deg, #A8D9C4 0%, #5FAE8C 55%, #357560 100%)', icon: 'fish', iconColor: 'rgba(255,255,255,0.6)' },
+  tiramisu: { grad: 'linear-gradient(145deg, #E8D4B0 0%, #C9A876 55%, #96754A 100%)', icon: 'cake', iconColor: 'rgba(60,35,10,0.5)' },
+  burger: { grad: 'linear-gradient(145deg, #F0C468 0%, #D98F3A 55%, #A85A1E 100%)', icon: 'burger', iconColor: 'rgba(60,25,0,0.55)' }
+};
+
+
+
+
+
+
+
+
+// Rasm slot: photo bo'lsa gradient+ikon "fotosurat" taqlidi, bo'lmasa universal fallback (kamera belgisi bilan)
+export function DishPhoto({ dish, height = 96, radius = 12, iconSize = 34 }) {
+  const style = dish.photo ? PHOTO_STYLES[dish.photo] : null;
+
+  if (style) {
+    return (
+      <div style={{ height, borderRadius: radius, position: 'relative', overflow: 'hidden', background: style.grad }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.35), transparent 55%)' }} />
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Icon name={style.icon} size={iconSize * 1.7} color={style.iconColor} strokeWidth={1.4} />
+        </div>
+      </div>);
+
+  }
+
+  return (
+    <div style={{ height, borderRadius: radius, background: dish.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+      <Icon name={dish.icon} size={iconSize} color="#EF9F27" />
+      <div style={{ position: 'absolute', bottom: 5, right: 6, display: 'flex', alignItems: 'center', gap: 2, background: 'rgba(255,255,255,0.65)', borderRadius: 6, padding: '1px 5px' }}>
+        <Icon name="camera" size={9} color="#9A9A94" />
+      </div>
+    </div>);
+
+}
+
+
+
+
+
+
+// Restoran banneri: 1-2 rasm bo'lsa avtomatik slayder, bo'lmasa universal banner
+export function RestaurantBanner({ restaurant, height = 150 }) {
+  const [index, setIndex] = useState(0);
+  const images = restaurant.images || [];
+
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const t = setInterval(() => setIndex((i) => (i + 1) % images.length), 3000);
+    return () => clearInterval(t);
+  }, [images.length]);
+
+  if (images.length === 0) {
+    return (
+      <div style={{ height, background: '#411E00', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>
+        <Icon name={restaurant.icon} size={64} color="#EF9F27" style={{ opacity: 0.4 }} />
+        <div style={{ position: 'absolute', bottom: 10, right: 12, display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(0,0,0,0.35)', borderRadius: 8, padding: '4px 9px' }}>
+          <Icon name="camera" size={12} color="rgba(255,255,255,0.8)" />
+          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.8)' }}>Rasm yo'q</span>
+        </div>
+      </div>);
+
+  }
+
+  const photoKey = images[index];
+  const style = PHOTO_STYLES[photoKey] || PHOTO_STYLES.plov;
+
+  return (
+    <div style={{ height, position: 'relative', flex: 'none', overflow: 'hidden' }}>
+      <div key={photoKey} style={{ height, background: style.grad, position: 'relative' }} className="animate-fade">
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 25% 15%, rgba(255,255,255,0.3), transparent 50%)' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.35), transparent 45%)' }} />
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Icon name={style.icon} size={90} color={style.iconColor} strokeWidth={1.3} />
+        </div>
+      </div>
+      {images.length > 1 &&
+      <div style={{ position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 5 }}>
+          {images.map((_, i) =>
+        <span
+          key={i}
+          style={{
+            height: 5,
+            borderRadius: 3,
+            width: i === index ? 16 : 5,
+            background: i === index ? '#fff' : 'rgba(255,255,255,0.5)',
+            transition: 'width 0.2s'
+          }} />
+
+        )}
+        </div>
+      }
+    </div>);
+
+}
