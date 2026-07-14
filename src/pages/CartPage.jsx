@@ -81,7 +81,7 @@ export function CartPage() {
     <div className="min-h-screen bg-canvas max-w-[420px] mx-auto flex flex-col">
       <div className="px-4 pt-3.5 pb-3 bg-surface flex items-center gap-3 border-b border-line sticky top-0 z-10">
         <button onClick={() => navigate(-1)} aria-label="Orqaga">
-          <Icon name="arrowLeft" size={22} color="#1A1A17" />
+          <Icon name="arrowLeft" size={22} color="#F2F1EE" />
         </button>
         <div className="text-lg font-medium text-ink">Savatcha</div>
       </div>
@@ -104,7 +104,7 @@ export function CartPage() {
             </div>
             <div className="text-sm font-medium text-ink">{group.restaurant.name}</div>
             <div className="text-[11px] text-muted ml-auto flex items-center gap-1">
-              <Icon name="clock" size={12} color="#6B6B66" /> {group.restaurant.deliveryMin}-{group.restaurant.deliveryMax} daq
+              <Icon name="clock" size={12} color="#9A9A96" /> {group.restaurant.deliveryMin}-{group.restaurant.deliveryMax} daq
             </div>
           </div>
           <div className="flex flex-col gap-2.5">
@@ -134,7 +134,7 @@ export function CartPage() {
                     className="w-7 h-7 rounded-lg border border-line flex items-center justify-center text-muted"
                     aria-label="Kamaytirish">
                     
-                        <Icon name="minus" size={14} color="#6B6B66" />
+                        <Icon name="minus" size={14} color="#9A9A96" />
                       </button>
                       <span className="text-sm font-medium text-ink w-3 text-center">{item.quantity}</span>
                       <button
@@ -186,7 +186,7 @@ export function CartPage() {
         
         <Icon name="phone" size={22} color={user.phone ? '#0F6E56' : '#EF9F27'} />
         <div className="flex-1">
-          <div className="text-[13px] font-medium" style={{ color: user.phone ? '#1A1A17' : '#BA7517' }}>
+          <div className="text-[13px] font-medium" style={{ color: user.phone ? '#F2F1EE' : '#BA7517' }}>
             {user.phone || 'Telefon raqamini kiriting'}
           </div>
           <div className="text-xs text-muted">Aloqa telefoni</div>

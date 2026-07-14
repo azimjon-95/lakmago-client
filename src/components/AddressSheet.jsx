@@ -35,7 +35,7 @@ export function AddressSheet({ addresses, selectedId, onSelect, onAdd, onClose }
         <div className="p-4 border-b border-line flex items-center justify-between">
           <div className="text-base font-medium text-ink">Manzil tanlang</div>
           <button onClick={onClose} aria-label="Yopish">
-            <Icon name="x" size={20} color="#6B6B66" />
+            <Icon name="x" size={20} color="#9A9A96" />
           </button>
         </div>
 
@@ -66,7 +66,7 @@ export function AddressSheet({ addresses, selectedId, onSelect, onAdd, onClose }
             onClick={() => setAdding(true)}
             className="mt-3 w-full border-2 border-dashed border-[#D3D1C7] rounded-xl p-3 text-muted text-[13px] font-medium flex items-center justify-center gap-1.5">
             
-              <Icon name="plus" size={16} color="#6B6B66" /> Yangi manzil qo'shish
+              <Icon name="plus" size={16} color="#9A9A96" /> Yangi manzil qo'shish
             </button>
           </div> :
 
@@ -78,7 +78,7 @@ export function AddressSheet({ addresses, selectedId, onSelect, onAdd, onClose }
               key={t}
               onClick={() => setTitle(t)}
               className="flex-1 py-2 rounded-[10px] text-[13px] font-medium"
-              style={title === t ? { background: '#411E00', color: '#FAEEDA' } : { background: '#F7F5F0', color: '#6B6B66' }}>
+              style={title === t ? { background: '#411E00', color: '#FAEEDA' } : { background: '#0E0E10', color: '#9A9A96' }}>
               
                   {t}
                 </button>

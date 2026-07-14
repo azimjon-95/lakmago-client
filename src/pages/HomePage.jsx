@@ -60,7 +60,7 @@ export function HomePage() {
           </div>
           <div className="text-sm font-medium text-ink flex items-center gap-1">
             {defaultAddress ? `${defaultAddress.title}, ${defaultAddress.address}`.slice(0, 26) : 'Manzil tanlang'}{' '}
-            <Icon name="chevronDown" size={13} color="#6B6B66" />
+            <Icon name="chevronDown" size={13} color="#9A9A96" />
           </div>
         </button>
         <button
@@ -97,7 +97,7 @@ export function HomePage() {
               style={
               active ?
               { background: '#411E00', color: '#FAEEDA' } :
-              { background: '#F7F5F0', color: '#6B6B66', border: '0.5px solid #EAE7DF' }
+              { background: '#0E0E10', color: '#9A9A96', border: '0.5px solid #EAE7DF' }
               }>
               
               {c.label}

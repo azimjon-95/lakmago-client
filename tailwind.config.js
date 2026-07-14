@@ -4,21 +4,22 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Logodan olingan LokmaGo brend palitrasi
+        // Logodan olingan LokmaGo brend palitrasi (o'zgarmaydi — aksentlar)
         brand: {
-          50: '#FAEEDA',
+          50: '#3A2A12',   // dark rejimda "yorug' jigar" o'rniga to'q fon
           100: '#FAC775',
-          400: '#EF9F27', // asosiy amber aksent
-          600: '#BA7517',
+          400: '#EF9F27',  // asosiy amber aksent
+          600: '#F0A838',
           800: '#633806',
-          ink: '#411E00', // to'q jigarrang (savatcha, sarlavhalar)
-          text: '#2C1400',
+          ink: '#FAC775',  // dark'da sarlavha aksentlari yorug'
+          text: '#2C1400', // amber ustidagi to'q matn (tugmalar)
         },
-        ink: '#1A1A17',
-        muted: '#6B6B66',
-        line: '#EAE7DF',
-        surface: '#FFFFFF',
-        canvas: '#F7F5F0',
+        // ===== DARK THEME semantik ranglar =====
+        canvas: '#0E0E10',   // eng orqa fon (deyarli qora)
+        surface: '#1A1A1E',  // kartalar, panellar
+        ink: '#F2F1EE',      // asosiy matn (och oq)
+        muted: '#9A9A96',    // ikkilamchi matn (kulrang)
+        line: '#2A2A30',     // chegaralar
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

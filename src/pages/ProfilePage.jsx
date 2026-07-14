@@ -39,7 +39,7 @@ export function ProfilePage() {
     <div className="min-h-screen bg-canvas max-w-[420px] mx-auto flex flex-col">
       <div className="px-4 py-3.5 bg-surface flex items-center gap-3 border-b border-line">
         <button onClick={() => navigate('/')} aria-label="Orqaga">
-          <Icon name="arrowLeft" size={22} color="#1A1A17" />
+          <Icon name="arrowLeft" size={22} color="#F2F1EE" />
         </button>
         <div className="text-lg font-medium text-ink">Profil</div>
       </div>
@@ -102,7 +102,7 @@ export function ProfilePage() {
           
             <Icon name="phone" size={18} color={user.phone ? '#9A9A94' : '#EF9F27'} />
             <div className="flex-1">
-              <div className="text-[13px] font-medium" style={{ color: user.phone ? '#1A1A17' : '#BA7517' }}>{user.phone || 'Kiritilmagan'}</div>
+              <div className="text-[13px] font-medium" style={{ color: user.phone ? '#F2F1EE' : '#BA7517' }}>{user.phone || 'Kiritilmagan'}</div>
               <div className="text-[11px] text-muted">Telefon raqami</div>
             </div>
             <Icon name="chevronRight" size={18} color="#9A9A94" />
@@ -153,7 +153,7 @@ export function ProfilePage() {
               key={t}
               onClick={() => setAddrTitle(t)}
               className="flex-1 py-2 rounded-[10px] text-xs font-medium"
-              style={addrTitle === t ? { background: '#411E00', color: '#FAEEDA' } : { background: '#F7F5F0', color: '#6B6B66' }}>
+              style={addrTitle === t ? { background: '#411E00', color: '#FAEEDA' } : { background: '#0E0E10', color: '#9A9A96' }}>
               
                   {t}
                 </button>
@@ -182,7 +182,7 @@ export function ProfilePage() {
           onClick={() => setShowAddAddress(true)}
           className="mt-2.5 w-full border-2 border-dashed border-[#D3D1C7] rounded-xl p-3 text-muted text-[13px] font-medium flex items-center justify-center gap-1.5">
           
-            <Icon name="plus" size={16} color="#6B6B66" /> Yangi manzil qo'shish
+            <Icon name="plus" size={16} color="#9A9A96" /> Yangi manzil qo'shish
           </button>
         }
       </div>

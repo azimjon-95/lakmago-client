@@ -40,7 +40,7 @@ export function RestaurantCard({ restaurant: r }) {
           </div>
         }
         {!hasPhoto &&
-        <div className="absolute bottom-1.5 right-2 flex items-center gap-1 bg-white/70 rounded-md px-1.5 py-0.5">
+        <div className="absolute bottom-1.5 right-2 flex items-center gap-1 bg-black/60 rounded-md px-1.5 py-0.5">
             <Icon name="camera" size={10} color="#9A9A94" />
           </div>
         }
@@ -48,8 +48,8 @@ export function RestaurantCard({ restaurant: r }) {
       <div className="px-3 py-[10px]">
         <div className="text-[15px] font-medium text-ink">{r.name}</div>
         <div className="text-xs text-muted mt-0.5 flex items-center gap-1 flex-wrap">
-          <Icon name="clock" size={12} color="#6B6B66" /> {r.deliveryMin}-{r.deliveryMax} daq ·{' '}
-          <Icon name="bike" size={12} color="#6B6B66" />{' '}
+          <Icon name="clock" size={12} color="#9A9A96" /> {r.deliveryMin}-{r.deliveryMax} daq ·{' '}
+          <Icon name="bike" size={12} color="#9A9A96" />{' '}
           {r.deliveryFee === 0 ? 'Bepul' : formatSomShort(r.deliveryFee)} · {r.cuisine}
         </div>
       </div>

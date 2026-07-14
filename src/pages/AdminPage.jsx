@@ -46,7 +46,7 @@ export function AdminPage() {
     <div className="min-h-screen bg-canvas max-w-[420px] mx-auto flex flex-col">
       <div className="px-4 py-3.5 bg-surface flex items-center gap-3 border-b border-line">
         <button onClick={() => navigate('/profile')} aria-label="Orqaga">
-          <Icon name="arrowLeft" size={22} color="#1A1A17" />
+          <Icon name="arrowLeft" size={22} color="#F2F1EE" />
         </button>
         <div className="text-lg font-medium text-ink">Admin panel · Bannerlar</div>
       </div>
@@ -55,14 +55,14 @@ export function AdminPage() {
         <button
           onClick={() => setTab('main')}
           className="flex-1 py-2.5 rounded-[10px] text-[13px] font-medium"
-          style={tab === 'main' ? { background: '#411E00', color: '#FAEEDA' } : { background: '#fff', color: '#6B6B66', boxShadow: 'inset 0 0 0 0.5px #EAE7DF' }}>
+          style={tab === 'main' ? { background: '#411E00', color: '#FAEEDA' } : { background: '#fff', color: '#9A9A96', boxShadow: 'inset 0 0 0 0.5px #EAE7DF' }}>
           
           Asosiy slayder ({banners.length}/4)
         </button>
         <button
           onClick={() => setTab('small')}
           className="flex-1 py-2.5 rounded-[10px] text-[13px] font-medium"
-          style={tab === 'small' ? { background: '#411E00', color: '#FAEEDA' } : { background: '#fff', color: '#6B6B66', boxShadow: 'inset 0 0 0 0.5px #EAE7DF' }}>
+          style={tab === 'small' ? { background: '#411E00', color: '#FAEEDA' } : { background: '#fff', color: '#9A9A96', boxShadow: 'inset 0 0 0 0.5px #EAE7DF' }}>
           
           Kichik reklama ({smallBanners.length})
         </button>
@@ -85,7 +85,7 @@ export function AdminPage() {
                     <div className="text-[13px] font-medium text-ink overflow-hidden text-ellipsis whitespace-nowrap">{b.title}</div>
                   </div>
                   <button onClick={() => setEditing(b)} className="w-[30px] h-[30px] rounded-lg border border-line flex items-center justify-center" aria-label="Tahrirlash">
-                    <Icon name="edit" size={14} color="#6B6B66" />
+                    <Icon name="edit" size={14} color="#9A9A96" />
                   </button>
                   <button onClick={() => removeBanner(b.id)} className="w-[30px] h-[30px] rounded-lg border border-line flex items-center justify-center" aria-label="O'chirish">
                     <Icon name="trash" size={14} color="#D85A30" />
@@ -98,7 +98,7 @@ export function AdminPage() {
             onClick={() => setEditing('new')}
             className="mt-3 w-full border-2 border-dashed border-[#D3D1C7] rounded-xl p-3 text-muted text-[13px] font-medium flex items-center justify-center gap-1.5">
             
-                <Icon name="plus" size={16} color="#6B6B66" /> Yangi banner qo'shish
+                <Icon name="plus" size={16} color="#9A9A96" /> Yangi banner qo'shish
               </button>
           }
           </>
@@ -120,7 +120,7 @@ export function AdminPage() {
                     <div className="text-[13px] font-medium text-ink">{b.title}</div>
                   </div>
                   <button onClick={() => setEditing(b)} className="w-[30px] h-[30px] rounded-lg border border-line flex items-center justify-center" aria-label="Tahrirlash">
-                    <Icon name="edit" size={14} color="#6B6B66" />
+                    <Icon name="edit" size={14} color="#9A9A96" />
                   </button>
                   <button onClick={() => removeSmallBanner(b.id)} className="w-[30px] h-[30px] rounded-lg border border-line flex items-center justify-center" aria-label="O'chirish">
                     <Icon name="trash" size={14} color="#D85A30" />
@@ -133,7 +133,7 @@ export function AdminPage() {
             onClick={() => setEditing('new')}
             className="mt-3 w-full border-2 border-dashed border-[#D3D1C7] rounded-xl p-3 text-muted text-[13px] font-medium flex items-center justify-center gap-1.5">
             
-              <Icon name="plus" size={16} color="#6B6B66" /> Yangi reklama qo'shish
+              <Icon name="plus" size={16} color="#9A9A96" /> Yangi reklama qo'shish
             </button>
           </>
         }
@@ -174,7 +174,7 @@ function BannerEditor({
     <div className="min-h-screen bg-surface max-w-[420px] mx-auto flex flex-col">
       <div className="px-4 py-3.5 flex items-center gap-3 border-b border-line">
         <button onClick={onCancel} aria-label="Yopish">
-          <Icon name="x" size={22} color="#1A1A17" />
+          <Icon name="x" size={22} color="#F2F1EE" />
         </button>
         <div className="text-lg font-medium text-ink">{banner ? 'Tahrirlash' : 'Yangi banner'}</div>
       </div>
@@ -224,7 +224,7 @@ function BannerEditor({
               key={i}
               onClick={() => setPresetIdx(i)}
               className="w-9 h-9 rounded-[10px]"
-              style={{ background: p.bg, border: presetIdx === i ? '2px solid #1A1A17' : '2px solid transparent' }}
+              style={{ background: p.bg, border: presetIdx === i ? '2px solid #F2F1EE' : '2px solid transparent' }}
               aria-label={`Rang ${i + 1}`} />
 
             )}
@@ -239,10 +239,10 @@ function BannerEditor({
             key={ic}
             onClick={() => setIcon(ic)}
             className="w-10 h-10 rounded-[10px] flex items-center justify-center"
-            style={{ background: icon === ic ? '#411E00' : '#F7F5F0' }}
+            style={{ background: icon === ic ? '#411E00' : '#0E0E10' }}
             aria-label={ic}>
             
-              <Icon name={ic} size={18} color={icon === ic ? '#EF9F27' : '#6B6B66'} />
+              <Icon name={ic} size={18} color={icon === ic ? '#EF9F27' : '#9A9A96'} />
             </button>
           )}
         </div>

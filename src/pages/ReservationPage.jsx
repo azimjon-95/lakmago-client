@@ -94,7 +94,7 @@ export function ReservationPage() {
     <div className="min-h-screen bg-surface max-w-[420px] mx-auto flex flex-col">
       <div className="px-4 py-3.5 flex items-center gap-3 border-b border-line">
         <button onClick={() => navigate(`/restaurant/${id}`)} aria-label="Orqaga">
-          <Icon name="arrowLeft" size={22} color="#1A1A17" />
+          <Icon name="arrowLeft" size={22} color="#F2F1EE" />
         </button>
         <div className="text-lg font-medium text-ink">Stol bron qilish</div>
       </div>
@@ -126,7 +126,7 @@ export function ReservationPage() {
                 style={active ? { background: '#411E00' } : { border: '0.5px solid #EAE7DF' }}>
                 
                 <div className="text-[11px]" style={{ color: active ? '#FAC775' : '#9A9A94' }}>{d.label}</div>
-                <div className="text-base font-medium" style={{ color: active ? '#fff' : '#1A1A17' }}>{d.date.getDate()}</div>
+                <div className="text-base font-medium" style={{ color: active ? '#fff' : '#F2F1EE' }}>{d.date.getDate()}</div>
               </button>);
 
           })}
@@ -141,7 +141,7 @@ export function ReservationPage() {
                 key={t}
                 onClick={() => setTime(t)}
                 className="px-4 py-2 rounded-xl text-sm"
-                style={active ? { background: '#EF9F27', color: '#2C1400', fontWeight: 500 } : { border: '0.5px solid #EAE7DF', color: '#1A1A17' }}>
+                style={active ? { background: '#EF9F27', color: '#2C1400', fontWeight: 500 } : { border: '0.5px solid #EAE7DF', color: '#F2F1EE' }}>
                 
                 {t}
               </button>);
@@ -152,7 +152,7 @@ export function ReservationPage() {
         <div className="text-[13px] font-medium text-ink mb-2">Mehmonlar soni</div>
         <div className="flex items-center justify-between border border-line rounded-xl px-4 py-2.5 mb-4">
           <span className="text-sm text-ink flex items-center gap-1.5">
-            <Icon name="users" size={16} color="#6B6B66" /> Kishilar
+            <Icon name="users" size={16} color="#9A9A96" /> Kishilar
           </span>
           <div className="flex items-center gap-4">
             <button onClick={() => setGuests((g) => Math.max(1, g - 1))} aria-label="Kamaytirish">
@@ -238,7 +238,7 @@ function PreOrderScreen({
     <div className="min-h-screen bg-surface max-w-[420px] mx-auto flex flex-col">
       <div className="px-4 py-3.5 flex items-center gap-3 border-b border-line">
         <button onClick={onBack} aria-label="Orqaga">
-          <Icon name="arrowLeft" size={22} color="#1A1A17" />
+          <Icon name="arrowLeft" size={22} color="#F2F1EE" />
         </button>
         <div className="text-lg font-medium text-ink">Oldindan taom tanlash</div>
       </div>
@@ -279,7 +279,7 @@ function PreOrderScreen({
 
                   <div className="flex items-center gap-2.5">
                         <button onClick={() => setQty(d.id, qty - 1)} className="w-7 h-7 rounded-lg border border-line flex items-center justify-center" aria-label="Kamaytirish">
-                          <Icon name="minus" size={16} color="#6B6B66" />
+                          <Icon name="minus" size={16} color="#9A9A96" />
                         </button>
                         <span className="text-[15px] font-medium text-ink w-3 text-center">{qty}</span>
                         <button onClick={() => setQty(d.id, qty + 1)} className="w-7 h-7 rounded-lg bg-brand-400 flex items-center justify-center" aria-label="Ko'paytirish">

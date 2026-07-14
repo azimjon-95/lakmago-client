@@ -101,7 +101,7 @@ export function DishModal({ dish, onClose }) {
             }
               {dish.weightGram &&
             <span className="flex items-center gap-1.5 text-xs text-muted">
-                  <Icon name="scale" size={15} color="#6B6B66" /> {dish.weightGram} g
+                  <Icon name="scale" size={15} color="#9A9A96" /> {dish.weightGram} g
                 </span>
             }
             </div>
@@ -188,7 +188,7 @@ export function DishModal({ dish, onClose }) {
           <div className="flex items-center gap-3 mt-5">
             <div className="flex items-center gap-3.5 border border-line rounded-xl px-3 py-2">
               <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} aria-label="Kamaytirish">
-                <Icon name="minus" size={18} color="#6B6B66" />
+                <Icon name="minus" size={18} color="#9A9A96" />
               </button>
               <span className="text-base font-medium text-ink w-4 text-center">{quantity}</span>
               <button onClick={() => setQuantity((q) => q + 1)} aria-label="Ko'paytirish">

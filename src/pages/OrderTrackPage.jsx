@@ -62,7 +62,7 @@ export function OrderTrackPage() {
     <div className="min-h-screen bg-canvas max-w-[420px] mx-auto flex flex-col">
       <div className="px-4 pt-3.5 pb-3 bg-surface flex items-center gap-3 border-b border-line sticky top-0 z-10">
         <button onClick={() => navigate('/')} aria-label="Yopish">
-          <Icon name="x" size={22} color="#1A1A17" />
+          <Icon name="x" size={22} color="#F2F1EE" />
         </button>
         <div className="text-lg font-medium text-ink">Buyurtma #{order.id}</div>
       </div>

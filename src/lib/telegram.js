@@ -63,6 +63,13 @@ export async function authenticateWithTelegram() {
   if (tg) {
     tg.ready();
     tg.expand();
+    // Dark theme — Telegram header va fon ranglari
+    try {
+      tg.setHeaderColor?.('#0E0E10');
+      tg.setBackgroundColor?.('#0E0E10');
+    } catch {
+      // eski Telegram versiyalarida bo'lmasligi mumkin
+    }
   }
 
   const initData = tg?.initData || '';

@@ -78,7 +78,7 @@ export function RestaurantPage() {
             <span className="text-muted font-normal">({restaurant.reviewCount})</span>
           </span>
           <span className="flex items-center gap-1.5 text-[13px] text-muted">
-            <Icon name="clock" size={15} color="#6B6B66" /> {restaurant.deliveryMin}-{restaurant.deliveryMax} daq
+            <Icon name="clock" size={15} color="#9A9A96" /> {restaurant.deliveryMin}-{restaurant.deliveryMax} daq
           </span>
           <span className="flex items-center gap-1.5 text-[13px]" style={{ color: '#0F6E56' }}>
             <Icon name="bike" size={15} color="#0F6E56" />
@@ -106,7 +106,7 @@ export function RestaurantPage() {
               style={
               isTabActive ?
               { color: '#BA7517', fontWeight: 500, borderBottom: '2px solid #EF9F27' } :
-              { color: '#6B6B66' }
+              { color: '#9A9A96' }
               }>
               
               {label}
