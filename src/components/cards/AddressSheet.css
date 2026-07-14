@@ -1,0 +1,31 @@
+.addr-sheet {
+  width: 100%; max-width: var(--app-width);
+  background: var(--surface);
+  border-radius: 22px 22px 0 0;
+  max-height: 80vh; overflow-y: auto;
+  animation: slide-up 0.28s var(--ease);
+}
+.addr-sheet__head { padding: 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+.addr-sheet__title { font-size: 16px; font-weight: 600; color: var(--ink); }
+.addr-sheet__body { padding: 16px; }
+.addr-sheet__list { display: flex; flex-direction: column; gap: 10px; }
+.addr-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px; border-radius: 12px; text-align: left;
+  border: 1px solid var(--line); background: var(--canvas);
+}
+.addr-item.is-selected { border-color: var(--brand); border-width: 1.5px; background: var(--brand-tint); }
+.addr-item__body { flex: 1; }
+.addr-item__title { font-size: 14px; font-weight: 500; color: var(--ink); }
+.addr-item__text { font-size: 12px; color: var(--muted); }
+.addr-sheet__add-btn {
+  margin-top: 12px; width: 100%;
+  border: 2px dashed var(--line); border-radius: 12px;
+  padding: 12px; color: var(--muted); font-size: 13px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.addr-sheet__label { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 8px; }
+.addr-sheet__types { display: flex; gap: 8px; margin-bottom: 14px; }
+.addr-sheet__type { flex: 1; padding: 8px; border-radius: 10px; font-size: 13px; font-weight: 500; background: var(--canvas); color: var(--muted); border: 1px solid var(--line); }
+.addr-sheet__type.is-active { background: var(--brand-tint); color: var(--brand-100); border-color: var(--brand); }
+.addr-sheet__actions { display: flex; gap: 10px; }

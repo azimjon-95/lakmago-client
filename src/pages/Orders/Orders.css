@@ -1,0 +1,38 @@
+/* ============ Buyurtmalar ============ */
+.orders { padding-bottom: 0; }
+.orders-header {
+  padding: 14px 16px;
+  font-size: 18px; font-weight: 600; color: var(--ink);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+.orders-list { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.orders-section-label { font-size: 13px; font-weight: 500; color: var(--muted); margin-top: 4px; }
+
+/* Faol buyurtma karta */
+.active-order-card {
+  display: block; width: 100%; text-align: left;
+  background: var(--brand-tint);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.active-order-card__top { display: flex; align-items: center; justify-content: space-between; }
+.active-order-card__id { font-size: 12px; color: var(--brand-100); }
+.active-order-card__names { font-size: 15px; font-weight: 500; color: var(--ink); margin-top: 4px; }
+.active-order-card__meta { font-size: 12px; color: var(--brand-100); margin-top: 4px; }
+
+/* Tarix karta */
+.past-order-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.past-order-card__top { display: flex; align-items: center; justify-content: space-between; }
+.past-order-card__id { font-size: 13px; font-weight: 500; color: var(--ink); }
+.past-order-card__status {
+  font-size: 11px; color: var(--success);
+  background: var(--success-bg);
+  padding: 2px 8px; border-radius: 8px;
+}
+.past-order-card__meta { font-size: 12px; color: var(--muted); margin-top: 4px; }

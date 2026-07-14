@@ -1,0 +1,84 @@
+/* ============ Restoran sahifasi ============ */
+.rest-loading { align-items: center; justify-content: center; }
+
+/* Banner */
+.rest-banner { position: relative; }
+.rest-banner__btn {
+  position: absolute; top: 12px;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex; align-items: center; justify-content: center;
+}
+.rest-banner__btn--back { left: 12px; }
+.rest-banner__btn--fav { right: 12px; }
+
+/* Ma'lumot */
+.rest-info { padding: 14px 16px 10px; border-bottom: 1px solid var(--line); }
+.rest-info__name { font-size: 20px; font-weight: 600; color: var(--ink); }
+.rest-info__cuisine { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.rest-info__meta { display: flex; gap: 14px; margin-top: 10px; flex-wrap: wrap; }
+.rest-meta { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.rest-meta--rating { color: var(--ink); font-weight: 500; }
+.rest-meta__count { color: var(--muted); font-weight: 400; }
+.rest-meta--free { color: var(--success); }
+.rest-reserve-btn {
+  margin-top: 12px;
+  width: 100%;
+  border: 1px solid var(--brand);
+  color: var(--brand);
+  font-size: 14px; font-weight: 500;
+  padding: 11px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+
+/* Tablar */
+.rest-tabs {
+  display: flex; gap: 12px;
+  padding: 10px 16px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+  position: sticky; top: 0;
+  background: var(--surface);
+  z-index: 10;
+}
+.rest-tab {
+  flex: none;
+  font-size: 14px;
+  color: var(--muted);
+  padding-bottom: 6px;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+.rest-tab.is-active { color: var(--brand); font-weight: 500; border-bottom-color: var(--brand); }
+
+/* Kontent */
+.rest-content { flex: 1; }
+.rest-section { scroll-margin-top: 52px; }
+.rest-section__title {
+  font-size: 17px; font-weight: 600; color: var(--ink);
+  padding: 14px 16px 6px;
+}
+.rest-dishes {
+  padding: 0 16px 14px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+/* Sharhlar */
+.rest-reviews { padding: 14px 16px 24px; }
+.rest-reviews__empty { font-size: 13px; color: var(--muted); text-align: center; padding: 24px 0; }
+.rest-reviews__list { display: flex; flex-direction: column; gap: 12px; }
+.review-card { background: var(--canvas); border-radius: var(--radius); padding: 12px; }
+.review-card__head { display: flex; align-items: center; justify-content: space-between; }
+.review-card__author { display: flex; align-items: center; gap: 8px; }
+.review-card__avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--brand-tint); color: var(--brand-100);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 500;
+}
+.review-card__name { font-size: 13px; font-weight: 500; color: var(--ink); }
+.review-card__date { font-size: 11px; color: var(--muted); }
+.review-card__stars { display: flex; gap: 2px; margin-top: 6px; }
+.review-card__text { font-size: 13px; color: var(--ink); margin-top: 6px; line-height: 1.5; }

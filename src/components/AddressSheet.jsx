@@ -1,115 +1,61 @@
 import { useState } from 'react';
 import { Icon } from './Icon';
-
-
-
-
-
-
-
-
-
+import { useT } from '@/i18n';
+import './cards/AddressSheet.css';
 
 export function AddressSheet({ addresses, selectedId, onSelect, onAdd, onClose }) {
+  const t = useT();
   const [adding, setAdding] = useState(false);
   const [title, setTitle] = useState('Uy');
   const [text, setText] = useState('');
 
   function handleAdd() {
     onAdd({ title, address: text });
-    setAdding(false);
-    setTitle('Uy');
-    setText('');
+    setAdding(false); setTitle('Uy'); setText('');
   }
 
   return (
-    <div
-      onClick={onClose}
-      className="fixed inset-0 z-[100] flex items-end justify-center"
-      style={{ background: 'rgba(20,10,0,0.55)' }}>
-      
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-[420px] bg-surface rounded-t-[22px] max-h-[80vh] overflow-y-auto animate-sheet">
-        
-        <div className="p-4 border-b border-line flex items-center justify-between">
-          <div className="text-base font-medium text-ink">Manzil tanlang</div>
-          <button onClick={onClose} aria-label="Yopish">
-            <Icon name="x" size={20} color="#9A9A96" />
-          </button>
+    <div onClick={onClose} className="sheet-overlay" style={{ zIndex: 100 }}>
+      <div onClick={(e) => e.stopPropagation()} className="addr-sheet">
+        <div className="addr-sheet__head">
+          <div className="addr-sheet__title">{t('myAddresses')}</div>
+          <button onClick={onClose} aria-label={t('close')}><Icon name="x" size={20} color="#9A9A96" /></button>
         </div>
 
-        {!adding ?
-        <div className="p-4">
-            <div className="flex flex-col gap-2.5">
-              {addresses.map((a) =>
-            <button
-              key={a.id}
-              onClick={() => onSelect(a.id)}
-              className="flex items-center gap-3 p-3.5 rounded-xl text-left"
-              style={
-              a.id === selectedId ?
-              { border: '1.5px solid #EF9F27', background: '#FAEEDA' } :
-              { border: '0.5px solid #EAE7DF', background: '#fff' }
-              }>
-              
-                  <Icon name="pin" size={20} color={a.id === selectedId ? '#BA7517' : '#9A9A94'} />
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-ink">{a.title}</div>
-                    <div className="text-xs text-muted">{a.address}</div>
+        {!adding ? (
+          <div className="addr-sheet__body">
+            <div className="addr-sheet__list">
+              {addresses.map((a) => (
+                <button key={a.id} onClick={() => onSelect(a.id)} className={`addr-item ${a.id === selectedId ? 'is-selected' : ''}`}>
+                  <Icon name="pin" size={20} color={a.id === selectedId ? '#EF9F27' : '#9A9A94'} />
+                  <div className="addr-item__body">
+                    <div className="addr-item__title">{a.title}</div>
+                    <div className="addr-item__text">{a.address}</div>
                   </div>
-                  {a.id === selectedId && <Icon name="circleCheck" size={18} color="#BA7517" />}
+                  {a.id === selectedId && <Icon name="circleCheck" size={18} color="#EF9F27" />}
                 </button>
-            )}
+              ))}
             </div>
-            <button
-            onClick={() => setAdding(true)}
-            className="mt-3 w-full border-2 border-dashed border-[#D3D1C7] rounded-xl p-3 text-muted text-[13px] font-medium flex items-center justify-center gap-1.5">
-            
-              <Icon name="plus" size={16} color="#9A9A96" /> Yangi manzil qo'shish
+            <button onClick={() => setAdding(true)} className="addr-sheet__add-btn">
+              <Icon name="plus" size={16} color="#9A9A96" /> {t('add')}
             </button>
-          </div> :
-
-        <div className="p-4">
-            <div className="text-[13px] font-medium text-ink mb-2">Manzil nomi</div>
-            <div className="flex gap-2 mb-3.5">
-              {['Uy', 'Ish', 'Boshqa'].map((t) =>
-            <button
-              key={t}
-              onClick={() => setTitle(t)}
-              className="flex-1 py-2 rounded-[10px] text-[13px] font-medium"
-              style={title === t ? { background: '#411E00', color: '#FAEEDA' } : { background: '#0E0E10', color: '#9A9A96' }}>
-              
-                  {t}
-                </button>
-            )}
+          </div>
+        ) : (
+          <div className="addr-sheet__body">
+            <div className="addr-sheet__label">{t('myAddresses')}</div>
+            <div className="addr-sheet__types">
+              {['Uy', 'Ish', 'Boshqa'].map((tp) => (
+                <button key={tp} onClick={() => setTitle(tp)} className={`addr-sheet__type ${title === tp ? 'is-active' : ''}`}>{tp}</button>
+              ))}
             </div>
-            <div className="text-[13px] font-medium text-ink mb-2">To'liq manzil</div>
-            <input
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Ko'cha, uy, xonadon raqami"
-            autoFocus
-            className="w-full box-border px-3.5 py-3 border border-line rounded-xl text-[16px] mb-4 outline-none focus:border-brand-400" />
-          
-            <div className="flex gap-2.5">
-              <button
-              onClick={() => setAdding(false)}
-              className="flex-1 bg-canvas text-muted text-sm font-medium py-3 rounded-xl">
-              
-                Bekor qilish
-              </button>
-              <button
-              onClick={handleAdd}
-              disabled={text.trim().length < 5}
-              className="flex-[1.5] bg-brand-ink text-white text-sm font-medium py-3 rounded-xl disabled:opacity-50">
-              
-                Qo'shish
-              </button>
+            <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Ko'cha, uy, xonadon" autoFocus className="input-field" style={{ marginBottom: 16 }} />
+            <div className="addr-sheet__actions">
+              <button onClick={() => setAdding(false)} className="btn-secondary" style={{ flex: 1 }}>{t('cancel')}</button>
+              <button onClick={handleAdd} disabled={text.trim().length < 5} className="btn-primary" style={{ flex: 1.5 }}>{t('add')}</button>
             </div>
           </div>
-        }
+        )}
       </div>
-    </div>);
-
+    </div>
+  );
 }

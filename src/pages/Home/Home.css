@@ -1,0 +1,98 @@
+/* ============ Bosh sahifa ============ */
+.home { padding-bottom: 0; }
+
+/* Header */
+.home-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px 8px;
+}
+.home-header__addr { text-align: left; }
+.home-header__addr-label {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px; color: var(--muted);
+}
+.home-header__addr-value {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 14px; font-weight: 500; color: var(--ink); margin-top: 2px;
+}
+.home-header__right { display: flex; align-items: center; gap: 8px; }
+.home-header__avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--brand-tint); color: var(--brand-100);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 500;
+}
+
+/* Qidiruv */
+.home-search { padding: 4px 16px 10px; }
+.home-search__btn {
+  width: 100%;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--canvas);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 11px 12px;
+}
+.home-search__btn span { font-size: 14px; color: var(--muted); }
+
+/* Kategoriyalar */
+.home-categories {
+  display: flex; gap: 8px;
+  padding: 8px 16px;
+  overflow-x: auto;
+}
+.home-cat {
+  flex: none;
+  font-size: 13px; font-weight: 500;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--canvas);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  transition: all 0.15s var(--ease);
+  white-space: nowrap;
+}
+.home-cat.is-active {
+  background: var(--brand);
+  color: var(--brand-text);
+  border-color: var(--brand);
+}
+
+/* Bo'lim sarlavhalari */
+.home-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 16px 8px;
+}
+.home-section-header__title {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 16px; font-weight: 600; color: var(--ink);
+}
+.home-section-header__action { font-size: 13px; color: var(--brand-600); }
+
+/* Gorizontal taom qatori */
+.home-scroll-row {
+  display: flex; gap: 10px;
+  padding: 0 16px 12px;
+  overflow-x: auto;
+}
+
+/* Kichik reklama banner */
+.home-mini-banner {
+  margin: 0 16px 12px;
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.home-mini-banner__eyebrow { font-size: 11px; font-weight: 500; color: var(--brand-text); opacity: 0.7; }
+.home-mini-banner__title { font-size: 15px; font-weight: 500; color: var(--brand-text); margin-top: 2px; }
+
+/* Restoranlar */
+.home-restaurants-title {
+  font-size: 16px; font-weight: 600; color: var(--ink);
+  padding: 4px 16px 10px;
+}
+.home-restaurants {
+  padding: 0 16px 16px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.home-empty { text-align: center; color: var(--muted); font-size: 14px; padding: 32px 0; }

@@ -1,0 +1,72 @@
+/* ============ Profil ============ */
+.profile { padding-bottom: 0; background: var(--canvas); }
+
+.profile-card {
+  margin: 16px;
+  background: var(--brand-tint);
+  border-radius: 18px;
+  padding: 18px;
+  display: flex; align-items: center; gap: 14px;
+}
+.profile-card__avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--brand); color: var(--brand-text);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 500;
+}
+.profile-card__info { flex: 1; min-width: 0; }
+.profile-card__name { font-size: 16px; font-weight: 600; color: var(--ink); }
+.profile-card__id { font-size: 12px; color: var(--brand-100); margin-top: 2px; }
+
+.profile-section { margin: 0 16px 12px; }
+.profile-section__label { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 8px; }
+
+/* Qatorlar */
+.profile-row {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex; align-items: center; gap: 12px;
+  text-align: left;
+}
+.profile-row--required { border-color: var(--brand); border-width: 1.5px; }
+.profile-row__body { flex: 1; }
+.profile-row__value { font-size: 13px; font-weight: 500; color: var(--ink); }
+.profile-row__value--accent { color: var(--brand); }
+.profile-row__label { font-size: 11px; color: var(--muted); }
+
+/* Tahrirlash */
+.profile-edit { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; }
+.profile-edit__actions { display: flex; gap: 8px; }
+
+/* Manzillar */
+.profile-addresses { display: flex; flex-direction: column; gap: 8px; }
+.profile-addresses__empty { font-size: 12px; color: var(--muted); text-align: center; padding: 12px 0; }
+.profile-address {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+.profile-address.is-default { border-color: var(--brand); border-width: 1.5px; }
+.profile-address__body { flex: 1; min-width: 0; }
+.profile-address__title { font-size: 13px; font-weight: 500; color: var(--ink); display: flex; align-items: center; gap: 4px; }
+.profile-address__badge { font-size: 10px; color: var(--brand); }
+.profile-address__text { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile-address__set { font-size: 11px; color: var(--brand); font-weight: 500; }
+
+.profile-addr-types { display: flex; gap: 8px; margin-bottom: 10px; }
+.profile-addr-type { flex: 1; padding: 8px; border-radius: 10px; font-size: 12px; font-weight: 500; background: var(--canvas); color: var(--muted); border: 1px solid var(--line); }
+.profile-addr-type.is-active { background: var(--brand-tint); color: var(--brand-100); border-color: var(--brand); }
+
+.profile-add-address {
+  margin-top: 10px; width: 100%;
+  border: 2px dashed var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  color: var(--muted); font-size: 13px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}

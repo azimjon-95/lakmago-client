@@ -1,0 +1,32 @@
+/* Faol buyurtma badge — sahifa pastida, chap tomonda suzib turadi */
+.active-order-badge {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 78px; /* BottomNav ustida */
+  z-index: 40;
+  width: calc(var(--app-width) - 32px);
+  max-width: calc(100vw - 32px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--brand);
+  color: var(--brand-text);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  animation: slide-up 0.3s var(--ease);
+}
+.active-order-badge__pulse {
+  position: absolute;
+  left: 20px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--brand-text);
+  opacity: 0.25;
+}
+.active-order-badge__icon { font-size: 22px; }
+.active-order-badge__text { display: flex; flex-direction: column; flex: 1; text-align: left; line-height: 1.2; }
+.active-order-badge__title { font-size: 14px; font-weight: 600; }
+.active-order-badge__status { font-size: 12px; opacity: 0.8; }
+.active-order-badge__arrow { font-size: 22px; font-weight: 300; }

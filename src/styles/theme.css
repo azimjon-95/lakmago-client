@@ -1,0 +1,229 @@
+/* ============================================
+   LokmaGo — Dizayn tokenlari (dark theme)
+   Barcha ranglar, o'lchamlar bir joyda.
+   ============================================ */
+:root {
+  /* Ranglar */
+  --canvas: #0E0E10;      /* eng orqa fon */
+  --surface: #1A1A1E;     /* kartalar, panellar */
+  --surface-2: #232329;   /* ikkilamchi yuza */
+  --ink: #F2F1EE;         /* asosiy matn */
+  --muted: #9A9A96;       /* ikkilamchi matn */
+  --line: #2A2A30;        /* chegaralar */
+
+  /* Brend (amber) */
+  --brand: #EF9F27;
+  --brand-600: #F0A838;
+  --brand-text: #2C1400;  /* amber ustidagi to'q matn */
+  --brand-tint: #3A2A12;  /* to'q amber fon */
+  --brand-100: #FAC775;
+
+  /* Holat ranglari */
+  --danger: #E24B4A;      /* chegirma, xato */
+  --success: #5DCAA5;     /* bepul yetkazish, muvaffaqiyat */
+  --success-bg: #12332C;
+  --info: #6BA8F0;
+
+  /* O'lchamlar */
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-lg: 18px;
+  --app-width: 420px;
+
+  /* Soyalar */
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+  --shadow-lg: 0 16px 40px rgba(0,0,0,0.5);
+
+  /* Animatsiya */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Global reset */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { color-scheme: dark; }
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--canvas);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, textarea, select { font-family: inherit; }
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; }
+
+/* Ilova karkasi — mobil kenglik, markazda */
+.app-shell {
+  min-height: 100vh;
+  max-width: var(--app-width);
+  margin: 0 auto;
+  background: var(--surface);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Umumiy yordamchi klasslar */
+.container-p { padding-left: 16px; padding-right: 16px; }
+.text-muted { color: var(--muted); }
+.text-ink { color: var(--ink); }
+
+/* Scrollbar yashirish (mobil his) */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Animatsiyalar */
+@keyframes pulse-ring {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  70% { transform: scale(1.4); opacity: 0; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   UMUMIY KOMPONENT KLASSLARI (barcha sahifalar)
+   ============================================ */
+
+/* Sahifa sarlavhasi (orqaga tugma + nom) */
+.page-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.page-header h1 { font-size: 18px; font-weight: 600; color: var(--ink); }
+.page-header__spacer { flex: 1; }
+
+/* Tugmalar */
+.btn-primary {
+  background: var(--brand);
+  color: var(--brand-text);
+  font-size: 15px;
+  font-weight: 600;
+  padding: 14px 20px;
+  border-radius: var(--radius);
+  transition: transform 0.1s var(--ease), opacity 0.15s;
+}
+.btn-primary:active { transform: scale(0.99); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-block { width: 100%; display: block; }
+
+.btn-secondary {
+  background: var(--surface-2);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px 18px;
+  border-radius: var(--radius);
+}
+
+/* Miqdor kontroli (− N +) */
+.qty-control { display: flex; align-items: center; gap: 10px; }
+.qty-btn {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+}
+.qty-btn--minus { background: var(--surface-2); border: 1px solid var(--line); }
+.qty-btn--plus { background: var(--brand); }
+.qty-value { font-size: 15px; font-weight: 600; color: var(--ink); min-width: 14px; text-align: center; }
+
+/* Kiritish maydonlari */
+.input-lg {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px;
+  background: var(--canvas);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  font-size: 16px;
+  text-align: center;
+  outline: none;
+  margin-bottom: 14px;
+}
+.input-lg:focus { border-color: var(--brand); }
+
+.input-field {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  background: var(--canvas);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  font-size: 15px;
+  outline: none;
+}
+.input-field:focus { border-color: var(--brand); }
+
+/* Pastdan chiquvchi sheet (modal) */
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  animation: fade-in 0.2s var(--ease);
+}
+.sheet {
+  width: 100%;
+  max-width: var(--app-width);
+  background: var(--surface);
+  border-radius: 22px 22px 0 0;
+  padding: 20px;
+  animation: slide-up 0.28s var(--ease);
+}
+.sheet__title { font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 14px; }
+
+/* Bo'sh holat */
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  text-align: center;
+}
+.empty-state__title { font-size: 18px; font-weight: 600; color: var(--ink); margin-top: 16px; }
+.empty-state__hint { font-size: 14px; color: var(--muted); margin-top: 6px; }
+
+/* Karta */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+/* Yuklanish spinner */
+.spinner {
+  width: 24px; height: 24px;
+  border: 2.5px solid var(--line);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}

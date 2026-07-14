@@ -1,0 +1,141 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Icon } from '@/components/Icon';
+import { BannerSlider } from '@/components/BannerSlider';
+import { RestaurantCard } from '@/components/RestaurantCard';
+import { DishScrollCard } from '@/components/DishScrollCard';
+import { DishModal } from '@/components/DishModal';
+import { BottomNav } from '@/components/BottomNav';
+import { CartBar } from '@/components/CartBar';
+import { LangSwitch } from '@/components/LangSwitch/LangSwitch';
+import { useUser } from '@/store/user';
+import { useBanners } from '@/store/banners';
+import { useT } from '@/i18n';
+import { restaurants, dishes, trendingDishIds, discountedDishIds } from '@/data/mock';
+import './Home.css';
+
+const categories = [
+  { id: 'all', key: 'all' },
+  { id: 'milliy', label: 'Milliy' },
+  { id: 'fastfood', label: 'Fast food' },
+  { id: 'sushi', label: 'Sushi' },
+  { id: 'shirinlik', label: 'Shirinlik' },
+];
+
+function SectionHeader({ icon, title, action }) {
+  return (
+    <div className="home-section-header">
+      <div className="home-section-header__title">
+        {icon && <Icon name={icon} size={17} color="#D85A30" />} {title}
+      </div>
+      {action && <div className="home-section-header__action">{action}</div>}
+    </div>
+  );
+}
+
+export function HomePage() {
+  const navigate = useNavigate();
+  const t = useT();
+  const user = useUser((s) => s.user);
+  const banners = useBanners((s) => s.banners);
+  const smallBanners = useBanners((s) => s.smallBanners);
+  const [category, setCategory] = useState('all');
+  const [modalDish, setModalDish] = useState(null);
+
+  const filtered = category === 'all' ? restaurants : restaurants.filter((r) => r.category === category);
+  const trending = dishes.filter((d) => trendingDishIds.includes(d.id));
+  const discounted = dishes.filter((d) => discountedDishIds.includes(d.id));
+  const defaultAddress = user.addresses.find((a) => a.id === user.defaultAddressId) ?? user.addresses[0];
+
+  return (
+    <div className="app-shell home">
+      {/* Sarlavha */}
+      <header className="home-header">
+        <button onClick={() => navigate('/profile')} className="home-header__addr">
+          <span className="home-header__addr-label">
+            <Icon name="pin" size={12} color="#EF9F27" /> {t('deliveryAddress')}
+          </span>
+          <span className="home-header__addr-value">
+            {defaultAddress ? `${defaultAddress.title}, ${defaultAddress.address}`.slice(0, 26) : t('address')}
+            <Icon name="chevronDown" size={13} color="#9A9A96" />
+          </span>
+        </button>
+        <div className="home-header__right">
+          <LangSwitch compact />
+          <button onClick={() => navigate('/profile')} className="home-header__avatar">
+            {user.photoInitials}
+          </button>
+        </div>
+      </header>
+
+      {/* Qidiruv */}
+      <div className="home-search">
+        <button onClick={() => navigate('/search')} className="home-search__btn">
+          <Icon name="search" size={18} color="#9A9A94" />
+          <span>{t('search')}</span>
+        </button>
+      </div>
+
+      <BannerSlider banners={banners} />
+
+      {/* Kategoriyalar */}
+      <div className="home-categories no-scrollbar">
+        {categories.map((c) => (
+          <button
+            key={c.id}
+            onClick={() => setCategory(c.id)}
+            className={`home-cat ${category === c.id ? 'is-active' : ''}`}
+          >
+            {c.key ? t(c.key) : c.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Trend taomlar */}
+      {trending.length > 0 && (
+        <>
+          <SectionHeader icon="flame" title={t('trendingDishes')} action={t('all')} />
+          <div className="home-scroll-row no-scrollbar">
+            {trending.map((d) => <DishScrollCard key={d.id} dish={d} onClick={setModalDish} />)}
+          </div>
+        </>
+      )}
+
+      {/* Kichik reklama */}
+      {smallBanners.map((sb) => (
+        <div key={sb.id} className="home-mini-banner" style={{ background: sb.tint }}>
+          <div>
+            <div className="home-mini-banner__eyebrow">{sb.eyebrow}</div>
+            <div className="home-mini-banner__title">{sb.title}</div>
+          </div>
+          <Icon name={sb.icon} size={38} color={sb.iconColor} />
+        </div>
+      ))}
+
+      {/* Chegirmadagi taomlar */}
+      {discounted.length > 0 && (
+        <>
+          <SectionHeader icon="discount" title={t('discountedDishes')} action={t('all')} />
+          <div className="home-scroll-row no-scrollbar">
+            {discounted.map((d) => <DishScrollCard key={d.id} dish={d} onClick={setModalDish} />)}
+          </div>
+        </>
+      )}
+
+      {/* Barcha restoranlar */}
+      <h2 className="home-restaurants-title">{t('allRestaurants')}</h2>
+      <div className="home-restaurants">
+        {filtered.map((r) => <RestaurantCard key={r.id} restaurant={r} />)}
+        {filtered.length === 0 && (
+          <div className="home-empty">{t('empty')}</div>
+        )}
+      </div>
+
+      <div style={{ flex: 1 }} />
+      <CartBar />
+      <BottomNav />
+
+      {modalDish && <DishModal dish={modalDish} onClose={() => setModalDish(null)} />}
+    </div>
+  );
+}

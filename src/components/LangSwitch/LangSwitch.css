@@ -1,0 +1,51 @@
+/* Til tanlash */
+.lang-switch--compact { position: relative; }
+.lang-switch__trigger {
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 6px 10px;
+}
+.lang-switch__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 30;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  min-width: 140px;
+  animation: fade-in 0.15s var(--ease);
+}
+.lang-switch__item {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%;
+  padding: 11px 14px;
+  font-size: 14px;
+  color: var(--ink);
+}
+.lang-switch__item:hover { background: var(--surface-2); }
+.lang-switch__item.is-active { color: var(--brand); }
+
+/* To'liq variant (pill'lar) */
+.lang-switch--full { display: flex; gap: 8px; }
+.lang-switch__pill {
+  flex: 1;
+  padding: 11px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--canvas);
+  color: var(--muted);
+  font-size: 14px;
+  transition: all 0.15s var(--ease);
+}
+.lang-switch__pill.is-active {
+  background: var(--brand);
+  color: var(--brand-text);
+  border-color: var(--brand);
+  font-weight: 500;
+}

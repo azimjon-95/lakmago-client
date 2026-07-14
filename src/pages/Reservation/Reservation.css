@@ -1,0 +1,73 @@
+/* ============ Bron ============ */
+.reservation { padding-bottom: 0; }
+.resv-body { padding: 16px; }
+
+/* Restoran header */
+.resv-restaurant { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; }
+.resv-restaurant__icon { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+.resv-restaurant__name { font-size: 15px; font-weight: 500; color: var(--ink); }
+.resv-restaurant__meta { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+
+.resv-label { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 8px; }
+
+/* Sanalar */
+.resv-days { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; }
+.resv-day {
+  flex: none; text-align: center;
+  padding: 8px 14px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--canvas);
+}
+.resv-day.is-active { background: var(--brand-tint); border-color: var(--brand); }
+.resv-day__label { font-size: 11px; color: var(--muted); }
+.resv-day.is-active .resv-day__label { color: var(--brand-100); }
+.resv-day__num { font-size: 16px; font-weight: 500; color: var(--ink); }
+
+/* Vaqtlar */
+.resv-times { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.resv-time {
+  padding: 8px 16px; border-radius: 12px; font-size: 14px;
+  border: 1px solid var(--line); background: var(--canvas); color: var(--ink);
+}
+.resv-time.is-active { background: var(--brand); color: var(--brand-text); font-weight: 500; border-color: var(--brand); }
+
+/* Mehmonlar */
+.resv-guests {
+  display: flex; align-items: center; justify-content: space-between;
+  border: 1px solid var(--line); border-radius: 12px;
+  padding: 10px 16px; margin-bottom: 16px;
+}
+.resv-guests__label { font-size: 14px; color: var(--ink); display: flex; align-items: center; gap: 6px; }
+
+.resv-input { margin-bottom: 10px; }
+.reservation .btn-block { margin-top: 6px; }
+
+/* Done ekran */
+.resv-done { align-items: center; justify-content: center; text-align: center; padding: 32px; }
+.resv-done__icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--brand-tint);
+  display: flex; align-items: center; justify-content: center;
+}
+.resv-done__title { font-size: 18px; font-weight: 600; color: var(--ink); margin-top: 16px; }
+.resv-done__text { font-size: 14px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+.resv-done__preorder { margin-top: 14px; width: 100%; background: var(--brand-tint); border-radius: 12px; padding: 14px; text-align: left; }
+.resv-done__preorder-title { font-size: 11px; font-weight: 500; color: var(--brand-100); margin-bottom: 6px; }
+.resv-done__preorder-row { font-size: 13px; color: var(--ink); display: flex; justify-content: space-between; padding: 2px 0; }
+
+/* Preorder ekran */
+.resv-preorder-hint { margin: 16px; background: var(--brand-tint); border-radius: 18px; padding: 14px; }
+.resv-preorder-hint__title { font-size: 14px; font-weight: 500; color: var(--brand-100); display: flex; align-items: center; gap: 8px; }
+.resv-preorder-hint__text { font-size: 13px; color: var(--brand-100); opacity: 0.85; margin-top: 6px; line-height: 1.5; }
+.resv-preorder-list { flex: 1; }
+.resv-preorder-section { padding: 10px 16px 6px; font-size: 15px; font-weight: 500; color: var(--ink); }
+.resv-preorder-dishes { padding: 0 16px 10px; display: flex; flex-direction: column; gap: 12px; }
+.resv-preorder-dish { display: flex; gap: 12px; align-items: center; }
+.resv-preorder-dish__photo { width: 56px; height: 56px; flex: none; }
+.resv-preorder-dish__body { flex: 1; min-width: 0; }
+.resv-preorder-dish__name { font-size: 14px; font-weight: 500; color: var(--ink); }
+.resv-preorder-dish__price { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.resv-preorder-dish__select { padding: 6px 14px; border-radius: 10px; font-size: 13px; font-weight: 500; color: var(--brand); border: 1px solid var(--brand); }
+.resv-preorder-footer { position: sticky; bottom: 0; background: var(--surface); border-top: 1px solid var(--line); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.resv-preorder-total { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+.resv-preorder-total__price { color: var(--ink); font-weight: 500; }
+.resv-preorder-actions { display: flex; gap: 10px; }
