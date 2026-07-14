@@ -12,7 +12,7 @@ export const smallBanners = [
 
 export const restaurants = [
 { id: 'r1', name: 'Milliy Taomlar', cuisine: 'Milliy oshxona', rating: 4.8, reviewCount: 320, deliveryMin: 25, deliveryMax: 35, deliveryFee: 0, category: 'milliy', tint: '#FAEEDA', icon: 'kitchen', discount: 30, images: ['photo-plov', 'photo-kabob'] },
-{ id: 'r2', name: 'Sushi Star', cuisine: 'Yapon oshxonasi', rating: 4.7, reviewCount: 154, deliveryMin: 30, deliveryMax: 45, deliveryFee: 12000, category: 'sushi', tint: '#E1F5EE', icon: 'fish', isNew: true, images: ['photo-sushi'] },
+{ id: 'r2', name: 'Sushi Star', cuisine: 'Yapon oshxonasi', rating: 4.7, reviewCount: 154, deliveryMin: 30, deliveryMax: 45, deliveryFee: 12000, category: 'sushi', tint: '#E1F5EE', icon: 'fish', isFresh: true, images: ['photo-sushi'] },
 { id: 'r3', name: 'Sweet Corner Kafe', cuisine: 'Kafe · Shirinliklar', rating: 4.6, reviewCount: 210, deliveryMin: 15, deliveryMax: 20, deliveryFee: 8000, category: 'kafe', tint: '#FBEAF0', icon: 'coffee', images: [] },
 { id: 'r4', name: 'Burger House', cuisine: 'Fast food', rating: 4.5, reviewCount: 98, deliveryMin: 20, deliveryMax: 30, deliveryFee: 10000, category: 'fastfood', tint: '#FCEBEB', icon: 'burger', images: ['photo-burger', 'photo-burger2'] }];
 

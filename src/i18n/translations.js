@@ -101,6 +101,7 @@ export const translations = {
     // Chat
     chatTitle: 'Yordam xizmati',
     chatPlaceholder: 'Xabar yozing...',
+    fresh: 'Yangi',
     popular: 'Mashhur',
     bestseller: 'Ko\u2018p sotilgan',
     chatWelcome: 'Assalomu alaykum! Sizga qanday yordam bera olamiz?',
@@ -192,6 +193,7 @@ export const translations = {
 
     chatTitle: 'Ёрдам хизмати',
     chatPlaceholder: 'Хабар ёзинг...',
+    fresh: 'Янги',
     popular: 'Машҳур',
     bestseller: 'Кўп сотилган',
     chatWelcome: 'Ассалому алайкум! Сизга қандай ёрдам бера оламиз?',
@@ -283,6 +285,7 @@ export const translations = {
 
     chatTitle: 'Служба поддержки',
     chatPlaceholder: 'Напишите сообщение...',
+    fresh: 'Новый',
     popular: 'Популярное',
     bestseller: 'Хит продаж',
     chatWelcome: 'Здравствуйте! Чем можем помочь?',

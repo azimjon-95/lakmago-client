@@ -20,7 +20,7 @@ export function RestaurantCard({ restaurant: r }) {
         <Icon name={r.icon} size={46} color={style ? style.iconColor : '#EF9F27'} strokeWidth={style ? 1.4 : 2} className="rcard__icon" />
         <div className="rcard__rating"><Icon name="star" size={12} color="#FAC775" /> {r.rating.toFixed(1)}</div>
         {r.discount && <div className="rcard__tag rcard__tag--discount">−{r.discount}%</div>}
-        {r.isNew && !r.discount && <div className="rcard__tag rcard__tag--new">{t('rating')}</div>}
+        {r.isFresh && !r.discount && <div className="rcard__tag rcard__tag--new">{t('fresh')}</div>}
       </div>
       <div className="rcard__body">
         <div className="rcard__name">{r.name}</div>
