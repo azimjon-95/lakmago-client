@@ -16,6 +16,10 @@ export const RestaurantCard = memo(function RestaurantCard({ restaurant: r }) {
   const photoKey = hasPhoto ? r.images[0] : null;
   const style = photoKey ? PHOTO_STYLES[photoKey] : null;
   const freeDelivery = r.deliveryFee === 0;
+  const realImg = r.imageUrl || (r.images && r.images.find((u) => typeof u === 'string' && u.startsWith('http')));
+  const optimizedImg = realImg && realImg.includes('/upload/')
+    ? realImg.replace('/upload/', '/upload/f_auto,q_auto,w_500,c_fill/')
+    : realImg;
 
   return (
     <button
@@ -25,8 +29,15 @@ export const RestaurantCard = memo(function RestaurantCard({ restaurant: r }) {
       className="rcard"
     >
       <div className="rcard__banner" style={{ background: style ? style.grad : r.tint }}>
-        {style && <div className="rcard__banner-glow" />}
-        <Icon name={r.icon} size={46} color={style ? style.iconColor : '#EF9F27'} strokeWidth={style ? 1.4 : 2} className="rcard__icon" />
+        {optimizedImg ? (
+          <img src={optimizedImg} alt={r.name} loading="lazy" decoding="async"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+        ) : (
+          <>
+            {style && <div className="rcard__banner-glow" />}
+            <Icon name={r.icon} size={46} color={style ? style.iconColor : '#EF9F27'} strokeWidth={style ? 1.4 : 2} className="rcard__icon" />
+          </>
+        )}
         <div className="rcard__rating"><Icon name="star" size={12} color="#FAC775" /> {r.rating.toFixed(1)}</div>
         {r.discount && <div className="rcard__tag rcard__tag--discount">−{r.discount}%</div>}
         {r.isFresh && !r.discount && <div className="rcard__tag rcard__tag--new">{t('fresh')}</div>}

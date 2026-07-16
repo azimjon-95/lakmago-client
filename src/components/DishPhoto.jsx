@@ -22,7 +22,29 @@ export const PHOTO_STYLES = {
 
 
 // Rasm slot: photo bo'lsa gradient+ikon "fotosurat" taqlidi, bo'lmasa universal fallback (kamera belgisi bilan)
+// Cloudinary URL'ni optimallashtirish (WebP/AVIF, o'lcham) — tez yuklanadi
+function optimizeCloudinary(url, width) {
+  if (!url || !url.includes('/upload/')) return url;
+  return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_fill/`);
+}
+
 export function DishPhoto({ dish, height = 96, radius = 12, iconSize = 34 }) {
+  // 1) Haqiqiy rasm bo'lsa (Cloudinary) — uni ko'rsatamiz (optimallashtirilган, lazy)
+  const realUrl = dish.imageUrl || (dish.images && dish.images[0]);
+  if (realUrl && realUrl.startsWith('http')) {
+    return (
+      <div style={{ height, borderRadius: radius, overflow: 'hidden', background: dish.tint || '#2A2A30' }}>
+        <img
+          src={optimizeCloudinary(realUrl, 400)}
+          alt={dish.name || ''}
+          loading="lazy"
+          decoding="async"
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+      </div>
+    );
+  }
+
   const style = dish.photo ? PHOTO_STYLES[dish.photo] : null;
 
   if (style) {
@@ -51,16 +73,32 @@ export function DishPhoto({ dish, height = 96, radius = 12, iconSize = 34 }) {
 
 
 
-// Restoran banneri: 1-2 rasm bo'lsa avtomatik slayder, bo'lmasa universal banner
+// Restoran banneri: real rasm (Cloudinary) bo'lsa uni ko'rsatadi, bo'lmasa universal banner
 export function RestaurantBanner({ restaurant, height = 150 }) {
   const [index, setIndex] = useState(0);
   const images = restaurant.images || [];
+
+  // Haqiqiy rasm (http) bo'lsa — uni ko'rsatamiz
+  const realUrl = restaurant.imageUrl || images.find((u) => typeof u === 'string' && u.startsWith('http'));
 
   useEffect(() => {
     if (images.length <= 1) return;
     const t = setInterval(() => setIndex((i) => (i + 1) % images.length), 3000);
     return () => clearInterval(t);
   }, [images.length]);
+
+  if (realUrl && realUrl.startsWith('http')) {
+    const optimized = realUrl.includes('/upload/')
+      ? realUrl.replace('/upload/', '/upload/f_auto,q_auto,w_800,c_fill/')
+      : realUrl;
+    return (
+      <div style={{ height, position: 'relative', flex: 'none', overflow: 'hidden', background: '#1A1A1E' }}>
+        <img src={optimized} alt={restaurant.name || ''} loading="lazy" decoding="async"
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.35), transparent 45%)' }} />
+      </div>
+    );
+  }
 
   if (images.length === 0) {
     return (
