@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { DishPhoto } from '@/components/DishPhoto';
@@ -8,6 +8,7 @@ import { useUser } from '@/store/user';
 import { useOrders } from '@/store/orders';
 import { useT } from '@/i18n';
 import { formatSom } from '@/lib/utils';
+import { api } from '@/api';
 import './Cart.css';
 
 const SERVICE_FEE = 3000;
@@ -31,8 +32,18 @@ export function CartPage() {
   const [showPhoneEdit, setShowPhoneEdit] = useState(false);
   const [phoneDraft, setPhoneDraft] = useState(user.phone ?? '');
   const [paymentMethod, setPaymentMethod] = useState(lastPaymentMethod);
+  const [bonusBalance, setBonusBalance] = useState(0);
+  const [useBonus, setUseBonus] = useState(false);
 
-  const total = totalPrice() + DELIVERY_FEE + SERVICE_FEE;
+  // Referal bonus balansini olamiz
+  useEffect(() => {
+    api.getReferralInfo().then((r) => setBonusBalance(r.bonusBalance || 0)).catch(() => {});
+  }, []);
+
+  const orderSum = totalPrice() + DELIVERY_FEE + SERVICE_FEE;
+  // Ishlatiladigan bonus: balansдан va summадан oshмаsин
+  const bonusApplied = useBonus ? Math.min(bonusBalance, orderSum) : 0;
+  const total = orderSum - bonusApplied;
   const selectedAddress = user.addresses.find((a) => a.id === user.defaultAddressId) ?? user.addresses[0];
 
   if (items.length === 0) {
@@ -54,7 +65,7 @@ export function CartPage() {
     const addrLabel = `${selectedAddress.title} — ${selectedAddress.address}`;
     const paymentLabel = paymentMethod === 'cash' ? t('cash') : 'Payme';
     // Backendga yuboradi (async). Xato bo'lsa ham local rejim ishlaydi.
-    placeOrder(groups, total, addrLabel, paymentLabel, paymentMethod, user.phone)
+    placeOrder(groups, total, addrLabel, paymentLabel, paymentMethod, user.phone, bonusApplied)
       .then(() => {
         setPaying(false);
         useCart.getState().clear();
@@ -191,11 +202,33 @@ export function CartPage() {
         </div>
       </div>
 
+      {/* Bonus bilan to'lash (referal bonusи bor bo'lsa) */}
+      {bonusBalance > 0 && (
+        <button onClick={() => setUseBonus((v) => !v)} className={`cart-bonus ${useBonus ? 'is-active' : ''}`}>
+          <div className="cart-bonus__left">
+            <Icon name="gift" size={20} color={useBonus ? '#5DCAA5' : '#EF9F27'} />
+            <div>
+              <div className="cart-bonus__title">Bonus bilan to'lash</div>
+              <div className="cart-bonus__balance">Mavjud: {formatSom(bonusBalance)}</div>
+            </div>
+          </div>
+          <div className={`cart-bonus__toggle ${useBonus ? 'is-on' : ''}`}>
+            <div className="cart-bonus__knob" />
+          </div>
+        </button>
+      )}
+
       {/* Hisob */}
       <div className="cart-summary">
         <Row label={t('subtotal')} value={formatSom(totalPrice())} />
         <Row label={t('deliveryFee')} value={DELIVERY_FEE === 0 ? t('free') : formatSom(DELIVERY_FEE)} />
         <Row label="Xizmat haqi" value={formatSom(SERVICE_FEE)} />
+        {bonusApplied > 0 && (
+          <div className="cart-summary__row cart-summary__row--bonus">
+            <span>🎁 Bonus chegirmasi</span>
+            <span>−{formatSom(bonusApplied)}</span>
+          </div>
+        )}
         <div className="cart-summary__total">
           <span>{t('total')}</span>
           <span>{formatSom(total)}</span>

@@ -26,13 +26,14 @@ export const useOrders = create((set, get) => ({
   reviews: {},
 
   // Buyurtma berish — backendga batch yuboradi, javobni activeOrder qiladi.
-  placeOrder: async (groups, total, address, paymentLabel, paymentMethod, phone) => {
+  placeOrder: async (groups, total, address, paymentLabel, paymentMethod, phone, useBonus = 0) => {
     // Backend uchun payload
     const payload = {
       address,
       phone,
       paymentMethod: paymentMethod === 'payme' ? 'payme' : paymentMethod === 'cash' ? 'cash' : 'payme',
       paymentLabel,
+      useBonus,
       orders: groups.map((g) => ({
         restaurantId: g.restaurant.id,
         restaurantName: g.restaurant.name,
