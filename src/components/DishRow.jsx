@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Icon } from './Icon';
 import { DishPhoto } from './DishPhoto';
 import { formatSomShort } from '@/lib/utils';
@@ -7,7 +8,7 @@ import { useT } from '@/i18n';
 import './cards/DishRow.css';
 
 // Yandex Eda uslubidagi menyu qatori.
-export function DishRow({ dish, onOpen }) {
+export const DishRow = memo(function DishRow({ dish, onOpen }) {
   const t = useT();
   const items = useCart((s) => s.items);
   const addItem = useCart((s) => s.addItem);
@@ -70,4 +71,4 @@ export function DishRow({ dish, onOpen }) {
       </div>
     </button>
   );
-}
+});

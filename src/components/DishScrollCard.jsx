@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { DishPhoto } from './DishPhoto';
 import { Icon } from './Icon';
 import { formatSomShort } from '@/lib/utils';
@@ -5,7 +6,7 @@ import { useCart } from '@/store/cart';
 import { haptic } from '@/lib/telegram';
 import './cards/DishScrollCard.css';
 
-export function DishScrollCard({ dish, onClick }) {
+export const DishScrollCard = memo(function DishScrollCard({ dish, onClick }) {
   const addItem = useCart((s) => s.addItem);
   const discountPct = dish.oldPrice ? Math.round((1 - dish.price / dish.oldPrice) * 100) : null;
   const hasOptions = (dish.optionGroups?.length ?? 0) > 0;
@@ -33,4 +34,4 @@ export function DishScrollCard({ dish, onClick }) {
       </div>
     </button>
   );
-}
+});

@@ -1,26 +1,27 @@
 import { restaurants, dishes, banners, trendingDishIds, discountedDishIds } from '@/data/mock';
 
-
-// Real backend Express + MongoDB bilan ishlaydi.
-// Hozircha mock — har bir funksiya Promise qaytaradi, shu tufayli
-// TanStack Query bilan ishlash real API ga o'tganda o'zgarmaydi.
+// API mijozi. VITE_API_URL='mock' bo'lsa demo (mock) rejim ishlaydi,
+// aks holda real backend (Express + MongoDB). TanStack Query bilan ishlaydi.
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
-// Demo rejim: VITE_API_URL='mock' bo'lsa backendga umuman urilmaydi, to'g'ridan mock.
 const DEMO_MODE = API_BASE === 'mock';
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function tryFetch(path, fallback) {
+// Request cancellation (AbortController) bilan fetch — eski so'rovlar bekor qilinadi
+async function tryFetch(path, fallback, { signal } = {}) {
   if (DEMO_MODE) {
-    await delay(150);
+    await delay(120);
     return fallback;
   }
   try {
-    const res = await fetch(`${API_BASE}${path}`);
+    const res = await fetch(`${API_BASE}${path}`, { signal });
     if (!res.ok) throw new Error(String(res.status));
     return await res.json();
-  } catch {
-    await delay(250); // mock kechikish
+  } catch (e) {
+    // So'rov bekor qilingan bo'lsa — jim o'tamiz (yangi so'rov keldi)
+    if (e.name === 'AbortError') throw e;
+    // Backend yo'q bo'lsa demo uchun mock (production'da bu kamdan-kam)
+    await delay(200);
     return fallback;
   }
 }
@@ -73,32 +74,40 @@ async function authFetchOrMock(path, options, mockResponse) {
 }
 
 export const api = {
-  getBanners: () => tryFetch('/banners', banners),
+  getBanners: (opts) => tryFetch('/banners', banners, opts),
 
-  getRestaurants: () => tryFetch('/restaurants', restaurants),
+  getRestaurants: async (opts) => {
+    const res = await tryFetch('/restaurants', { items: restaurants, nextCursor: null, hasMore: false }, opts);
+    // Backend { items, nextCursor } qaytaradi; mock ham shu formatда. Array bo'lsa ham qo'llab-quvvatlaymiz.
+    return Array.isArray(res) ? res : (res.items ?? []);
+  },
 
-  getRestaurant: (id) =>
+  getRestaurant: (id, opts) =>
   tryFetch(
     `/restaurants/${id}`,
-    restaurants.find((r) => r.id === id)
+    restaurants.find((r) => r.id === id),
+    opts,
   ),
 
-  getDishes: (restaurantId) =>
+  getDishes: (restaurantId, opts) =>
   tryFetch(
     `/restaurants/${restaurantId}/dishes`,
-    dishes.filter((d) => d.restaurantId === restaurantId)
+    dishes.filter((d) => d.restaurantId === restaurantId),
+    opts,
   ),
 
-  getTrendingDishes: () =>
+  getTrendingDishes: (opts) =>
   tryFetch(
     '/dishes/trending',
-    dishes.filter((d) => trendingDishIds.includes(d.id))
+    dishes.filter((d) => trendingDishIds.includes(d.id)),
+    opts,
   ),
 
-  getDiscountedDishes: () =>
+  getDiscountedDishes: (opts) =>
   tryFetch(
     '/dishes/discounted',
-    dishes.filter((d) => discountedDishIds.includes(d.id))
+    dishes.filter((d) => discountedDishIds.includes(d.id)),
+    opts,
   ),
 
   // Telegram login — token qaytaradi

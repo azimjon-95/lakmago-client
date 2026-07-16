@@ -5,7 +5,7 @@ import { DishPhoto } from '@/components/DishPhoto';
 import { haptic } from '@/lib/telegram';
 import { useT } from '@/i18n';
 import { formatSom, formatSomShort } from '@/lib/utils';
-import { restaurants, dishes } from '@/data/mock';
+import { useRestaurant, useDishes } from '@/hooks/queries';
 import './Reservation.css';
 
 const TIMES = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30'];
@@ -25,7 +25,7 @@ export function ReservationPage() {
   const { id = '' } = useParams();
   const navigate = useNavigate();
   const t = useT();
-  const restaurant = restaurants.find((r) => r.id === id);
+  const { data: restaurant } = useRestaurant(id);
 
   const days = useMemo(() => nextDays(7, 'Bugun'), []);
   const [dayIdx, setDayIdx] = useState(0);
@@ -151,7 +151,7 @@ export function ReservationPage() {
 }
 
 function PreOrderScreen({ restaurant, reservationInfo, onSkip, onConfirm, onBack, t }) {
-  const restaurantDishes = dishes.filter((d) => d.restaurantId === restaurant.id);
+  const { data: restaurantDishes = [] } = useDishes(restaurant.id);
   const [selections, setSelections] = useState({});
 
   const sections = useMemo(() => {

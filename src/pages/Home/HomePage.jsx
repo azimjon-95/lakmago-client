@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { BannerSlider } from '@/components/BannerSlider';
@@ -8,21 +8,22 @@ import { DishModal } from '@/components/DishModal';
 import { BottomNav } from '@/components/BottomNav';
 import { CartBar } from '@/components/CartBar';
 import { LangSwitch } from '@/components/LangSwitch/LangSwitch';
+import { RestaurantCardSkeleton, DishScrollСardSkeleton } from '@/components/Skeleton/Skeleton';
 import { useUser } from '@/store/user';
-import { useBanners } from '@/store/banners';
 import { useT } from '@/i18n';
-import { restaurants, dishes, trendingDishIds, discountedDishIds } from '@/data/mock';
+import { useRestaurants, useTrendingDishes, useDiscountedDishes, useBannersQuery } from '@/hooks/queries';
 import './Home.css';
 
 const categories = [
   { id: 'all', key: 'all' },
   { id: 'milliy', label: 'Milliy' },
+  { id: 'choyxona', label: 'Choyxona' },
   { id: 'fastfood', label: 'Fast food' },
   { id: 'sushi', label: 'Sushi' },
   { id: 'shirinlik', label: 'Shirinlik' },
 ];
 
-function SectionHeader({ icon, title, action }) {
+const SectionHeader = memo(function SectionHeader({ icon, title, action }) {
   return (
     <div className="home-section-header">
       <div className="home-section-header__title">
@@ -31,25 +32,37 @@ function SectionHeader({ icon, title, action }) {
       {action && <div className="home-section-header__action">{action}</div>}
     </div>
   );
-}
+});
 
 export function HomePage() {
   const navigate = useNavigate();
   const t = useT();
   const user = useUser((s) => s.user);
-  const banners = useBanners((s) => s.banners);
-  const smallBanners = useBanners((s) => s.smallBanners);
   const [category, setCategory] = useState('all');
   const [modalDish, setModalDish] = useState(null);
 
-  const filtered = category === 'all' ? restaurants : restaurants.filter((r) => r.category === category);
-  const trending = dishes.filter((d) => trendingDishIds.includes(d.id));
-  const discounted = dishes.filter((d) => discountedDishIds.includes(d.id));
-  const defaultAddress = user.addresses.find((a) => a.id === user.defaultAddressId) ?? user.addresses[0];
+  // Real data — TanStack Query (cache + background refetch)
+  const { data: restaurants = [], isLoading: restLoading } = useRestaurants();
+  const { data: trending = [], isLoading: trendLoading } = useTrendingDishes();
+  const { data: discounted = [] } = useDiscountedDishes();
+  const { data: banners = [] } = useBannersQuery();
+
+  // Filtrlashni memolaymiz (keraksiz qayta hisoblash bo'lmaydi)
+  const filtered = useMemo(
+    () => (category === 'all' ? restaurants : restaurants.filter((r) => r.category === category)),
+    [restaurants, category],
+  );
+
+  const defaultAddress = useMemo(
+    () => user.addresses.find((a) => a.id === user.defaultAddressId) ?? user.addresses[0],
+    [user.addresses, user.defaultAddressId],
+  );
+
+  const openModal = useCallback((d) => setModalDish(d), []);
+  const closeModal = useCallback(() => setModalDish(null), []);
 
   return (
     <div className="app-shell home">
-      {/* Sarlavha */}
       <header className="home-header">
         <button onClick={() => navigate('/profile')} className="home-header__addr">
           <span className="home-header__addr-label">
@@ -68,7 +81,6 @@ export function HomePage() {
         </div>
       </header>
 
-      {/* Qidiruv */}
       <div className="home-search">
         <button onClick={() => navigate('/search')} className="home-search__btn">
           <Icon name="search" size={18} color="#9A9A94" />
@@ -78,7 +90,6 @@ export function HomePage() {
 
       <BannerSlider banners={banners} />
 
-      {/* Kategoriyalar */}
       <div className="home-categories no-scrollbar">
         {categories.map((c) => (
           <button
@@ -92,32 +103,23 @@ export function HomePage() {
       </div>
 
       {/* Trend taomlar */}
-      {trending.length > 0 && (
+      {(trendLoading || trending.length > 0) && (
         <>
           <SectionHeader icon="flame" title={t('trendingDishes')} action={t('all')} />
           <div className="home-scroll-row no-scrollbar">
-            {trending.map((d) => <DishScrollCard key={d.id} dish={d} onClick={setModalDish} />)}
+            {trendLoading
+              ? Array.from({ length: 4 }).map((_, i) => <DishScrollСardSkeleton key={i} />)
+              : trending.map((d) => <DishScrollCard key={d.id || d._id} dish={d} onClick={openModal} />)}
           </div>
         </>
       )}
-
-      {/* Kichik reklama */}
-      {smallBanners.map((sb) => (
-        <div key={sb.id} className="home-mini-banner" style={{ background: sb.tint }}>
-          <div>
-            <div className="home-mini-banner__eyebrow">{sb.eyebrow}</div>
-            <div className="home-mini-banner__title">{sb.title}</div>
-          </div>
-          <Icon name={sb.icon} size={38} color={sb.iconColor} />
-        </div>
-      ))}
 
       {/* Chegirmadagi taomlar */}
       {discounted.length > 0 && (
         <>
           <SectionHeader icon="discount" title={t('discountedDishes')} action={t('all')} />
           <div className="home-scroll-row no-scrollbar">
-            {discounted.map((d) => <DishScrollCard key={d.id} dish={d} onClick={setModalDish} />)}
+            {discounted.map((d) => <DishScrollCard key={d.id || d._id} dish={d} onClick={openModal} />)}
           </div>
         </>
       )}
@@ -125,8 +127,11 @@ export function HomePage() {
       {/* Barcha restoranlar */}
       <h2 className="home-restaurants-title">{t('allRestaurants')}</h2>
       <div className="home-restaurants">
-        {filtered.map((r) => <RestaurantCard key={r.id} restaurant={r} />)}
-        {filtered.length === 0 && (
+        {restLoading ? (
+          Array.from({ length: 4 }).map((_, i) => <RestaurantCardSkeleton key={i} />)
+        ) : filtered.length > 0 ? (
+          filtered.map((r) => <RestaurantCard key={r.id || r._id} restaurant={r} />)
+        ) : (
           <div className="home-empty">{t('empty')}</div>
         )}
       </div>
@@ -135,7 +140,7 @@ export function HomePage() {
       <CartBar />
       <BottomNav />
 
-      {modalDish && <DishModal dish={modalDish} onClose={() => setModalDish(null)} />}
+      {modalDish && <DishModal dish={modalDish} onClose={closeModal} />}
     </div>
   );
 }

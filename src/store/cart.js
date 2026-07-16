@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { restaurants } from '@/data/mock';
 
 
 
@@ -68,17 +67,26 @@ export const useCart = create((set, get) => ({
 
   // Savatchani restoranlar bo'yicha guruhlash — checkout va ko'p-restoranli
   // buyurtma yaratishda ishlatiladi (har restoran o'z sub-buyurtmasini oladi)
+  // Restoran ma'lumoti taomning o'zidan olinadi (mock'ga bog'liq emas)
   restaurantGroups: () => {
     const map = new Map();
     get().items.forEach((item) => {
       const rid = item.dish.restaurantId;
-      if (!map.has(rid)) map.set(rid, []);
-      map.get(rid).push(item);
+      if (!map.has(rid)) map.set(rid, { items: [], meta: item.dish });
+      map.get(rid).items.push(item);
     });
-    return Array.from(map.entries()).map(([restaurantId, items]) => ({
-      restaurant: restaurants.find((r) => r.id === restaurantId),
+    return Array.from(map.entries()).map(([restaurantId, { items, meta }]) => ({
+      restaurant: {
+        id: restaurantId,
+        name: meta.restaurantName || meta.restaurant?.name || 'Restoran',
+        tint: meta.restaurantTint || meta.restaurant?.tint || '#3A2A12',
+        icon: meta.restaurantIcon || meta.restaurant?.icon || 'tools-kitchen-2',
+        deliveryMin: meta.restaurantDeliveryMin ?? 25,
+        deliveryMax: meta.restaurantDeliveryMax ?? 40,
+        deliveryFee: meta.restaurantDeliveryFee ?? 0,
+      },
       items,
-      subtotal: items.reduce((s, i) => s + i.unitPrice * i.quantity, 0)
+      subtotal: items.reduce((s, i) => s + i.unitPrice * i.quantity, 0),
     }));
   }
 }));

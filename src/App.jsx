@@ -1,14 +1,16 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { HomePage } from '@/pages/Home/HomePage';
-import { RestaurantPage } from '@/pages/Restaurant/RestaurantPage';
-import { CartPage } from '@/pages/Cart/CartPage';
-import { OrderTrackPage } from '@/pages/OrderTrack/OrderTrackPage';
-import { OrdersPage } from '@/pages/Orders/OrdersPage';
-import { ReservationPage } from '@/pages/Reservation/ReservationPage';
-import { ProfilePage } from '@/pages/Profile/ProfilePage';
-import { SearchPage, FavoritesPage } from '@/pages/Stub/StubPages';
+import { HomePage } from '@/pages/Home/HomePage'; // asosiy sahifa — darhol yuklanadi
+// Qolgan sahifalar lazy — kerak bo'lganda yuklanadi (bundle kichrayadi, tez ochiladi)
+const RestaurantPage = lazy(() => import('@/pages/Restaurant/RestaurantPage').then((m) => ({ default: m.RestaurantPage })));
+const CartPage = lazy(() => import('@/pages/Cart/CartPage').then((m) => ({ default: m.CartPage })));
+const OrderTrackPage = lazy(() => import('@/pages/OrderTrack/OrderTrackPage').then((m) => ({ default: m.OrderTrackPage })));
+const OrdersPage = lazy(() => import('@/pages/Orders/OrdersPage').then((m) => ({ default: m.OrdersPage })));
+const ReservationPage = lazy(() => import('@/pages/Reservation/ReservationPage').then((m) => ({ default: m.ReservationPage })));
+const ProfilePage = lazy(() => import('@/pages/Profile/ProfilePage').then((m) => ({ default: m.ProfilePage })));
+const SearchPage = lazy(() => import('@/pages/Stub/StubPages').then((m) => ({ default: m.SearchPage })));
+const FavoritesPage = lazy(() => import('@/pages/Stub/StubPages').then((m) => ({ default: m.FavoritesPage })));
 import { useUser } from '@/store/user';
 import { authenticateWithTelegram } from '@/lib/telegram';
 import { I18nProvider } from '@/i18n';
@@ -16,7 +18,16 @@ import { ActiveOrderBadge } from '@/components/ActiveOrderBadge/ActiveOrderBadge
 import { SupportChat } from '@/components/SupportChat/SupportChat';
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { staleTime: 60_000, refetchOnWindowFocus: false } },
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60_000,        // 5 daqiqa "yangi" — keraksiz refetch bo'lmaydi
+      gcTime: 30 * 60_000,          // 30 daqiqa cache saqlanadi (tez qaytish)
+      refetchOnWindowFocus: false,   // fokusда qayta so'ramaydi
+      refetchOnReconnect: true,      // internet tiklanганда yangilaydi
+      retry: 2,                      // xatoда 2 marta qayta urinadi
+      retryDelay: (n) => Math.min(1000 * 2 ** n, 8000),
+    },
+  },
 });
 
 // Global suzuvchi elementlar (badge + chat) — ba'zi sahifalarda yashiriladi
@@ -66,17 +77,19 @@ export default function App() {
     <I18nProvider>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/restaurant/:id" element={<RestaurantPage />} />
-            <Route path="/restaurant/:id/reserve" element={<ReservationPage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/order/track" element={<OrderTrackPage />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/orders" element={<OrdersPage />} />
-            <Route path="/favorites" element={<FavoritesPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-          </Routes>
+          <Suspense fallback={<div className="app-shell" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="spinner" /></div>}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/restaurant/:id" element={<RestaurantPage />} />
+              <Route path="/restaurant/:id/reserve" element={<ReservationPage />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/order/track" element={<OrderTrackPage />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/orders" element={<OrdersPage />} />
+              <Route path="/favorites" element={<FavoritesPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+            </Routes>
+          </Suspense>
           <FloatingLayer />
         </BrowserRouter>
       </QueryClientProvider>

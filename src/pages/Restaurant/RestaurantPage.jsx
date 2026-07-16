@@ -5,12 +5,12 @@ import { DishRow } from '@/components/DishRow';
 import { DishModal } from '@/components/DishModal';
 import { CartBar } from '@/components/CartBar';
 import { RestaurantBanner } from '@/components/DishPhoto';
+import { DishRowSkeleton } from '@/components/Skeleton/Skeleton';
 import { useT } from '@/i18n';
-import { restaurants, dishes, seedReviews } from '@/data/mock';
+import { useRestaurant, useDishes } from '@/hooks/queries';
 import './Restaurant.css';
 
 const REVIEWS_TAB = '__reviews__';
-const reviewsData = seedReviews();
 
 export function RestaurantPage() {
   const { id = '' } = useParams();
@@ -19,9 +19,24 @@ export function RestaurantPage() {
   const [modalDish, setModalDish] = useState(null);
   const [isFav, setIsFav] = useState(false);
 
-  const restaurant = restaurants.find((r) => r.id === id);
-  const restaurantDishes = dishes.filter((d) => d.restaurantId === id);
-  const restaurantReviews = reviewsData[id] || [];
+  // Real data — TanStack Query
+  const { data: restaurant, isLoading: restLoading } = useRestaurant(id);
+  const { data: rawDishes = [], isLoading: dishesLoading } = useDishes(id);
+  const restaurantReviews = restaurant?.reviews || [];
+
+  // Taomlarga restoran meta'sini biriktiramiz (savatга to'g'ri o'tishi uchun)
+  const restaurantDishes = useMemo(
+    () => rawDishes.map((d) => ({
+      ...d,
+      restaurantName: restaurant?.name,
+      restaurantTint: restaurant?.tint,
+      restaurantIcon: restaurant?.icon,
+      restaurantDeliveryMin: restaurant?.deliveryMin,
+      restaurantDeliveryMax: restaurant?.deliveryMax,
+      restaurantDeliveryFee: restaurant?.deliveryFee,
+    })),
+    [rawDishes, restaurant],
+  );
 
   const sections = useMemo(() => {
     const map = new Map();
@@ -32,17 +47,16 @@ export function RestaurantPage() {
     const list = Array.from(map.entries());
     list.push([REVIEWS_TAB, []]);
     return list;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [restaurantDishes]);
 
-  const [active, setActive] = useState(sections[0]?.[0] ?? '');
+  const [active, setActive] = useState('');
 
   function scrollTo(name) {
     setActive(name);
     document.getElementById(`sec-${name}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  if (!restaurant) {
+  if (restLoading || !restaurant) {
     return <div className="app-shell rest-loading"><div className="spinner" /></div>;
   }
 
@@ -140,7 +154,9 @@ export function RestaurantPage() {
             <div key={name} id={`sec-${name}`} className="rest-section">
               <div className="rest-section__title">{name}</div>
               <div className="rest-dishes">
-                {list.map((d) => <DishRow key={d.id} dish={d} onOpen={setModalDish} />)}
+                {dishesLoading
+                  ? Array.from({ length: 3 }).map((_, i) => <DishRowSkeleton key={i} />)
+                  : list.map((d) => <DishRow key={d.id || d._id} dish={d} onOpen={setModalDish} />)}
               </div>
             </div>
           );

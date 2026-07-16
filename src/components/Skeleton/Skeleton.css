@@ -1,0 +1,32 @@
+/* Shimmer animatsiyali skeleton */
+.skeleton {
+  display: block;
+  background: linear-gradient(
+    100deg,
+    var(--surface-2) 30%,
+    var(--line) 50%,
+    var(--surface-2) 70%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.3s ease-in-out infinite;
+}
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Restoran karta skeleton */
+.skel-rcard {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.skel-rcard__body { padding: 12px 14px; }
+
+/* Gorizontal taom skeleton */
+.skel-dscard { flex: none; width: 150px; }
+
+/* Menyu qator skeleton */
+.skel-drow { display: flex; gap: 12px; }
+.skel-drow__body { flex: 1; padding-top: 4px; }
