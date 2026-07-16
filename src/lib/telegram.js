@@ -109,3 +109,58 @@ export async function authenticateWithTelegram() {
     addresses: data.user.addresses
   };
 }
+
+// ===== ULASHISH (SHARE) =====
+// Bot username va webapp nomi — .env dan (ulashish havolasi uchun).
+// Masalan: VITE_BOT_USERNAME=LokmaGoBot, VITE_WEBAPP_NAME=app
+const BOT_USERNAME = import.meta.env.VITE_BOT_USERNAME ?? 'LokmaGoBot';
+const WEBAPP_NAME = import.meta.env.VITE_WEBAPP_NAME ?? 'app';
+
+// Taomга olib boruvchi Telegram Mini App havolasini yasaydi.
+// startapp parametri orqali ilova ochilганда o'sha taom ochiladi.
+// Format: https://t.me/BotName/app?startapp=dish_<id>
+export function buildDishShareLink(dishId) {
+  return `https://t.me/${BOT_USERNAME}/${WEBAPP_NAME}?startapp=dish_${dishId}`;
+}
+
+// Taomni Telegram do'stlarга ulashish.
+// Telegram do'stlar ro'yxatини ochadi, taom havolasi + tavsif yuboriladi.
+// Havola bosilganда webapp o'sha taom bilan ochiladi.
+export function shareDish(dish) {
+  haptic();
+  const link = buildDishShareLink(dish.id || dish._id);
+
+  // Ulashish matni — taom nomi, narxi, qisqa tavsif
+  const price = dish.price ? `${dish.price.toLocaleString('ru-RU')} so'm` : '';
+  const lines = [
+    `🍽 ${dish.name}`,
+    price && `💰 ${price}`,
+    dish.description && `${dish.description}`,
+    '',
+    '👇 LokmaGo\'da buyurtma bering:',
+  ].filter(Boolean);
+  const text = lines.join('\n');
+
+  const tg = getTelegram();
+  const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
+
+  if (tg?.openTelegramLink) {
+    // Telegram ichida — do'stlar ro'yxatи ochiladi
+    tg.openTelegramLink(shareUrl);
+  } else {
+    // Brauzerда — yangi oynада ochiladi (yoki nusxalash)
+    window.open(shareUrl, '_blank');
+  }
+}
+
+// Ilova ochilганда startapp parametrини o'qish (ulashilган taomга yo'naltirish).
+// Qaytaradi: { type: 'dish', id } yoki null
+export function getStartParam() {
+  const tg = getTelegram();
+  const raw = tg?.initDataUnsafe?.start_param;
+  if (!raw) return null;
+  if (raw.startsWith('dish_')) {
+    return { type: 'dish', id: raw.slice(5) };
+  }
+  return null;
+}

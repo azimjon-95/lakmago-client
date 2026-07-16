@@ -33,3 +33,15 @@
   transition: transform 0.1s var(--ease);
 }
 .dish-row__add:active { transform: scale(0.95); }
+
+/* Amal tugmalari (share + qty/add) */
+.dish-row__actions { display: flex; align-items: center; gap: 8px; }
+.dish-row__share {
+  width: 32px; height: 32px; border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  flex: none;
+  transition: background 0.15s;
+}
+.dish-row__share:active { background: var(--surface-2); }

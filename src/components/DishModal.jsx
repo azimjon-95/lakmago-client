@@ -3,7 +3,7 @@ import { Icon } from './Icon';
 import { DishPhoto } from './DishPhoto';
 import { formatSom, formatSomShort } from '@/lib/utils';
 import { useCart } from '@/store/cart';
-import { haptic } from '@/lib/telegram';
+import { haptic, shareDish } from '@/lib/telegram';
 import { useT } from '@/i18n';
 import './cards/DishModal.css';
 
@@ -55,6 +55,9 @@ export function DishModal({ dish, onClose }) {
           <DishPhoto dish={dish} height={180} radius={0} iconSize={72} />
           <button onClick={onClose} className="dish-modal__close" aria-label={t('close')}>
             <Icon name="x" size={18} color="#fff" />
+          </button>
+          <button onClick={() => shareDish(dish)} className="dish-modal__share" aria-label={t('share')}>
+            <Icon name="share" size={17} color="#fff" />
           </button>
           {dish.isHit && <div className="dish-modal__hit"><Icon name="flame" size={11} color="#fff" /> HIT</div>}
         </div>

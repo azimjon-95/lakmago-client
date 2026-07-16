@@ -1,5 +1,5 @@
 import { useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HomePage } from '@/pages/Home/HomePage'; // asosiy sahifa — darhol yuklanadi
 // Qolgan sahifalar lazy — kerak bo'lganda yuklanadi (bundle kichrayadi, tez ochiladi)
@@ -12,7 +12,8 @@ const ProfilePage = lazy(() => import('@/pages/Profile/ProfilePage').then((m) =>
 const SearchPage = lazy(() => import('@/pages/Stub/StubPages').then((m) => ({ default: m.SearchPage })));
 const FavoritesPage = lazy(() => import('@/pages/Stub/StubPages').then((m) => ({ default: m.FavoritesPage })));
 import { useUser } from '@/store/user';
-import { authenticateWithTelegram } from '@/lib/telegram';
+import { authenticateWithTelegram, getStartParam } from '@/lib/telegram';
+import { api } from '@/api';
 import { I18nProvider } from '@/i18n';
 import { ActiveOrderBadge } from '@/components/ActiveOrderBadge/ActiveOrderBadge';
 import { SupportChat } from '@/components/SupportChat/SupportChat';
@@ -78,6 +79,7 @@ export default function App() {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <Suspense fallback={<div className="app-shell" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="spinner" /></div>}>
+            <StartParamHandler />
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/restaurant/:id" element={<RestaurantPage />} />
@@ -95,6 +97,30 @@ export default function App() {
       </QueryClientProvider>
     </I18nProvider>
   );
+}
+
+// Ulashilган havola bilan ochilганда (startapp=dish_ID) — o'sha taom restoraniga
+// yo'naltiradi va taomни ochadi.
+function StartParamHandler() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const param = getStartParam();
+    if (!param || param.type !== 'dish') return;
+    let cancelled = false;
+    api.getDish(param.id)
+      .then((dish) => {
+        if (cancelled || !dish) return;
+        const rid = dish.restaurantId || dish.restaurant?.id;
+        if (rid) {
+          // Restoran sahifasига o'tamiz, taom highlight uchun state
+          navigate(`/restaurant/${rid}`, { state: { highlightDish: param.id } });
+        }
+      })
+      .catch(() => { /* topilmasa bosh sahifa qoladi */ });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return null;
 }
 
 function initialsOf(first, last) {

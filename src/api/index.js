@@ -96,6 +96,14 @@ export const api = {
     opts,
   ),
 
+  // Bitta taom (ulashilган havola uchun)
+  getDish: (id, opts) =>
+  tryFetch(
+    `/dishes/${id}`,
+    dishes.find((d) => d.id === id),
+    opts,
+  ),
+
   getTrendingDishes: (opts) =>
   tryFetch(
     '/dishes/trending',
