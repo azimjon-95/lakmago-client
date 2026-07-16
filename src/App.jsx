@@ -17,6 +17,7 @@ import { api } from '@/api';
 import { I18nProvider } from '@/i18n';
 import { ActiveOrderBadge } from '@/components/ActiveOrderBadge/ActiveOrderBadge';
 import { SupportChat } from '@/components/SupportChat/SupportChat';
+import { SubscriptionGate } from '@/components/SubscriptionGate/SubscriptionGate';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -78,6 +79,7 @@ export default function App() {
     <I18nProvider>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
+          <SubscriptionGate>
           <Suspense fallback={<div className="app-shell" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="spinner" /></div>}>
             <StartParamHandler />
             <Routes>
@@ -92,6 +94,7 @@ export default function App() {
               <Route path="/profile" element={<ProfilePage />} />
             </Routes>
           </Suspense>
+          </SubscriptionGate>
           <FloatingLayer />
         </BrowserRouter>
       </QueryClientProvider>

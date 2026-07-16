@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { BottomNav } from '@/components/BottomNav';
 import { LangSwitch } from '@/components/LangSwitch/LangSwitch';
 import { useUser } from '@/store/user';
 import { useT } from '@/i18n';
+import { api } from '@/api';
+import { getTelegram, haptic } from '@/lib/telegram';
 import './Profile.css';
 
 export function ProfilePage() {
@@ -48,6 +50,9 @@ export function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Do'stlarni taklif qilish (referral) */}
+      <ReferralCard />
 
       {/* Til tanlash */}
       <div className="profile-section">
@@ -144,6 +149,77 @@ export function ProfilePage() {
 
       <div style={{ flex: 1 }} />
       <BottomNav />
+    </div>
+  );
+}
+
+// Do'stlarni taklif qilish kartasi — havola, do'stlar soni, bonus balans
+function ReferralCard() {
+  const [info, setInfo] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    api.getReferralInfo().then(setInfo).catch(() => {});
+  }, []);
+
+  const share = () => {
+    haptic();
+    if (!info?.referralLink) return;
+    const text = `🍽 LokmaGo — mazali taomlar tez yetkazib beriladi!\n\nMening havolam orqali qo'shiling va bonus oling 👇`;
+    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(info.referralLink)}&text=${encodeURIComponent(text)}`;
+    const tg = getTelegram();
+    if (tg?.openTelegramLink) tg.openTelegramLink(shareUrl);
+    else window.open(shareUrl, '_blank');
+  };
+
+  const copy = async () => {
+    haptic();
+    if (!info?.referralLink) return;
+    try {
+      await navigator.clipboard.writeText(info.referralLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch { /* ignore */ }
+  };
+
+  const som = (n) => (n ?? 0).toLocaleString('ru-RU').replace(/,/g, ' ');
+
+  return (
+    <div className="referral-card">
+      <div className="referral-card__head">
+        <div className="referral-card__title">
+          <Icon name="users" size={18} color="#EF9F27" /> Do'stlarni taklif qiling
+        </div>
+        {info?.reward > 0 && (
+          <div className="referral-card__badge">+{som(info.reward)} so'm</div>
+        )}
+      </div>
+
+      <p className="referral-card__desc">
+        Har bir do'stingiz kanalga obuna bo'lиб qo'shilса — ikkalangizga ham bonus!
+      </p>
+
+      {/* Statistika */}
+      <div className="referral-card__stats">
+        <div className="referral-stat">
+          <div className="referral-stat__value">{info?.referralCount ?? 0}</div>
+          <div className="referral-stat__label">Taklif qilingan</div>
+        </div>
+        <div className="referral-stat">
+          <div className="referral-stat__value">{som(info?.bonusBalance)}</div>
+          <div className="referral-stat__label">Bonus (so'm)</div>
+        </div>
+      </div>
+
+      {/* Amallar */}
+      <div className="referral-card__actions">
+        <button onClick={share} className="referral-card__share">
+          <Icon name="send" size={16} color="#2C1400" /> Do'stlarga yuborish
+        </button>
+        <button onClick={copy} className="referral-card__copy">
+          <Icon name={copied ? 'check' : 'copy'} size={16} color="#F2F1EE" />
+        </button>
+      </div>
     </div>
   );
 }

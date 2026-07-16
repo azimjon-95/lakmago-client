@@ -92,7 +92,7 @@ export async function authenticateWithTelegram() {
   const res = await fetch(`${API_BASE}/auth/telegram`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ initData })
+    body: JSON.stringify({ initData, startParam: tg?.initDataUnsafe?.start_param || '' })
   });
   if (!res.ok) throw new Error(`Auth xatosi: ${res.status}`);
   const data = await res.json();

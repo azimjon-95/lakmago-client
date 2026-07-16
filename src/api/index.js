@@ -150,6 +150,17 @@ export const api = {
   // Faol buyurtmalar
   getActiveOrders: () => authFetchOrMock('/orders/active', { method: 'GET' }, () => []),
 
+  // ===== Referral tizimi =====
+  // Referal statistika (havola, do'stlar soni, bonus)
+  getReferralInfo: () => authFetchOrMock('/referral/me', { method: 'GET' }, () => ({
+    referralLink: 'https://t.me/LokmaGoBot?start=ref_demo',
+    referralCount: 0, bonusBalance: 0, reward: 5000, welcomeBonus: 3000,
+  })),
+  // Asosiy kanал obuna holati (gate)
+  getSubscription: () => authFetchOrMock('/referral/subscription', { method: 'GET' }, () => ({
+    required: false, subscribed: true,
+  })),
+
   // Guruh (bitta buyurtma = bir necha restoran)
   getOrderGroup: (groupId) => authFetchOrMock(`/orders/group/${groupId}`, { method: 'GET' }, () => []),
 
