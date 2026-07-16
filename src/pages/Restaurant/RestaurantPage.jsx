@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useMemo, useState, useEffect, useRef } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { DishRow } from '@/components/DishRow';
 import { DishModal } from '@/components/DishModal';
@@ -15,9 +15,11 @@ const REVIEWS_TAB = '__reviews__';
 export function RestaurantPage() {
   const { id = '' } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const t = useT();
   const [modalDish, setModalDish] = useState(null);
   const [isFav, setIsFav] = useState(false);
+  const highlightHandled = useRef(false);
 
   // Real data — TanStack Query
   const { data: restaurant, isLoading: restLoading } = useRestaurant(id);
@@ -48,6 +50,20 @@ export function RestaurantPage() {
     list.push([REVIEWS_TAB, []]);
     return list;
   }, [restaurantDishes]);
+
+  // Ulashilган havola bilan kelinса (highlightDish) — o'sha taomni avtomatik ochamiz
+  useEffect(() => {
+    const targetId = location.state?.highlightDish;
+    if (!targetId || highlightHandled.current || restaurantDishes.length === 0) return;
+    const dish = restaurantDishes.find((d) => (d.id || d._id) === targetId);
+    if (dish) {
+      highlightHandled.current = true;
+      // Kичик kechikish bilan ochamiz (sahifa render bo'lib ulgursin)
+      setTimeout(() => setModalDish(dish), 300);
+      // State'ни tozalaymiz (qayta ochilmasligi uchun)
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [restaurantDishes, location.state, location.pathname, navigate]);
 
   const [active, setActive] = useState('');
 
