@@ -116,11 +116,21 @@ export async function authenticateWithTelegram() {
 const BOT_USERNAME = import.meta.env.VITE_BOT_USERNAME ?? 'LokmaGoBot';
 const WEBAPP_NAME = import.meta.env.VITE_WEBAPP_NAME ?? 'app';
 // Server domenи (OG meta sahifа uchun) — chiroyли rasm+nom karta bilan ulashish.
-// Masalan: https://api.lokmago.uz  (bo'sh bo'lsa to'g'ridan t.me havola)
-const SHARE_BASE = import.meta.env.VITE_SHARE_BASE ?? '';
+// VITE_SHARE_BASE aniq berilса — o'sha. Aks holда VITE_API_URL'дан server domenини
+// avtomатик olamiz (chunki OG sahifани shu server beradi). Shunda alohида sozlash shart emas.
+function deriveShareBase() {
+  const explicit = import.meta.env.VITE_SHARE_BASE;
+  if (explicit) return explicit.replace(/\/$/, '');
+  const api = import.meta.env.VITE_API_URL;
+  // 'mock' yoki bo'sh — OG sahifа yo'q, t.me havolаga tushamiz
+  if (!api || api === 'mock') return '';
+  // '.../api' → server ildizи
+  return api.replace(/\/api\/?$/, '').replace(/\/$/, '');
+}
+const SHARE_BASE = deriveShareBase();
 
-// Taomга olib boruvchi havola. SHARE_BASE bo'lsa OG sahifа (chiroyли preview),
-// aks holda to'g'ridan Telegram Mini App havolаsi.
+// Taomга olib boruvchi havola. SHARE_BASE bo'lsa OG sahifа (chiroyли preview:
+// rasm+nom+narx karta), aks holда to'g'ridan Telegram Mini App havolаsi.
 export function buildDishShareLink(dishId) {
   if (SHARE_BASE) return `${SHARE_BASE}/share/dish/${dishId}`;
   return `https://t.me/${BOT_USERNAME}/${WEBAPP_NAME}?startapp=dish_${dishId}`;
