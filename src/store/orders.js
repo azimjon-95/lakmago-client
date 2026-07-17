@@ -1,9 +1,8 @@
 import { create } from 'zustand';
 import { api } from '@/api';
-import { courierNames } from '@/data/mock';
 
-// Demo rejim (backend yo'q) bo'lsa local simulyatsiya ishlaydi.
-const DEMO = (import.meta.env.VITE_API_URL ?? '/api') === 'mock';
+// Kuryer nomlari (backend courierName bermasa ehtiyot uchun)
+const courierNames = ['Aziz', 'Bek', 'Dilshod', 'Jasur', 'Sardor', "Ulug'bek"];
 
 // Backenddan kelgan Order'larni mijoz ekranidagi "subOrder" formatiga o'giradi.
 function toSubOrder(o, i) {
@@ -52,41 +51,23 @@ export const useOrders = create((set, get) => ({
       })),
     };
 
-    let groupId = 'G' + Date.now();
-    let subOrders;
-
-    try {
-      const res = await api.createOrder(payload);
-      groupId = res.groupId;
-      // Backend javobidagi order'larни, lekin to'liq restaurant obyekti bilan (mijoz ekrani uchun) birlashtiramiz
-      subOrders = res.orders.map((o, i) => {
-        const g = groups[i];
-        return {
-          id: String(o._id),
-          backendId: String(o._id),
-          restaurant: g?.restaurant || { id: o.restaurantId, name: o.restaurantName },
-          items: g?.items || [],
-          subtotal: o.subtotal,
-          etaMinutes: o.etaMinutes ?? 30,
-          status: 'accepted',
-          courierName: o.courierName || courierNames[i % courierNames.length],
-          rated: false,
-        };
-      });
-    } catch {
-      // Backend yo'q — local simulyatsiya
-      subOrders = groups.map((g, i) => ({
-        id: `SUB-${Date.now()}-${i}`,
-        backendId: null,
-        restaurant: g.restaurant,
-        items: g.items,
-        subtotal: g.subtotal,
-        etaMinutes: g.restaurant.deliveryMin + Math.round(Math.random() * (g.restaurant.deliveryMax - g.restaurant.deliveryMin)),
+    // Backendga yuboramiz (xato bo'lsa yuqoriга uzatiladi — mock yo'q)
+    const res = await api.createOrder(payload);
+    const groupId = res.groupId;
+    const subOrders = res.orders.map((o, i) => {
+      const g = groups[i];
+      return {
+        id: String(o._id),
+        backendId: String(o._id),
+        restaurant: g?.restaurant || { id: o.restaurantId, name: o.restaurantName },
+        items: g?.items || [],
+        subtotal: o.subtotal,
+        etaMinutes: o.etaMinutes ?? 30,
         status: 'accepted',
-        courierName: courierNames[i % courierNames.length],
+        courierName: o.courierName || courierNames[i % courierNames.length],
         rated: false,
-      }));
-    }
+      };
+    });
 
     const order = { id: groupId, groupId, subOrders, address, paymentLabel, paymentMethod, total, createdAt: Date.now() };
     set({ activeOrder: order });
@@ -95,18 +76,16 @@ export const useOrders = create((set, get) => ({
 
   // Faol buyurtmani backenddan tiklash (sahifa yangilanганda)
   loadActive: async () => {
-    if (DEMO) return;
     try {
       const orders = await api.getActiveOrders();
       if (!orders || orders.length === 0) return;
-      // groupId bo'yicha guruhlash
       const groupId = orders[0].groupId;
       const sameGroup = orders.filter((o) => o.groupId === groupId);
       const subOrders = sameGroup.map(toSubOrder);
       const total = sameGroup.reduce((s, o) => s + o.total, 0);
       set({ activeOrder: { id: groupId, groupId, subOrders, address: sameGroup[0].address, total, createdAt: Date.now() } });
     } catch {
-      // e'tiborsiz
+      // e'tiborsiz (faol buyurtma yo'q yoki tarmoq xatosi)
     }
   },
 

@@ -12,7 +12,8 @@ const ProfilePage = lazy(() => import('@/pages/Profile/ProfilePage').then((m) =>
 const SearchPage = lazy(() => import('@/pages/Stub/StubPages').then((m) => ({ default: m.SearchPage })));
 const FavoritesPage = lazy(() => import('@/pages/Stub/StubPages').then((m) => ({ default: m.FavoritesPage })));
 import { useUser } from '@/store/user';
-import { authenticateWithTelegram, getStartParam } from '@/lib/telegram';
+import { authenticateWithTelegram, getStartParam, isTelegramEnv } from '@/lib/telegram';
+import { TelegramOnly } from '@/components/TelegramOnly/TelegramOnly';
 import { api } from '@/api';
 import { I18nProvider } from '@/i18n';
 import { ActiveOrderBadge } from '@/components/ActiveOrderBadge/ActiveOrderBadge';
@@ -47,9 +48,19 @@ function FloatingLayer() {
 }
 
 export default function App() {
+  // Ilova faqat Telegram ичида ishlaydi — brauzerда "Telegram'да oching" ekrani.
+  // (Hook'lardan oldin — Rules of Hooks buzilmaydi, chunki bu birinchi tekshiruv.)
+  if (!isTelegramEnv()) {
+    return <TelegramOnly />;
+  }
+  return <AppInner />;
+}
+
+function AppInner() {
   const updateUser = useUser((s) => s.updateUser);
   const setAuthStatus = useUser((s) => s.setAuthStatus);
   const currentUser = useUser((s) => s.user);
+
   // Splash faqat sessiya boshида bir marta (qayta yuklaшда emas)
   const [showSplash, setShowSplash] = useState(() => !sessionStorage.getItem('lokmago_splash_seen'));
 

@@ -7,7 +7,6 @@ import { useT } from '@/i18n';
 import './OrderTrack.css';
 
 const STEP_INDEX = { accepted: 0, preparing: 1, ready: 2, delivering: 3, delivered: 4 };
-const DEMO = (import.meta.env.VITE_API_URL ?? '/api') === 'mock';
 
 export function OrderTrackPage() {
   const navigate = useNavigate();
@@ -26,25 +25,8 @@ export function OrderTrackPage() {
     { status: 'delivered', label: t('orderDelivered'), icon: 'homeCheck' },
   ];
 
-  // Demo rejimда (backend yo'q) — timer bilan simulyatsiya.
-  // Haqiqiy rejimда statusni RESTORAN boshqaradi (socket orqali keladi), timer ishlamaydi.
-  useEffect(() => {
-    if (!order || !DEMO) return;
-    const timers = order.subOrders.map((sub) => {
-      const speed = 2200 + (sub.etaMinutes % 5) * 400;
-      return setInterval(() => {
-        const cur = useOrders.getState().activeOrder?.subOrders.find((s) => s.id === sub.id);
-        if (!cur) return;
-        const currentIdx = STEP_INDEX[cur.status];
-        // delivering'gача avtomatik; delivered'ni mijoz o'zi bosadi
-        if (currentIdx < STEP_INDEX.delivering) {
-          updateSubOrderStatus(order.id, sub.id, STEPS[currentIdx + 1].status);
-        }
-      }, speed);
-    });
-    return () => timers.forEach(clearInterval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [order?.id]);
+  // Status RESTORAN tomonidan boshqariladi va socket orqali keladi (real-time).
+  // (Demo timer olib tashlandi — mock yo'q, faqat backend.)
 
   // Haqiqiy rejim: backend socket'dan status keladi
   useOrderTracking(

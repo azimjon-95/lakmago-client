@@ -176,3 +176,14 @@ export function getStartParam() {
   }
   return null;
 }
+
+// Haqiqий Telegram Mini App muhitидami tekshirish.
+// Brauzerда oddiy ochilса — Telegram obyekti bo'lmaydi yoki initData bo'sh bo'ladi.
+export function isTelegramEnv() {
+  const tg = window.Telegram?.WebApp;
+  if (!tg) return false;
+  // initData bor va platform 'unknown' emas — haqiqий Telegram ичида
+  const hasInitData = Boolean(tg.initData && tg.initData.length > 0);
+  const realPlatform = tg.platform && tg.platform !== 'unknown';
+  return hasInitData || realPlatform;
+}
