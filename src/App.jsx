@@ -1,4 +1,4 @@
-import { useEffect, lazy, Suspense } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HomePage } from '@/pages/Home/HomePage'; // asosiy sahifa — darhol yuklanadi
@@ -18,6 +18,7 @@ import { I18nProvider } from '@/i18n';
 import { ActiveOrderBadge } from '@/components/ActiveOrderBadge/ActiveOrderBadge';
 import { SupportChat } from '@/components/SupportChat/SupportChat';
 import { SubscriptionGate } from '@/components/SubscriptionGate/SubscriptionGate';
+import { Splash } from '@/components/Splash/Splash';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +50,13 @@ export default function App() {
   const updateUser = useUser((s) => s.updateUser);
   const setAuthStatus = useUser((s) => s.setAuthStatus);
   const currentUser = useUser((s) => s.user);
+  // Splash faqat sessiya boshида bir marta (qayta yuklaшда emas)
+  const [showSplash, setShowSplash] = useState(() => !sessionStorage.getItem('lokmago_splash_seen'));
+
+  const finishSplash = () => {
+    sessionStorage.setItem('lokmago_splash_seen', '1');
+    setShowSplash(false);
+  };
 
   useEffect(() => {
     authenticateWithTelegram()
@@ -78,6 +86,7 @@ export default function App() {
   return (
     <I18nProvider>
       <QueryClientProvider client={queryClient}>
+        {showSplash && <Splash onDone={finishSplash} />}
         <BrowserRouter>
           <SubscriptionGate>
           <Suspense fallback={<div className="app-shell" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="spinner" /></div>}>
