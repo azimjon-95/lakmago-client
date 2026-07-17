@@ -1,11 +1,18 @@
 import { Icon } from '@/components/Icon';
 import './TelegramOnly.css';
 
-// Brauzerда ochilса ko'rsatiladi — ilova faqat Telegram ичида ishlaydi.
+// Brauzerда ochilса ko'rsatiladi — ilova faqat Telegram ичida ishlaydi.
 export function TelegramOnly() {
   const botUsername = import.meta.env.VITE_BOT_USERNAME ?? 'LokmaGoBot';
   const webappName = import.meta.env.VITE_WEBAPP_NAME ?? 'app';
-  const link = `https://t.me/${botUsername}/${webappName}`;
+
+  // Asosiy havola: botга ?start=web bilan o'tadi.
+  // Telegram bu havolани ochганда AVTOMATIK /start web yuboradi (foydalanuvchi
+  // hech nima yozmaydi) — obuna gate + xush kelibsiz oqimи ishga tushadi,
+  // so'ng "Buyurtma berish" (webapp) tugmasi beriladi.
+  const startLink = `https://t.me/${botUsername}?start=web`;
+  // Muqobil: to'g'ridan Mini App (obuna talab qilinmаса — eng tez)
+  const appLink = `https://t.me/${botUsername}/${webappName}`;
 
   return (
     <div className="tg-only">
@@ -14,12 +21,14 @@ export function TelegramOnly() {
         <h1 className="tg-only__title">LokmaGo</h1>
         <p className="tg-only__text">
           Ilova faqat <b>Telegram</b> ichida ishlaydi.
-          Buyurtma berish uchun quyidagi tugma orqali Telegram'да oching.
+          Quyidagi tugmani bosing — Telegram'да avtomatik ochiladi.
         </p>
-        <a href={link} className="tg-only__btn" target="_blank" rel="noreferrer">
+        <a href={startLink} className="tg-only__btn">
           <Icon name="send" size={18} color="#2C1400" /> Telegram'да ochish
         </a>
-        <p className="tg-only__hint">yoki @{botUsername} ni Telegram'да toping</p>
+        <a href={appLink} className="tg-only__link" target="_blank" rel="noreferrer">
+          To'g'ridan ilovani ochish
+        </a>
       </div>
     </div>
   );

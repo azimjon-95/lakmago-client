@@ -28,3 +28,10 @@
 }
 .tg-only__btn:active { transform: scale(0.98); }
 .tg-only__hint { font-size: 13px; color: var(--muted, #9A9A96); margin-top: 16px; }
+
+.tg-only__link {
+  display: inline-block; margin-top: 16px;
+  color: var(--muted, #9A9A96); font-size: 13px;
+  text-decoration: underline;
+}
+.tg-only__link:active { color: var(--ink, #F2F1EE); }
