@@ -122,18 +122,29 @@ function deriveShareBase() {
   const explicit = import.meta.env.VITE_SHARE_BASE;
   if (explicit) return explicit.replace(/\/$/, '');
   const api = import.meta.env.VITE_API_URL;
-  // 'mock' yoki bo'sh — OG sahifа yo'q, t.me havolаga tushamiz
   if (!api || api === 'mock') return '';
+  // Lokal manzil (localhost/127.0.0.1) — Telegram ko'ra olmaydi, OG ishlamaydi
+  if (/localhost|127\.0\.0\.1|0\.0\.0\.0/.test(api)) return '';
   // '.../api' → server ildizи
   return api.replace(/\/api\/?$/, '').replace(/\/$/, '');
 }
 const SHARE_BASE = deriveShareBase();
 
+// Taomга olib boruvchi Telegram Mini App havolasi.
+// WEBAPP_NAME bo'lsa: t.me/Bot/nom?startapp=dish_<id>
+// bo'lmasa:         t.me/Bot?startapp=dish_<id>  (ikkalasi ham webapp'ni ochadi)
+function buildMiniAppLink(dishId) {
+  const base = WEBAPP_NAME
+    ? `https://t.me/${BOT_USERNAME}/${WEBAPP_NAME}`
+    : `https://t.me/${BOT_USERNAME}`;
+  return `${base}?startapp=dish_${dishId}`;
+}
+
 // Taomга olib boruvchi havola. SHARE_BASE bo'lsa OG sahifа (chiroyли preview:
 // rasm+nom+narx karta), aks holда to'g'ridan Telegram Mini App havolаsi.
 export function buildDishShareLink(dishId) {
   if (SHARE_BASE) return `${SHARE_BASE}/share/dish/${dishId}`;
-  return `https://t.me/${BOT_USERNAME}/${WEBAPP_NAME}?startapp=dish_${dishId}`;
+  return buildMiniAppLink(dishId);
 }
 
 // Taomni Telegram do'stlarга ulashish.
@@ -168,8 +179,20 @@ export function shareDish(dish) {
 // Ilova ochilганда startapp parametrини o'qish (ulashilган taomга yo'naltirish).
 // Qaytaradi: { type: 'dish', id } yoki null
 export function getStartParam() {
+  // 1) Telegram SDK'дан (asosiy manba)
   const tg = getTelegram();
-  const raw = tg?.initDataUnsafe?.start_param;
+  let raw = tg?.initDataUnsafe?.start_param;
+
+  // 2) Ehtiyot: URL hash/query'дан ham qidiramiz (SDK kечиkса yoki bo'sh bo'lsa)
+  if (!raw && typeof window !== 'undefined') {
+    try {
+      const hash = window.location.hash || '';
+      const search = window.location.search || '';
+      const params = new URLSearchParams(hash.replace(/^#/, '') + '&' + search.replace(/^\?/, ''));
+      raw = params.get('tgWebAppStartParam') || params.get('startapp') || params.get('start_param') || '';
+    } catch { /* ignore */ }
+  }
+
   if (!raw) return null;
   if (raw.startsWith('dish_')) {
     return { type: 'dish', id: raw.slice(5) };

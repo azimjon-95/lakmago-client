@@ -12,7 +12,9 @@ export function TelegramOnly() {
   // so'ng "Buyurtma berish" (webapp) tugmasi beriladi.
   const startLink = `https://t.me/${botUsername}?start=web`;
   // Muqobil: to'g'ridan Mini App (obuna talab qilinmаса — eng tez)
-  const appLink = `https://t.me/${botUsername}/${webappName}`;
+  const appLink = webappName
+    ? `https://t.me/${botUsername}/${webappName}`
+    : `https://t.me/${botUsername}?startapp=`;
 
   return (
     <div className="tg-only">
