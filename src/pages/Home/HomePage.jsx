@@ -4,6 +4,7 @@ import { Icon } from '@/components/Icon';
 import { BannerSlider } from '@/components/BannerSlider';
 import { RestaurantCard } from '@/components/RestaurantCard';
 import { DishScrollCard } from '@/components/DishScrollCard';
+import { DishGridCard } from '@/components/DishGridCard';
 import { DishModal } from '@/components/DishModal';
 import { BottomNav } from '@/components/BottomNav';
 import { CartBar } from '@/components/CartBar';
@@ -11,7 +12,7 @@ import { LangSwitch } from '@/components/LangSwitch/LangSwitch';
 import { RestaurantCardSkeleton, DishScrollСardSkeleton } from '@/components/Skeleton/Skeleton';
 import { useUser } from '@/store/user';
 import { useT } from '@/i18n';
-import { useRestaurants, useTrendingDishes, useDiscountedDishes, useBannersQuery } from '@/hooks/queries';
+import { useRestaurants, useTrendingDishes, useDiscountedDishes, useBannersQuery, useAllDishes } from '@/hooks/queries';
 import './Home.css';
 
 const categories = [
@@ -45,6 +46,7 @@ export function HomePage() {
   const { data: restaurants = [], isLoading: restLoading } = useRestaurants();
   const { data: trending = [], isLoading: trendLoading } = useTrendingDishes();
   const { data: discounted = [] } = useDiscountedDishes();
+  const { data: allDishes = [], isLoading: allDishesLoading } = useAllDishes();
   const { data: banners = [] } = useBannersQuery();
 
   // Filtrlashni memolaymiz (keraksiz qayta hisoblash bo'lmaydi)
@@ -135,6 +137,20 @@ export function HomePage() {
           <div className="home-empty">{t('empty')}</div>
         )}
       </div>
+
+      {/* Barcha taomlar (hamma restoran/kafelar aralash) */}
+      {(allDishesLoading || allDishes.length > 0) && (
+        <>
+          <h2 className="home-restaurants-title">{t('allDishes')}</h2>
+          <div className="home-dishes-grid">
+            {allDishesLoading
+              ? Array.from({ length: 6 }).map((_, i) => <DishScrollСardSkeleton key={i} />)
+              : allDishes.map((d) => (
+                  <DishGridCard key={d.id || d._id} dish={d} onClick={openModal} />
+                ))}
+          </div>
+        </>
+      )}
 
       <div style={{ flex: 1 }} />
       <CartBar />

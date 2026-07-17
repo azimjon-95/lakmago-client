@@ -43,6 +43,12 @@ export const useDiscountedDishes = () =>
     queryFn: ({ signal }) => api.getDiscountedDishes({ signal }),
   });
 
+export const useAllDishes = () =>
+  useQuery({
+    queryKey: ['dishes', 'all'],
+    queryFn: ({ signal }) => api.getAllDishes({ signal }),
+  });
+
 // Prefetch — restoran kartasiga tegilганда menyuни oldindan yuklaydi (tezkorlik)
 export function usePrefetchRestaurant() {
   const qc = useQueryClient();

@@ -115,11 +115,14 @@ export async function authenticateWithTelegram() {
 // Masalan: VITE_BOT_USERNAME=LokmaGoBot, VITE_WEBAPP_NAME=app
 const BOT_USERNAME = import.meta.env.VITE_BOT_USERNAME ?? 'LokmaGoBot';
 const WEBAPP_NAME = import.meta.env.VITE_WEBAPP_NAME ?? 'app';
+// Server domenи (OG meta sahifа uchun) — chiroyли rasm+nom karta bilan ulashish.
+// Masalan: https://api.lokmago.uz  (bo'sh bo'lsa to'g'ridan t.me havola)
+const SHARE_BASE = import.meta.env.VITE_SHARE_BASE ?? '';
 
-// Taomга olib boruvchi Telegram Mini App havolasini yasaydi.
-// startapp parametri orqali ilova ochilганда o'sha taom ochiladi.
-// Format: https://t.me/BotName/app?startapp=dish_<id>
+// Taomга olib boruvchi havola. SHARE_BASE bo'lsa OG sahifа (chiroyли preview),
+// aks holda to'g'ridan Telegram Mini App havolаsi.
 export function buildDishShareLink(dishId) {
+  if (SHARE_BASE) return `${SHARE_BASE}/share/dish/${dishId}`;
   return `https://t.me/${BOT_USERNAME}/${WEBAPP_NAME}?startapp=dish_${dishId}`;
 }
 
@@ -130,14 +133,13 @@ export function shareDish(dish) {
   haptic();
   const link = buildDishShareLink(dish.id || dish._id);
 
-  // Ulashish matni — taom nomi, narxi, qisqa tavsif
+  // Chiroyli, qisqa matn — havola matnга QO'SHILMAYDI (Telegram preview kartаsi yasaydi).
+  // Shunda do'stга toza ko'rinadi: rasm + tavsif + bosiladigan karta.
   const price = dish.price ? `${dish.price.toLocaleString('ru-RU')} so'm` : '';
   const lines = [
     `🍽 ${dish.name}`,
     price && `💰 ${price}`,
-    dish.description && `${dish.description}`,
-    '',
-    '👇 LokmaGo\'da buyurtma bering:',
+    dish.description && `\n${dish.description}`,
   ].filter(Boolean);
   const text = lines.join('\n');
 

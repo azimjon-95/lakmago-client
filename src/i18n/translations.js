@@ -33,6 +33,7 @@ export const translations = {
     trendingDishes: 'Trend taomlar',
     discountedDishes: 'Chegirmadagi taomlar',
     allRestaurants: 'Barcha restoranlar',
+    allDishes: 'Barcha taomlar',
     restaurants: 'Restoranlar',
 
     // Restoran
@@ -133,6 +134,7 @@ export const translations = {
     trendingDishes: 'Тренд таомлар',
     discountedDishes: 'Чегирмадаги таомлар',
     allRestaurants: 'Барча ресторанлар',
+    allDishes: 'Барча таомлар',
     restaurants: 'Ресторанлар',
 
     freeDelivery: 'Бепул етказиш',
@@ -226,6 +228,7 @@ export const translations = {
     trendingDishes: 'Популярные блюда',
     discountedDishes: 'Блюда со скидкой',
     allRestaurants: 'Все рестораны',
+    allDishes: 'Все блюда',
     restaurants: 'Рестораны',
 
     freeDelivery: 'Бесплатная доставка',

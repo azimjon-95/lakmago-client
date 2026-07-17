@@ -118,6 +118,12 @@ export const api = {
     opts,
   ),
 
+  // Barcha restoranlar taomlarи aralash (bosh sahifа)
+  getAllDishes: async (opts) => {
+    const res = await tryFetch('/dishes/all', { items: dishes, nextCursor: null, hasMore: false }, opts);
+    return Array.isArray(res) ? res : (res.items ?? []);
+  },
+
   // Telegram login — token qaytaradi
   loginTelegram: (initData) =>
   authFetch('/auth/telegram', {
