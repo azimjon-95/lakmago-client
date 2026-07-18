@@ -13,6 +13,7 @@ import { RestaurantCardSkeleton, DishScrollСardSkeleton } from '@/components/Sk
 import { useUser } from '@/store/user';
 import { useT } from '@/i18n';
 import { useRestaurants, useTrendingDishes, useDiscountedDishes, useBannersQuery, useAllDishes } from '@/hooks/queries';
+import { API_BASE } from '@/api';
 import './Home.css';
 
 const categories = [
@@ -43,7 +44,7 @@ export function HomePage() {
   const [modalDish, setModalDish] = useState(null);
 
   // Real data — TanStack Query (cache + background refetch)
-  const { data: restaurants = [], isLoading: restLoading, isError: restError, refetch: refetchRest } = useRestaurants();
+  const { data: restaurants = [], isLoading: restLoading, isError: restError, error: restErrorObj, refetch: refetchRest } = useRestaurants();
   const { data: trending = [], isLoading: trendLoading } = useTrendingDishes();
   const { data: discounted = [] } = useDiscountedDishes();
   const { data: allDishes = [], isLoading: allDishesLoading } = useAllDishes();
@@ -135,8 +136,21 @@ export function HomePage() {
           <div className="home-error">
             <div className="home-error__icon">📡</div>
             <div className="home-error__title">Ma'lumot yuklanmadi</div>
-            <div className="home-error__text">Internet aloqasini tekshiring yoki keyinroq urinib ko'ring.</div>
+            <div className="home-error__text">
+              {restErrorObj?.kind === 'network'
+                ? 'Serverga ulanib bo\u2018lmadi. Internet aloqasini tekshiring.'
+                : `Server javob bermadi${restErrorObj?.status ? ` (${restErrorObj.status})` : ''}.`}
+            </div>
             <button onClick={() => refetchRest()} className="home-error__btn">Qayta urinish</button>
+            <details className="home-error__details">
+              <summary>Texnik ma'lumot</summary>
+              <div className="home-error__code">
+                <div>API: {API_BASE}</div>
+                {restErrorObj?.kind && <div>Tur: {restErrorObj.kind}</div>}
+                {restErrorObj?.status && <div>Kod: {restErrorObj.status}</div>}
+                {restErrorObj?.detail && <div>Tafsilot: {restErrorObj.detail}</div>}
+              </div>
+            </details>
           </div>
         ) : filtered.length > 0 ? (
           filtered.map((r) => <RestaurantCard key={r.id || r._id} restaurant={r} />)

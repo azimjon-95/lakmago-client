@@ -1,7 +1,7 @@
 // LokmaGo API mijozi — faqat real backend (Express + MongoDB).
 // Mock/demo rejim yo'q: barcha ma'lumot serverdan keladi.
 
-const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
+export const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
 
 // JWT token (Telegram login orqali olinadi)
 let authToken = null;
@@ -30,18 +30,32 @@ function normalizeIds(data) {
 
 // Umumiy fetch — AbortController (signal) qo'llab-quvvatlaydi, JWT qo'shadi.
 async function apiFetch(path, { signal, ...options } = {}) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    signal,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-      ...(options.headers || {}),
-    },
-  });
+  const url = `${API_BASE}${path}`;
+  let res;
+  try {
+    res = await fetch(url, {
+      ...options,
+      signal,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        ...(options.headers || {}),
+      },
+    });
+  } catch (e) {
+    // Tarmoq darajasidagi xato: CORS, Mixed Content (HTTPS→HTTP), server o'chiq
+    if (e.name === 'AbortError') throw e;
+    const err = new Error('Serverga ulanib bo\u2018lmadi');
+    err.kind = 'network';
+    err.url = url;
+    err.detail = e.message;
+    throw err;
+  }
   if (!res.ok) {
-    const err = new Error(`API xatosi: ${res.status}`);
+    const err = new Error(`Server xatosi (${res.status})`);
     err.status = res.status;
+    err.kind = 'http';
+    err.url = url;
     throw err;
   }
   if (res.status === 204) return null;
