@@ -5,11 +5,13 @@
      Keng ekranda ilova markazda bo'lsa ham tugma ilova ichida qoladi. */
   left: 50%;
   /* min() — ilova kengligi ekrandan katta bo'lsa ham tugma ichkarida qoladi */
-  margin-left: calc(min(var(--app-width), 100vw) / 2 - 72px);
-  /* Pastki menyu + iPhone home indicator hisobga olinadi */
-  bottom: calc(82px + env(safe-area-inset-bottom, 0px));
-  z-index: 45;
-  width: 56px; height: 56px;
+  margin-left: calc(min(var(--app-width), 100vw) / 2 - 62px);
+  /* Savat paneli (fixed) + pastki menyu USTIDA — to'qnashmaydi.
+     --cart-bar-offset: savat bo'lganda JS/CSS orqali oshiriladi. */
+  bottom: calc(78px + var(--cart-bar-offset, 0px) + env(safe-area-inset-bottom, 0px));
+  z-index: 46;
+  width: 48px; height: 48px;
+  transition: bottom 0.25s var(--ease);
   border-radius: 50%;
   background: var(--brand);
   display: flex; align-items: center; justify-content: center;

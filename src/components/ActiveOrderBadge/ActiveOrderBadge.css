@@ -4,7 +4,9 @@
   left: 50%;
   transform: translateX(-50%);
   /* BottomNav + iPhone home indicator ustida */
-  bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+  /* Savat paneli bo'lsa uning ustida (--cart-bar-offset) */
+  bottom: calc(78px + var(--cart-bar-offset, 0px) + env(safe-area-inset-bottom, 0px));
+  transition: bottom 0.25s var(--ease);
   z-index: 40;
   width: calc(var(--app-width) - 32px);
   max-width: calc(100vw - 32px);
