@@ -14,6 +14,7 @@ import { useUser } from '@/store/user';
 import { useT } from '@/i18n';
 import { useRestaurants, useTrendingDishes, useDiscountedDishes, useBannersQuery, useAllDishes } from '@/hooks/queries';
 import { API_BASE } from '@/api';
+import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
 import './Home.css';
 
 const categories = [
@@ -40,8 +41,10 @@ export function HomePage() {
   const navigate = useNavigate();
   const t = useT();
   const user = useUser((s) => s.user);
+  const addAddress = useUser((s) => s.addAddress);
   const [category, setCategory] = useState('all');
   const [modalDish, setModalDish] = useState(null);
+  const [showAddressFlow, setShowAddressFlow] = useState(false);
 
   // Real data — TanStack Query (cache + background refetch)
   const { data: restaurants = [], isLoading: restLoading, isError: restError, error: restErrorObj, refetch: refetchRest } = useRestaurants();
@@ -67,7 +70,7 @@ export function HomePage() {
   return (
     <div className="app-shell home">
       <header className="home-header">
-        <button onClick={() => navigate('/profile')} className="home-header__addr">
+        <button onClick={() => setShowAddressFlow(true)} className="home-header__addr">
           <span className="home-header__addr-label">
             <Icon name="pin" size={12} color="#EF9F27" /> {t('deliveryAddress')}
           </span>
@@ -178,6 +181,14 @@ export function HomePage() {
       <BottomNav />
 
       {modalDish && <DishModal dish={modalDish} onClose={closeModal} />}
+
+      {/* Manzil qo'shish oqimi */}
+      {showAddressFlow && (
+        <AddressFlow
+          onSave={(addr) => addAddress(addr)}
+          onClose={() => setShowAddressFlow(false)}
+        />
+      )}
     </div>
   );
 }

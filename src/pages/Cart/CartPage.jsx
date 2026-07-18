@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { DishPhoto } from '@/components/DishPhoto';
 import { AddressSheet } from '@/components/AddressSheet';
+import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
 import { useCart } from '@/store/cart';
 import { useUser } from '@/store/user';
 import { useOrders } from '@/store/orders';
@@ -29,6 +30,7 @@ export function CartPage() {
   const groups = restaurantGroups();
   const [paying, setPaying] = useState(false);
   const [showAddressSheet, setShowAddressSheet] = useState(false);
+  const [showAddressFlow, setShowAddressFlow] = useState(false);
   const [showPhoneEdit, setShowPhoneEdit] = useState(false);
   const [phoneDraft, setPhoneDraft] = useState(user.phone ?? '');
   const [paymentMethod, setPaymentMethod] = useState(lastPaymentMethod);
@@ -248,8 +250,16 @@ export function CartPage() {
           addresses={user.addresses}
           selectedId={selectedAddress?.id}
           onSelect={(id) => { setDefaultAddress(id); setShowAddressSheet(false); }}
-          onAdd={(addr) => addAddress(addr)}
+          onAdd={() => { setShowAddressSheet(false); setShowAddressFlow(true); }}
           onClose={() => setShowAddressSheet(false)}
+        />
+      )}
+
+      {/* Yangi manzil qo'shish oqimi (joylashuv → qidiruv → tafsilotlar) */}
+      {showAddressFlow && (
+        <AddressFlow
+          onSave={(addr) => addAddress(addr)}
+          onClose={() => setShowAddressFlow(false)}
         />
       )}
 

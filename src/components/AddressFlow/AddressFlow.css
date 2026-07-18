@@ -1,0 +1,164 @@
+/* ===== Manzil oqimi (3 bosqich) ===== */
+.addrflow-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: var(--canvas);
+  display: flex; flex-direction: column;
+  animation: addrflow-in 0.22s ease;
+}
+@keyframes addrflow-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+.addrflow { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
+/* Sarlavha (2 va 3-bosqich) */
+.addrflow__header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  flex: none;
+}
+.addrflow__back-btn, .addrflow__back {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex: none;
+}
+.addrflow__back-btn:active { background: var(--surface-2); }
+.addrflow__back { position: absolute; top: 14px; right: 14px; }
+.addrflow__header-title { font-size: 17px; font-weight: 700; color: var(--ink); margin: 0; }
+
+/* 1-bosqich: ruxsat ekrani */
+.addrflow__hero {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 32px 24px 8px; min-height: 200px;
+}
+.loc-illustration { position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; }
+.loc-illustration__pin { position: relative; z-index: 2; }
+.loc-illustration__ring {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle, var(--brand-tint) 0%, transparent 70%);
+  animation: loc-pulse 2.4s ease-in-out infinite;
+}
+@keyframes loc-pulse { 0%,100% { transform: scale(0.9); opacity: 0.7; } 50% { transform: scale(1.1); opacity: 1; } }
+
+.addrflow__title {
+  font-size: 24px; font-weight: 800; color: var(--ink);
+  text-align: center; margin: 0 24px 12px; line-height: 1.25;
+}
+.addrflow__text {
+  font-size: 14px; color: var(--muted); line-height: 1.6;
+  text-align: center; margin: 0 28px 24px;
+}
+.addrflow__error {
+  margin: 0 24px 16px; padding: 12px 14px;
+  background: rgba(226,75,74,0.12); border: 1px solid var(--danger);
+  border-radius: 12px; color: var(--danger); font-size: 13px; text-align: center;
+}
+.addrflow__actions { padding: 0 20px 28px; flex: none; }
+.addrflow__btn-primary {
+  width: 100%; padding: 16px; border-radius: 16px;
+  background: var(--brand-400); color: var(--brand-text);
+  font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.addrflow__btn-primary:active { transform: scale(0.98); }
+.addrflow__btn-primary:disabled { opacity: 0.65; }
+.addrflow__btn-link {
+  width: 100%; padding: 14px; margin-top: 10px;
+  color: var(--brand-100); font-size: 15px; font-weight: 600;
+  background: transparent;
+}
+
+/* 2-bosqich: qidiruv */
+.addr-search__field {
+  display: flex; align-items: center; gap: 10px;
+  margin: 12px 16px; padding: 13px 14px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 14px; flex: none;
+}
+.addr-search__input {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: var(--ink); font-size: 15px;
+}
+.addr-search__input::placeholder { color: var(--muted); }
+
+.addr-search__current {
+  display: flex; align-items: center; gap: 12px;
+  margin: 0 16px 8px; padding: 13px 14px;
+  background: var(--surface); border-radius: 14px;
+  color: var(--brand-100); font-size: 15px; font-weight: 600;
+  width: calc(100% - 32px); flex: none;
+}
+.addr-search__current-icon {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--brand-tint);
+  display: flex; align-items: center; justify-content: center; flex: none;
+}
+.addr-search__current:active { background: var(--surface-2); }
+
+.addr-search__results { flex: 1; overflow-y: auto; padding: 4px 16px 20px; }
+.addr-search__loading, .addr-search__empty {
+  text-align: center; color: var(--muted); font-size: 14px; padding: 24px;
+}
+.addr-result {
+  display: flex; align-items: flex-start; gap: 12px;
+  width: 100%; padding: 13px 4px; text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+.addr-result:active { background: var(--surface-2); }
+.addr-result__body { flex: 1; min-width: 0; }
+.addr-result__street { font-size: 15px; color: var(--ink); line-height: 1.35; }
+.addr-result__city { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+/* 3-bosqich: tafsilotlar */
+.addr-details__scroll { flex: 1; overflow-y: auto; padding: 16px; }
+.addr-details__section-title {
+  font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 12px;
+}
+.addr-details__picked {
+  display: flex; align-items: center; gap: 12px;
+  padding-bottom: 16px; margin-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+.addr-details__picked-icon {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center; flex: none;
+}
+.addr-details__street { font-size: 16px; color: var(--ink); font-weight: 600; line-height: 1.3; }
+.addr-details__city { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+.addr-details__row { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-end; }
+.addr-details__labels { display: flex; gap: 6px; flex: none; }
+.addr-label {
+  width: 52px; height: 56px; border-radius: 14px;
+  background: var(--surface); border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+}
+.addr-label.is-active { border-color: var(--brand-400); background: var(--brand-tint); }
+
+.addr-details__field { margin-bottom: 12px; }
+.addr-details__field--grow { flex: 1; margin-bottom: 0; }
+.addr-details__field label {
+  display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px;
+}
+.addr-details__field input,
+.addr-details__field textarea {
+  width: 100%; padding: 14px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 14px; color: var(--ink); font-size: 15px;
+  outline: none; resize: none; font-family: inherit;
+}
+.addr-details__field input:focus,
+.addr-details__field textarea:focus { border-color: var(--brand-400); }
+.addr-details__field input::placeholder,
+.addr-details__field textarea::placeholder { color: var(--muted); }
+
+.addr-details__grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.addr-details__hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
+
+.addr-details__footer {
+  padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: var(--canvas); flex: none;
+}
+
+.spinner--sm { width: 16px; height: 16px; border-width: 2px; }

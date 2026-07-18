@@ -36,7 +36,7 @@ export function AddressSheet({ addresses, selectedId, onSelect, onAdd, onClose }
                 </button>
               ))}
             </div>
-            <button onClick={() => setAdding(true)} className="addr-sheet__add-btn">
+            <button onClick={onAdd} className="addr-sheet__add-btn">
               <Icon name="plus" size={16} color="#9A9A96" /> {t('add')}
             </button>
           </div>

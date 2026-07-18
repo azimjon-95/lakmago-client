@@ -71,12 +71,14 @@ export const useUser = create((set) => ({
 
   addAddress: (address) =>
   set((state) => {
-    const addresses = [...state.user.addresses, { ...address, id: 'addr' + Date.now() }];
+    const newAddr = { ...address, id: 'addr' + Date.now() };
+    const addresses = [...state.user.addresses, newAddr];
     return {
       user: {
         ...state.user,
         addresses,
-        defaultAddressId: state.user.defaultAddressId || addresses[addresses.length - 1].id
+        // Yangi qo'shilган manzil darhol tanlanadi (qulaylik)
+        defaultAddressId: newAddr.id,
       }
     };
   }),
