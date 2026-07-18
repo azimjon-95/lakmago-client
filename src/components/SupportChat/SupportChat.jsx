@@ -59,7 +59,7 @@ export function SupportChat() {
                 <div className="support-chat__online">● online</div>
               </div>
             </div>
-            <button className="support-chat__close" onClick={() => setOpen(false)} aria-label={t('close')}><Icon name="x" size={18} color="#9A9A96" /></button>
+            <button className="support-chat__close" onClick={() => setOpen(false)} aria-label={t('close')}><Icon name="x" size={18} color="#A99C8C" /></button>
           </div>
 
           <div className="support-chat__body" ref={bodyRef}>
@@ -77,7 +77,7 @@ export function SupportChat() {
               onKeyDown={(e) => e.key === 'Enter' && send()}
               placeholder={t('chatPlaceholder')}
             />
-            <button onClick={send} aria-label={t('send')}><Icon name="send" size={18} color="#EF9F27" /></button>
+            <button onClick={send} aria-label={t('send')}><Icon name="send" size={18} color="#F5A524" /></button>
           </div>
         </div>
       )}

@@ -79,7 +79,7 @@ export const useCart = create((set, get) => ({
       restaurant: {
         id: restaurantId,
         name: meta.restaurantName || meta.restaurant?.name || 'Restoran',
-        tint: meta.restaurantTint || meta.restaurant?.tint || '#3A2A12',
+        tint: meta.restaurantTint || meta.restaurant?.tint || '#3D2A10',
         icon: meta.restaurantIcon || meta.restaurant?.icon || 'tools-kitchen-2',
         deliveryMin: meta.restaurantDeliveryMin ?? 25,
         deliveryMax: meta.restaurantDeliveryMax ?? 40,

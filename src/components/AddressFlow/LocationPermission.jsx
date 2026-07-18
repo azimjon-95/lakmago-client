@@ -27,14 +27,14 @@ export function LocationPermission({ onDetected, onManual, onClose }) {
     <div className="addrflow">
       {onClose && (
         <button onClick={onClose} className="addrflow__back" aria-label="Yopish">
-          <Icon name="x" size={20} color="#9A9A96" />
+          <Icon name="x" size={20} color="#A99C8C" />
         </button>
       )}
 
       <div className="addrflow__hero">
         <div className="loc-illustration">
           <div className="loc-illustration__pin">
-            <Icon name="pin" size={64} color="#EF9F27" strokeWidth={1.5} />
+            <Icon name="pin" size={64} color="#F5A524" strokeWidth={1.5} />
           </div>
           <div className="loc-illustration__ring" />
         </div>
@@ -53,7 +53,7 @@ export function LocationPermission({ onDetected, onManual, onClose }) {
           {loading ? (
             <><span className="spinner spinner--sm" /> Aniqlanmoqda...</>
           ) : (
-            <><Icon name="navigation" size={18} color="#2C1400" /> Joylashuvni avtomatik aniqlash</>
+            <><Icon name="navigation" size={18} color="#2A1500" /> Joylashuvni avtomatik aniqlash</>
           )}
         </button>
         <button onClick={onManual} className="addrflow__btn-link">

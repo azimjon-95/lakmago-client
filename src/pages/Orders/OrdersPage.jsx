@@ -17,7 +17,7 @@ export function OrdersPage() {
       <div className="app-shell orders">
         <header className="orders-header">{t('navOrders')}</header>
         <div className="empty-state">
-          <Icon name="bag" size={48} color="#9A9A94" />
+          <Icon name="bag" size={48} color="#A99C8C" />
           <div className="empty-state__title">{t('noActiveOrders')}</div>
           <p className="empty-state__hint">{t('cartEmptyHint')}</p>
           <button onClick={() => navigate('/')} className="btn-primary" style={{ marginTop: 20 }}>
@@ -40,7 +40,7 @@ export function OrdersPage() {
             <button onClick={() => navigate('/order/track')} className="active-order-card">
               <div className="active-order-card__top">
                 <span className="active-order-card__id">{t('orderNumber')} #{activeOrder.id}</span>
-                <Icon name="chevronRight" size={16} color="#FAC775" />
+                <Icon name="chevronRight" size={16} color="#FFCE7A" />
               </div>
               <div className="active-order-card__names">
                 {activeOrder.subOrders.map((s) => s.restaurant.name).join(' + ')}

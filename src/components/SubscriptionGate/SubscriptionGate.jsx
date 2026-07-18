@@ -49,7 +49,7 @@ export function SubscriptionGate({ children }) {
   return (
     <div className="sub-gate">
       <div className="sub-gate__card">
-        <div className="sub-gate__icon"><Icon name="send" size={40} color="#EF9F27" /></div>
+        <div className="sub-gate__icon"><Icon name="send" size={40} color="#F5A524" /></div>
         <h2 className="sub-gate__title">Kanalga obuna bo'ling</h2>
         <p className="sub-gate__text">
           Buyurtma berishдан oldin asosiy kanalimizga obuna bo'ling.
@@ -57,7 +57,7 @@ export function SubscriptionGate({ children }) {
         </p>
 
         <button onClick={openChannel} className="sub-gate__subscribe">
-          <Icon name="send" size={18} color="#2C1400" /> Kanalga obuna bo'lish
+          <Icon name="send" size={18} color="#2A1500" /> Kanalga obuna bo'lish
         </button>
         <button onClick={onCheck} disabled={checking} className="sub-gate__check">
           {checking ? 'Tekshirilmoqda...' : '✅ Obuna bo\u2018ldim, tekshirish'}

@@ -28,7 +28,7 @@ export function ActiveOrderBadge() {
   return (
     <button className="active-order-badge" onClick={() => navigate('/order/track')}>
       <span className="active-order-badge__pulse" />
-      <span className="active-order-badge__icon"><Icon name="scooter" size={20} color="#2C1400" /></span>
+      <span className="active-order-badge__icon"><Icon name="scooter" size={20} color="#2A1500" /></span>
       <span className="active-order-badge__text">
         <span className="active-order-badge__title">{t('yourOrder')}</span>
         <span className="active-order-badge__status">{t(statusKey)}</span>

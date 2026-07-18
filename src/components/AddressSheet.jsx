@@ -19,7 +19,7 @@ export function AddressSheet({ addresses, selectedId, onSelect, onAdd, onClose }
       <div onClick={(e) => e.stopPropagation()} className="addr-sheet">
         <div className="addr-sheet__head">
           <div className="addr-sheet__title">{t('myAddresses')}</div>
-          <button onClick={onClose} aria-label={t('close')}><Icon name="x" size={20} color="#9A9A96" /></button>
+          <button onClick={onClose} aria-label={t('close')}><Icon name="x" size={20} color="#A99C8C" /></button>
         </div>
 
         {!adding ? (
@@ -27,17 +27,17 @@ export function AddressSheet({ addresses, selectedId, onSelect, onAdd, onClose }
             <div className="addr-sheet__list">
               {addresses.map((a) => (
                 <button key={a.id} onClick={() => onSelect(a.id)} className={`addr-item ${a.id === selectedId ? 'is-selected' : ''}`}>
-                  <Icon name="pin" size={20} color={a.id === selectedId ? '#EF9F27' : '#9A9A94'} />
+                  <Icon name="pin" size={20} color={a.id === selectedId ? '#F5A524' : '#A99C8C'} />
                   <div className="addr-item__body">
                     <div className="addr-item__title">{a.title}</div>
                     <div className="addr-item__text">{a.address}</div>
                   </div>
-                  {a.id === selectedId && <Icon name="circleCheck" size={18} color="#EF9F27" />}
+                  {a.id === selectedId && <Icon name="circleCheck" size={18} color="#F5A524" />}
                 </button>
               ))}
             </div>
             <button onClick={onAdd} className="addr-sheet__add-btn">
-              <Icon name="plus" size={16} color="#9A9A96" /> {t('add')}
+              <Icon name="plus" size={16} color="#A99C8C" /> {t('add')}
             </button>
           </div>
         ) : (

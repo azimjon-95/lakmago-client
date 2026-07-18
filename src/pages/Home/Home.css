@@ -118,7 +118,7 @@
 .dgcard__photo { position: relative; }
 .dgcard__badge {
   position: absolute; top: 8px; left: 8px;
-  background: var(--danger); color: #fff;
+  background: var(--appetite); color: #fff;
   font-size: 11px; font-weight: 700;
   padding: 3px 8px; border-radius: 20px;
 }

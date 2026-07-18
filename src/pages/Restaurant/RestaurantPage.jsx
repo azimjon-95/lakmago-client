@@ -85,7 +85,7 @@ export function RestaurantPage() {
           <Icon name="arrowLeft" size={18} color="#fff" />
         </button>
         <button onClick={() => setIsFav((v) => !v)} className="rest-banner__btn rest-banner__btn--fav" aria-label="♥">
-          <Icon name="heart" size={17} color={isFav ? '#EF9F27' : '#fff'} style={isFav ? { fill: '#EF9F27' } : {}} />
+          <Icon name="heart" size={17} color={isFav ? '#F5A524' : '#fff'} style={isFav ? { fill: '#F5A524' } : {}} />
         </button>
       </div>
 
@@ -95,20 +95,20 @@ export function RestaurantPage() {
         <div className="rest-info__cuisine">{restaurant.cuisine} · Toshkent</div>
         <button onClick={() => scrollTo(REVIEWS_TAB)} className="rest-info__meta">
           <span className="rest-meta rest-meta--rating">
-            <Icon name="star" size={15} color="#EF9F27" />
+            <Icon name="star" size={15} color="#F5A524" />
             {restaurant.rating.toFixed(1)}
             <span className="rest-meta__count">({restaurant.reviewCount})</span>
           </span>
           <span className="rest-meta">
-            <Icon name="clock" size={15} color="#9A9A96" /> {restaurant.deliveryMin}–{restaurant.deliveryMax} {t('min')}
+            <Icon name="clock" size={15} color="#A99C8C" /> {restaurant.deliveryMin}–{restaurant.deliveryMax} {t('min')}
           </span>
           <span className="rest-meta rest-meta--free">
-            <Icon name="bike" size={15} color="#5DCAA5" />
+            <Icon name="bike" size={15} color="#6FBF73" />
             {restaurant.deliveryFee === 0 ? t('free') : t('delivery')}
           </span>
         </button>
         <button onClick={() => navigate(`/restaurant/${id}/reserve`)} className="rest-reserve-btn">
-          <Icon name="calendarPlus" size={17} color="#EF9F27" /> {t('reserveTable')}
+          <Icon name="calendarPlus" size={17} color="#F5A524" /> {t('reserveTable')}
         </button>
       </div>
 
@@ -154,8 +154,8 @@ export function RestaurantPage() {
                         <div className="review-card__stars">
                           {[1, 2, 3, 4, 5].map((n) => (
                             <Icon key={n} name="star" size={13}
-                              color={n <= rv.rating ? '#EF9F27' : '#4A4A4E'}
-                              style={n <= rv.rating ? { fill: '#EF9F27' } : {}} />
+                              color={n <= rv.rating ? '#F5A524' : '#4A4A4E'}
+                              style={n <= rv.rating ? { fill: '#F5A524' } : {}} />
                           ))}
                         </div>
                         {rv.comment && <div className="review-card__text">{rv.comment}</div>}

@@ -70,7 +70,7 @@ export function CartPage() {
   if (items.length === 0) {
     return (
       <div className="app-shell cart-empty">
-        <Icon name="bag" size={48} color="#9A9A94" />
+        <Icon name="bag" size={48} color="#A99C8C" />
         <div className="cart-empty__title">{t('cartEmpty')}</div>
         <p className="cart-empty__hint">{t('cartEmptyHint')}</p>
         <button onClick={() => navigate('/')} className="btn-primary">{t('allRestaurants')}</button>
@@ -108,7 +108,7 @@ export function CartPage() {
     <div className="app-shell cart">
       <header className="cart-header">
         <button onClick={() => navigate(-1)} aria-label={t('back')} className="cart-header__btn">
-          <Icon name="x" size={22} color="#F2F1EE" />
+          <Icon name="x" size={22} color="#F7F2EA" />
         </button>
         <div className="cart-header__center">
           <h1 className="cart-header__title">{t('cart')}</h1>
@@ -119,13 +119,13 @@ export function CartPage() {
           )}
         </div>
         <button onClick={confirmClear} aria-label="Tozalash" className="cart-header__btn">
-          <Icon name="trash" size={20} color="#9A9A96" />
+          <Icon name="trash" size={20} color="#A99C8C" />
         </button>
       </header>
 
       {groups.length > 1 && (
         <div className="cart-multi-hint">
-          <Icon name="bag" size={18} color="#EF9F27" />
+          <Icon name="bag" size={18} color="#F5A524" />
           <div>{groups.length} ta restoran · har biri alohida yetkaziladi, bitta ekranда kuzatiladi.</div>
         </div>
       )}
@@ -134,11 +134,11 @@ export function CartPage() {
         <div key={group.restaurant.id} className="cart-group">
           <div className="cart-group__head">
             <div className="cart-group__icon" style={{ background: group.restaurant.tint }}>
-              <Icon name={group.restaurant.icon} size={13} color="#EF9F27" />
+              <Icon name={group.restaurant.icon} size={13} color="#F5A524" />
             </div>
             <div className="cart-group__name">{group.restaurant.name}</div>
             <div className="cart-group__time">
-              <Icon name="clock" size={12} color="#9A9A96" /> {group.restaurant.deliveryMin}–{group.restaurant.deliveryMax} {t('min')}
+              <Icon name="clock" size={12} color="#A99C8C" /> {group.restaurant.deliveryMin}–{group.restaurant.deliveryMax} {t('min')}
             </div>
           </div>
           <div className="cart-items">
@@ -151,7 +151,7 @@ export function CartPage() {
                   <div className="cart-item__top">
                     <div className="cart-item__name">{item.dish.name}</div>
                     <button onClick={() => removeItem(item.key)} aria-label={t('close')}>
-                      <Icon name="trash" size={16} color="#9A9A94" />
+                      <Icon name="trash" size={16} color="#A99C8C" />
                     </button>
                   </div>
                   {item.selectedOptions.length > 0 && (
@@ -161,11 +161,11 @@ export function CartPage() {
                     <div className="cart-item__price">{formatSom(item.unitPrice * item.quantity)}</div>
                     <div className="qty-control">
                       <button onClick={() => decrement(item.key)} className="qty-btn qty-btn--minus" aria-label="−">
-                        <Icon name="minus" size={14} color="#9A9A96" />
+                        <Icon name="minus" size={14} color="#A99C8C" />
                       </button>
                       <span className="qty-value">{item.quantity}</span>
                       <button onClick={() => addItem(item.dish, 1, item.selectedOptions, item.note)} className="qty-btn qty-btn--plus" aria-label="+">
-                        <Icon name="plus" size={14} color="#2C1400" />
+                        <Icon name="plus" size={14} color="#2A1500" />
                       </button>
                     </div>
                   </div>
@@ -181,7 +181,7 @@ export function CartPage() {
         onClick={() => setShowAddressSheet(true)}
         className={`cart-field ${selectedAddress ? '' : 'cart-field--required'}`}
       >
-        <Icon name="pin" size={22} color="#EF9F27" />
+        <Icon name="pin" size={22} color="#F5A524" />
         <div className="cart-field__body">
           {selectedAddress ? (
             <>
@@ -192,7 +192,7 @@ export function CartPage() {
             <div className="cart-field__value cart-field__value--accent">{t('address')}</div>
           )}
         </div>
-        <Icon name="chevronRight" size={18} color="#9A9A94" />
+        <Icon name="chevronRight" size={18} color="#A99C8C" />
       </button>
 
       {/* Telefon */}
@@ -200,14 +200,14 @@ export function CartPage() {
         onClick={() => { setPhoneDraft(user.phone || ''); setShowPhoneEdit(true); }}
         className={`cart-field ${user.phone ? '' : 'cart-field--required'}`}
       >
-        <Icon name="phone" size={22} color={user.phone ? '#5DCAA5' : '#EF9F27'} />
+        <Icon name="phone" size={22} color={user.phone ? '#6FBF73' : '#F5A524'} />
         <div className="cart-field__body">
           <div className={`cart-field__value ${user.phone ? '' : 'cart-field__value--accent'}`}>
             {user.phone || '+998 __ ___ __ __'}
           </div>
           <div className="cart-field__label">Telefon</div>
         </div>
-        <Icon name="chevronRight" size={18} color="#9A9A94" />
+        <Icon name="chevronRight" size={18} color="#A99C8C" />
       </button>
 
       {/* To'lov */}
@@ -218,9 +218,9 @@ export function CartPage() {
             onClick={() => setPaymentMethod('payme')}
             className={`pay-opt ${paymentMethod === 'payme' ? 'is-active' : ''}`}
           >
-            <Icon name="card" size={18} color="#5DCAA5" />
+            <Icon name="card" size={18} color="#6FBF73" />
             <span>Payme</span>
-            {paymentMethod === 'payme' && <Icon name="circleCheck" size={15} color="#5DCAA5" />}
+            {paymentMethod === 'payme' && <Icon name="circleCheck" size={15} color="#6FBF73" />}
           </button>
           <button
             onClick={() => setPaymentMethod('cash')}
@@ -228,7 +228,7 @@ export function CartPage() {
           >
             <span className="pay-opt__emoji">💵</span>
             <span>{t('cash')}</span>
-            {paymentMethod === 'cash' && <Icon name="circleCheck" size={15} color="#EF9F27" />}
+            {paymentMethod === 'cash' && <Icon name="circleCheck" size={15} color="#F5A524" />}
           </button>
         </div>
       </div>
@@ -240,7 +240,7 @@ export function CartPage() {
       {bonusBalance > 0 && (
         <button onClick={() => setUseBonus((v) => !v)} className={`cart-bonus ${useBonus ? 'is-active' : ''}`}>
           <div className="cart-bonus__left">
-            <Icon name="gift" size={20} color={useBonus ? '#5DCAA5' : '#EF9F27'} />
+            <Icon name="gift" size={20} color={useBonus ? '#6FBF73' : '#F5A524'} />
             <div>
               <div className="cart-bonus__title">Bonus bilan to'lash</div>
               <div className="cart-bonus__balance">Mavjud: {formatSom(bonusBalance)}</div>
@@ -274,7 +274,7 @@ export function CartPage() {
       <div className="cart-footer">
         {/* Yetkazish qatori */}
         <div className="cart-footer__delivery">
-          <Icon name="truck" size={18} color={DELIVERY_FEE === 0 ? '#5DCAA5' : '#9A9A96'} />
+          <Icon name="truck" size={18} color={DELIVERY_FEE === 0 ? '#6FBF73' : '#A99C8C'} />
           <span className={DELIVERY_FEE === 0 ? 'is-free' : ''}>
             {DELIVERY_FEE === 0 ? 'Bepul yetkazib berish' : `Yetkazish · ${formatSom(DELIVERY_FEE)}`}
           </span>
@@ -385,7 +385,7 @@ function CartUpsell({ groups }) {
             <div className="upsell-card__name">{d.name}</div>
             <div className="upsell-card__price">{formatSom(d.price)}</div>
             <button onClick={() => add(d)} className="upsell-card__add" aria-label="Qo'shish">
-              <Icon name="plus" size={18} color="#EF9F27" />
+              <Icon name="plus" size={18} color="#F5A524" />
             </button>
           </div>
         ))}

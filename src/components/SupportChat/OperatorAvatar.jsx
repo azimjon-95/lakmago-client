@@ -6,8 +6,8 @@ export function OperatorAvatar({ size = 56, online = true }) {
       <defs>
         <clipPath id="op-clip"><circle cx="32" cy="32" r="32" /></clipPath>
         <linearGradient id="op-bg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FAC775" />
-          <stop offset="100%" stopColor="#EF9F27" />
+          <stop offset="0%" stopColor="#FFCE7A" />
+          <stop offset="100%" stopColor="#F5A524" />
         </linearGradient>
       </defs>
 
@@ -16,7 +16,7 @@ export function OperatorAvatar({ size = 56, online = true }) {
         <rect width="64" height="64" fill="url(#op-bg)" />
 
         {/* Yelka / kiyim */}
-        <path d="M8 64c0-12 10.7-19 24-19s24 7 24 19H8z" fill="#2C1400" />
+        <path d="M8 64c0-12 10.7-19 24-19s24 7 24 19H8z" fill="#2A1500" />
         <path d="M26 46c2 4 10 4 12 0l-2-4h-8l-2 4z" fill="#F0C9A0" />
 
         {/* Bo'yin */}
@@ -40,19 +40,19 @@ export function OperatorAvatar({ size = 56, online = true }) {
         <path d="M28.5 32.5c1.8 1.8 5.2 1.8 7 0" stroke="#C2683F" strokeWidth="1.5" strokeLinecap="round" />
 
         {/* Garnitura (dispetcher belgisi) */}
-        <path d="M19 27a13 13 0 0 1 26 0" stroke="#1A1A1E" strokeWidth="2.6" strokeLinecap="round" fill="none" />
-        <rect x="16.5" y="26" width="5" height="8.5" rx="2.5" fill="#1A1A1E" />
-        <rect x="42.5" y="26" width="5" height="8.5" rx="2.5" fill="#1A1A1E" />
+        <path d="M19 27a13 13 0 0 1 26 0" stroke="#1C1815" strokeWidth="2.6" strokeLinecap="round" fill="none" />
+        <rect x="16.5" y="26" width="5" height="8.5" rx="2.5" fill="#1C1815" />
+        <rect x="42.5" y="26" width="5" height="8.5" rx="2.5" fill="#1C1815" />
         {/* Mikrofon */}
-        <path d="M19 34.5v3.5c0 2.2 1.8 4 4 4h3" stroke="#1A1A1E" strokeWidth="2" strokeLinecap="round" fill="none" />
-        <circle cx="27" cy="42" r="2.2" fill="#1A1A1E" />
+        <path d="M19 34.5v3.5c0 2.2 1.8 4 4 4h3" stroke="#1C1815" strokeWidth="2" strokeLinecap="round" fill="none" />
+        <circle cx="27" cy="42" r="2.2" fill="#1C1815" />
       </g>
 
       {/* Onlayn belgisi */}
       {online && (
         <>
-          <circle cx="52" cy="52" r="9" fill="#1A1A1E" />
-          <circle cx="52" cy="52" r="6" fill="#5DCAA5" />
+          <circle cx="52" cy="52" r="9" fill="#1C1815" />
+          <circle cx="52" cy="52" r="6" fill="#6FBF73" />
         </>
       )}
     </svg>

@@ -36,7 +36,7 @@ export function ProfilePage() {
   return (
     <div className="app-shell profile">
       <header className="page-header">
-        <button onClick={() => navigate('/')} aria-label={t('back')}><Icon name="arrowLeft" size={22} color="#F2F1EE" /></button>
+        <button onClick={() => navigate('/')} aria-label={t('back')}><Icon name="arrowLeft" size={22} color="#F7F2EA" /></button>
         <h1>{t('profile')}</h1>
       </header>
 
@@ -75,12 +75,12 @@ export function ProfilePage() {
           </div>
         ) : (
           <button onClick={() => { setFirstName(user.firstName); setLastName(user.lastName); setEditingField('name'); }} className="profile-row">
-            <Icon name="edit" size={18} color="#9A9A94" />
+            <Icon name="edit" size={18} color="#A99C8C" />
             <div className="profile-row__body">
               <div className="profile-row__value">{user.firstName} {user.lastName}</div>
               <div className="profile-row__label">{t('profile')}</div>
             </div>
-            <Icon name="chevronRight" size={18} color="#9A9A94" />
+            <Icon name="chevronRight" size={18} color="#A99C8C" />
           </button>
         )}
 
@@ -94,12 +94,12 @@ export function ProfilePage() {
           </div>
         ) : (
           <button onClick={() => { setPhone(user.phone || ''); setEditingField('phone'); }} className={`profile-row ${user.phone ? '' : 'profile-row--required'}`} style={{ marginTop: 10 }}>
-            <Icon name="phone" size={18} color={user.phone ? '#9A9A94' : '#EF9F27'} />
+            <Icon name="phone" size={18} color={user.phone ? '#A99C8C' : '#F5A524'} />
             <div className="profile-row__body">
               <div className={`profile-row__value ${user.phone ? '' : 'profile-row__value--accent'}`}>{user.phone || t('empty')}</div>
               <div className="profile-row__label">Telefon</div>
             </div>
-            <Icon name="chevronRight" size={18} color="#9A9A94" />
+            <Icon name="chevronRight" size={18} color="#A99C8C" />
           </button>
         )}
       </div>
@@ -111,7 +111,7 @@ export function ProfilePage() {
           {user.addresses.length === 0 && <div className="profile-addresses__empty">{t('empty')}</div>}
           {user.addresses.map((a) => (
             <div key={a.id} className={`profile-address ${a.id === user.defaultAddressId ? 'is-default' : ''}`}>
-              <Icon name="pin" size={18} color={a.id === user.defaultAddressId ? '#EF9F27' : '#9A9A94'} />
+              <Icon name="pin" size={18} color={a.id === user.defaultAddressId ? '#F5A524' : '#A99C8C'} />
               <div className="profile-address__body">
                 <div className="profile-address__title">
                   {a.title}
@@ -122,7 +122,7 @@ export function ProfilePage() {
               {a.id !== user.defaultAddressId && (
                 <button onClick={() => setDefaultAddress(a.id)} className="profile-address__set">{t('save')}</button>
               )}
-              <button onClick={() => removeAddress(a.id)} aria-label={t('close')}><Icon name="trash" size={16} color="#E24B4A" /></button>
+              <button onClick={() => removeAddress(a.id)} aria-label={t('close')}><Icon name="trash" size={16} color="#E14B42" /></button>
             </div>
           ))}
         </div>
@@ -142,7 +142,7 @@ export function ProfilePage() {
           </div>
         ) : (
           <button onClick={() => setShowAddAddress(true)} className="profile-add-address">
-            <Icon name="plus" size={16} color="#9A9A96" /> {t('add')}
+            <Icon name="plus" size={16} color="#A99C8C" /> {t('add')}
           </button>
         )}
       </div>
@@ -188,7 +188,7 @@ function ReferralCard() {
     <div className="referral-card">
       <div className="referral-card__head">
         <div className="referral-card__title">
-          <Icon name="users" size={18} color="#EF9F27" /> Do'stlarni taklif qiling
+          <Icon name="users" size={18} color="#F5A524" /> Do'stlarni taklif qiling
         </div>
         {info?.reward > 0 && (
           <div className="referral-card__badge">+{som(info.reward)} so'm</div>
@@ -214,10 +214,10 @@ function ReferralCard() {
       {/* Amallar */}
       <div className="referral-card__actions">
         <button onClick={share} className="referral-card__share">
-          <Icon name="send" size={16} color="#2C1400" /> Do'stlarga yuborish
+          <Icon name="send" size={16} color="#2A1500" /> Do'stlarga yuborish
         </button>
         <button onClick={copy} className="referral-card__copy">
-          <Icon name={copied ? 'check' : 'copy'} size={16} color="#F2F1EE" />
+          <Icon name={copied ? 'check' : 'copy'} size={16} color="#F7F2EA" />
         </button>
       </div>
     </div>

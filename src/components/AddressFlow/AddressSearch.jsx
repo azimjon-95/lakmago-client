@@ -46,13 +46,13 @@ export function AddressSearch({ onPick, onBack }) {
     <div className="addrflow addrflow--search">
       <div className="addrflow__header">
         <button onClick={onBack} className="addrflow__back-btn" aria-label="Orqaga">
-          <Icon name="arrowLeft" size={22} color="#F2F1EE" />
+          <Icon name="arrowLeft" size={22} color="#F7F2EA" />
         </button>
         <h3 className="addrflow__header-title">Qayerga yetkazib berilsin</h3>
       </div>
 
       <div className="addr-search__field">
-        <Icon name="search" size={18} color="#9A9A94" />
+        <Icon name="search" size={18} color="#A99C8C" />
         <input
           ref={inputRef}
           value={query}
@@ -62,7 +62,7 @@ export function AddressSearch({ onPick, onBack }) {
         />
         {query && (
           <button onClick={() => setQuery('')} aria-label="Tozalash">
-            <Icon name="x" size={16} color="#9A9A94" />
+            <Icon name="x" size={16} color="#A99C8C" />
           </button>
         )}
       </div>
@@ -70,7 +70,7 @@ export function AddressSearch({ onPick, onBack }) {
       {/* Joriy joylashuv tugmasi */}
       <button onClick={useCurrent} disabled={detecting} className="addr-search__current">
         <div className="addr-search__current-icon">
-          <Icon name="navigation" size={18} color="#EF9F27" />
+          <Icon name="navigation" size={18} color="#F5A524" />
         </div>
         <span>{detecting ? 'Aniqlanmoqda...' : 'Joriy joylashuvim'}</span>
       </button>
@@ -83,7 +83,7 @@ export function AddressSearch({ onPick, onBack }) {
         )}
         {results.map((r, i) => (
           <button key={i} onClick={() => { haptic(); onPick(r); }} className="addr-result">
-            <Icon name="pin" size={18} color="#9A9A94" />
+            <Icon name="pin" size={18} color="#A99C8C" />
             <div className="addr-result__body">
               <div className="addr-result__street">{r.street}</div>
               {r.city && <div className="addr-result__city">{r.city}</div>}

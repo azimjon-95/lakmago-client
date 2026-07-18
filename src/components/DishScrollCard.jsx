@@ -24,7 +24,7 @@ export const DishScrollCard = memo(function DishScrollCard({ dish, onClick }) {
         <DishPhoto dish={dish} height={112} radius={14} iconSize={38} />
         {discountPct && <div className="dscard__badge dscard__badge--discount">−{discountPct}%</div>}
         {dish.isHit && !discountPct && <div className="dscard__badge dscard__badge--hit">HIT</div>}
-        <button onClick={quickAdd} className="dscard__add" aria-label="+"><Icon name="plus" size={18} color="#2C1400" /></button>
+        <button onClick={quickAdd} className="dscard__add" aria-label="+"><Icon name="plus" size={18} color="#2A1500" /></button>
       </div>
       <div className="dscard__name">{dish.name}</div>
       {dish.restaurantName && <div className="dscard__rest">{dish.restaurantName}</div>}

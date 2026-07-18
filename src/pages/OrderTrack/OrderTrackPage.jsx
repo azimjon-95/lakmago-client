@@ -50,14 +50,14 @@ export function OrderTrackPage() {
     <div className="app-shell order-track">
       <header className="page-header">
         <button onClick={() => navigate('/')} aria-label={t('close')}>
-          <Icon name="x" size={22} color="#F2F1EE" />
+          <Icon name="x" size={22} color="#F7F2EA" />
         </button>
         <h1>{t('orderNumber')} #{order.id}</h1>
       </header>
 
       {order.subOrders.length > 1 && (
         <div className="order-track__multi">
-          <Icon name="bag" size={16} color="#EF9F27" />
+          <Icon name="bag" size={16} color="#F5A524" />
           <span>{order.subOrders.length} ta restoran — har biri alohida kuzatiladi</span>
         </div>
       )}
@@ -90,7 +90,7 @@ function SubOrderCard({ sub, orderId, rateSubOrder, steps, t }) {
     <div className="suborder">
       <div className="suborder__head">
         <div className="suborder__icon" style={{ background: sub.restaurant.tint }}>
-          <Icon name={sub.restaurant.icon} size={18} color="#EF9F27" />
+          <Icon name={sub.restaurant.icon} size={18} color="#F5A524" />
         </div>
         <div className="suborder__info">
           <div className="suborder__name">{sub.restaurant.name}</div>
@@ -109,7 +109,7 @@ function SubOrderCard({ sub, orderId, rateSubOrder, steps, t }) {
           return (
             <div key={step.status} className="suborder__step-wrap">
               <div className={`suborder__dot ${done ? 'is-done' : ''} ${active ? 'is-active' : ''}`}>
-                <Icon name={step.icon} size={13} color={done || active ? (done ? '#fff' : '#2C1400') : '#6B6B66'} />
+                <Icon name={step.icon} size={13} color={done || active ? (done ? '#fff' : '#2A1500') : '#6B6B66'} />
               </div>
               {i < steps.length - 1 && (
                 <div className={`suborder__line ${i < stepIndex ? 'is-done' : ''}`} />
@@ -136,7 +136,7 @@ function SubOrderCard({ sub, orderId, rateSubOrder, steps, t }) {
             <div className="suborder__courier-role">{t('courier')}</div>
           </div>
           <button className="suborder__courier-call" aria-label="☎">
-            <Icon name="phone" size={14} color="#EF9F27" />
+            <Icon name="phone" size={14} color="#F5A524" />
           </button>
         </div>
       )}
@@ -144,7 +144,7 @@ function SubOrderCard({ sub, orderId, rateSubOrder, steps, t }) {
       {isDone && !sub.rated && <ConfirmDelivery sub={sub} orderId={orderId} rateSubOrder={rateSubOrder} t={t} />}
       {isDone && sub.rated && (
         <div className="suborder__thanks">
-          <Icon name="circleCheck" size={15} color="#5DCAA5" /> {t('save')} ✓
+          <Icon name="circleCheck" size={15} color="#6FBF73" /> {t('save')} ✓
         </div>
       )}
     </div>
@@ -160,7 +160,7 @@ function ConfirmDelivery({ sub, orderId, rateSubOrder, t }) {
     return (
       <div className="suborder__confirm">
         <button onClick={() => setConfirmed(true)} className="btn-primary btn-block">
-          <Icon name="check" size={15} color="#2C1400" /> {t('orderDelivered')} ✓
+          <Icon name="check" size={15} color="#2A1500" /> {t('orderDelivered')} ✓
         </button>
       </div>
     );
@@ -172,7 +172,7 @@ function ConfirmDelivery({ sub, orderId, rateSubOrder, t }) {
       <div className="suborder__stars">
         {[1, 2, 3, 4, 5].map((n) => (
           <button key={n} onClick={() => setRating(n)} aria-label={`${n}`}>
-            <Icon name="star" size={26} color={n <= rating ? '#EF9F27' : '#4A4A4E'} style={n <= rating ? { fill: '#EF9F27' } : {}} />
+            <Icon name="star" size={26} color={n <= rating ? '#F5A524' : '#4A4A4E'} style={n <= rating ? { fill: '#F5A524' } : {}} />
           </button>
         ))}
       </div>

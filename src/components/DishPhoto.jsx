@@ -34,8 +34,8 @@ export function DishPhoto({ dish, height = 96, radius = 12, iconSize = 34, fill 
   // fill=true — ota elementни to'liq egallaydi (modal uchun)
   // fit='contain' — rasm kesilmaydi, to'liq ko'rinadi
   const boxStyle = fill
-    ? { width: '100%', height: '100%', borderRadius: radius, overflow: 'hidden', background: dish.tint || '#2A2A30' }
-    : { height, borderRadius: radius, overflow: 'hidden', background: dish.tint || '#2A2A30' };
+    ? { width: '100%', height: '100%', borderRadius: radius, overflow: 'hidden', background: dish.tint || 'var(--food-tint-1)' }
+    : { height, borderRadius: radius, overflow: 'hidden', background: dish.tint || 'var(--food-tint-1)' };
 
   // 1) Haqiqiy rasm bo'lsa (Cloudinary) — uni ko'rsatamiz (optimallashtirilган, lazy)
   const realUrl = dish.imageUrl || (dish.images && dish.images[0]);
@@ -70,9 +70,9 @@ export function DishPhoto({ dish, height = 96, radius = 12, iconSize = 34, fill 
 
   return (
     <div style={{ height, borderRadius: radius, background: dish.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-      <Icon name={dish.icon} size={iconSize} color="#EF9F27" />
+      <Icon name={dish.icon} size={iconSize} color="#F5A524" />
       <div style={{ position: 'absolute', bottom: 5, right: 6, display: 'flex', alignItems: 'center', gap: 2, background: 'rgba(255,255,255,0.65)', borderRadius: 6, padding: '1px 5px' }}>
-        <Icon name="camera" size={9} color="#9A9A94" />
+        <Icon name="camera" size={9} color="#A99C8C" />
       </div>
     </div>);
 
@@ -102,7 +102,7 @@ export function RestaurantBanner({ restaurant, height = 150 }) {
       ? realUrl.replace('/upload/', '/upload/f_auto,q_auto,w_800,c_fill/')
       : realUrl;
     return (
-      <div style={{ height, position: 'relative', flex: 'none', overflow: 'hidden', background: '#1A1A1E' }}>
+      <div style={{ height, position: 'relative', flex: 'none', overflow: 'hidden', background: '#1C1815' }}>
         <img src={optimized} alt={restaurant.name || ''} loading="lazy" decoding="async"
           style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.35), transparent 45%)' }} />
@@ -113,7 +113,7 @@ export function RestaurantBanner({ restaurant, height = 150 }) {
   if (images.length === 0) {
     return (
       <div style={{ height, background: '#411E00', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>
-        <Icon name={restaurant.icon} size={64} color="#EF9F27" style={{ opacity: 0.4 }} />
+        <Icon name={restaurant.icon} size={64} color="#F5A524" style={{ opacity: 0.4 }} />
         <div style={{ position: 'absolute', bottom: 10, right: 12, display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(0,0,0,0.35)', borderRadius: 8, padding: '4px 9px' }}>
           <Icon name="camera" size={12} color="rgba(255,255,255,0.8)" />
           <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.8)' }}>Rasm yo'q</span>

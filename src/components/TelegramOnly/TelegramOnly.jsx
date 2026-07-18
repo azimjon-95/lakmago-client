@@ -19,14 +19,14 @@ export function TelegramOnly() {
   return (
     <div className="tg-only">
       <div className="tg-only__card">
-        <div className="tg-only__logo"><Icon name="utensils" size={44} color="#2C1400" /></div>
+        <div className="tg-only__logo"><Icon name="utensils" size={44} color="#2A1500" /></div>
         <h1 className="tg-only__title">LokmaGo</h1>
         <p className="tg-only__text">
           Ilova faqat <b>Telegram</b> ichida ishlaydi.
           Quyidagi tugmani bosing — Telegram'да avtomatik ochiladi.
         </p>
         <a href={startLink} className="tg-only__btn">
-          <Icon name="send" size={18} color="#2C1400" /> Telegram'да ochish
+          <Icon name="send" size={18} color="#2A1500" /> Telegram'да ochish
         </a>
         <a href={appLink} className="tg-only__link" target="_blank" rel="noreferrer">
           To'g'ridan ilovani ochish

@@ -57,17 +57,17 @@ export const DishRow = memo(function DishRow({ dish, onOpen }) {
           {!stopped && (
             <div className="dish-row__actions" onClick={(e) => e.stopPropagation()}>
               <button onClick={() => shareDish(dish)} className="dish-row__share" aria-label={t('share')}>
-                <Icon name="share" size={16} color="#9A9A96" />
+                <Icon name="share" size={16} color="#A99C8C" />
               </button>
               {inCart && !hasOptions ? (
                 <div className="qty-control">
-                  <button onClick={() => decrement(simpleKey)} className="qty-btn qty-btn--minus" aria-label="−"><Icon name="minus" size={16} color="#9A9A96" /></button>
+                  <button onClick={() => decrement(simpleKey)} className="qty-btn qty-btn--minus" aria-label="−"><Icon name="minus" size={16} color="#A99C8C" /></button>
                   <span className="qty-value">{inCart.quantity}</span>
-                  <button onClick={() => addItem(dish, 1, [])} className="qty-btn qty-btn--plus" aria-label="+"><Icon name="plus" size={16} color="#2C1400" /></button>
+                  <button onClick={() => addItem(dish, 1, [])} className="qty-btn qty-btn--plus" aria-label="+"><Icon name="plus" size={16} color="#2A1500" /></button>
                 </div>
               ) : (
                 <button onClick={quickAdd} className="dish-row__add" aria-label={t('addToCart')}>
-                  <Icon name="plus" size={20} color="#2C1400" />
+                  <Icon name="plus" size={20} color="#2A1500" />
                 </button>
               )}
             </div>

@@ -9,7 +9,7 @@ function toSubOrder(o, i) {
   return {
     id: String(o._id),
     backendId: String(o._id),
-    restaurant: o.restaurant || { id: o.restaurantId, name: o.restaurantName, tint: '#3A2A12', icon: 'ti-tools-kitchen-2', deliveryMin: 25, deliveryMax: 40 },
+    restaurant: o.restaurant || { id: o.restaurantId, name: o.restaurantName, tint: '#3D2A10', icon: 'ti-tools-kitchen-2', deliveryMin: 25, deliveryMax: 40 },
     items: o.items?.map((it) => ({ dish: { name: it.name, ...it }, quantity: it.quantity, unitPrice: it.unitPrice })) || o.itemsRaw || [],
     subtotal: o.subtotal,
     etaMinutes: o.etaMinutes ?? 30,

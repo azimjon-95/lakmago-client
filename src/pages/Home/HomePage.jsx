@@ -72,11 +72,11 @@ export function HomePage() {
       <header className="home-header">
         <button onClick={() => setShowAddressFlow(true)} className="home-header__addr">
           <span className="home-header__addr-label">
-            <Icon name="pin" size={12} color="#EF9F27" /> {t('deliveryAddress')}
+            <Icon name="pin" size={12} color="#F5A524" /> {t('deliveryAddress')}
           </span>
           <span className="home-header__addr-value">
             {defaultAddress ? `${defaultAddress.title}, ${defaultAddress.address}`.slice(0, 26) : t('address')}
-            <Icon name="chevronDown" size={13} color="#9A9A96" />
+            <Icon name="chevronDown" size={13} color="#A99C8C" />
           </span>
         </button>
         <div className="home-header__right">
@@ -89,7 +89,7 @@ export function HomePage() {
 
       <div className="home-search">
         <button onClick={() => navigate('/search')} className="home-search__btn">
-          <Icon name="search" size={18} color="#9A9A94" />
+          <Icon name="search" size={18} color="#A99C8C" />
           <span>{t('search')}</span>
         </button>
       </div>

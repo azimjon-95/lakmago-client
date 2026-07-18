@@ -72,8 +72,8 @@ export function DishModal({ dish, onClose }) {
 
           {(dish.calories || dish.weightGram) && (
             <div className="dish-modal__nutrition">
-              {dish.calories && <span><Icon name="flame" size={15} color="#E24B4A" /> {dish.calories} {t('calories')}</span>}
-              {dish.weightGram && <span><Icon name="scale" size={15} color="#9A9A96" /> {dish.weightGram} {t('gram')}</span>}
+              {dish.calories && <span><Icon name="flame" size={15} color="#E14B42" /> {dish.calories} {t('calories')}</span>}
+              {dish.weightGram && <span><Icon name="scale" size={15} color="#A99C8C" /> {dish.weightGram} {t('gram')}</span>}
             </div>
           )}
 
@@ -100,7 +100,7 @@ export function DishModal({ dish, onClose }) {
                         {o.name}{o.price > 0 && <span className="dish-modal__option-price"> +{formatSomShort(o.price)}</span>}
                       </span>
                       {g.multiple ? (
-                        <span className={`dish-modal__check ${isSel ? 'is-sel' : ''}`}>{isSel && <Icon name="check" size={15} color="#2C1400" />}</span>
+                        <span className={`dish-modal__check ${isSel ? 'is-sel' : ''}`}>{isSel && <Icon name="check" size={15} color="#2A1500" />}</span>
                       ) : (
                         <span className={`dish-modal__radio ${isSel ? 'is-sel' : ''}`} />
                       )}
@@ -116,9 +116,9 @@ export function DishModal({ dish, onClose }) {
 
           <div className="dish-modal__footer">
             <div className="qty-control dish-modal__qty">
-              <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} aria-label="−"><Icon name="minus" size={18} color="#9A9A96" /></button>
+              <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} aria-label="−"><Icon name="minus" size={18} color="#A99C8C" /></button>
               <span className="qty-value">{quantity}</span>
-              <button onClick={() => setQuantity((q) => q + 1)} aria-label="+"><Icon name="plus" size={18} color="#EF9F27" /></button>
+              <button onClick={() => setQuantity((q) => q + 1)} aria-label="+"><Icon name="plus" size={18} color="#F5A524" /></button>
             </div>
             <button onClick={handleAdd} className="btn-primary dish-modal__add">
               {t('toCart')} · {formatSom(total)}

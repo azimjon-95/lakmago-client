@@ -61,7 +61,7 @@ export function ReservationPage() {
   if (step === 'done') {
     return (
       <div className="app-shell resv-done">
-        <div className="resv-done__icon"><Icon name="calendarPlus" size={32} color="#EF9F27" /></div>
+        <div className="resv-done__icon"><Icon name="calendarPlus" size={32} color="#F5A524" /></div>
         <div className="resv-done__title">{t('reservationSent')}</div>
         <p className="resv-done__text">
           {restaurant?.name} · {dateLabel}, {time}, {guests} {t('guests').toLowerCase()}.
@@ -86,7 +86,7 @@ export function ReservationPage() {
     <div className="app-shell reservation">
       <header className="page-header">
         <button onClick={() => navigate(`/restaurant/${id}`)} aria-label={t('back')}>
-          <Icon name="arrowLeft" size={22} color="#F2F1EE" />
+          <Icon name="arrowLeft" size={22} color="#F7F2EA" />
         </button>
         <h1>{t('reserveTable')}</h1>
       </header>
@@ -95,12 +95,12 @@ export function ReservationPage() {
         {restaurant && (
           <div className="resv-restaurant">
             <div className="resv-restaurant__icon" style={{ background: restaurant.tint }}>
-              <Icon name={restaurant.icon} size={26} color="#EF9F27" />
+              <Icon name={restaurant.icon} size={26} color="#F5A524" />
             </div>
             <div>
               <div className="resv-restaurant__name">{restaurant.name}</div>
               <div className="resv-restaurant__meta">
-                <Icon name="star" size={12} color="#EF9F27" /> {restaurant.rating.toFixed(1)} · Toshkent
+                <Icon name="star" size={12} color="#F5A524" /> {restaurant.rating.toFixed(1)} · Toshkent
               </div>
             </div>
           </div>
@@ -127,14 +127,14 @@ export function ReservationPage() {
 
         <div className="resv-label">{t('guests')}</div>
         <div className="resv-guests">
-          <span className="resv-guests__label"><Icon name="users" size={16} color="#9A9A96" /> {t('guests')}</span>
+          <span className="resv-guests__label"><Icon name="users" size={16} color="#A99C8C" /> {t('guests')}</span>
           <div className="qty-control">
             <button onClick={() => setGuests((g) => Math.max(1, g - 1))} className="qty-btn qty-btn--minus" aria-label="−">
-              <Icon name="minus" size={16} color="#9A9A96" />
+              <Icon name="minus" size={16} color="#A99C8C" />
             </button>
             <span className="qty-value">{guests}</span>
             <button onClick={() => setGuests((g) => g + 1)} className="qty-btn qty-btn--plus" aria-label="+">
-              <Icon name="plus" size={16} color="#2C1400" />
+              <Icon name="plus" size={16} color="#2A1500" />
             </button>
           </div>
         </div>
@@ -183,13 +183,13 @@ function PreOrderScreen({ restaurant, reservationInfo, onSkip, onConfirm, onBack
   return (
     <div className="app-shell reservation">
       <header className="page-header">
-        <button onClick={onBack} aria-label={t('back')}><Icon name="arrowLeft" size={22} color="#F2F1EE" /></button>
+        <button onClick={onBack} aria-label={t('back')}><Icon name="arrowLeft" size={22} color="#F7F2EA" /></button>
         <h1>{t('extras')}</h1>
       </header>
 
       <div className="resv-preorder-hint">
         <div className="resv-preorder-hint__title">
-          <Icon name="calendarPlus" size={18} color="#EF9F27" /> {reservationInfo.dateLabel}, {reservationInfo.time}
+          <Icon name="calendarPlus" size={18} color="#F5A524" /> {reservationInfo.dateLabel}, {reservationInfo.time}
         </div>
         <div className="resv-preorder-hint__text">
           Kelishingizga tayyor bo'lib tursin — hoziroq tanlang yoki joyida buyurtma bering.
@@ -214,9 +214,9 @@ function PreOrderScreen({ restaurant, reservationInfo, onSkip, onConfirm, onBack
                       <button onClick={() => setQty(d.id, 1)} className="resv-preorder-dish__select">{t('add')}</button>
                     ) : (
                       <div className="qty-control">
-                        <button onClick={() => setQty(d.id, qty - 1)} className="qty-btn qty-btn--minus" aria-label="−"><Icon name="minus" size={16} color="#9A9A96" /></button>
+                        <button onClick={() => setQty(d.id, qty - 1)} className="qty-btn qty-btn--minus" aria-label="−"><Icon name="minus" size={16} color="#A99C8C" /></button>
                         <span className="qty-value">{qty}</span>
-                        <button onClick={() => setQty(d.id, qty + 1)} className="qty-btn qty-btn--plus" aria-label="+"><Icon name="plus" size={16} color="#2C1400" /></button>
+                        <button onClick={() => setQty(d.id, qty + 1)} className="qty-btn qty-btn--plus" aria-label="+"><Icon name="plus" size={16} color="#2A1500" /></button>
                       </div>
                     )}
                   </div>

@@ -1,6 +1,6 @@
 .splash {
   position: fixed; inset: 0; z-index: 10000;
-  background: var(--canvas, #0E0E10);
+  background: var(--canvas, #12100E);
   display: flex; align-items: center; justify-content: center;
   opacity: 1; transition: opacity 0.4s ease;
 }
@@ -71,7 +71,7 @@
   display: flex; align-items: baseline;
 }
 .sp-lakma {
-  color: var(--ink, #F2F1EE);
+  color: var(--ink, #F7F2EA);
   opacity: 0;
   animation: sp-lakma-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) 1.4s both;
 }
@@ -95,7 +95,7 @@
 .splash__tagline {
   margin-top: 10px;
   font-size: 11px; font-weight: 600; letter-spacing: 2px;
-  color: var(--muted, #9A9A96);
+  color: var(--muted, #A99C8C);
   opacity: 0;
   animation: sp-fade-in 0.6s ease 2.3s both;
 }

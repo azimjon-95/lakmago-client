@@ -19,7 +19,7 @@ export const DishGridCard = memo(function DishGridCard({ dish, onClick }) {
         <div className="dgcard__name">{dish.name}</div>
         {dish.restaurantName && (
           <div className="dgcard__rest">
-            <Icon name="bowl" size={11} color="#9A9A96" /> {dish.restaurantName}
+            <Icon name="bowl" size={11} color="#A99C8C" /> {dish.restaurantName}
           </div>
         )}
         <div className="dgcard__price-row">
@@ -27,7 +27,7 @@ export const DishGridCard = memo(function DishGridCard({ dish, onClick }) {
           {hasDiscount && <span className="dgcard__old">{formatSom(dish.oldPrice)}</span>}
         </div>
       </div>
-      <div className="dgcard__add"><Icon name="plus" size={18} color="#2C1400" /></div>
+      <div className="dgcard__add"><Icon name="plus" size={18} color="#2A1500" /></div>
     </button>
   );
 });

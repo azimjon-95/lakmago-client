@@ -51,7 +51,7 @@ export function AddressDetails({ location, onSave, onBack }) {
     <div className="addrflow addrflow--details">
       <div className="addrflow__header">
         <button onClick={onBack} className="addrflow__back-btn" aria-label="Orqaga">
-          <Icon name="arrowLeft" size={22} color="#F2F1EE" />
+          <Icon name="arrowLeft" size={22} color="#F7F2EA" />
         </button>
         <h3 className="addrflow__header-title">Manzil tafsilotlari</h3>
       </div>
@@ -61,7 +61,7 @@ export function AddressDetails({ location, onSave, onBack }) {
         <div className="addr-details__section-title">Manzil</div>
         <div className="addr-details__picked">
           <div className="addr-details__picked-icon">
-            <Icon name="pin" size={20} color="#EF9F27" />
+            <Icon name="pin" size={20} color="#F5A524" />
           </div>
           <div>
             <div className="addr-details__street">{location.street}</div>
@@ -79,7 +79,7 @@ export function AddressDetails({ location, onSave, onBack }) {
                 className={`addr-label ${labelId === l.id ? 'is-active' : ''}`}
                 aria-label={l.title}
               >
-                <Icon name={l.icon} size={20} color={labelId === l.id ? '#EF9F27' : '#9A9A94'} />
+                <Icon name={l.icon} size={20} color={labelId === l.id ? '#F5A524' : '#A99C8C'} />
               </button>
             ))}
           </div>
