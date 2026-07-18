@@ -143,3 +143,22 @@
   background: var(--brand-400);
   display: flex; align-items: center; justify-content: center;
 }
+
+/* Data yuklanmaganда xato holati */
+.home-error {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 32px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+.home-error__icon { font-size: 40px; margin-bottom: 10px; }
+.home-error__title { font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+.home-error__text { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 18px; }
+.home-error__btn {
+  background: var(--brand-400); color: var(--brand-text);
+  font-weight: 600; font-size: 14px;
+  padding: 11px 24px; border-radius: 12px;
+}
+.home-error__btn:active { transform: scale(0.98); }

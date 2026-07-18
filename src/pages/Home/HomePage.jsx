@@ -43,7 +43,7 @@ export function HomePage() {
   const [modalDish, setModalDish] = useState(null);
 
   // Real data — TanStack Query (cache + background refetch)
-  const { data: restaurants = [], isLoading: restLoading } = useRestaurants();
+  const { data: restaurants = [], isLoading: restLoading, isError: restError, refetch: refetchRest } = useRestaurants();
   const { data: trending = [], isLoading: trendLoading } = useTrendingDishes();
   const { data: discounted = [] } = useDiscountedDishes();
   const { data: allDishes = [], isLoading: allDishesLoading } = useAllDishes();
@@ -131,6 +131,13 @@ export function HomePage() {
       <div className="home-restaurants">
         {restLoading ? (
           Array.from({ length: 4 }).map((_, i) => <RestaurantCardSkeleton key={i} />)
+        ) : restError ? (
+          <div className="home-error">
+            <div className="home-error__icon">📡</div>
+            <div className="home-error__title">Ma'lumot yuklanmadi</div>
+            <div className="home-error__text">Internet aloqasini tekshiring yoki keyinroq urinib ko'ring.</div>
+            <button onClick={() => refetchRest()} className="home-error__btn">Qayta urinish</button>
+          </div>
         ) : filtered.length > 0 ? (
           filtered.map((r) => <RestaurantCard key={r.id || r._id} restaurant={r} />)
         ) : (
