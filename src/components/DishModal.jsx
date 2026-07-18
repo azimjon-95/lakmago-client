@@ -51,8 +51,9 @@ export function DishModal({ dish, onClose }) {
   return (
     <div className="dish-modal-overlay" onClick={onClose}>
       <div className="dish-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="dish-modal__grabber" />
         <div className="dish-modal__photo">
-          <DishPhoto dish={dish} height={180} radius={0} iconSize={72} />
+          <DishPhoto dish={dish} fill fit="contain" radius={0} iconSize={72} />
           <button onClick={onClose} className="dish-modal__close" aria-label={t('close')}>
             <Icon name="x" size={18} color="#fff" />
           </button>
@@ -120,7 +121,7 @@ export function DishModal({ dish, onClose }) {
               <button onClick={() => setQuantity((q) => q + 1)} aria-label="+"><Icon name="plus" size={18} color="#EF9F27" /></button>
             </div>
             <button onClick={handleAdd} className="btn-primary dish-modal__add">
-              {t('addToCart')} · {formatSom(total)}
+              {t('toCart')} · {formatSom(total)}
             </button>
           </div>
         </div>

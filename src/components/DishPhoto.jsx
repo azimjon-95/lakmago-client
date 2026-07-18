@@ -23,23 +23,33 @@ export const PHOTO_STYLES = {
 
 // Rasm slot: photo bo'lsa gradient+ikon "fotosurat" taqlidi, bo'lmasa universal fallback (kamera belgisi bilan)
 // Cloudinary URL'ni optimallashtirish (WebP/AVIF, o'lcham) — tez yuklanadi
-function optimizeCloudinary(url, width) {
+// fit='contain' bo'lsa c_fit (rasm kesilmaydi), aks holda c_fill (to'ldiradi)
+function optimizeCloudinary(url, width, fit = 'cover') {
   if (!url || !url.includes('/upload/')) return url;
-  return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_fill/`);
+  const crop = fit === 'contain' ? 'c_fit' : 'c_fill';
+  return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},${crop}/`);
 }
 
-export function DishPhoto({ dish, height = 96, radius = 12, iconSize = 34 }) {
+export function DishPhoto({ dish, height = 96, radius = 12, iconSize = 34, fill = false, fit = 'cover' }) {
+  // fill=true — ota elementни to'liq egallaydi (modal uchun)
+  // fit='contain' — rasm kesilmaydi, to'liq ko'rinadi
+  const boxStyle = fill
+    ? { width: '100%', height: '100%', borderRadius: radius, overflow: 'hidden', background: dish.tint || '#2A2A30' }
+    : { height, borderRadius: radius, overflow: 'hidden', background: dish.tint || '#2A2A30' };
+
   // 1) Haqiqiy rasm bo'lsa (Cloudinary) — uni ko'rsatamiz (optimallashtirilган, lazy)
   const realUrl = dish.imageUrl || (dish.images && dish.images[0]);
   if (realUrl && realUrl.startsWith('http')) {
+    // contain rejimида kattaroq o'lcham so'raymiz (sifat yo'qolmasin)
+    const w = fit === 'contain' ? 800 : 400;
     return (
-      <div style={{ height, borderRadius: radius, overflow: 'hidden', background: dish.tint || '#2A2A30' }}>
+      <div style={boxStyle}>
         <img
-          src={optimizeCloudinary(realUrl, 400)}
+          src={optimizeCloudinary(realUrl, w, fit)}
           alt={dish.name || ''}
           loading="lazy"
           decoding="async"
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          style={{ width: '100%', height: '100%', objectFit: fit }}
         />
       </div>
     );

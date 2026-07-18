@@ -9,11 +9,31 @@
   background: var(--surface);
   border-radius: 22px 22px 0 0;
   overflow: hidden;
-  max-height: 92vh;
+  /* Yandex Eda uslubida — deyarli to'liq ekran, rasm to'liq ko'rinadi */
+  height: 94vh;
+  max-height: 94vh;
   display: flex; flex-direction: column;
   animation: slide-up 0.28s var(--ease);
 }
-.dish-modal__photo { position: relative; flex: none; }
+/* Tortish chizig'i (bottom sheet belgisi) */
+.dish-modal__grabber {
+  width: 40px; height: 4px; border-radius: 2px;
+  background: var(--line);
+  margin: 8px auto 0;
+  flex: none;
+}
+/* Rasm — to'liq ko'rinadi (kesilmaydi), qolgan joyni egallaydi */
+.dish-modal__photo {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 180px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--canvas);
+  overflow: hidden;
+}
+.dish-modal__photo img,
+.dish-modal__photo > div { width: 100%; height: 100%; }
+.dish-modal__photo img { object-fit: contain; }
 .dish-modal__close {
   position: absolute; top: 12px; right: 12px;
   width: 34px; height: 34px; border-radius: 50%;
@@ -27,7 +47,12 @@
   padding: 4px 10px; border-radius: 8px;
   display: flex; align-items: center; gap: 4px;
 }
-.dish-modal__body { padding: 16px; overflow-y: auto; }
+.dish-modal__body {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 0 1 auto;
+  max-height: 55vh;
+}
 .dish-modal__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .dish-modal__name { font-size: 20px; font-weight: 600; color: var(--ink); }
 .dish-modal__price { font-size: 18px; font-weight: 600; color: var(--ink); white-space: nowrap; }
@@ -60,9 +85,22 @@
 .dish-modal__check.is-sel { background: var(--brand); border-color: var(--brand); }
 .dish-modal__radio { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--muted); }
 .dish-modal__radio.is-sel { border: 5px solid var(--brand); background: var(--surface); }
-.dish-modal__footer { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
-.dish-modal__qty { border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; }
-.dish-modal__add { flex: 1; }
+/* Pastda qotirilган (Yandex Eda uslubida) — doim ko'rinadi */
+.dish-modal__footer {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 16px;
+  position: sticky; bottom: 0;
+  background: var(--surface);
+  padding: 12px 0 calc(4px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  z-index: 2;
+}
+.dish-modal__qty { border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; flex: none; }
+.dish-modal__add {
+  flex: 1; padding: 15px 12px; border-radius: 14px;
+  font-size: 15px; font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
 /* Ulashish tugmasi (rasm ustида) */
 .dish-modal__share {
