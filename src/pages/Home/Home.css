@@ -37,25 +37,46 @@
 
 /* Kategoriyalar */
 .home-categories {
-  display: flex; gap: 8px;
-  padding: 8px 16px;
+  display: flex; gap: 14px;
+  padding: 10px 16px 14px;
   overflow-x: auto;
+  scroll-snap-type: x proximity;
 }
+/* Kategoriya — rasm tepada, nom pastda (Uzum/Yandex uslubi) */
 .home-cat {
   flex: none;
-  font-size: 13px; font-weight: 500;
-  padding: 7px 14px;
-  border-radius: 999px;
-  background: var(--canvas);
-  color: var(--muted);
-  border: 1px solid var(--line);
-  transition: all 0.15s var(--ease);
-  white-space: nowrap;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  width: 68px;
+  background: transparent;
+  padding: 0;
+  scroll-snap-align: start;
 }
-.home-cat.is-active {
-  background: var(--brand);
-  color: var(--brand-text);
+.home-cat__art {
+  width: 60px; height: 60px;
+  border-radius: 18px;
+  background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid transparent;
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease), transform 0.12s var(--ease);
+}
+.home-cat__label {
+  font-size: 11.5px; font-weight: 500;
+  color: var(--muted);
+  text-align: center; line-height: 1.25;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 68px;
+  transition: color 0.15s var(--ease);
+}
+.home-cat:active .home-cat__art { transform: scale(0.94); }
+
+/* Tanlangan — amber ramka va yorqin nom */
+.home-cat.is-active .home-cat__art {
   border-color: var(--brand);
+  background: var(--brand-tint);
+}
+.home-cat.is-active .home-cat__label {
+  color: var(--brand-100);
+  font-weight: 700;
 }
 
 /* Bo'lim sarlavhalari */

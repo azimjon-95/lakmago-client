@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 
 function initialsOf(first, last) {
@@ -60,7 +61,9 @@ function getInitialUser() {
 
 
 
-export const useUser = create((set) => ({
+export const useUser = create(
+  persist(
+    (set) => ({
   user: getInitialUser(),
   authStatus: 'pending',
   lastPaymentMethod: 'payme',
@@ -96,4 +99,30 @@ export const useUser = create((set) => ({
 
   setAuthStatus: (authStatus) => set({ authStatus }),
   setLastPaymentMethod: (lastPaymentMethod) => set({ lastPaymentMethod })
-}));
+    }),
+    {
+      name: 'lokmago_user',
+      storage: createJSONStorage(() => localStorage),
+      // Faqat kerakli maydonlarni saqlaymiz.
+      // Manzillar va telefon — bir marta kiritilsa hamma joyda ko'rinadi.
+      partialize: (state) => ({
+        user: {
+          addresses: state.user.addresses,
+          defaultAddressId: state.user.defaultAddressId,
+          phone: state.user.phone,
+        },
+        lastPaymentMethod: state.lastPaymentMethod,
+      }),
+      // Saqlangan ma'lumotni Telegram profili bilan birlashtiramiz:
+      // ism/rasm har safar Telegram'dan yangilanadi, manzil saqlanganidan olinadi.
+      merge: (persisted, current) => ({
+        ...current,
+        ...persisted,
+        user: {
+          ...current.user,
+          ...(persisted?.user || {}),
+        },
+      }),
+    },
+  ),
+);

@@ -15,15 +15,24 @@ import { useT } from '@/i18n';
 import { useRestaurants, useTrendingDishes, useDiscountedDishes, useBannersQuery, useAllDishes } from '@/hooks/queries';
 import { API_BASE } from '@/api';
 import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
+import { CategoryIcon } from '@/components/CategoryIcons/CategoryIcon';
+import { AddressSheet } from '@/components/AddressSheet';
 import './Home.css';
 
+// Kategoriyalar — rasm bilan (Uzum/Yandex uslubida gorizontal scroll)
 const categories = [
-  { id: 'all', key: 'all' },
-  { id: 'milliy', label: 'Milliy' },
-  { id: 'choyxona', label: 'Choyxona' },
-  { id: 'fastfood', label: 'Fast food' },
-  { id: 'sushi', label: 'Sushi' },
-  { id: 'shirinlik', label: 'Shirinlik' },
+  { id: 'all', key: 'all', art: 'all' },
+  { id: 'milliy', label: 'Milliy taom', art: 'milliy' },
+  { id: 'choyxona', label: 'Choyxona', art: 'choyxona' },
+  { id: 'fastfood', label: 'Fast food', art: 'fastfood' },
+  { id: 'lavash', label: 'Lavash', art: 'lavash' },
+  { id: 'burger', label: 'Burger', art: 'fastfood' },
+  { id: 'pitsa', label: 'Pitsa', art: 'pitsa' },
+  { id: 'sushi', label: 'Sushi', art: 'sushi' },
+  { id: 'shashlik', label: 'Shashlik', art: 'shashlik' },
+  { id: 'shirinlik', label: 'Shirinlik', art: 'shirinlik' },
+  { id: 'salqin', label: 'Ichimlik', art: 'ichimlik' },
+  { id: 'magazin_oziq', label: "Do'konlar", art: 'magazin' },
 ];
 
 const SectionHeader = memo(function SectionHeader({ icon, title, action }) {
@@ -42,9 +51,11 @@ export function HomePage() {
   const t = useT();
   const user = useUser((s) => s.user);
   const addAddress = useUser((s) => s.addAddress);
+  const setDefaultAddress = useUser((s) => s.setDefaultAddress);
   const [category, setCategory] = useState('all');
   const [modalDish, setModalDish] = useState(null);
   const [showAddressFlow, setShowAddressFlow] = useState(false);
+  const [showAddressSheet, setShowAddressSheet] = useState(false);
 
   // Real data — TanStack Query (cache + background refetch)
   const { data: restaurants = [], isLoading: restLoading, isError: restError, error: restErrorObj, refetch: refetchRest } = useRestaurants();
@@ -70,7 +81,7 @@ export function HomePage() {
   return (
     <div className="app-shell home">
       <header className="home-header">
-        <button onClick={() => setShowAddressFlow(true)} className="home-header__addr">
+        <button onClick={() => (user.addresses.length ? setShowAddressSheet(true) : setShowAddressFlow(true))} className="home-header__addr">
           <span className="home-header__addr-label">
             <Icon name="pin" size={12} color="#F5A524" /> {t('deliveryAddress')}
           </span>
@@ -103,7 +114,10 @@ export function HomePage() {
             onClick={() => setCategory(c.id)}
             className={`home-cat ${category === c.id ? 'is-active' : ''}`}
           >
-            {c.key ? t(c.key) : c.label}
+            <span className="home-cat__art">
+              <CategoryIcon name={c.art} size={52} />
+            </span>
+            <span className="home-cat__label">{c.key ? t(c.key) : c.label}</span>
           </button>
         ))}
       </div>
@@ -182,7 +196,18 @@ export function HomePage() {
 
       {modalDish && <DishModal dish={modalDish} onClose={closeModal} />}
 
-      {/* Manzil qo'shish oqimi */}
+      {/* Saqlangan manzillar ro'yxati (bor bo'lsa) */}
+      {showAddressSheet && (
+        <AddressSheet
+          addresses={user.addresses}
+          selectedId={user.defaultAddressId}
+          onSelect={(id) => { setDefaultAddress(id); setShowAddressSheet(false); }}
+          onAdd={() => { setShowAddressSheet(false); setShowAddressFlow(true); }}
+          onClose={() => setShowAddressSheet(false)}
+        />
+      )}
+
+      {/* Yangi manzil qo'shish oqimi */}
       {showAddressFlow && (
         <AddressFlow
           onSave={(addr) => addAddress(addr)}
