@@ -3,7 +3,8 @@
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 78px; /* BottomNav ustida */
+  /* BottomNav + iPhone home indicator ustida */
+  bottom: calc(78px + env(safe-area-inset-bottom, 0px));
   z-index: 40;
   width: calc(var(--app-width) - 32px);
   max-width: calc(100vw - 32px);

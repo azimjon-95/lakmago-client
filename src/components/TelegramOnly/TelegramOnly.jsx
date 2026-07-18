@@ -19,7 +19,7 @@ export function TelegramOnly() {
   return (
     <div className="tg-only">
       <div className="tg-only__card">
-        <div className="tg-only__logo">🍽</div>
+        <div className="tg-only__logo"><Icon name="utensils" size={44} color="#2C1400" /></div>
         <h1 className="tg-only__title">LokmaGo</h1>
         <p className="tg-only__text">
           Ilova faqat <b>Telegram</b> ichida ishlaydi.

@@ -70,6 +70,14 @@ export async function authenticateWithTelegram() {
     } catch {
       // eski Telegram versiyalarida bo'lmasligi mumkin
     }
+    // Viewport balandligини CSS o'zgaruvchisига yozamiz — har xil telefonда
+    // (notch, klaviatura, kengaytirish) layout to'g'ri moslashadi.
+    const syncViewport = () => {
+      const h = tg.viewportStableHeight || tg.viewportHeight;
+      if (h) document.documentElement.style.setProperty('--tg-viewport-height', `${h}px`);
+    };
+    syncViewport();
+    tg.onEvent?.('viewportChanged', syncViewport);
   }
 
   const initData = tg?.initData || '';

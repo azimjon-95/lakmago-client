@@ -59,13 +59,17 @@ ul { list-style: none; }
 
 /* Ilova karkasi — mobil kenglik, markazda */
 .app-shell {
-  min-height: 100vh;
+  /* Telegram Mini App viewport balandligи (JS o'rnatadi), aks holда 100vh.
+     100dvh — mobil brauzerда panel ochilganда ham to'g'ri ishlaydi. */
+  min-height: var(--tg-viewport-height, 100dvh);
   max-width: var(--app-width);
   margin: 0 auto;
   background: var(--surface);
   position: relative;
   display: flex;
   flex-direction: column;
+  /* iPhone "notch" (yuqori) hisobga olinadi */
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 /* Umumiy yordamchi klasslar */

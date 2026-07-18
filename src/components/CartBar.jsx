@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { Icon } from '@/components/Icon';
 import { useCart } from '@/store/cart';
 import { useT } from '@/i18n';
 import { formatSom } from '@/lib/utils';
@@ -24,7 +25,7 @@ export function CartBar() {
       {/* Bepul yetkazish progress — undovchi */}
       <div className="cart-bar-promo">
         {freeReached ? (
-          <span className="cart-bar-promo__free">🎉 {t('freeDelivery')} qo'lga kiritildi!</span>
+          <span className="cart-bar-promo__free"><Icon name="gift" size={14} color="#5DCAA5" /> {t('freeDelivery')} qo'lga kiritildi!</span>
         ) : (
           <span className="cart-bar-promo__text">
             {t('freeDelivery')}gacha <b>{formatSom(remaining)} {t('som')}</b>

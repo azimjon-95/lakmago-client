@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useOrders } from '@/store/orders';
 import { useT } from '@/i18n';
 import './ActiveOrderBadge.css';
+import { Icon } from '@/components/Icon';
 
 // Mijoz buyurtma bergач har sahifada chekkada ko'rinadigan kichik tugma.
 // Bosilsa — faol buyurtmalar sahifasiga o'tadi.
@@ -27,7 +28,7 @@ export function ActiveOrderBadge() {
   return (
     <button className="active-order-badge" onClick={() => navigate('/order/track')}>
       <span className="active-order-badge__pulse" />
-      <span className="active-order-badge__icon">🛵</span>
+      <span className="active-order-badge__icon"><Icon name="scooter" size={20} color="#2C1400" /></span>
       <span className="active-order-badge__text">
         <span className="active-order-badge__title">{t('yourOrder')}</span>
         <span className="active-order-badge__status">{t(statusKey)}</span>

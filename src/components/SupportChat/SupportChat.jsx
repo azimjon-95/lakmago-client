@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useT } from '@/i18n';
 import './SupportChat.css';
+import { OperatorAvatar } from './OperatorAvatar';
+import { Icon } from '@/components/Icon';
 
 // Bottom-right animatsiyali chat tugmasi + oyna.
 // Mijoz sayt adminlari (yordam xizmati) bilan gaplashadi.
@@ -43,7 +45,7 @@ export function SupportChat() {
         <button className="support-fab" onClick={() => setOpen(true)} aria-label={t('chatTitle')}>
           <span className="support-fab__ring" />
           <span className="support-fab__ring support-fab__ring--2" />
-          <span className="support-fab__icon">💬</span>
+          <span className="support-fab__icon"><OperatorAvatar size={44} /></span>
         </button>
       )}
 
@@ -51,13 +53,13 @@ export function SupportChat() {
         <div className="support-chat">
           <div className="support-chat__header">
             <div className="support-chat__header-info">
-              <span className="support-chat__avatar">🎧</span>
+              <span className="support-chat__avatar"><OperatorAvatar size={36} /></span>
               <div>
                 <div className="support-chat__title">{t('chatTitle')}</div>
                 <div className="support-chat__online">● online</div>
               </div>
             </div>
-            <button className="support-chat__close" onClick={() => setOpen(false)}>✕</button>
+            <button className="support-chat__close" onClick={() => setOpen(false)} aria-label={t('close')}><Icon name="x" size={18} color="#9A9A96" /></button>
           </div>
 
           <div className="support-chat__body" ref={bodyRef}>
@@ -75,7 +77,7 @@ export function SupportChat() {
               onKeyDown={(e) => e.key === 'Enter' && send()}
               placeholder={t('chatPlaceholder')}
             />
-            <button onClick={send} aria-label={t('send')}>➤</button>
+            <button onClick={send} aria-label={t('send')}><Icon name="send" size={18} color="#EF9F27" /></button>
           </div>
         </div>
       )}

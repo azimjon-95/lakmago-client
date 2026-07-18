@@ -3,7 +3,8 @@
   bottom: 0;
   display: flex;
   justify-content: space-around;
-  padding: 10px 0;
+  /* iPhone home indicator (pastdagi chiziq) menyuni bosib qolmasin */
+  padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--line);
   background: var(--surface);
   z-index: 20;
