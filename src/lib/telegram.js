@@ -113,20 +113,44 @@ export async function authenticateWithTelegram() {
 // ===== ULASHISH (SHARE) =====
 // Bot username va webapp nomi — .env dan (ulashish havolasi uchun).
 // Masalan: VITE_BOT_USERNAME=LokmaGoBot, VITE_WEBAPP_NAME=app
-const BOT_USERNAME = import.meta.env.VITE_BOT_USERNAME ?? 'LokmaGoBot';
-const WEBAPP_NAME = import.meta.env.VITE_WEBAPP_NAME ?? 'app';
+// Bot username va Mini App nomи — tozalanadi (@ , bo'shliq, / olib tashlanadi)
+const cleanName = (v, fallback = '') =>
+  String(v ?? fallback).trim().replace(/^@/, '').replace(/^\/+|\/+$/g, '');
+
+const BOT_USERNAME = cleanName(import.meta.env.VITE_BOT_USERNAME, 'LokmaGoBot');
+const WEBAPP_NAME = cleanName(import.meta.env.VITE_WEBAPP_NAME, '');
 // Server domenи (OG meta sahifа uchun) — chiroyли rasm+nom karta bilan ulashish.
 // VITE_SHARE_BASE aniq berilса — o'sha. Aks holда VITE_API_URL'дан server domenини
 // avtomатик olamiz (chunki OG sahifани shu server beradi). Shunda alohида sozlash shart emas.
+// OG sahifа serveringiz domenи (masalan https://api.lokmago.uz).
+// MUHIM: bu yerга t.me havolаси YOZILMASLIGI kerak — u Mini App havolаси,
+// OG sahifа emas. Noto'g'ri qiymat berilса — e'tiborga olinmaydi.
+function isValidShareBase(url) {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    // Faqat http/https
+    if (!/^https?:$/.test(u.protocol)) return false;
+    // t.me / telegram.org — bu Mini App havolаsи, OG sahifа emas
+    if (/(^|\.)t\.me$|(^|\.)telegram\.(org|me)$/i.test(u.hostname)) return false;
+    // Lokal manzil — Telegram ko'ra olmaydi
+    if (/localhost|127\.0\.0\.1|0\.0\.0\.0/.test(u.hostname)) return false;
+    // So'rov (?) yoki yo'l bo'lmasin — faqat toza domen kutiladi
+    if (u.search) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function deriveShareBase() {
   const explicit = import.meta.env.VITE_SHARE_BASE;
-  if (explicit) return explicit.replace(/\/$/, '');
+  if (isValidShareBase(explicit)) return explicit.replace(/\/$/, '');
+  // Noto'g'ri yoki bo'sh — API manzilидан olamiz
   const api = import.meta.env.VITE_API_URL;
-  if (!api || api === 'mock') return '';
-  // Lokal manzil (localhost/127.0.0.1) — Telegram ko'ra olmaydi, OG ishlamaydi
-  if (/localhost|127\.0\.0\.1|0\.0\.0\.0/.test(api)) return '';
-  // '.../api' → server ildizи
-  return api.replace(/\/api\/?$/, '').replace(/\/$/, '');
+  if (!api) return '';
+  const root = api.replace(/\/api\/?$/, '').replace(/\/$/, '');
+  return isValidShareBase(root) ? root : '';
 }
 const SHARE_BASE = deriveShareBase();
 
