@@ -1,11 +1,9 @@
 /* ===== Suzib turuvchi chat tugmasi (FAB) ===== */
 .support-fab {
   position: fixed;
-  /* Ilova ustunining o'ng chetiga yopishadi (ekran chetiga emas).
-     Keng ekranda ilova markazda bo'lsa ham tugma ilova ichida qoladi. */
-  left: 50%;
-  /* min() — ilova kengligi ekrandan katta bo'lsa ham tugma ichkarida qoladi */
-  margin-left: calc(min(var(--app-width), 100vw) / 2 - 62px);
+  /* O'NG CHEKKAGA yopishadi (yon notch hisobga olinadi).
+     Avval markazga yaqin turib kontent ustiga tushardi. */
+  right: calc(14px + env(safe-area-inset-right, 0px));
   /* Savat paneli (fixed) + pastki menyu USTIDA — to'qnashmaydi.
      --cart-bar-offset: savat bo'lganda JS/CSS orqali oshiriladi. */
   bottom: calc(78px + var(--cart-bar-offset, 0px) + env(safe-area-inset-bottom, 0px));
