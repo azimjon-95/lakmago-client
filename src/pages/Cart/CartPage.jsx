@@ -10,6 +10,8 @@ import { useOrders } from '@/store/orders';
 import { useT } from '@/i18n';
 import { formatSom } from '@/lib/utils';
 import { api } from '@/api';
+import { haptic } from '@/lib/telegram';
+import { useDishes } from '@/hooks/queries';
 import './Cart.css';
 
 const SERVICE_FEE = 3000;
@@ -18,7 +20,8 @@ const DELIVERY_FEE = 0;
 export function CartPage() {
   const navigate = useNavigate();
   const t = useT();
-  const { items, addItem, decrement, removeItem, totalPrice, restaurantGroups } = useCart();
+  const { items, addItem, decrement, removeItem, totalPrice, totalCount, restaurantGroups } = useCart();
+  const itemCount = totalCount();
   const user = useUser((s) => s.user);
   const updateUser = useUser((s) => s.updateUser);
   const addAddress = useUser((s) => s.addAddress);
@@ -43,6 +46,22 @@ export function CartPage() {
   }, []);
 
   const orderSum = totalPrice() + DELIVERY_FEE + SERVICE_FEE;
+  // Yetkazish vaqti (barcha restoranlar ичida eng kengi)
+  const etaText = (() => {
+    if (groups.length === 0) return '';
+    const min = Math.min(...groups.map((g) => g.restaurant.deliveryMin ?? 25));
+    const max = Math.max(...groups.map((g) => g.restaurant.deliveryMax ?? 40));
+    return `${min}–${max} daq`;
+  })();
+
+  // Savatni tozalash (tasdiq bilan)
+  const confirmClear = () => {
+    haptic();
+    if (window.confirm('Savatni tozalaysizmi?')) {
+      useCart.getState().clear();
+    }
+  };
+
   // Ishlatiladigan bonus: balansдан va summадан oshмаsин
   const bonusApplied = useBonus ? Math.min(bonusBalance, orderSum) : 0;
   const total = orderSum - bonusApplied;
@@ -87,11 +106,21 @@ export function CartPage() {
 
   return (
     <div className="app-shell cart">
-      <header className="page-header">
-        <button onClick={() => navigate(-1)} aria-label={t('back')}>
-          <Icon name="arrowLeft" size={22} color="#F2F1EE" />
+      <header className="cart-header">
+        <button onClick={() => navigate(-1)} aria-label={t('back')} className="cart-header__btn">
+          <Icon name="x" size={22} color="#F2F1EE" />
         </button>
-        <h1>{t('cart')}</h1>
+        <div className="cart-header__center">
+          <h1 className="cart-header__title">{t('cart')}</h1>
+          {groups.length > 0 && (
+            <div className="cart-header__sub">
+              {etaText} · {groups.length === 1 ? groups[0].restaurant.name : `${groups.length} ta muassasa`}
+            </div>
+          )}
+        </div>
+        <button onClick={confirmClear} aria-label="Tozalash" className="cart-header__btn">
+          <Icon name="trash" size={20} color="#9A9A96" />
+        </button>
       </header>
 
       {groups.length > 1 && (
@@ -204,6 +233,9 @@ export function CartPage() {
         </div>
       </div>
 
+      {/* Qo'shimcha tavsiya — "Hech narsani unutmadingizmi?" */}
+      <CartUpsell groups={groups} />
+
       {/* Bonus bilan to'lash (referal bonusи bor bo'lsa) */}
       {bonusBalance > 0 && (
         <button onClick={() => setUseBonus((v) => !v)} className={`cart-bonus ${useBonus ? 'is-active' : ''}`}>
@@ -240,8 +272,20 @@ export function CartPage() {
       <div style={{ flex: 1 }} />
 
       <div className="cart-footer">
-        <button onClick={handlePlaceOrder} disabled={paying} className="btn-primary btn-block">
-          {paying ? t('loading') : `${t('placeOrder')} · ${formatSom(total)}`}
+        {/* Yetkazish qatori */}
+        <div className="cart-footer__delivery">
+          <Icon name="truck" size={18} color={DELIVERY_FEE === 0 ? '#5DCAA5' : '#9A9A96'} />
+          <span className={DELIVERY_FEE === 0 ? 'is-free' : ''}>
+            {DELIVERY_FEE === 0 ? 'Bepul yetkazib berish' : `Yetkazish · ${formatSom(DELIVERY_FEE)}`}
+          </span>
+          <span className="cart-footer__eta">{etaText}</span>
+        </div>
+
+        {/* To'lov tugmasi (soni + summa) */}
+        <button onClick={handlePlaceOrder} disabled={paying} className="cart-paybtn">
+          <span className="cart-paybtn__count">{itemCount}</span>
+          <span className="cart-paybtn__label">{paying ? t('loading') : t('payTotal')}</span>
+          <span className="cart-paybtn__sum">{formatSom(total)}</span>
         </button>
       </div>
 
@@ -290,6 +334,62 @@ function Row({ label, value }) {
     <div className="cart-summary__row">
       <span>{label}</span>
       <span>{value}</span>
+    </div>
+  );
+}
+
+// "Hech narsani unutmadingizmi?" — savatдаgi restoran menyusидан tavsiya.
+// Savatда bo'lmagan taomlarни ko'rsatadi (upsell).
+function CartUpsell({ groups }) {
+  const addItem = useCart((s) => s.addItem);
+  const items = useCart((s) => s.items);
+  const firstRestaurantId = groups[0]?.restaurant?.id;
+  const { data: dishes = [] } = useDishes(firstRestaurantId);
+
+  if (!firstRestaurantId || dishes.length === 0) return null;
+
+  // Savatда bor taomlar ID'lari
+  const inCartIds = new Set(items.map((i) => i.dish.id || i.dish._id));
+  // Savatда yo'q, mavjud taomlar (eng ko'pi 6 ta)
+  const suggestions = dishes
+    .filter((d) => !inCartIds.has(d.id || d._id) && d.isAvailable !== false)
+    .slice(0, 6);
+
+  if (suggestions.length === 0) return null;
+
+  const meta = groups[0].restaurant;
+  const add = (dish) => {
+    haptic();
+    // Restoran meta'sini biriktiramiz (savat to'g'ri ishlashi uchun)
+    addItem({
+      ...dish,
+      restaurantId: firstRestaurantId,
+      restaurantName: meta.name,
+      restaurantTint: meta.tint,
+      restaurantIcon: meta.icon,
+      restaurantDeliveryMin: meta.deliveryMin,
+      restaurantDeliveryMax: meta.deliveryMax,
+      restaurantDeliveryFee: meta.deliveryFee,
+    }, 1, []);
+  };
+
+  return (
+    <div className="cart-upsell">
+      <h2 className="cart-upsell__title">Hech narsani unutmadingizmi?</h2>
+      <div className="cart-upsell__row no-scrollbar">
+        {suggestions.map((d) => (
+          <div key={d.id || d._id} className="upsell-card">
+            <div className="upsell-card__photo">
+              <DishPhoto dish={d} height={110} radius={14} iconSize={34} />
+            </div>
+            <div className="upsell-card__name">{d.name}</div>
+            <div className="upsell-card__price">{formatSom(d.price)}</div>
+            <button onClick={() => add(d)} className="upsell-card__add" aria-label="Qo'shish">
+              <Icon name="plus" size={18} color="#EF9F27" />
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

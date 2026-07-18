@@ -147,3 +147,85 @@
 .cart-bonus__toggle.is-on .cart-bonus__knob { transform: translateX(18px); }
 .cart-summary__row--bonus { color: var(--success); font-weight: 600; }
 .cart-summary__row--bonus span { color: var(--success); }
+
+/* ===== Savat sarlavhasi (Yandex Eda uslubi) ===== */
+.cart-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 12px 14px;
+  border-bottom: 1px solid var(--line);
+  flex: none;
+}
+.cart-header__btn {
+  width: 40px; height: 40px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; flex: none;
+}
+.cart-header__btn:active { background: var(--surface-2); }
+.cart-header__center { flex: 1; text-align: center; min-width: 0; }
+.cart-header__title { font-size: 19px; font-weight: 700; color: var(--ink); margin: 0; }
+.cart-header__sub {
+  font-size: 12.5px; color: var(--muted); margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ===== "Hech narsani unutmadingizmi?" (upsell) ===== */
+.cart-upsell { margin: 20px 0 8px; }
+.cart-upsell__title {
+  font-size: 19px; font-weight: 700; color: var(--ink);
+  margin: 0 16px 14px;
+}
+.cart-upsell__row {
+  display: flex; gap: 12px;
+  overflow-x: auto; padding: 0 16px 4px;
+  scroll-snap-type: x mandatory;
+}
+.upsell-card {
+  flex: none; width: 148px; position: relative;
+  scroll-snap-align: start;
+}
+.upsell-card__photo { margin-bottom: 8px; }
+.upsell-card__name {
+  font-size: 14px; font-weight: 600; color: var(--ink);
+  line-height: 1.3; margin-bottom: 4px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.upsell-card__price { font-size: 13.5px; color: var(--muted); margin-bottom: 8px; }
+.upsell-card__add {
+  width: 100%; height: 40px; border-radius: 12px;
+  background: var(--surface); border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+}
+.upsell-card__add:active { background: var(--surface-2); }
+
+/* ===== Pastdagi to'lov paneli (sticky) ===== */
+.cart-footer {
+  position: sticky; bottom: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
+  z-index: 10;
+}
+.cart-footer__delivery {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 0 12px;
+  font-size: 13.5px; color: var(--muted);
+}
+.cart-footer__delivery .is-free { color: var(--success); font-weight: 600; }
+.cart-footer__eta { margin-left: auto; font-size: 12.5px; }
+
+.cart-paybtn {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  background: var(--brand-400); color: var(--brand-text);
+  border-radius: 16px; padding: 15px 16px;
+  font-weight: 700;
+}
+.cart-paybtn:active { transform: scale(0.99); }
+.cart-paybtn:disabled { opacity: 0.65; }
+.cart-paybtn__count {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(0,0,0,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; flex: none;
+}
+.cart-paybtn__label { font-size: 15.5px; }
+.cart-paybtn__sum { margin-left: auto; font-size: 15.5px; }
