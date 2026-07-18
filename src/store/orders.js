@@ -26,6 +26,18 @@ export const useOrders = create((set, get) => ({
 
   // Buyurtma berish — backendga batch yuboradi, javobni activeOrder qiladi.
   placeOrder: async (groups, total, address, paymentLabel, paymentMethod, phone, useBonus = 0) => {
+    // MongoDB ObjectId formatи (24 belgili hex) — eski/noto'g'ri ID'ni oldindan aniqlaymiz
+    const isObjectId = (v) => typeof v === 'string' && /^[a-f\d]{24}$/i.test(v);
+    const pickId = (obj) => String(obj?._id || obj?.id || '');
+
+    // Tekshiruv: savatда eski (mock) ID qolган bo'lsa — aniq xato beramiz
+    for (const g of groups) {
+      const rid = pickId(g.restaurant);
+      if (!isObjectId(rid)) {
+        throw new Error('Savatда eski ma\u2018lumot bor. Savatni tozalab, qaytadan tanlang.');
+      }
+    }
+
     // Backend uchun payload
     const payload = {
       address,
@@ -34,10 +46,10 @@ export const useOrders = create((set, get) => ({
       paymentLabel,
       useBonus,
       orders: groups.map((g) => ({
-        restaurantId: g.restaurant.id,
+        restaurantId: pickId(g.restaurant),
         restaurantName: g.restaurant.name,
         items: g.items.map((it) => ({
-          dishId: it.dish.id,
+          dishId: pickId(it.dish),
           name: it.dish.name,
           quantity: it.quantity,
           unitPrice: it.unitPrice,

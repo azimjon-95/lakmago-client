@@ -9,6 +9,25 @@ export function setAuthToken(token) {
   authToken = token;
 }
 
+// MongoDB `_id` ni `id` ga ham nusxalaymиz (rekursiv).
+// Sabab: backend `_id` (ObjectId) beradi, UI kодда `.id` ishlatiladi.
+// Shu tufayli hech qayerда `undefined` id bo'lmaydi va serverга to'g'ri ObjectId ketadi.
+function normalizeIds(data) {
+  if (Array.isArray(data)) return data.map(normalizeIds);
+  if (data && typeof data === 'object') {
+    const out = {};
+    for (const [k, v] of Object.entries(data)) {
+      out[k] = normalizeIds(v);
+    }
+    // _id bor va id yo'q bo'lsa — id ni qo'shamiz (string ko'rinishда)
+    if (out._id !== undefined && out.id === undefined) {
+      out.id = String(out._id);
+    }
+    return out;
+  }
+  return data;
+}
+
 // Umumiy fetch — AbortController (signal) qo'llab-quvvatlaydi, JWT qo'shadi.
 async function apiFetch(path, { signal, ...options } = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -26,7 +45,8 @@ async function apiFetch(path, { signal, ...options } = {}) {
     throw err;
   }
   if (res.status === 204) return null;
-  return res.json();
+  const json = await res.json();
+  return normalizeIds(json);
 }
 
 export const api = {
