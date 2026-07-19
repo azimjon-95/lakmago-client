@@ -38,21 +38,33 @@ export const RestaurantCard = memo(function RestaurantCard({ restaurant: r }) {
             <Icon name={r.icon} size={46} color={style ? style.iconColor : '#F5A524'} strokeWidth={style ? 1.4 : 2} className="rcard__icon" />
           </>
         )}
-        <div className="rcard__rating"><Icon name="star" size={12} color="#FFCE7A" /> {r.rating.toFixed(1)}</div>
         {r.discount && <div className="rcard__tag rcard__tag--discount">−{r.discount}%</div>}
         {r.isFresh && !r.discount && <div className="rcard__tag rcard__tag--new">{t('fresh')}</div>}
+        {/* Yetkazish vaqti — banner burchagida (Uzum uslubi) */}
+        <div className="rcard__eta">{r.deliveryMin}–{r.deliveryMax} {t('min')}</div>
       </div>
       <div className="rcard__body">
-        <div className="rcard__name">{r.name}</div>
+        {/* Nom va reyting bir qatorda */}
+        <div className="rcard__head">
+          <div className="rcard__name">{r.name}</div>
+          <div className="rcard__rating">
+            <Icon name="star" size={13} color="#FFCE7A" /> {(r.rating ?? 0).toFixed(1)}
+          </div>
+        </div>
+        <div className="rcard__cuisine">{r.cuisine}</div>
         <div className="rcard__meta">
-          <span>{r.cuisine}</span>
-          <span className="rcard__dot">•</span>
-          <span className="rcard__meta-item"><Icon name="clock" size={12} color="#A99C8C" /> {r.deliveryMin}–{r.deliveryMax} {t('min')}</span>
-          <span className="rcard__dot">•</span>
+          {r.discount > 0 && (
+            <>
+              <span className="rcard__promo">
+                <Icon name="discount" size={13} color="#E85D3D" /> Chegirma −{r.discount}%
+              </span>
+              <span className="rcard__sep" />
+            </>
+          )}
           {freeDelivery ? (
-            <span className="rcard__free"><Icon name="bike" size={12} color="#6FBF73" /> {t('freeDelivery')}</span>
+            <span className="rcard__free"><Icon name="bike" size={13} color="#6FBF73" /> {t('freeDelivery')}</span>
           ) : (
-            <span className="rcard__meta-item"><Icon name="bike" size={12} color="#A99C8C" /> {formatSomShort(r.deliveryFee)} {t('som')}</span>
+            <span className="rcard__meta-item"><Icon name="bike" size={13} color="#A99C8C" /> {formatSomShort(r.deliveryFee)} {t('som')}</span>
           )}
         </div>
       </div>

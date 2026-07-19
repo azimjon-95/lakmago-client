@@ -10,7 +10,7 @@ export const DishGridCard = memo(function DishGridCard({ dish, onClick }) {
   return (
     <button className="dgcard" onClick={() => onClick(dish)}>
       <div className="dgcard__photo">
-        <DishPhoto dish={dish} height={120} radius={14} iconSize={40} />
+        <DishPhoto dish={dish} height={104} radius={0} iconSize={34} />
         {hasDiscount && (
           <div className="dgcard__badge">−{Math.round((1 - dish.price / dish.oldPrice) * 100)}%</div>
         )}

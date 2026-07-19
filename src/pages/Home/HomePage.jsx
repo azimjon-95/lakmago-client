@@ -131,6 +131,20 @@ export function HomePage() {
         </>
       )}
 
+      {/* Taomlar — TEPADA (Uzum uslubi: gorizontal scroll, kichik kartalar) */}
+      {(allDishesLoading || allDishes.length > 0) && (
+        <>
+          <h2 className="home-restaurants-title">{t('allDishes')}</h2>
+          <div className="home-dishes-row no-scrollbar">
+            {allDishesLoading
+              ? Array.from({ length: 6 }).map((_, i) => <DishScrollСardSkeleton key={i} />)
+              : allDishes.map((d) => (
+                  <DishGridCard key={d.id || d._id} dish={d} onClick={openModal} />
+                ))}
+          </div>
+        </>
+      )}
+
       {/* Barcha restoranlar */}
       <h2 className="home-restaurants-title">{t('allRestaurants')}</h2>
       <div className="home-restaurants">
@@ -162,20 +176,6 @@ export function HomePage() {
           <div className="home-empty">{t('empty')}</div>
         )}
       </div>
-
-      {/* Barcha taomlar (hamma restoran/kafelar aralash) */}
-      {(allDishesLoading || allDishes.length > 0) && (
-        <>
-          <h2 className="home-restaurants-title">{t('allDishes')}</h2>
-          <div className="home-dishes-grid">
-            {allDishesLoading
-              ? Array.from({ length: 6 }).map((_, i) => <DishScrollСardSkeleton key={i} />)
-              : allDishes.map((d) => (
-                  <DishGridCard key={d.id || d._id} dish={d} onClick={openModal} />
-                ))}
-          </div>
-        </>
-      )}
 
       <div style={{ flex: 1 }} />
       <CartBar />

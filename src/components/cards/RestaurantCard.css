@@ -30,3 +30,51 @@
 .rcard__meta-item { display: flex; align-items: center; gap: 4px; }
 .rcard__dot { color: var(--line); }
 .rcard__free { color: var(--success); font-weight: 500; display: flex; align-items: center; gap: 4px; }
+
+/* ===== Uzum uslubidagi restoran kartasi ===== */
+
+/* Yetkazish vaqti — banner o'ng pastki burchagida */
+.rcard__eta {
+  position: absolute; right: 10px; bottom: 10px;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(4px);
+  color: #fff; font-size: 12px; font-weight: 600;
+  padding: 5px 11px; border-radius: 10px;
+}
+
+/* Nom + reyting bir qatorda */
+.rcard__head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; margin-bottom: 3px;
+}
+.rcard__head .rcard__name {
+  font-size: 17px; font-weight: 700; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin: 0;
+}
+/* Reyting endi banner ustida emas — nom yonida */
+.rcard__body .rcard__rating {
+  position: static;
+  display: flex; align-items: center; gap: 4px;
+  background: transparent; padding: 0;
+  color: var(--ink); font-size: 14px; font-weight: 700;
+  flex: none;
+}
+
+.rcard__cuisine {
+  font-size: 13px; color: var(--muted);
+  margin-bottom: 8px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.rcard__meta {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12.5px; flex-wrap: wrap;
+}
+.rcard__promo {
+  display: flex; align-items: center; gap: 5px;
+  color: var(--appetite); font-weight: 600;
+}
+.rcard__sep {
+  width: 1px; height: 12px; background: var(--line);
+}
