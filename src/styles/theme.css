@@ -388,3 +388,15 @@ ul { list-style: none; }
   color: var(--success);
   font-weight: 600;
 }
+
+/* ===== Kategoriya fotolari =====
+   Uzum uslubidagi oq fonli taom rasmlari dark theme'da yaxshi
+   ko'rinishi uchun ochroq fon beriladi. */
+.home-cat__art:has(.cat-photo),
+.search-cat__art:has(.cat-photo),
+.filter-cat__art:has(.cat-photo) {
+  background: #F7F2EA;
+  padding: 4px;
+}
+/* :has() qo'llab-quvvatlanmasa — rasm o'zi oq fon bilan keladi */
+.cat-photo { border-radius: 12px; }

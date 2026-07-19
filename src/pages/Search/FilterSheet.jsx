@@ -1,6 +1,7 @@
 import { Icon } from '@/components/Icon';
 import { CategoryIcon } from '@/components/CategoryIcons/CategoryIcon';
 import { haptic } from '@/lib/telegram';
+import { CATEGORIES as CATS } from '@/data/categories';
 
 // Maxsus istaklar (Uzum uslubida)
 export const SPECIALS = [
@@ -13,20 +14,8 @@ export const SPECIALS = [
 // Yetkazish vaqti
 export const TIMES = [30, 45, 60, null]; // null = 60+
 
-// Kategoriyalar (bosh sahifadagi bilan bir xil)
-export const CATEGORIES = [
-  { id: 'milliy', label: 'Milliy taom', art: 'milliy' },
-  { id: 'choyxona', label: 'Choyxona', art: 'choyxona' },
-  { id: 'fastfood', label: 'Fast food', art: 'fastfood' },
-  { id: 'lavash', label: 'Lavash', art: 'lavash' },
-  { id: 'burger', label: 'Burger', art: 'fastfood' },
-  { id: 'pitsa', label: 'Pitsa', art: 'pitsa' },
-  { id: 'sushi', label: 'Sushi', art: 'sushi' },
-  { id: 'shashlik', label: 'Shashlik', art: 'shashlik' },
-  { id: 'shirinlik', label: 'Shirinlik', art: 'shirinlik' },
-  { id: 'salqin', label: 'Ichimlik', art: 'ichimlik' },
-  { id: 'magazin_oziq', label: "Do'konlar", art: 'magazin' },
-];
+// Kategoriyalar markaziy ro'yxatdan — bosh sahifa bilan bir xil
+export { CATEGORIES } from '@/data/categories';
 
 // Saralash
 export const SORTS = [
@@ -101,13 +90,13 @@ export function FilterSheet({
           <section className="filter-block">
             <h3 className="filter-block__title">Oshxonalar va kategoriyalar</h3>
             <div className="filter-cats">
-              {CATEGORIES.map((c) => (
+              {CATS.map((c) => (
                 <button
                   key={c.id}
                   onClick={() => toggleCategory(c.id)}
                   className={`filter-cat ${categories.includes(c.id) ? 'is-active' : ''}`}
                 >
-                  <span className="filter-cat__art"><CategoryIcon name={c.art} size={48} /></span>
+                  <span className="filter-cat__art"><CategoryIcon name={c.art} img={c.img} size={48} /></span>
                   <span className="filter-cat__label">{c.label}</span>
                 </button>
               ))}

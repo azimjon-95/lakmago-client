@@ -16,24 +16,11 @@ import { useRestaurants, useTrendingDishes, useDiscountedDishes, useBannersQuery
 import { API_BASE } from '@/api';
 import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
 import { CategoryIcon } from '@/components/CategoryIcons/CategoryIcon';
+import { HOME_CATEGORIES as categories } from '@/data/categories';
 import { AddressSheet } from '@/components/AddressSheet';
 import './Home.css';
 
-// Kategoriyalar — rasm bilan (Uzum/Yandex uslubida gorizontal scroll)
-const categories = [
-  { id: 'all', key: 'all', art: 'all' },
-  { id: 'milliy', label: 'Milliy taom', art: 'milliy' },
-  { id: 'choyxona', label: 'Choyxona', art: 'choyxona' },
-  { id: 'fastfood', label: 'Fast food', art: 'fastfood' },
-  { id: 'lavash', label: 'Lavash', art: 'lavash' },
-  { id: 'burger', label: 'Burger', art: 'fastfood' },
-  { id: 'pitsa', label: 'Pitsa', art: 'pitsa' },
-  { id: 'sushi', label: 'Sushi', art: 'sushi' },
-  { id: 'shashlik', label: 'Shashlik', art: 'shashlik' },
-  { id: 'shirinlik', label: 'Shirinlik', art: 'shirinlik' },
-  { id: 'salqin', label: 'Ichimlik', art: 'ichimlik' },
-  { id: 'magazin_oziq', label: "Do'konlar", art: 'magazin' },
-];
+// Kategoriyalar markaziy ro'yxatdan (src/data/categories.js)
 
 const SectionHeader = memo(function SectionHeader({ icon, title, action }) {
   return (
@@ -115,7 +102,7 @@ export function HomePage() {
             className={`home-cat ${category === c.id ? 'is-active' : ''}`}
           >
             <span className="home-cat__art">
-              <CategoryIcon name={c.art} size={52} />
+              <CategoryIcon name={c.art} img={c.img} size={52} />
             </span>
             <span className="home-cat__label">{c.key ? t(c.key) : c.label}</span>
           </button>

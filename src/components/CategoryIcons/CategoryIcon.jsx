@@ -127,7 +127,36 @@ const ART = {
   ),
 };
 
-export function CategoryIcon({ name, size = 56 }) {
+// Cloudinary rasmini optimallashtirish (WebP/AVIF, kerakli o'lcham)
+function optimizeImg(url, size) {
+  if (!url) return url;
+  if (url.includes('/upload/')) {
+    // c_fit — taom kesilmaydi, oq fon saqlanadi
+    return url.replace('/upload/', `/upload/f_auto,q_auto,w_${size * 2},c_fit/`);
+  }
+  return url;
+}
+
+// Kategoriya ikoni.
+//   img berilgan bo'lsa — HAQIQIY FOTO (Uzum uslubida)
+//   bo'lmasa — chizma SVG (zaxira, hech qachon bo'sh qolmaydi)
+export function CategoryIcon({ name, size = 56, img = '' }) {
+  if (img) {
+    return (
+      <img
+        src={optimizeImg(img, size)}
+        alt=""
+        width={size}
+        height={size}
+        loading="lazy"
+        decoding="async"
+        className="cat-photo"
+        style={{ width: size, height: size, objectFit: 'contain', display: 'block' }}
+        // Rasm yuklanmasa — chizmaga qaytamiz
+        onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling?.style?.setProperty('display', 'block'); }}
+      />
+    );
+  }
   const art = ART[name] || ART.all;
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden="true">

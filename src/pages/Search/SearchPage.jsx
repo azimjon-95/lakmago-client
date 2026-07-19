@@ -127,7 +127,7 @@ export function SearchPage() {
             onClick={() => toggleCategory(c.id)}
             className={`search-cat ${categories.includes(c.id) ? 'is-active' : ''}`}
           >
-            <span className="search-cat__art"><CategoryIcon name={c.art} size={44} /></span>
+            <span className="search-cat__art"><CategoryIcon name={c.art} img={c.img} size={44} /></span>
             <span className="search-cat__label">{c.label}</span>
           </button>
         ))}
