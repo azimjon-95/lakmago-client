@@ -21,6 +21,15 @@ export function RestaurantPage() {
   const [modalDish, setModalDish] = useState(null);
   const [isFav, setIsFav] = useState(false);
   const [infoSheet, setInfoSheet] = useState(null); // 'schedule' | 'service' | null
+
+  // Bo'sh ma'lumotlar ko'rsatilmasin — element umuman chizilmaydi
+  const hasScheduleInfo = Boolean(
+    restaurant?.openTime || restaurant?.closeTime || restaurant?.legalName ||
+    restaurant?.legalAddress || restaurant?.inn || restaurant?.address || restaurant?.phone,
+  );
+  const hasServiceInfo = Boolean(
+    restaurant?.minOrderAmount > 0 || restaurant?.serviceFeePercent > 0 || restaurant?.deliveryFee > 0,
+  );
   const highlightHandled = useRef(false);
 
   // Real data — TanStack Query
@@ -94,7 +103,7 @@ export function RestaurantPage() {
       {/* Ma'lumot — Uzum uslubi: nom markazda + stat kartalari */}
       <div className="rest-info">
         <h1 className="rest-info__name">{restaurant.name}</h1>
-        <div className="rest-info__cuisine">{restaurant.cuisine}</div>
+        {restaurant.cuisine && <div className="rest-info__cuisine">{restaurant.cuisine}</div>}
 
         {/* Stat kartalari */}
         <div className="rest-stats">
@@ -106,13 +115,16 @@ export function RestaurantPage() {
             <span className="rest-stat__label">eshikkacha</span>
           </div>
 
-          <button onClick={() => scrollTo(REVIEWS_TAB)} className="rest-stat">
-            <span className="rest-stat__icon rest-stat__icon--rating">
-              <Icon name="star" size={20} color="#6FBF73" />
-            </span>
-            <span className="rest-stat__value">{(restaurant.rating ?? 0).toFixed(1)}</span>
-            <span className="rest-stat__label">reyting</span>
-          </button>
+          {/* Reyting — faqat baho berilgan bo'lsa ko'rinadi */}
+          {restaurant.rating > 0 && (
+            <button onClick={() => scrollTo(REVIEWS_TAB)} className="rest-stat">
+              <span className="rest-stat__icon rest-stat__icon--rating">
+                <Icon name="star" size={20} color="#6FBF73" />
+              </span>
+              <span className="rest-stat__value">{restaurant.rating.toFixed(1)}</span>
+              <span className="rest-stat__label">reyting</span>
+            </button>
+          )}
 
           {restaurant.deliveryFee === 0 && (
             <div className="rest-stat">
@@ -124,17 +136,20 @@ export function RestaurantPage() {
             </div>
           )}
 
-          <button onClick={() => setInfoSheet('schedule')} className="rest-stat">
-            <span className="rest-stat__icon rest-stat__icon--info">
-              <Icon name="info" size={20} color="#E0A96D" />
-            </span>
-            <span className="rest-stat__value">Xabar</span>
-            <span className="rest-stat__label">ish tartibi</span>
-          </button>
+          {/* Ish tartibi — faqat ma'lumot kiritilgan bo'lsa */}
+          {hasScheduleInfo && (
+            <button onClick={() => setInfoSheet('schedule')} className="rest-stat">
+              <span className="rest-stat__icon rest-stat__icon--info">
+                <Icon name="info" size={20} color="#E0A96D" />
+              </span>
+              <span className="rest-stat__value">Xabar</span>
+              <span className="rest-stat__label">ish tartibi</span>
+            </button>
+          )}
         </div>
 
         {/* Xizmat haqi (agar sozlangan bo'lsa) */}
-        {(restaurant.minOrderAmount > 0 || restaurant.serviceFeePercent > 0) && (
+        {hasServiceInfo && (
           <button onClick={() => setInfoSheet('service')} className="rest-service-link">
             <Icon name="info" size={14} color="#A99C8C" /> Xizmat haqi va shartlar
           </button>

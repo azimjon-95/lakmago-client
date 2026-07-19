@@ -45,7 +45,7 @@ export const DishRow = memo(function DishRow({ dish, onOpen }) {
       <div className="dish-row__body">
         <div className="dish-row__name">{dish.name}</div>
         {meta && <div className="dish-row__meta">{meta}</div>}
-        <div className="dish-row__desc">{dish.description}</div>
+        {dish.description && <div className="dish-row__desc">{dish.description}</div>}
 
         <div className="dish-row__bottom">
           <div className="dish-row__price">

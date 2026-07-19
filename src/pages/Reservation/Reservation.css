@@ -71,3 +71,15 @@
 .resv-preorder-total { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
 .resv-preorder-total__price { color: var(--ink); font-weight: 500; }
 .resv-preorder-actions { display: flex; gap: 10px; }
+
+/* ===== Bron formasi maydonlari ===== */
+.resv-field { margin-bottom: 14px; }
+.resv-field__label {
+  display: block;
+  font-size: 13px; font-weight: 600; color: var(--ink);
+  margin-bottom: 6px;
+}
+.resv-field__hint {
+  font-size: 11.5px; color: var(--muted);
+  margin-top: 5px; line-height: 1.4;
+}

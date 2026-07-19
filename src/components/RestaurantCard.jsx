@@ -41,17 +41,21 @@ export const RestaurantCard = memo(function RestaurantCard({ restaurant: r }) {
         {r.discount && <div className="rcard__tag rcard__tag--discount">−{r.discount}%</div>}
         {r.isFresh && !r.discount && <div className="rcard__tag rcard__tag--new">{t('fresh')}</div>}
         {/* Yetkazish vaqti — banner burchagida (Uzum uslubi) */}
-        <div className="rcard__eta">{r.deliveryMin}–{r.deliveryMax} {t('min')}</div>
+        {(r.deliveryMin > 0 || r.deliveryMax > 0) && (
+          <div className="rcard__eta">{r.deliveryMin}–{r.deliveryMax} {t('min')}</div>
+        )}
       </div>
       <div className="rcard__body">
         {/* Nom va reyting bir qatorda */}
         <div className="rcard__head">
           <div className="rcard__name">{r.name}</div>
-          <div className="rcard__rating">
-            <Icon name="star" size={13} color="#FFCE7A" /> {(r.rating ?? 0).toFixed(1)}
-          </div>
+          {r.rating > 0 && (
+            <div className="rcard__rating">
+              <Icon name="star" size={13} color="#FFCE7A" /> {r.rating.toFixed(1)}
+            </div>
+          )}
         </div>
-        <div className="rcard__cuisine">{r.cuisine}</div>
+        {r.cuisine && <div className="rcard__cuisine">{r.cuisine}</div>}
         <div className="rcard__meta">
           {r.discount > 0 && (
             <>

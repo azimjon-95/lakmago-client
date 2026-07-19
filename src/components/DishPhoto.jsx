@@ -110,16 +110,19 @@ export function RestaurantBanner({ restaurant, height = 150 }) {
     );
   }
 
+  // Rasm yo'q — restoran ikoni bilan chiroyli gradient (ogohlantirish yozuvi yo'q)
   if (images.length === 0) {
     return (
-      <div style={{ height, background: '#411E00', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>
-        <Icon name={restaurant.icon} size={64} color="#F5A524" style={{ opacity: 0.4 }} />
-        <div style={{ position: 'absolute', bottom: 10, right: 12, display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(0,0,0,0.35)', borderRadius: 8, padding: '4px 9px' }}>
-          <Icon name="camera" size={12} color="rgba(255,255,255,0.8)" />
-          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.8)' }}>Rasm yo'q</span>
-        </div>
-      </div>);
-
+      <div style={{
+        height,
+        background: 'linear-gradient(135deg, #3D2A10 0%, #2A1D0E 100%)',
+        position: 'relative',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flex: 'none',
+      }}>
+        <Icon name={restaurant.icon} size={64} color="#F5A524" style={{ opacity: 0.35 }} />
+      </div>
+    );
   }
 
   const photoKey = images[index];

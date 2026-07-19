@@ -4,9 +4,24 @@ import { Icon } from '@/components/Icon';
 import { DishPhoto } from '@/components/DishPhoto';
 import { haptic } from '@/lib/telegram';
 import { useT } from '@/i18n';
+import { useUser } from '@/store/user';
 import { formatSom, formatSomShort } from '@/lib/utils';
 import { useRestaurant, useDishes } from '@/hooks/queries';
 import './Reservation.css';
+
+// Telefon raqamni chiroyli formatlash: +998 90 123 45 67
+function formatPhone(v) {
+  const digits = String(v).replace(/\D/g, '').slice(0, 12);
+  if (!digits) return '';
+  let out = '+';
+  if (digits.length <= 3) return out + digits;
+  out += digits.slice(0, 3);
+  if (digits.length > 3) out += ' ' + digits.slice(3, 5);
+  if (digits.length > 5) out += ' ' + digits.slice(5, 8);
+  if (digits.length > 8) out += ' ' + digits.slice(8, 10);
+  if (digits.length > 10) out += ' ' + digits.slice(10, 12);
+  return out;
+}
 
 const TIMES = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30'];
 const WEEKDAYS = ['Yak', 'Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Sha'];
@@ -31,14 +46,19 @@ export function ReservationPage() {
   const [dayIdx, setDayIdx] = useState(0);
   const [time, setTime] = useState('18:30');
   const [guests, setGuests] = useState(4);
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  // Profildagi ma'lumot bilan avtomatik to'ldiriladi (qayta yozish shart emas)
+  const user = useUser((st) => st.user);
+  const [name, setName] = useState(() =>
+    [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim());
+  const [phone, setPhone] = useState(() => user?.phone || '');
   const [step, setStep] = useState('form');
   const [preOrderDishes, setPreOrderDishes] = useState([]);
 
   const selectedDate = days[dayIdx].date;
   const dateLabel = selectedDate.toLocaleDateString('uz', { day: 'numeric', month: 'long' });
-  const valid = name.trim().length >= 2 && phone.trim().length >= 7;
+  // Tekshiruv: ism kamida 2 harf, telefon kamida 9 raqam
+  const phoneDigits = phone.replace(/\D/g, '');
+  const valid = name.trim().length >= 2 && phoneDigits.length >= 9;
 
   function finishReservation(chosen) {
     setPreOrderDishes(chosen);
@@ -139,8 +159,30 @@ export function ReservationPage() {
           </div>
         </div>
 
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('profile')} className="input-field resv-input" />
-        <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Telefon" inputMode="tel" className="input-field resv-input" />
+        {/* Aloqa ma'lumotlari — restoran siz bilan bog'lanishi uchun */}
+        <div className="resv-field">
+          <label className="resv-field__label">Ism va familiya *</label>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Masalan: Aziz Karimov"
+            autoComplete="name"
+            className="input-field resv-input"
+          />
+        </div>
+
+        <div className="resv-field">
+          <label className="resv-field__label">Telefon raqam *</label>
+          <input
+            value={phone}
+            onChange={(e) => setPhone(formatPhone(e.target.value))}
+            placeholder="+998 90 123 45 67"
+            inputMode="tel"
+            autoComplete="tel"
+            className="input-field resv-input"
+          />
+          <p className="resv-field__hint">Restoran bron bo'yicha shu raqamga qo'ng'iroq qiladi</p>
+        </div>
 
         <button onClick={() => { haptic(); setStep('preorder'); }} disabled={!valid} className="btn-primary btn-block">
           {t('confirmReservation')} · {dateLabel}, {time}

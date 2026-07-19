@@ -68,7 +68,7 @@ export function DishModal({ dish, onClose }) {
             <div className="dish-modal__name">{dish.name}</div>
             <div className="dish-modal__price">{formatSom(dish.price)}</div>
           </div>
-          <p className="dish-modal__desc">{dish.description}</p>
+          {dish.description && <p className="dish-modal__desc">{dish.description}</p>}
 
           {(dish.calories || dish.weightGram) && (
             <div className="dish-modal__nutrition">
