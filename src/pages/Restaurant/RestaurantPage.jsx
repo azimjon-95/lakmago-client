@@ -22,6 +22,13 @@ export function RestaurantPage() {
   const [isFav, setIsFav] = useState(false);
   const [infoSheet, setInfoSheet] = useState(null); // 'schedule' | 'service' | null
 
+  const highlightHandled = useRef(false);
+
+  // Real data — TanStack Query
+  const { data: restaurant, isLoading: restLoading } = useRestaurant(id);
+  const { data: rawDishes = [], isLoading: dishesLoading } = useDishes(id);
+  const restaurantReviews = restaurant?.reviews || [];
+
   // Bo'sh ma'lumotlar ko'rsatilmasin — element umuman chizilmaydi
   const hasScheduleInfo = Boolean(
     restaurant?.openTime || restaurant?.closeTime || restaurant?.legalName ||
@@ -30,12 +37,6 @@ export function RestaurantPage() {
   const hasServiceInfo = Boolean(
     restaurant?.minOrderAmount > 0 || restaurant?.serviceFeePercent > 0 || restaurant?.deliveryFee > 0,
   );
-  const highlightHandled = useRef(false);
-
-  // Real data — TanStack Query
-  const { data: restaurant, isLoading: restLoading } = useRestaurant(id);
-  const { data: rawDishes = [], isLoading: dishesLoading } = useDishes(id);
-  const restaurantReviews = restaurant?.reviews || [];
 
   // Taomlarga restoran meta'sini biriktiramiz (savatга to'g'ri o'tishi uchun)
   const restaurantDishes = useMemo(
