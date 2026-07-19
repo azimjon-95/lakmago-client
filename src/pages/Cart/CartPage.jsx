@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { DishPhoto } from '@/components/DishPhoto';
@@ -34,6 +34,12 @@ export function CartPage() {
   const [paying, setPaying] = useState(false);
   const [showAddressSheet, setShowAddressSheet] = useState(false);
   const [showAddressFlow, setShowAddressFlow] = useState(false);
+
+  // Yetkazish turi va vaqt
+  const [fulfillment, setFulfillment] = useState('delivery'); // 'delivery' | 'pickup'
+  const [timingMode, setTimingMode] = useState('asap');       // 'asap' | 'scheduled'
+  const [scheduledFor, setScheduledFor] = useState(null);
+  const isPickup = fulfillment === 'pickup';
   const [showPhoneEdit, setShowPhoneEdit] = useState(false);
   const [phoneDraft, setPhoneDraft] = useState(user.phone ?? '');
   const [paymentMethod, setPaymentMethod] = useState(lastPaymentMethod);
@@ -45,7 +51,34 @@ export function CartPage() {
     api.getReferralInfo().then((r) => setBonusBalance(r.bonusBalance || 0)).catch(() => {});
   }, []);
 
-  const orderSum = totalPrice() + DELIVERY_FEE + SERVICE_FEE;
+  // Olib ketishda yetkazish haqi olinmaydi
+  const effectiveDeliveryFee = isPickup ? 0 : DELIVERY_FEE;
+  const orderSum = totalPrice() + effectiveDeliveryFee + SERVICE_FEE;
+
+  // Tayyorlash/yetkazish vaqtini hisoblaymiz
+  const prepMinutes = groups.length
+    ? Math.max(...groups.map((g) => g.restaurant.prepMinutes ?? 20))
+    : 20;
+  const deliveryMinutes = groups.length
+    ? Math.max(...groups.map((g) => g.restaurant.deliveryMax ?? 40))
+    : 40;
+
+  const fmtClock = (d) => d.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const readyTimeLabel = fmtClock(new Date(Date.now() + prepMinutes * 60_000));
+  const etaLabel = fmtClock(new Date(Date.now() + deliveryMinutes * 60_000));
+
+  // Belgilangan vaqt uchun slotlar (30 daqiqalik oraliq, 8 soatgacha)
+  const timeSlots = useMemo(() => {
+    const slots = [];
+    const start = new Date(Date.now() + (isPickup ? prepMinutes : deliveryMinutes) * 60_000);
+    // Keyingi yarim soatlikka yaxlitlaymiz
+    start.setMinutes(start.getMinutes() > 30 ? 60 : 30, 0, 0);
+    for (let i = 0; i < 16; i++) {
+      const d = new Date(start.getTime() + i * 30 * 60_000);
+      slots.push({ value: d.toISOString(), label: fmtClock(d) });
+    }
+    return slots;
+  }, [isPickup, prepMinutes, deliveryMinutes]);
   // Yetkazish vaqti (barcha restoranlar ичida eng kengi)
   const etaText = (() => {
     if (groups.length === 0) return '';
@@ -79,14 +112,25 @@ export function CartPage() {
   }
 
   function handlePlaceOrder() {
-    if (!selectedAddress) { setShowAddressSheet(true); return; }
+    // Manzil faqat yetkazishda majburiy
+    if (!isPickup && !selectedAddress) { setShowAddressSheet(true); return; }
     if (!user.phone) { setPhoneDraft(''); setShowPhoneEdit(true); return; }
+    // Belgilangan vaqt tanlanmagan bo'lsa — birinchi slotni olamiz
+    if (timingMode === 'scheduled' && !scheduledFor && timeSlots.length) {
+      setScheduledFor(timeSlots[0].value);
+    }
     setPaying(true);
     setLastPaymentMethod(paymentMethod);
-    const addrLabel = `${selectedAddress.title} — ${selectedAddress.address}`;
+    const addrLabel = isPickup
+      ? ''
+      : `${selectedAddress.title} — ${selectedAddress.address}`;
     const paymentLabel = paymentMethod === 'cash' ? t('cash') : 'Payme';
     // Backendga yuboradi (async). Xato bo'lsa ham local rejim ishlaydi.
-    placeOrder(groups, total, addrLabel, paymentLabel, paymentMethod, user.phone, bonusApplied)
+    placeOrder(groups, total, addrLabel, paymentLabel, paymentMethod, user.phone, bonusApplied, {
+      fulfillment,
+      timingMode,
+      scheduledFor: timingMode === 'scheduled' ? (scheduledFor || timeSlots[0]?.value) : undefined,
+    })
       .then(() => {
         setPaying(false);
         useCart.getState().clear();
@@ -176,7 +220,71 @@ export function CartPage() {
         </div>
       ))}
 
-      {/* Manzil */}
+      {/* Yetkazish turi — kuryer yoki o'zim olib ketaman */}
+      <div className="cart-fulfillment">
+        <button
+          onClick={() => { haptic(); setFulfillment('delivery'); }}
+          className={`cart-ftab ${fulfillment === 'delivery' ? 'is-active' : ''}`}
+        >
+          <Icon name="bike" size={19} color={fulfillment === 'delivery' ? '#F5A524' : '#A99C8C'} />
+          <span className="cart-ftab__title">Yetkazib berish</span>
+          <span className="cart-ftab__sub">
+            {DELIVERY_FEE === 0 ? 'Bepul' : formatSom(DELIVERY_FEE)}
+          </span>
+        </button>
+        <button
+          onClick={() => { haptic(); setFulfillment('pickup'); }}
+          className={`cart-ftab ${fulfillment === 'pickup' ? 'is-active' : ''}`}
+        >
+          <Icon name="bag" size={19} color={fulfillment === 'pickup' ? '#F5A524' : '#A99C8C'} />
+          <span className="cart-ftab__title">O'zim olib ketaman</span>
+          <span className="cart-ftab__sub cart-ftab__sub--free">Yetkazish bepul</span>
+        </button>
+      </div>
+
+      {/* Vaqt — hozir yoki belgilangan */}
+      <div className="cart-timing">
+        <div className="cart-timing__tabs">
+          <button
+            onClick={() => { haptic(); setTimingMode('asap'); }}
+            className={`cart-ttab ${timingMode === 'asap' ? 'is-active' : ''}`}
+          >
+            {isPickup ? 'Tayyor bo\u2018lishi bilan' : 'Imkon qadar tez'}
+          </button>
+          <button
+            onClick={() => { haptic(); setTimingMode('scheduled'); }}
+            className={`cart-ttab ${timingMode === 'scheduled' ? 'is-active' : ''}`}
+          >
+            Vaqtga belgilash
+          </button>
+        </div>
+
+        {timingMode === 'asap' ? (
+          <div className="cart-timing__hint">
+            <Icon name="clock" size={15} color="#6FBF73" />
+            <span>
+              {isPickup
+                ? `Taxminan ${readyTimeLabel} da tayyor bo'ladi`
+                : `Taxminan ${etaLabel} da yetkaziladi`}
+            </span>
+          </div>
+        ) : (
+          <div className="cart-slots no-scrollbar">
+            {timeSlots.map((slot) => (
+              <button
+                key={slot.value}
+                onClick={() => { haptic(); setScheduledFor(slot.value); }}
+                className={`cart-slot ${scheduledFor === slot.value ? 'is-active' : ''}`}
+              >
+                {slot.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Manzil — faqat yetkazishda */}
+      {!isPickup && (
       <button
         onClick={() => setShowAddressSheet(true)}
         className={`cart-field ${selectedAddress ? '' : 'cart-field--required'}`}
@@ -194,6 +302,23 @@ export function CartPage() {
         </div>
         <Icon name="chevronRight" size={18} color="#A99C8C" />
       </button>
+      )}
+
+      {/* Olib ketish manzili — restoran qayerdan olinadi */}
+      {isPickup && groups.length > 0 && (
+        <div className="cart-pickup-info">
+          <Icon name="pin" size={20} color="#F5A524" />
+          <div className="cart-pickup-info__body">
+            <div className="cart-pickup-info__title">Olib ketish manzili</div>
+            {groups.map((g) => (
+              <div key={g.restaurant.id} className="cart-pickup-info__row">
+                <b>{g.restaurant.name}</b>
+                {g.restaurant.address && <span> — {g.restaurant.address}</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Telefon */}
       <button

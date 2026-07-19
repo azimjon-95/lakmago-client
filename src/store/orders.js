@@ -25,7 +25,7 @@ export const useOrders = create((set, get) => ({
   reviews: {},
 
   // Buyurtma berish — backendga batch yuboradi, javobni activeOrder qiladi.
-  placeOrder: async (groups, total, address, paymentLabel, paymentMethod, phone, useBonus = 0) => {
+  placeOrder: async (groups, total, address, paymentLabel, paymentMethod, phone, useBonus = 0, opts = {}) => {
     // MongoDB ObjectId formatи (24 belgili hex) — eski/noto'g'ri ID'ni oldindan aniqlaymiz
     const isObjectId = (v) => typeof v === 'string' && /^[a-f\d]{24}$/i.test(v);
     const pickId = (obj) => String(obj?._id || obj?.id || '');
@@ -45,6 +45,10 @@ export const useOrders = create((set, get) => ({
       paymentMethod: paymentMethod === 'payme' ? 'payme' : paymentMethod === 'cash' ? 'cash' : 'payme',
       paymentLabel,
       useBonus,
+      // Yetkazish turi va vaqt (olib ketish / belgilangan vaqt)
+      fulfillment: opts.fulfillment || 'delivery',
+      timingMode: opts.timingMode || 'asap',
+      ...(opts.scheduledFor ? { scheduledFor: opts.scheduledFor } : {}),
       orders: groups.map((g) => ({
         restaurantId: pickId(g.restaurant),
         restaurantName: g.restaurant.name,
