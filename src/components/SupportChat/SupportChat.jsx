@@ -3,6 +3,9 @@ import { useT } from '@/i18n';
 import './SupportChat.css';
 import { OperatorAvatar } from './OperatorAvatar';
 import { Icon } from '@/components/Icon';
+import { api } from '@/api';
+import { io } from 'socket.io-client';
+import { useUser } from '@/store/user';
 
 // Bottom-right animatsiyali chat tugmasi + oyna.
 // Mijoz sayt adminlari (yordam xizmati) bilan gaplashadi.
@@ -13,31 +16,75 @@ export function SupportChat() {
   const [messages, setMessages] = useState([]);
   const bodyRef = useRef(null);
 
-  // Chat ochilganda xush kelibsiz xabari
+  const [sending, setSending] = useState(false);
+  const [unread, setUnread] = useState(0);
+  const userId = useUser((st) => st.user?._id || st.user?.id);
+
+  // Chat ochilganda serverdan tarixni yuklaymiz
   useEffect(() => {
-    if (open && messages.length === 0) {
-      setMessages([{ id: 1, from: 'support', text: t('chatWelcome') }]);
-    }
-  }, [open, messages.length, t]);
+    if (!open) return;
+    let cancelled = false;
+    api.getSupportChat()
+      .then((data) => {
+        if (cancelled) return;
+        const list = (data?.messages || []).map((m, i) => ({
+          id: m._id || i,
+          from: m.from === 'admin' ? 'support' : 'user',
+          text: m.text,
+          adminName: m.adminName,
+        }));
+        // Tarix bo'sh bo'lsa — xush kelibsiz
+        setMessages(list.length ? list : [{ id: 'w', from: 'support', text: t('chatWelcome') }]);
+        setUnread(0);
+      })
+      .catch(() => {
+        // Server yo'q — kamida xush kelibsiz ko'rsatamiz
+        setMessages([{ id: 'w', from: 'support', text: t('chatWelcome') }]);
+      });
+    return () => { cancelled = true; };
+  }, [open, t]);
+
+  // Admin javobini real vaqtda qabul qilamiz
+  useEffect(() => {
+    if (!userId) return;
+    const socket = io(import.meta.env.VITE_SOCKET_URL ?? '/', {
+      transports: ['websocket', 'polling'],
+    });
+    socket.emit('join:user', String(userId));
+    socket.on('support:reply', (data) => {
+      setMessages((m) => [...m, {
+        id: Date.now(), from: 'support', text: data.text, adminName: data.adminName,
+      }]);
+      // Chat yopiq bo'lsa — o'qilmagan belgisi
+      setUnread((n) => (open ? 0 : n + 1));
+    });
+    return () => socket.disconnect();
+  }, [userId, open]);
 
   useEffect(() => {
     bodyRef.current?.scrollTo({ top: bodyRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
-  const send = () => {
+  const send = async () => {
     const text = input.trim();
-    if (!text) return;
-    setMessages((m) => [...m, { id: Date.now(), from: 'user', text }]);
+    if (!text || sending) return;
+
+    // Darhol ko'rsatamiz (tez his qilinsin)
+    const tempId = Date.now();
+    setMessages((m) => [...m, { id: tempId, from: 'user', text }]);
     setInput('');
-    // Demo: admin javobini simulyatsiya qilamiz (haqiqiy tizimда Socket orqali)
-    setTimeout(() => {
-      setMessages((m) => [...m, {
-        id: Date.now() + 1,
-        from: 'support',
-        text: '✓ Xabaringiz qabul qilindi. Operator tez orada javob beradi.',
-      }]);
-    }, 1200);
-  };
+    setSending(true);
+
+    try {
+      await api.sendSupportMessage(text);
+    } catch {
+      // Yuborilmadi — belgilab qo'yamiz
+      setMessages((m) => m.map((msg) =>
+        msg.id === tempId ? { ...msg, failed: true } : msg));
+    } finally {
+      setSending(false);
+    }
+  };;
 
   return (
     <>

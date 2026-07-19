@@ -116,6 +116,10 @@ export const api = {
   deleteAddress: (id) => apiFetch(`/addresses/${id}`, { method: 'DELETE' }),
   setDefaultAddress: (id) => apiFetch(`/addresses/${id}/default`, { method: 'PATCH' }),
 
+  // ===== Qo'llab-quvvatlash chati =====
+  getSupportChat: () => apiFetch('/support/chat', { method: 'GET' }),
+  sendSupportMessage: (text) => apiFetch('/support/message', { method: 'POST', body: JSON.stringify({ text }) }),
+
   // ===== Referral =====
   getReferralInfo: () => apiFetch('/referral/me', { method: 'GET' }),
   getSubscription: () => apiFetch('/referral/subscription', { method: 'GET' }),
