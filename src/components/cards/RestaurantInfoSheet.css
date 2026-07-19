@@ -1,0 +1,67 @@
+/* ===== Restoran ma'lumot oynasi ===== */
+.rinfo-overlay {
+  position: fixed; inset: 0; z-index: 240;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex; align-items: flex-end; justify-content: center;
+  animation: fade-in 0.18s ease;
+}
+.rinfo-sheet {
+  position: relative;
+  width: 100%; max-width: var(--app-width);
+  max-height: 88vh; overflow-y: auto;
+  background: var(--surface);
+  border-radius: 22px 22px 0 0;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  animation: slide-up 0.26s var(--ease);
+}
+.rinfo-sheet__grabber {
+  width: 40px; height: 4px; border-radius: 2px;
+  background: var(--line); margin: 9px auto 0;
+}
+.rinfo-sheet__close {
+  position: absolute; top: 14px; right: 16px;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.rinfo-body { padding: 22px 20px 8px; }
+.rinfo-body--center { text-align: center; padding-top: 30px; }
+
+.rinfo-icon {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--surface-2);
+  display: inline-flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+.rinfo-title {
+  font-size: 21px; font-weight: 800; color: var(--ink);
+  margin: 0 0 16px;
+}
+.rinfo-title--left { text-align: left; font-size: 19px; }
+.rinfo-title--mt { margin-top: 26px; }
+
+.rinfo-text { color: var(--muted); font-size: 14px; line-height: 1.6; }
+.rinfo-text p { margin: 0 0 6px; }
+
+.rinfo-hours {
+  margin-top: 16px; font-size: 16px; font-weight: 600; color: var(--ink);
+}
+
+/* Xizmat haqi jadvali */
+.rinfo-rows { display: flex; flex-direction: column; }
+.rinfo-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 14px; padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.rinfo-row:last-child { border-bottom: none; }
+.rinfo-row__label { font-size: 14.5px; color: var(--ink); }
+.rinfo-row__value { font-size: 14.5px; font-weight: 700; color: var(--brand-100); white-space: nowrap; }
+.rinfo-row__value--free { color: var(--success); }
+.rinfo-row__note { color: var(--muted); }
+
+.rinfo-note {
+  margin-top: 16px; font-size: 12.5px; color: var(--muted-2);
+  line-height: 1.55;
+}

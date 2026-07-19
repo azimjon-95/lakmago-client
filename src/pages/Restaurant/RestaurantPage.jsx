@@ -5,6 +5,7 @@ import { DishRow } from '@/components/DishRow';
 import { DishModal } from '@/components/DishModal';
 import { CartBar } from '@/components/CartBar';
 import { RestaurantBanner } from '@/components/DishPhoto';
+import { RestaurantInfoSheet } from '@/components/RestaurantInfoSheet';
 import { DishRowSkeleton } from '@/components/Skeleton/Skeleton';
 import { useT } from '@/i18n';
 import { useRestaurant, useDishes } from '@/hooks/queries';
@@ -19,6 +20,7 @@ export function RestaurantPage() {
   const t = useT();
   const [modalDish, setModalDish] = useState(null);
   const [isFav, setIsFav] = useState(false);
+  const [infoSheet, setInfoSheet] = useState(null); // 'schedule' | 'service' | null
   const highlightHandled = useRef(false);
 
   // Real data — TanStack Query
@@ -89,27 +91,61 @@ export function RestaurantPage() {
         </button>
       </div>
 
-      {/* Ma'lumot */}
+      {/* Ma'lumot — Uzum uslubi: nom markazda + stat kartalari */}
       <div className="rest-info">
         <h1 className="rest-info__name">{restaurant.name}</h1>
-        <div className="rest-info__cuisine">{restaurant.cuisine} · Toshkent</div>
-        <button onClick={() => scrollTo(REVIEWS_TAB)} className="rest-info__meta">
-          <span className="rest-meta rest-meta--rating">
-            <Icon name="star" size={15} color="#F5A524" />
-            {restaurant.rating.toFixed(1)}
-            <span className="rest-meta__count">({restaurant.reviewCount})</span>
-          </span>
-          <span className="rest-meta">
-            <Icon name="clock" size={15} color="#A99C8C" /> {restaurant.deliveryMin}–{restaurant.deliveryMax} {t('min')}
-          </span>
-          <span className="rest-meta rest-meta--free">
-            <Icon name="bike" size={15} color="#6FBF73" />
-            {restaurant.deliveryFee === 0 ? t('free') : t('delivery')}
-          </span>
-        </button>
-        <button onClick={() => navigate(`/restaurant/${id}/reserve`)} className="rest-reserve-btn">
-          <Icon name="calendarPlus" size={17} color="#F5A524" /> {t('reserveTable')}
-        </button>
+        <div className="rest-info__cuisine">{restaurant.cuisine}</div>
+
+        {/* Stat kartalari */}
+        <div className="rest-stats">
+          <div className="rest-stat">
+            <span className="rest-stat__icon rest-stat__icon--time">
+              <Icon name="clock" size={20} color="#F5A524" />
+            </span>
+            <span className="rest-stat__value">{restaurant.deliveryMin}–{restaurant.deliveryMax} {t('min')}</span>
+            <span className="rest-stat__label">eshikkacha</span>
+          </div>
+
+          <button onClick={() => scrollTo(REVIEWS_TAB)} className="rest-stat">
+            <span className="rest-stat__icon rest-stat__icon--rating">
+              <Icon name="star" size={20} color="#6FBF73" />
+            </span>
+            <span className="rest-stat__value">{(restaurant.rating ?? 0).toFixed(1)}</span>
+            <span className="rest-stat__label">reyting</span>
+          </button>
+
+          {restaurant.deliveryFee === 0 && (
+            <div className="rest-stat">
+              <span className="rest-stat__icon rest-stat__icon--free">
+                <Icon name="bike" size={20} color="#F5A524" />
+              </span>
+              <span className="rest-stat__value">Bepul</span>
+              <span className="rest-stat__label">yetkazish</span>
+            </div>
+          )}
+
+          <button onClick={() => setInfoSheet('schedule')} className="rest-stat">
+            <span className="rest-stat__icon rest-stat__icon--info">
+              <Icon name="info" size={20} color="#E0A96D" />
+            </span>
+            <span className="rest-stat__value">Xabar</span>
+            <span className="rest-stat__label">ish tartibi</span>
+          </button>
+        </div>
+
+        {/* Xizmat haqi (agar sozlangan bo'lsa) */}
+        {(restaurant.minOrderAmount > 0 || restaurant.serviceFeePercent > 0) && (
+          <button onClick={() => setInfoSheet('service')} className="rest-service-link">
+            <Icon name="info" size={14} color="#A99C8C" /> Xizmat haqi va shartlar
+          </button>
+        )}
+
+        {/* Stol bron qilish — bizning ustunligimiz */}
+        {restaurant.reservationEnabled !== false && (
+          <button onClick={() => navigate(`/restaurant/${id}/reserve`)} className="rest-reserve-btn">
+            <Icon name="calendarPlus" size={17} color="#F5A524" /> {t('reserveTable')}
+          </button>
+        )}
       </div>
 
       {/* Tablar */}
@@ -181,6 +217,14 @@ export function RestaurantPage() {
 
       <CartBar />
       {modalDish && <DishModal dish={modalDish} onClose={() => setModalDish(null)} />}
+
+      {infoSheet && (
+        <RestaurantInfoSheet
+          kind={infoSheet}
+          restaurant={restaurant}
+          onClose={() => setInfoSheet(null)}
+        />
+      )}
     </div>
   );
 }
