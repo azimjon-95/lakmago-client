@@ -1,0 +1,218 @@
+/* ===== Qidiruv sahifasi ===== */
+.search-page { padding-bottom: 0; }
+
+/* Qidiruv qatori */
+.search-top {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px 8px;
+  flex: none;
+}
+.search-field {
+  flex: 1;
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.search-field__input {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: var(--ink); font-size: 15px; min-width: 0;
+}
+.search-field__input::placeholder { color: var(--muted); }
+
+.search-filter-btn {
+  position: relative; flex: none;
+  width: 46px; height: 46px; border-radius: 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+}
+.search-filter-btn.is-active { background: var(--brand); border-color: var(--brand); }
+.search-filter-btn__badge {
+  position: absolute; top: -5px; right: -5px;
+  min-width: 19px; height: 19px; padding: 0 5px;
+  border-radius: 999px;
+  background: var(--appetite); color: #fff;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--surface);
+}
+
+/* Kategoriyalar — tez tanlash */
+.search-cats {
+  display: flex; gap: 12px;
+  padding: 6px 16px 12px;
+  overflow-x: auto;
+  flex: none;
+}
+.search-cat {
+  flex: none;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  width: 60px; background: transparent; padding: 0;
+}
+.search-cat__art {
+  width: 52px; height: 52px; border-radius: 16px;
+  background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid transparent;
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
+}
+.search-cat__label {
+  font-size: 10.5px; color: var(--muted);
+  text-align: center; line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60px;
+}
+.search-cat.is-active .search-cat__art { border-color: var(--brand); background: var(--brand-tint); }
+.search-cat.is-active .search-cat__label { color: var(--brand-100); font-weight: 700; }
+
+/* Faol filtr chiplari */
+.search-chips {
+  display: flex; gap: 8px;
+  padding: 0 16px 10px;
+  overflow-x: auto; flex: none;
+}
+.search-chip {
+  flex: none;
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 999px;
+  background: var(--brand-tint); color: var(--brand-100);
+  font-size: 12.5px; font-weight: 600;
+  white-space: nowrap;
+}
+.search-chip--reset { background: transparent; border: 1px solid var(--line); color: var(--muted); }
+
+/* Natijalar */
+.search-results { flex: 1; padding: 0 16px; overflow-y: auto; }
+.search-section-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 17px; font-weight: 700; color: var(--ink);
+  margin: 14px 0 10px;
+}
+.search-section-count {
+  font-size: 12px; font-weight: 600; color: var(--muted);
+  background: var(--surface-2); padding: 2px 8px; border-radius: 999px;
+}
+.search-dishes {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+  margin-bottom: 8px;
+}
+.search-restaurants { display: flex; flex-direction: column; gap: 12px; padding-bottom: 16px; }
+
+/* Bo'sh holat */
+.search-empty { text-align: center; padding: 48px 24px; }
+.search-empty__title { font-size: 17px; font-weight: 700; color: var(--ink); margin: 14px 0 6px; }
+.search-empty__hint { font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+.search-empty__btn {
+  margin-top: 18px; padding: 11px 22px; border-radius: 12px;
+  background: var(--brand); color: var(--brand-text);
+  font-size: 14px; font-weight: 700;
+}
+
+/* ===== Filtr oynasi ===== */
+.filter-overlay {
+  position: fixed; inset: 0; z-index: 250;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex; align-items: flex-end; justify-content: center;
+  animation: fade-in 0.18s ease;
+}
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+.filter-sheet {
+  width: 100%; max-width: var(--app-width);
+  max-height: 92vh;
+  background: var(--surface);
+  border-radius: 22px 22px 0 0;
+  display: flex; flex-direction: column;
+  animation: slide-up 0.26s var(--ease);
+}
+.filter-sheet__grabber {
+  width: 40px; height: 4px; border-radius: 2px;
+  background: var(--line); margin: 9px auto 0; flex: none;
+}
+.filter-sheet__header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 18px 14px; flex: none;
+}
+.filter-sheet__title { font-size: 22px; font-weight: 800; color: var(--ink); margin: 0; }
+.filter-sheet__close {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center;
+}
+.filter-sheet__body { flex: 1; overflow-y: auto; padding: 0 18px 12px; }
+
+.filter-block { margin-bottom: 26px; }
+.filter-block__title { font-size: 17px; font-weight: 700; color: var(--ink); margin: 0 0 12px; }
+
+/* Maxsus istaklar */
+.filter-specials { display: flex; flex-wrap: wrap; gap: 9px; }
+.filter-special {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-radius: 14px;
+  background: var(--surface-2); border: 1px solid var(--line);
+  color: var(--ink); font-size: 14px; font-weight: 600;
+}
+.filter-special.is-active { border-color: var(--brand); background: var(--brand-tint); }
+
+/* Yetkazish vaqti */
+.filter-times {
+  display: flex; gap: 6px;
+  background: var(--surface-2); border-radius: 16px; padding: 5px;
+}
+.filter-time {
+  flex: 1; padding: 12px 0; border-radius: 12px;
+  color: var(--muted); font-size: 15px; font-weight: 600;
+  transition: background 0.15s var(--ease), color 0.15s var(--ease);
+}
+.filter-time.is-active { background: var(--brand); color: var(--brand-text); font-weight: 700; }
+
+/* Kategoriyalar grid */
+.filter-cats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px 8px; }
+.filter-cat {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  background: transparent; padding: 0;
+}
+.filter-cat__art {
+  width: 56px; height: 56px; border-radius: 17px;
+  background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid transparent;
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
+}
+.filter-cat__label {
+  font-size: 11px; color: var(--muted); text-align: center; line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
+.filter-cat.is-active .filter-cat__art { border-color: var(--brand); background: var(--brand-tint); }
+.filter-cat.is-active .filter-cat__label { color: var(--brand-100); font-weight: 700; }
+
+/* Saralash */
+.filter-sorts { display: flex; flex-direction: column; }
+.filter-sort {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 14px; border-radius: 12px;
+  color: var(--ink); font-size: 15px; text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+.filter-sort:last-child { border-bottom: none; }
+.filter-sort.is-active { background: var(--brand-tint); color: var(--brand-100); font-weight: 700; }
+
+/* Pastki tugmalar */
+.filter-sheet__footer {
+  display: flex; gap: 10px;
+  padding: 12px 18px calc(16px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line);
+  background: var(--surface); flex: none;
+}
+.filter-reset {
+  padding: 15px 22px; border-radius: 14px;
+  border: 1px solid var(--line); color: var(--muted);
+  font-size: 15px; font-weight: 600; flex: none;
+}
+.filter-apply {
+  flex: 1; padding: 15px; border-radius: 14px;
+  background: var(--brand); color: var(--brand-text);
+  font-size: 15.5px; font-weight: 700;
+}
+.filter-apply:active { transform: scale(0.99); }

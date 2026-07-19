@@ -9,7 +9,7 @@ const OrderTrackPage = lazy(() => import('@/pages/OrderTrack/OrderTrackPage').th
 const OrdersPage = lazy(() => import('@/pages/Orders/OrdersPage').then((m) => ({ default: m.OrdersPage })));
 const ReservationPage = lazy(() => import('@/pages/Reservation/ReservationPage').then((m) => ({ default: m.ReservationPage })));
 const ProfilePage = lazy(() => import('@/pages/Profile/ProfilePage').then((m) => ({ default: m.ProfilePage })));
-const SearchPage = lazy(() => import('@/pages/Stub/StubPages').then((m) => ({ default: m.SearchPage })));
+const SearchPage = lazy(() => import('@/pages/Search/SearchPage').then((m) => ({ default: m.SearchPage })));
 const FavoritesPage = lazy(() => import('@/pages/Stub/StubPages').then((m) => ({ default: m.FavoritesPage })));
 import { useUser } from '@/store/user';
 import { authenticateWithTelegram, getStartParam, isTelegramEnv } from '@/lib/telegram';

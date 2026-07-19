@@ -16,11 +16,6 @@ function Stub({ icon, title, text }) {
   );
 }
 
-export function SearchPage() {
-  const t = useT();
-  return <Stub icon="search" title={t('navSearch')} text={t('search')} />;
-}
-
 export function FavoritesPage() {
   const t = useT();
   return <Stub icon="heart" title={t('navProfile')} text={t('empty')} />;
