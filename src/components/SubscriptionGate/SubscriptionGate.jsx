@@ -11,6 +11,7 @@ export function SubscriptionGate({ children }) {
   const t = useT();
   const [state, setState] = useState({ loading: true, required: false, subscribed: true, channelUrl: '' });
   const [checking, setChecking] = useState(false);
+  const [autoChecking, setAutoChecking] = useState(false);
 
   const check = async () => {
     try {
@@ -38,7 +39,31 @@ export function SubscriptionGate({ children }) {
     const tg = getTelegram();
     if (tg?.openTelegramLink && state.channelUrl) tg.openTelegramLink(state.channelUrl);
     else if (state.channelUrl) window.open(state.channelUrl, '_blank');
+
+    // Foydalanuvchi kanalga o'tdi — qaytganda avtomatik tekshiramiz.
+    // Telegram avtomatik obuna qilishga ruxsat bermaydi, lekin bu
+    // tajribani deyarli avtomatik qiladi: bir bosish → obuna → qaytish.
+    setAutoChecking(true);
   };
+
+  // Ilova fokusga qaytganda avtomatik tekshirish
+  useEffect(() => {
+    if (!autoChecking) return;
+    const onFocus = async () => {
+      const ok = await check();
+      if (ok) setAutoChecking(false);
+    };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onFocus);
+    // Har 2 soniyada ham tekshiramiz (Telegram ichida focus ishlamasligi mumkin)
+    const poll = setInterval(onFocus, 2000);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onFocus);
+      clearInterval(poll);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoChecking]);
 
   // Yuklanmoqда — bo'sh (tez o'tadi)
   if (state.loading) return children;
@@ -52,8 +77,8 @@ export function SubscriptionGate({ children }) {
         <div className="sub-gate__icon"><Icon name="send" size={40} color="#F5A524" /></div>
         <h2 className="sub-gate__title">Kanalga obuna bo'ling</h2>
         <p className="sub-gate__text">
-          Buyurtma berishдан oldin asosiy kanalimizga obuna bo'ling.
-          Bu bir marta — obuna bo'lганingizdan so'ng ilovadan bemalol foydalanasiz.
+          Yangi taomlar, chegirmalar va aksiyalardan xabardor bo'lish uchun
+          kanalimizga qo'shiling. Bu bir marta — keyin ilova doim ochiq.
         </p>
 
         <button onClick={openChannel} className="sub-gate__subscribe">
@@ -63,8 +88,13 @@ export function SubscriptionGate({ children }) {
           {checking ? 'Tekshirilmoqda...' : '✅ Obuna bo\u2018ldim, tekshirish'}
         </button>
 
-        {!checking && state.required && !state.subscribed && (
-          <p className="sub-gate__hint">Obuna bo'lgach «Tekshirish» tugmasini bosing</p>
+        {autoChecking && !checking && (
+          <p className="sub-gate__hint">
+            <span className="spinner spinner--sm" /> Obuna tekshirilmoqda...
+          </p>
+        )}
+        {!autoChecking && !checking && (
+          <p className="sub-gate__hint">Obuna bo'lgach avtomatik ochiladi</p>
         )}
       </div>
     </div>

@@ -70,6 +70,7 @@ function AppInner() {
   };
 
   useEffect(() => {
+    const loadAddresses = useUser.getState().loadAddresses;
     authenticateWithTelegram()
       .then((profile) => {
         updateUser({

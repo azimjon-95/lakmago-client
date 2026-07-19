@@ -29,16 +29,43 @@ export async function getCurrentPosition() {
   if (!navigator.geolocation) {
     throw new Error('Qurilma joylashuvni qo\u2018llab-quvvatlamaydi');
   }
+  // Aniqlik uchun bir necha o'lchov olamiz va eng aniqini tanlaymiz.
+  // watchPosition GPS qulflanishini kutadi (getCurrentPosition ba'zan
+  // birinchi, noaniq natijani qaytaradi).
   return new Promise((resolve, reject) => {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+    let best = null;
+    let watchId = null;
+    let timer = null;
+
+    const finish = () => {
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      if (timer) clearTimeout(timer);
+      if (best) {
+        resolve({ lat: best.coords.latitude, lng: best.coords.longitude, accuracy: best.coords.accuracy });
+      } else {
+        reject(new Error('Joylashuv aniqlanmadi'));
+      }
+    };
+
+    watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        // Eng aniq o'lchovni saqlaymiz (accuracy — metrda, kichik = aniqroq)
+        if (!best || pos.coords.accuracy < best.coords.accuracy) best = pos;
+        // 30 metrdan aniq bo'lsa — yetarli, kutmaymiz
+        if (pos.coords.accuracy <= 30) finish();
+      },
       (err) => {
+        if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+        if (timer) clearTimeout(timer);
         if (err.code === 1) reject(new Error('Joylashuvga ruxsat berilmadi'));
         else if (err.code === 3) reject(new Error('Joylashuv aniqlanmadi (vaqt tugadi)'));
-        else reject(new Error('Joylashuvni olishда xato'));
+        else reject(new Error('Joylashuvni olishda xato'));
       },
-      { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
     );
+
+    // 8 soniyada eng yaxshi natijani olamiz (cheksiz kutmaymiz)
+    timer = setTimeout(finish, 8000);
   });
 }
 

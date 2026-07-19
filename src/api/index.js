@@ -109,6 +109,13 @@ export const api = {
       body: JSON.stringify({ rating, comment }),
     }),
 
+  // ===== Manzillar (serverda saqlanadi) =====
+  getAddresses: () => apiFetch('/addresses', { method: 'GET' }),
+  createAddress: (data) => apiFetch('/addresses', { method: 'POST', body: JSON.stringify(data) }),
+  updateAddress: (id, data) => apiFetch(`/addresses/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteAddress: (id) => apiFetch(`/addresses/${id}`, { method: 'DELETE' }),
+  setDefaultAddress: (id) => apiFetch(`/addresses/${id}/default`, { method: 'PATCH' }),
+
   // ===== Referral =====
   getReferralInfo: () => apiFetch('/referral/me', { method: 'GET' }),
   getSubscription: () => apiFetch('/referral/subscription', { method: 'GET' }),

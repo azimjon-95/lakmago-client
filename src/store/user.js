@@ -72,30 +72,85 @@ export const useUser = create(
 
   updateUser: (patch) => set((state) => ({ user: { ...state.user, ...patch } })),
 
-  addAddress: (address) =>
-  set((state) => {
-    const newAddr = { ...address, id: 'addr' + Date.now() };
-    const addresses = [...state.user.addresses, newAddr];
-    return {
+  // Manzil qo'shish — avval lokal (tez ko'rinadi), keyin serverga saqlanadi
+  addAddress: async (address) => {
+    const tempId = 'addr' + Date.now();
+    const newAddr = { ...address, id: tempId };
+    set((state) => ({
       user: {
         ...state.user,
-        addresses,
-        // Yangi qo'shilган manzil darhol tanlanadi (qulaylik)
-        defaultAddressId: newAddr.id,
+        addresses: [...state.user.addresses, newAddr],
+        defaultAddressId: tempId,
+      },
+    }));
+
+    // Serverga saqlaymiz — boshqa qurilmada ham ko'rinadi
+    try {
+      const { api } = await import('@/api');
+      const res = await api.createAddress({
+        title: address.title,
+        address: address.address,
+        street: address.street || '',
+        city: address.city || '',
+        entrance: address.entrance || '',
+        floor: address.floor || '',
+        flat: address.flat || '',
+        note: address.note || '',
+        labelId: address.labelId || 'other',
+        ...(address.lat ? { lat: address.lat, lng: address.lng } : {}),
+      });
+      // Server javobini o'rnatamiz (haqiqiy _id bilan)
+      if (res?.addresses) {
+        set((state) => ({
+          user: {
+            ...state.user,
+            addresses: res.addresses.map((a) => ({ ...a, id: String(a._id) })),
+            defaultAddressId: res.defaultAddressId ? String(res.defaultAddressId) : tempId,
+          },
+        }));
       }
-    };
-  }),
+    } catch {
+      // Server yo'q — lokal saqlanган holat qoladi (offline ishlaydi)
+    }
+  },
 
-  removeAddress: (id) =>
-  set((state) => {
-    const addresses = state.user.addresses.filter((a) => a.id !== id);
-    const defaultAddressId =
-    state.user.defaultAddressId === id ? addresses[0]?.id ?? null : state.user.defaultAddressId;
-    return { user: { ...state.user, addresses, defaultAddressId } };
-  }),
+  // Serverdan manzillarni yuklash (ilova ochilganda)
+  loadAddresses: async () => {
+    try {
+      const { api } = await import('@/api');
+      const res = await api.getAddresses();
+      if (res?.addresses) {
+        set((state) => ({
+          user: {
+            ...state.user,
+            addresses: res.addresses.map((a) => ({ ...a, id: String(a._id) })),
+            defaultAddressId: res.defaultAddressId ? String(res.defaultAddressId) : state.user.defaultAddressId,
+          },
+        }));
+      }
+    } catch { /* offline — lokal holat qoladi */ }
+  },
 
-  setDefaultAddress: (id) =>
-  set((state) => ({ user: { ...state.user, defaultAddressId: id } })),
+  removeAddress: async (id) => {
+    try {
+      const { api } = await import('@/api');
+      await api.deleteAddress(id);
+    } catch { /* offline */ }
+    set((state) => {
+      const addresses = state.user.addresses.filter((a) => a.id !== id);
+      const defaultAddressId =
+        state.user.defaultAddressId === id ? addresses[0]?.id ?? null : state.user.defaultAddressId;
+      return { user: { ...state.user, addresses, defaultAddressId } };
+    });
+  },
+
+  setDefaultAddress: async (id) => {
+    set((state) => ({ user: { ...state.user, defaultAddressId: id } }));
+    try {
+      const { api } = await import('@/api');
+      await api.setDefaultAddress(id);
+    } catch { /* offline */ }
+  },
 
   setAuthStatus: (authStatus) => set({ authStatus }),
   setLastPaymentMethod: (lastPaymentMethod) => set({ lastPaymentMethod })
