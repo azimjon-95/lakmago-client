@@ -3,10 +3,23 @@
 
 export const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
 
-// JWT token (Telegram login orqali olinadi)
-let authToken = null;
+// JWT token (Telegram login orqali olinadi).
+// sessionStorage'da ham saqlanadi — sahifa yangilanganda yo'qolmaydi.
+const TOKEN_KEY = 'lokmago_token';
+let authToken = (typeof sessionStorage !== 'undefined')
+  ? sessionStorage.getItem(TOKEN_KEY)
+  : null;
+
 export function setAuthToken(token) {
-  authToken = token;
+  authToken = token || null;
+  try {
+    if (token) sessionStorage.setItem(TOKEN_KEY, token);
+    else sessionStorage.removeItem(TOKEN_KEY);
+  } catch { /* sessionStorage bloklangan bo'lishi mumkin */ }
+}
+
+export function getAuthToken() {
+  return authToken;
 }
 
 // MongoDB `_id` ni `id` ga ham nusxalaymиz (rekursiv).

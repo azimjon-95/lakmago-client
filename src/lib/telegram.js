@@ -104,7 +104,12 @@ export async function authenticateWithTelegram() {
   });
   if (!res.ok) throw new Error(`Auth xatosi: ${res.status}`);
   const data = await res.json();
-  if (data.token) sessionStorage.setItem('lokmago_token', data.token);
+  // Tokenni API klientiga beramiz — himoyalangan so'rovlar ishlashi uchun.
+  // (Avval faqat sessionStorage'ga yozilardi, API undan xabarsiz edi → 401)
+  if (data.token) {
+    const { setAuthToken } = await import('@/api');
+    setAuthToken(data.token);
+  }
   return {
     telegramId: data.user.telegramId,
     firstName: data.user.firstName,

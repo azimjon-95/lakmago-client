@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Icon } from '@/components/Icon';
 import { api } from '@/api';
+import { useUser } from '@/store/user';
 import { getTelegram, haptic } from '@/lib/telegram';
 import { useT } from '@/i18n';
 import './SubscriptionGate.css';
@@ -25,7 +26,13 @@ export function SubscriptionGate({ children }) {
     }
   };
 
-  useEffect(() => { check(); }, []);
+  // Login tugagunicha kutamiz — aks holda 401 qaytadi
+  const authStatus = useUser((st) => st.authStatus);
+  useEffect(() => {
+    if (authStatus === 'pending') return;
+    check();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authStatus]);
 
   const onCheck = async () => {
     haptic();
