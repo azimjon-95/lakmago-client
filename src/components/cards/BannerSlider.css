@@ -11,3 +11,22 @@
 .banner-slider__dots { position: absolute; bottom: 10px; left: 18px; display: flex; gap: 6px; }
 .banner-slider__dot { height: 5px; width: 5px; border-radius: 3px; background: rgba(255,255,255,0.5); transition: all 0.3s var(--ease); }
 .banner-slider__dot.is-active { width: 16px; background: var(--brand); }
+
+/* Tugmasiz banner — faqat rasm, matn bloki yo'q */
+.banner-slide--plain {
+  justify-content: center;
+}
+.banner-slide__body {
+  position: relative;
+  z-index: 1;
+}
+/* Tugma bo'lsa matn o'qilishi uchun yengil qoraytirish */
+.banner-slide:not(.banner-slide--plain)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 60%, transparent 100%);
+  border-radius: inherit;
+}
+.banner-slide[role="button"] { cursor: pointer; }
+.banner-slide[role="button"]:active { transform: scale(0.995); }

@@ -11,6 +11,15 @@ export function BannerSlider({ banners }) {
     return () => clearInterval(t);
   }, [banners.length]);
 
+  // Havolani Telegram ichida yoki brauzerda ochamiz
+  const openLink = (url) => {
+    const tg = window.Telegram?.WebApp;
+    if (!url) return;
+    if (url.includes('t.me/') && tg?.openTelegramLink) tg.openTelegramLink(url);
+    else if (tg?.openLink) tg.openLink(url);
+    else window.open(url, '_blank');
+  };
+
   if (!banners.length) return null;
   const b = banners[index];
   // Rasm bo'lsa fon sifatida rasm, bo'lmasa rang
@@ -20,12 +29,25 @@ export function BannerSlider({ banners }) {
 
   return (
     <div className="banner-slider">
-      <div className="banner-slide" style={slideStyle} key={b.id || b._id}>
-        <div>
-          <div className="banner-slide__eyebrow" style={{ color: b.accentText }}>{b.eyebrow}</div>
-          <div className="banner-slide__title">{b.title}</div>
-          <div className="banner-slide__cta" style={{ background: b.ctaBg, color: b.ctaText }}>{b.cta}</div>
-        </div>
+      <div
+        className={`banner-slide ${b.hasButton ? '' : 'banner-slide--plain'}`}
+        style={slideStyle}
+        key={b.id || b._id}
+        onClick={() => b.hasButton && b.linkUrl && openLink(b.linkUrl)}
+        role={b.hasButton && b.linkUrl ? 'button' : undefined}
+      >
+        {/* Matn va tugma faqat yoqilganda — aks holda toza rasm */}
+        {b.hasButton && (
+          <div className="banner-slide__body">
+            {b.eyebrow && (
+              <div className="banner-slide__eyebrow" style={{ color: b.accentText }}>{b.eyebrow}</div>
+            )}
+            {b.title && <div className="banner-slide__title">{b.title}</div>}
+            <div className="banner-slide__cta" style={{ background: b.ctaBg, color: b.ctaText }}>
+              {b.cta || "Ko'rish"}
+            </div>
+          </div>
+        )}
         {!b.imageUrl && <Icon name={b.icon} size={52} color={b.ctaBg} />}
       </div>
       <div className="banner-slider__dots">
