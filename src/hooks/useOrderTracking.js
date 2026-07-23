@@ -1,24 +1,28 @@
 import { useEffect } from 'react';
-import { io } from 'socket.io-client';
+import { getSocket, trackOrder } from '@/lib/socket';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL ?? '';
-
-// Har buyurtma (backend order)ning real-time statusini kuzatadi.
-// backendIds — kuzatiladigan order _id'lar. onStatus(backendId, status) chaqiriladi.
-// Backend/socket yo'q bo'lsa (demo) — hech narsa qilmaydi, sahifa timer bilan simulyatsiya qiladi.
+// Buyurtmalarning real-time holatini kuzatadi.
+// backendIds — kuzatiladigan order _id'lar.
+// onStatus(orderId, status) — holat o'zgarganda chaqiriladi.
 export function useOrderTracking(backendIds, onStatus) {
   useEffect(() => {
     const ids = (backendIds || []).filter(Boolean);
-    if (!SOCKET_URL || ids.length === 0) return;
+    if (ids.length === 0) return;
 
-    const socket = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
-    ids.forEach((id) => socket.emit('track:order', id));
+    const socket = getSocket();
+    ids.forEach(trackOrder);
 
-    socket.on('order:status', (data) => {
-      onStatus(data.orderId, data.status);
-    });
+    const handler = (data) => onStatus(data.orderId, data.status);
+    socket.on('order:status', handler);
 
-    return () => { socket.disconnect(); };
+    // Uzilib qayta ulansa — kuzatuvni tiklaymiz
+    const rejoin = () => ids.forEach(trackOrder);
+    socket.on('connect', rejoin);
+
+    return () => {
+      socket.off('order:status', handler);
+      socket.off('connect', rejoin);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [(backendIds || []).join(',')]);
 }

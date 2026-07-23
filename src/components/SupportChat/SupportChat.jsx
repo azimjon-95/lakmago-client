@@ -4,7 +4,7 @@ import './SupportChat.css';
 import { OperatorAvatar } from './OperatorAvatar';
 import { Icon } from '@/components/Icon';
 import { api } from '@/api';
-import { io } from 'socket.io-client';
+import { getSocket, joinUserRoom } from '@/lib/socket';
 import { useUser } from '@/store/user';
 
 // Bottom-right animatsiyali chat tugmasi + oyna.
@@ -47,18 +47,18 @@ export function SupportChat() {
   // Admin javobini real vaqtda qabul qilamiz
   useEffect(() => {
     if (!userId) return;
-    const socket = io(import.meta.env.VITE_SOCKET_URL ?? '/', {
-      transports: ['websocket', 'polling'],
-    });
-    socket.emit('join:user', String(userId));
-    socket.on('support:reply', (data) => {
+    const socket = getSocket();
+    joinUserRoom(userId);
+    const handler = (data) => {
       setMessages((m) => [...m, {
         id: Date.now(), from: 'support', text: data.text, adminName: data.adminName,
       }]);
       // Chat yopiq bo'lsa — o'qilmagan belgisi
       setUnread((n) => (open ? 0 : n + 1));
-    });
-    return () => socket.disconnect();
+    };
+    socket.on('support:reply', handler);
+    // Umumiy socket — uzmaymiz, faqat tinglovchini olib tashlaymiz
+    return () => socket.off('support:reply', handler);
   }, [userId, open]);
 
   useEffect(() => {

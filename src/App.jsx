@@ -15,6 +15,7 @@ import { useUser } from '@/store/user';
 import { authenticateWithTelegram, getStartParam, isTelegramEnv } from '@/lib/telegram';
 import { TelegramOnly } from '@/components/TelegramOnly/TelegramOnly';
 import { api } from '@/api';
+import { joinUserRoom } from '@/lib/socket';
 import { I18nProvider } from '@/i18n';
 import { ActiveOrderBadge } from '@/components/ActiveOrderBadge/ActiveOrderBadge';
 import { SupportChat } from '@/components/SupportChat/SupportChat';
@@ -87,6 +88,10 @@ function AppInner() {
           verified: true,
         });
         setAuthStatus('done');
+        // Serverdagi manzillar va shaxsiy socket xonasi
+        loadAddresses?.();
+        const uid = profile._id || profile.id;
+        if (uid) joinUserRoom(uid);
       })
       .catch((err) => {
         console.warn('Telegram auth muvaffaqiyatsiz, mehmon rejimida davom etiladi:', err);
