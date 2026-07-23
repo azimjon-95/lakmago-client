@@ -42,6 +42,8 @@ export function RestaurantPage() {
   const restaurantDishes = useMemo(
     () => rawDishes.map((d) => ({
       ...d,
+      // Savat aynan shu maydon bo'yicha guruhlaydi — bo'lmasa buyurtma yaratilmaydi
+      restaurantId: d.restaurantId || restaurant?.id || restaurant?._id || id,
       restaurantName: restaurant?.name,
       restaurantTint: restaurant?.tint,
       restaurantIcon: restaurant?.icon,
@@ -49,7 +51,7 @@ export function RestaurantPage() {
       restaurantDeliveryMax: restaurant?.deliveryMax,
       restaurantDeliveryFee: restaurant?.deliveryFee,
     })),
-    [rawDishes, restaurant],
+    [rawDishes, restaurant, id],
   );
 
   const sections = useMemo(() => {
