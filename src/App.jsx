@@ -7,6 +7,7 @@ const RestaurantPage = lazy(() => import('@/pages/Restaurant/RestaurantPage').th
 const CartPage = lazy(() => import('@/pages/Cart/CartPage').then((m) => ({ default: m.CartPage })));
 const OrderTrackPage = lazy(() => import('@/pages/OrderTrack/OrderTrackPage').then((m) => ({ default: m.OrderTrackPage })));
 const OrdersPage = lazy(() => import('@/pages/Orders/OrdersPage').then((m) => ({ default: m.OrdersPage })));
+const MyReservationsPage = lazy(() => import('@/pages/Reservation/MyReservationsPage').then((m) => ({ default: m.MyReservationsPage })));
 const ReservationPage = lazy(() => import('@/pages/Reservation/ReservationPage').then((m) => ({ default: m.ReservationPage })));
 const ProfilePage = lazy(() => import('@/pages/Profile/ProfilePage').then((m) => ({ default: m.ProfilePage })));
 const SearchPage = lazy(() => import('@/pages/Search/SearchPage').then((m) => ({ default: m.SearchPage })));
@@ -111,6 +112,7 @@ function AppInner() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/restaurant/:id" element={<RestaurantPage />} />
+              <Route path="/my-reservations" element={<MyReservationsPage />} />
               <Route path="/restaurant/:id/reserve" element={<ReservationPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/order/track" element={<OrderTrackPage />} />

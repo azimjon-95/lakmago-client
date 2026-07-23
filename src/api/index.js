@@ -138,6 +138,8 @@ export const api = {
   getSubscription: () => apiFetch('/referral/subscription', { method: 'GET' }),
 
   // ===== Bron =====
+  getMyReservations: () => apiFetch('/reservations/my', { method: 'GET' }),
+  cancelReservation: (id) => apiFetch(`/reservations/${id}/cancel`, { method: 'PATCH' }),
   createReservation: (payload) =>
     apiFetch('/reservations', { method: 'POST', body: JSON.stringify(payload) }),
 

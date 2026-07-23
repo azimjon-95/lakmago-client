@@ -61,6 +61,18 @@ export function ProfilePage() {
       </div>
 
       {/* Shaxsiy */}
+      {/* Bronlarim */}
+      <div className="profile-section">
+        <button onClick={() => navigate('/my-reservations')} className="profile-row">
+          <Icon name="calendarPlus" size={18} color="#F5A524" />
+          <div className="profile-row__body">
+            <div className="profile-row__value">Bronlarim</div>
+            <div className="profile-row__label">Stol bronlari tarixi</div>
+          </div>
+          <Icon name="chevronRight" size={18} color="#A99C8C" />
+        </button>
+      </div>
+
       <div className="profile-section">
         <div className="profile-section__label">{t('settings')}</div>
 
