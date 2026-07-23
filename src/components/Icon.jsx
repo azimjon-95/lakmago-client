@@ -25,7 +25,8 @@ export function Icon({ name, size = 20, color = 'currentColor', strokeWidth = 2,
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
-      style={{ flexShrink: 0, ...style }}
+      // color — to'ldirilgan ikonlar (fill: currentColor) uchun kerak
+      style={{ flexShrink: 0, color, ...style }}
       aria-hidden="true">
       
       {elements.map(([tag, attrs], i) => {

@@ -124,7 +124,9 @@ export function SupportChat() {
               onKeyDown={(e) => e.key === 'Enter' && send()}
               placeholder={t('chatPlaceholder')}
             />
-            <button onClick={send} aria-label={t('send')}><Icon name="send" size={18} color="#F5A524" /></button>
+            <button onClick={send} aria-label={t('send')} className="support-chat__send">
+              <Icon name="telegram" size={20} color="#2A1500" />
+            </button>
           </div>
         </div>
       )}

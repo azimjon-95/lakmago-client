@@ -54,5 +54,7 @@ export const ICONS = {
   scooter: [['circle', { cx: '19', cy: '17', r: '3' }], ['circle', { cx: '5', cy: '17', r: '3' }], ['path', { d: 'M8 17h8' }], ['path', { d: 'M19 17V9a2 2 0 0 0-2-2h-2' }], ['path', { d: 'M5 17V9l3-5h4' }], ['path', { d: 'M12 4h3' }]],
   utensils: [['path', { d: 'M3 2v7c0 1.1.9 2 2 2h1a2 2 0 0 0 2-2V2' }], ['path', { d: 'M6 2v20' }], ['path', { d: 'M18 2v20' }], ['path', { d: 'M18 12c2-1 3-3 3-6 0-2.5-1-4-3-4' }]],
   filter: [['path', { d: 'M4 6h16' }], ['path', { d: 'M4 12h10' }], ['path', { d: 'M4 18h6' }], ['circle', { cx: '17', cy: '12', r: '2' }], ['circle', { cx: '13', cy: '18', r: '2' }], ['circle', { cx: '9', cy: '6', r: '2' }]],
-  info: [['circle', { cx: '12', cy: '12', r: '10' }], ['path', { d: 'M12 16v-4' }], ['path', { d: 'M12 8h.01' }]]
+  info: [['circle', { cx: '12', cy: '12', r: '10' }], ['path', { d: 'M12 16v-4' }], ['path', { d: 'M12 8h.01' }]],
+  // Telegram paper-plane — to'ldirilgan shakl (fill bilan chiziladi)
+  telegram: [['path', { d: 'M21.94 3.3a1 1 0 0 0-1.06-.16L2.5 10.9a1 1 0 0 0 .07 1.86l4.4 1.5 1.7 5.2a1 1 0 0 0 1.66.4l2.5-2.4 4.5 3.3a1 1 0 0 0 1.57-.6l3.4-15.9a1 1 0 0 0-.36-.96zM9.6 14.2l-.5 3.6-1.1-3.4 8.8-6.3z', fill: 'currentColor', stroke: 'none' }]]
 };
