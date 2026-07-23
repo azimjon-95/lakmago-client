@@ -110,8 +110,10 @@ export function RestaurantBanner({ restaurant, height = 150 }) {
     );
   }
 
-  // Rasm yo'q — restoran ikoni bilan chiroyli gradient (ogohlantirish yozuvi yo'q)
-  if (images.length === 0) {
+  // Rasm yo'q — restoran ikoni bilan chiroyli gradient.
+  // images ichida yaroqsiz qiymat bo'lsa ham shu holat ishlaydi.
+  const hasValidImage = images.some((u) => typeof u === 'string' && u.startsWith('http'));
+  if (!hasValidImage) {
     return (
       <div style={{
         height,
