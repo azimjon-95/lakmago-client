@@ -61,8 +61,26 @@ const API_BASE = import.meta.env.VITE_API_URL ?? null;
 export async function authenticateWithTelegram() {
   const tg = getTelegram();
   if (tg) {
+    // ===== Mini App ochilish ketma-ketligi =====
+    // Har bir chaqiruv feature detection bilan himoyalangan —
+    // eski Telegram versiyalarida bu API'lar mavjud emas.
     tg.ready();
-    tg.expand();
+
+    if (typeof tg.expand === 'function') {
+      try { tg.expand(); } catch { /* qo'llab-quvvatlanmaydi */ }
+    }
+
+    // To'liq ekran rejimi (Bot API 8.0+)
+    if (typeof tg.requestFullscreen === 'function') {
+      try { tg.requestFullscreen(); } catch { /* qo'llab-quvvatlanmaydi */ }
+    }
+
+    // Pastga swipe bilan yopilishni bloklaymiz (Bot API 7.7+).
+    // Ilovadan chiqish faqat Telegram'ning Close tugmasi orqali.
+    if (typeof tg.disableVerticalSwipes === 'function') {
+      try { tg.disableVerticalSwipes(); } catch { /* qo'llab-quvvatlanmaydi */ }
+    }
+
     // Dark theme — Telegram header va fon ranglari
     try {
       tg.setHeaderColor?.('#12100E');
@@ -77,7 +95,11 @@ export async function authenticateWithTelegram() {
       if (h) document.documentElement.style.setProperty('--tg-viewport-height', `${h}px`);
     };
     syncViewport();
-    tg.onEvent?.('viewportChanged', syncViewport);
+    if (typeof tg.onEvent === 'function') {
+      tg.onEvent('viewportChanged', syncViewport);
+      // To'liq ekranga o'tganda balandlik o'zgaradi — qayta hisoblaymiz
+      tg.onEvent('fullscreenChanged', syncViewport);
+    }
   }
 
   const initData = tg?.initData || '';
