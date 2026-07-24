@@ -89,8 +89,9 @@ ul { list-style: none; }
   position: relative;
   display: flex;
   flex-direction: column;
-  /* iPhone "notch" (yuqori) hisobga olinadi */
-  padding-top: env(safe-area-inset-top, 0px);
+  /* Yuqori bo'shliq: iPhone notch + Telegram tugmalari (to'liq ekranda).
+     --tg-content-top ni telegram.js o'rnatadi. */
+  padding-top: calc(env(safe-area-inset-top, 0px) + var(--tg-content-top, 0px));
 }
 
 /* Umumiy yordamchi klasslar */

@@ -91,14 +91,28 @@ export async function authenticateWithTelegram() {
     // Viewport balandligини CSS o'zgaruvchisига yozamiz — har xil telefonда
     // (notch, klaviatura, kengaytirish) layout to'g'ri moslashadi.
     const syncViewport = () => {
+      const root = document.documentElement;
       const h = tg.viewportStableHeight || tg.viewportHeight;
-      if (h) document.documentElement.style.setProperty('--tg-viewport-height', `${h}px`);
+      if (h) root.style.setProperty('--tg-viewport-height', `${h}px`);
+
+      // To'liq ekranda Telegram tugmalari (Закрыть, ⌄, ⋯) kontent ustiga
+      // tushadi. Telegram ular egallagan balandlikni contentSafeAreaInset
+      // da beradi (Bot API 8.0+).
+      let top = tg.contentSafeAreaInset?.top ?? 0;
+
+      // Eski versiyalarda bu maydon yo'q — to'liq ekranda bo'lsak
+      // tugmalar balandligini taxminan qo'shamiz (~56px).
+      if (!top && tg.isFullscreen) top = 56;
+
+      root.style.setProperty('--tg-content-top', `${top}px`);
     };
     syncViewport();
     if (typeof tg.onEvent === 'function') {
       tg.onEvent('viewportChanged', syncViewport);
-      // To'liq ekranga o'tganda balandlik o'zgaradi — qayta hisoblaymiz
+      // To'liq ekranga o'tganda balandlik va yuqori bo'shliq o'zgaradi
       tg.onEvent('fullscreenChanged', syncViewport);
+      tg.onEvent('safeAreaChanged', syncViewport);
+      tg.onEvent('contentSafeAreaChanged', syncViewport);
     }
   }
 
