@@ -96,7 +96,7 @@ export function FilterSheet({
                   onClick={() => toggleCategory(c.id)}
                   className={`filter-cat ${categories.includes(c.id) ? 'is-active' : ''}`}
                 >
-                  <span className="filter-cat__art"><CategoryIcon name={c.art} img={c.img} size={48} /></span>
+                  <span className="filter-cat__art"><CategoryIcon name={c.art} id={c.id} img={c.img} size={48} /></span>
                   <span className="filter-cat__label">{c.label}</span>
                 </button>
               ))}

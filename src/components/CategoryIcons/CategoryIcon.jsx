@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react';
+
 // Kategoriya illyustratsiyalari — bir xil uslubda chizilgan SVG.
 // Tashqi rasm emas: darhol ko'rinadi, yuklanish kutilmaydi, hech qachon "sinmaydi".
 
@@ -138,13 +140,23 @@ function optimizeImg(url, size) {
 }
 
 // Kategoriya ikoni.
-//   img berilgan bo'lsa — HAQIQIY FOTO (Uzum uslubida)
-//   bo'lmasa — chizma SVG (zaxira, hech qachon bo'sh qolmaydi)
-export function CategoryIcon({ name, size = 56, img = '' }) {
-  if (img) {
+//   1) public/categories/<id>.png bo'lsa — haqiqiy foto
+//   2) img prop berilgan bo'lsa — o'sha (Cloudinary havolasi)
+//   3) aks holda — chizma SVG (hech qachon bo'sh qolmaydi)
+export function CategoryIcon({ name, id, size = 56, img = '' }) {
+  // Rasm yuklanmasa chizmaga qaytamiz
+  const [failed, setFailed] = useState(false);
+
+  // Lokal papkadagi rasm: public/categories/<id>.png
+  const localSrc = id ? `/categories/${id}.png` : '';
+  const src = img || localSrc;
+
+  useEffect(() => { setFailed(false); }, [src]);
+
+  if (src && !failed) {
     return (
       <img
-        src={optimizeImg(img, size)}
+        src={img ? optimizeImg(img, size) : src}
         alt=""
         width={size}
         height={size}
@@ -152,11 +164,11 @@ export function CategoryIcon({ name, size = 56, img = '' }) {
         decoding="async"
         className="cat-photo"
         style={{ width: size, height: size, objectFit: 'contain', display: 'block' }}
-        // Rasm yuklanmasa — chizmaga qaytamiz
-        onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling?.style?.setProperty('display', 'block'); }}
+        onError={() => setFailed(true)}
       />
     );
   }
+
   const art = ART[name] || ART.all;
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden="true">

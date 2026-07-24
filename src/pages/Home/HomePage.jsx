@@ -78,19 +78,20 @@ export function HomePage() {
           </span>
         </button>
         <div className="home-header__right">
+          {/* Qidiruv — ikonka, joyni tejaydi */}
+          <button
+            onClick={() => navigate('/search')}
+            className="home-header__icon-btn"
+            aria-label={t('search')}
+          >
+            <Icon name="search" size={19} color="#F7F2EA" />
+          </button>
           <LangSwitch compact />
           <button onClick={() => navigate('/profile')} className="home-header__avatar">
             {user.photoInitials}
           </button>
         </div>
       </header>
-
-      <div className="home-search">
-        <button onClick={() => navigate('/search')} className="home-search__btn">
-          <Icon name="search" size={18} color="#A99C8C" />
-          <span>{t('search')}</span>
-        </button>
-      </div>
 
       <BannerSlider banners={banners} />
 
@@ -102,7 +103,7 @@ export function HomePage() {
             className={`home-cat ${category === c.id ? 'is-active' : ''}`}
           >
             <span className="home-cat__art">
-              <CategoryIcon name={c.art} img={c.img} size={52} />
+              <CategoryIcon name={c.art} id={c.id} img={c.img} size={52} />
             </span>
             <span className="home-cat__label">{c.key ? t(c.key) : c.label}</span>
           </button>
