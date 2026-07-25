@@ -4,6 +4,7 @@ import { Icon } from '@/components/Icon';
 import { DishPhoto } from '@/components/DishPhoto';
 import { haptic } from '@/lib/telegram';
 import { useT } from '@/i18n';
+import { api } from '@/api';
 import { useUser } from '@/store/user';
 import { formatSom, formatSomShort } from '@/lib/utils';
 import { useRestaurant, useDishes } from '@/hooks/queries';
@@ -60,9 +61,41 @@ export function ReservationPage() {
   const phoneDigits = phone.replace(/\D/g, '');
   const valid = name.trim().length >= 2 && phoneDigits.length >= 9;
 
-  function finishReservation(chosen) {
-    setPreOrderDishes(chosen);
-    setStep('done');
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+
+  // Bronni serverga saqlaydi — restoran shu orqali ko'radi,
+  // mijozga bot orqali eslatma keladi.
+  async function finishReservation(chosen) {
+    if (saving) return;
+    setSaving(true);
+    setSaveError(null);
+
+    // Sana YYYY-MM-DD formatida (server shuni kutadi)
+    const d = selectedDate;
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+    try {
+      await api.createReservation({
+        restaurantId: id,
+        restaurantName: restaurant?.name || 'Restoran',
+        date: dateStr,
+        time,
+        guests,
+        name: name.trim(),
+        phone: phone.trim(),
+        // Oldindan tanlangan taomlar izohga yoziladi
+        note: chosen.length
+          ? `Oldindan buyurtma: ${chosen.map((c) => `${c.name}×${c.qty || 1}`).join(', ')}`
+          : '',
+      });
+      setPreOrderDishes(chosen);
+      setStep('done');
+    } catch (e) {
+      setSaveError(e.message || 'Bron saqlanmadi');
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (step === 'preorder' && restaurant) {
@@ -70,8 +103,10 @@ export function ReservationPage() {
       <PreOrderScreen
         restaurant={restaurant}
         reservationInfo={{ dateLabel, time, guests }}
-        onSkip={() => finishReservation([])}
+        onCancelAll={() => { haptic(); navigate(-1); }}
         onConfirm={(chosen) => finishReservation(chosen)}
+        saving={saving}
+        saveError={saveError}
         onBack={() => setStep('form')}
         t={t}
       />
@@ -192,7 +227,7 @@ export function ReservationPage() {
   );
 }
 
-function PreOrderScreen({ restaurant, reservationInfo, onSkip, onConfirm, onBack, t }) {
+function PreOrderScreen({ restaurant, reservationInfo, onCancelAll, onConfirm, onBack, saving, saveError, t }) {
   const { data: restaurantDishes = [] } = useDishes(restaurant.id);
   const [selections, setSelections] = useState({});
 
@@ -270,6 +305,7 @@ function PreOrderScreen({ restaurant, reservationInfo, onSkip, onConfirm, onBack
       </div>
 
       <div className="resv-preorder-footer">
+        {saveError && <div className="resv-error">{saveError}</div>}
         {totalCount > 0 && (
           <div className="resv-preorder-total">
             <span>{totalCount} · {t('addToCart')}</span>
@@ -277,9 +313,18 @@ function PreOrderScreen({ restaurant, reservationInfo, onSkip, onConfirm, onBack
           </div>
         )}
         <div className="resv-preorder-actions">
-          <button onClick={onSkip} className="btn-secondary" style={{ flex: 1 }}>{t('cancel')}</button>
-          <button onClick={() => onConfirm(selectedList)} disabled={totalCount === 0} className="btn-primary" style={{ flex: 1.4 }}>
-            {totalCount > 0 ? `${t('send')} · ${formatSom(totalPrice)}` : t('addToCart')}
+          {/* Bekor qilish — butun bron jarayoni to'xtaydi */}
+          <button onClick={onCancelAll} className="btn-secondary" style={{ flex: 1 }}>
+            Bekor qilish
+          </button>
+          {/* Tasdiqlash — taom tanlanmasa ham faol (taom ixtiyoriy) */}
+          <button
+            onClick={() => onConfirm(selectedList)}
+            disabled={saving}
+            className="btn-primary"
+            style={{ flex: 1.4 }}
+          >
+            {saving ? 'Saqlanmoqda...' : totalCount > 0 ? `Tasdiqlash · ${formatSom(totalPrice)}` : 'Tasdiqlash'}
           </button>
         </div>
       </div>
