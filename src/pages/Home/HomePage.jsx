@@ -99,7 +99,7 @@ export function HomePage() {
         {categories.map((c) => (
           <button
             key={c.id}
-            onClick={() => setCategory(c.id)}
+            onClick={() => setCategory((cur) => (cur === c.id ? 'all' : c.id))}
             className={`home-cat ${category === c.id ? 'is-active' : ''}`}
           >
             <span className="home-cat__art">

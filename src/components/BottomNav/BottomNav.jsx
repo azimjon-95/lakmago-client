@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Icon } from '../Icon';
 import { useCart } from '@/store/cart';
@@ -12,6 +13,14 @@ const tabs = [
 ];
 
 export function BottomNav() {
+  // Pastki menyu bor-yo'qligini bildiramiz. Savat paneli shu qiymatga
+  // tayanadi — menyusiz sahifada (restoran, savat) pastga tushadi.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty('--bottom-nav-h', '62px');
+    return () => root.style.setProperty('--bottom-nav-h', '0px');
+  }, []);
+
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const t = useT();

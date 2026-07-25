@@ -6,7 +6,7 @@
   left: 0;
   right: 0;
   /* BottomNav (~62px) + iPhone home indicator ustida */
-  bottom: calc(62px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(var(--bottom-nav-h, 62px) + env(safe-area-inset-bottom, 0px));
   padding: 6px 12px 8px;
   /* Yon "notch" (yotiq iPhone) hisobga olinadi */
   padding-left: calc(12px + env(safe-area-inset-left, 0px));

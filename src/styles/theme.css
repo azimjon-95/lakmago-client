@@ -11,6 +11,10 @@
      faqat "bepul yetkazish" kabi ishonch signallari uchun
    ============================================ */
 :root {
+  /* Pastki menyu balandligi. BottomNav render bo'lganda 62px,
+     menyusiz sahifada 0px (BottomNav.jsx boshqaradi). */
+  --bottom-nav-h: 0px;
+
   /* ---- FON: to'q, LEKIN iliq (jigarrang nuance bilan) ----
      Sof qora (#0E0E10) sovuq va "texnik" ko'rinadi. Iliq to'q fon
      taomni "issiq" ko'rsatadi va rasm ranglarini kuchaytiradi. */
@@ -313,7 +317,7 @@ ul { list-style: none; }
   }
   .active-order-badge {
     /* Markazda qoladi (left:50% + transform), faqat balandlik ixchamlashadi */
-    bottom: calc(62px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(var(--bottom-nav-h, 62px) + env(safe-area-inset-bottom, 0px));
   }
 }
 

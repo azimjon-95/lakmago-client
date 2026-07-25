@@ -6,7 +6,7 @@
   right: calc(14px + env(safe-area-inset-right, 0px));
   /* Savat paneli (fixed) + pastki menyu USTIDA — to'qnashmaydi.
      --cart-bar-offset: savat bo'lganda JS/CSS orqali oshiriladi. */
-  bottom: calc(78px + var(--cart-bar-offset, 0px) + env(safe-area-inset-bottom, 0px));
+  bottom: calc(var(--bottom-nav-h, 0px) + 16px + var(--cart-bar-offset, 0px) + env(safe-area-inset-bottom, 0px));
   z-index: 46;
   width: 48px; height: 48px;
   transition: bottom 0.25s var(--ease);

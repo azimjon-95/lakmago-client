@@ -28,8 +28,7 @@ export const CATEGORIES = [
   { id: 'magazin_oziq', label: "Do'konlar", art: 'magazin', img: '' },
 ];
 
-// Bosh sahifa uchun — "Barchasi" bilan
-export const HOME_CATEGORIES = [
-  { id: 'all', key: 'all', art: 'all', img: '' },
-  ...CATEGORIES,
-];
+// Bosh sahifa uchun. "Barchasi" tugmasi yo'q — standart holatda
+// hech biri tanlanmaydi va barcha taomlar ko'rinadi.
+// Tanlangan kategoriyani qayta bosish tanlovni bekor qiladi.
+export const HOME_CATEGORIES = CATEGORIES;
