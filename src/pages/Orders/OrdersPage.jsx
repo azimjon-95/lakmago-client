@@ -116,7 +116,6 @@ export function OrdersPage() {
                 order={o}
                 open={openId === o._id}
                 onToggle={() => toggle(o._id)}
-                onTrack={() => navigate('/order/track')}
                 highlight
               />
             ))}
@@ -148,7 +147,7 @@ export function OrdersPage() {
 }
 
 // Bitta buyurtma kartasi — bosilsa tafsilot ochiladi
-function OrderCard({ order: o, open, onToggle, onTrack, onRepeat, highlight }) {
+function OrderCard({ order: o, open, onToggle, onRepeat, highlight }) {
   const st = STATUS[o.status] || STATUS.pending;
   const stepIndex = FLOW.indexOf(o.status);
   const itemCount = (o.items || []).reduce((s, i) => s + (i.quantity || 1), 0);
@@ -233,18 +232,13 @@ function OrderCard({ order: o, open, onToggle, onTrack, onRepeat, highlight }) {
             </div>
           )}
 
-          <div className="ord-card__actions">
-            {onTrack && (
-              <button onClick={onTrack} className="ord-btn ord-btn--primary">
-                Kuzatish
-              </button>
-            )}
-            {onRepeat && (
+          {onRepeat && (
+            <div className="ord-card__actions">
               <button onClick={onRepeat} className="ord-btn">
                 Qayta buyurtma
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
     </div>
