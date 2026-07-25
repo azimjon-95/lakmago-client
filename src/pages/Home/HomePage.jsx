@@ -51,11 +51,20 @@ export function HomePage() {
   const { data: allDishes = [], isLoading: allDishesLoading } = useAllDishes();
   const { data: banners = [] } = useBannersQuery();
 
-  // Filtrlashni memolaymiz (keraksiz qayta hisoblash bo'lmaydi)
+  // Kategoriya tanlanganda restoranlar VA taomlar birga filtrlanadi
   const filtered = useMemo(
     () => (category === 'all' ? restaurants : restaurants.filter((r) => r.category === category)),
     [restaurants, category],
   );
+
+  // Taomlar ham shu kategoriya bo'yicha. Taomda kategoriya bo'lmasa —
+  // restorani mos kelsa ham ko'rsatamiz (eski ma'lumot uchun).
+  const filteredDishes = useMemo(() => {
+    if (category === 'all') return allDishes;
+    const restIds = new Set(filtered.map((r) => String(r.id || r._id)));
+    return allDishes.filter((d) =>
+      d.category === category || restIds.has(String(d.restaurantId)));
+  }, [allDishes, filtered, category]);
 
   const defaultAddress = useMemo(
     () => user.addresses.find((a) => a.id === user.defaultAddressId) ?? user.addresses[0],
@@ -133,13 +142,13 @@ export function HomePage() {
       )}
 
       {/* Taomlar — TEPADA (Uzum uslubi: gorizontal scroll, kichik kartalar) */}
-      {(allDishesLoading || allDishes.length > 0) && (
+      {(allDishesLoading || filteredDishes.length > 0) && (
         <>
           <h2 className="home-restaurants-title">{t('allDishes')}</h2>
           <div className="home-dishes-row no-scrollbar">
             {allDishesLoading
               ? Array.from({ length: 6 }).map((_, i) => <DishScrollСardSkeleton key={i} />)
-              : allDishes.map((d) => (
+              : filteredDishes.map((d) => (
                   <DishGridCard key={d.id || d._id} dish={d} onClick={openModal} />
                 ))}
           </div>
