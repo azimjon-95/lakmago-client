@@ -199,7 +199,7 @@ export function RestaurantPage() {
                         <div className="review-card__head">
                           <div className="review-card__author">
                             <div className="review-card__avatar">
-                              {rv.name.split(' ').map((w) => w[0]).join('')}
+                              {(rv.name || 'M').split(' ').map((w) => w[0]).join('').slice(0, 2)}
                             </div>
                             <span className="review-card__name">{rv.name}</span>
                           </div>
