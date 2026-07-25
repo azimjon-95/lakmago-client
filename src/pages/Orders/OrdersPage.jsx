@@ -1,27 +1,97 @@
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { BottomNav } from '@/components/BottomNav';
-import { useOrders } from '@/store/orders';
-import { useT } from '@/i18n';
+import { api } from '@/api';
+import { getSocket, joinUserRoom } from '@/lib/socket';
+import { useUser } from '@/store/user';
 import { formatSom } from '@/lib/utils';
+import { useT } from '@/i18n';
+import { haptic } from '@/lib/telegram';
 import './Orders.css';
+
+// Buyurtma holatlari — bosqichma-bosqich
+const FLOW = ['pending', 'accepted', 'preparing', 'ready', 'delivering', 'delivered'];
+
+const STATUS = {
+  pending: { label: 'Tasdiq kutilmoqda', icon: 'clock', color: '#E0A96D' },
+  accepted: { label: 'Qabul qilindi', icon: 'check', color: '#6FBF73' },
+  preparing: { label: 'Tayyorlanmoqda', icon: 'flame', color: '#F5A524' },
+  ready: { label: 'Tayyor', icon: 'bag', color: '#6FBF73' },
+  delivering: { label: "Yo'lda", icon: 'scooter', color: '#F5A524' },
+  delivered: { label: 'Yetkazildi', icon: 'check', color: '#6FBF73' },
+  cancelled: { label: 'Bekor qilindi', icon: 'x', color: '#E14B42' },
+};
+
+// Faol = hali yetkazilmagan va bekor qilinmagan
+const isActive = (s) => !['delivered', 'cancelled'].includes(s);
+
+function fmtDate(d) {
+  const date = new Date(d);
+  const today = new Date();
+  const isToday = date.toDateString() === today.toDateString();
+  const time = date.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', hour12: false });
+  if (isToday) return `Bugun, ${time}`;
+  const yesterday = new Date(today.getTime() - 86400000);
+  if (date.toDateString() === yesterday.toDateString()) return `Kecha, ${time}`;
+  return `${date.toLocaleDateString('uz-UZ', { day: '2-digit', month: 'long' })}, ${time}`;
+}
 
 export function OrdersPage() {
   const navigate = useNavigate();
   const t = useT();
-  const activeOrder = useOrders((s) => s.activeOrder);
-  const pastOrders = useOrders((s) => s.pastOrders);
+  const userId = useUser((s) => s.user?._id || s.user?.id);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [openId, setOpenId] = useState(null);
 
-  if (!activeOrder && pastOrders.length === 0) {
+  const load = useCallback(() => {
+    api.getMyOrders()
+      .then((list) => setOrders(Array.isArray(list) ? list : []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  // Real-time: holat o'zgarsa ro'yxat yangilanadi
+  useEffect(() => {
+    if (!userId) return;
+    const socket = getSocket();
+    joinUserRoom(userId);
+    const refresh = () => load();
+    socket.on('order:status', refresh);
+    return () => socket.off('order:status', refresh);
+  }, [userId, load]);
+
+  const active = orders.filter((o) => isActive(o.status));
+  const past = orders.filter((o) => !isActive(o.status));
+
+  const toggle = (id) => {
+    haptic();
+    setOpenId((cur) => (cur === id ? null : id));
+  };
+
+  if (loading) {
     return (
       <div className="app-shell orders">
         <header className="orders-header">{t('navOrders')}</header>
-        <div className="empty-state">
-          <Icon name="bag" size={48} color="#A99C8C" />
-          <div className="empty-state__title">{t('noActiveOrders')}</div>
-          <p className="empty-state__hint">{t('cartEmptyHint')}</p>
-          <button onClick={() => navigate('/')} className="btn-primary" style={{ marginTop: 20 }}>
-            {t('allRestaurants')}
+        <div className="orders-empty">Yuklanmoqda...</div>
+        <BottomNav />
+      </div>
+    );
+  }
+
+  if (orders.length === 0) {
+    return (
+      <div className="app-shell orders">
+        <header className="orders-header">{t('navOrders')}</header>
+        <div className="orders-empty">
+          <Icon name="bag" size={56} color="#7D7264" />
+          <div className="orders-empty__title">Buyurtmalar yo'q</div>
+          <p className="orders-empty__hint">Menyudan taom tanlang</p>
+          <button onClick={() => navigate('/')} className="orders-empty__btn">
+            Barcha restoranlar
           </button>
         </div>
         <BottomNav />
@@ -34,43 +104,149 @@ export function OrdersPage() {
       <header className="orders-header">{t('navOrders')}</header>
 
       <div className="orders-list">
-        {activeOrder && (
+        {/* Faol buyurtmalar — yuqorida, ajralib turadi */}
+        {active.length > 0 && (
           <>
-            <div className="orders-section-label">{t('activeOrders')}</div>
-            <button onClick={() => navigate('/order/track')} className="active-order-card">
-              <div className="active-order-card__top">
-                <span className="active-order-card__id">{t('orderNumber')} #{activeOrder.id}</span>
-                <Icon name="chevronRight" size={16} color="#FFCE7A" />
-              </div>
-              <div className="active-order-card__names">
-                {activeOrder.subOrders.map((s) => s.restaurant.name).join(' + ')}
-              </div>
-              <div className="active-order-card__meta">
-                {activeOrder.subOrders.filter((s) => s.status === 'delivered').length}/{activeOrder.subOrders.length} {t('orderDelivered').toLowerCase()} · {formatSom(activeOrder.total)}
-              </div>
-            </button>
+            <div className="orders-section-label">
+              <span className="orders-live-dot" /> Faol buyurtmalar
+            </div>
+            {active.map((o) => (
+              <OrderCard
+                key={o._id}
+                order={o}
+                open={openId === o._id}
+                onToggle={() => toggle(o._id)}
+                onTrack={() => navigate('/order/track')}
+                highlight
+              />
+            ))}
           </>
         )}
 
-        {pastOrders.length > 0 && (
+        {/* Tugagan buyurtmalar */}
+        {past.length > 0 && (
           <>
-            <div className="orders-section-label">{t('orderHistory')}</div>
-            {pastOrders.map((o) => (
-              <div key={o.id} className="past-order-card">
-                <div className="past-order-card__top">
-                  <span className="past-order-card__id">#{o.id}</span>
-                  <span className="past-order-card__status">{t('orderDelivered')}</span>
-                </div>
-                <div className="past-order-card__meta">
-                  {o.subOrders.map((s) => s.restaurant.name).join(' + ')} · {formatSom(o.total)}
-                </div>
-              </div>
+            <div className="orders-section-label orders-section-label--muted">
+              Tarix
+            </div>
+            {past.map((o) => (
+              <OrderCard
+                key={o._id}
+                order={o}
+                open={openId === o._id}
+                onToggle={() => toggle(o._id)}
+                onRepeat={() => navigate(`/restaurant/${o.restaurantId}`)}
+              />
             ))}
           </>
         )}
       </div>
 
       <BottomNav />
+    </div>
+  );
+}
+
+// Bitta buyurtma kartasi — bosilsa tafsilot ochiladi
+function OrderCard({ order: o, open, onToggle, onTrack, onRepeat, highlight }) {
+  const st = STATUS[o.status] || STATUS.pending;
+  const stepIndex = FLOW.indexOf(o.status);
+  const itemCount = (o.items || []).reduce((s, i) => s + (i.quantity || 1), 0);
+
+  return (
+    <div className={`ord-card ${highlight ? 'ord-card--active' : ''}`}>
+      <button onClick={onToggle} className="ord-card__head">
+        <div className="ord-card__main">
+          <div className="ord-card__top">
+            <span className="ord-card__rest">{o.restaurantName}</span>
+            <span className="ord-card__status" style={{ color: st.color }}>
+              <Icon name={st.icon} size={13} color={st.color} /> {st.label}
+            </span>
+          </div>
+          <div className="ord-card__meta">
+            {fmtDate(o.createdAt)} · {itemCount} ta taom
+          </div>
+        </div>
+        <div className="ord-card__right">
+          <span className="ord-card__total">{formatSom(o.total)}</span>
+          <Icon name={open ? 'chevronDown' : 'chevronRight'} size={17} color="#A99C8C" />
+        </div>
+      </button>
+
+      {/* Bosqich chizig'i — faqat faol buyurtmada */}
+      {highlight && stepIndex >= 0 && (
+        <div className="ord-steps">
+          {FLOW.slice(0, 5).map((s, i) => (
+            <span
+              key={s}
+              className={`ord-steps__bar ${i <= stepIndex ? 'is-done' : ''}`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Tafsilot */}
+      {open && (
+        <div className="ord-card__body">
+          <div className="ord-items">
+            {(o.items || []).map((it, i) => (
+              <div key={i} className="ord-item">
+                <span className="ord-item__qty">{it.quantity}×</span>
+                <span className="ord-item__name">{it.name}</span>
+                <span className="ord-item__price">{formatSom(it.unitPrice * it.quantity)}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="ord-sum">
+            <div className="ord-sum__row">
+              <span>Taomlar</span><span>{formatSom(o.subtotal)}</span>
+            </div>
+            {o.deliveryFee > 0 && (
+              <div className="ord-sum__row">
+                <span>Yetkazish</span><span>{formatSom(o.deliveryFee)}</span>
+              </div>
+            )}
+            {o.serviceFee > 0 && (
+              <div className="ord-sum__row">
+                <span>Xizmat haqi</span><span>{formatSom(o.serviceFee)}</span>
+              </div>
+            )}
+            {o.bonusUsed > 0 && (
+              <div className="ord-sum__row ord-sum__row--bonus">
+                <span>Bonus</span><span>−{formatSom(o.bonusUsed)}</span>
+              </div>
+            )}
+            <div className="ord-sum__row ord-sum__row--total">
+              <span>Jami</span><span>{formatSom(o.total)}</span>
+            </div>
+          </div>
+
+          {o.address && (
+            <div className="ord-card__addr">
+              <Icon name="pin" size={14} color="#A99C8C" /> {o.address}
+            </div>
+          )}
+          {o.fulfillment === 'pickup' && (
+            <div className="ord-card__addr">
+              <Icon name="bag" size={14} color="#A99C8C" /> O'zim olib ketaman
+            </div>
+          )}
+
+          <div className="ord-card__actions">
+            {onTrack && (
+              <button onClick={onTrack} className="ord-btn ord-btn--primary">
+                Kuzatish
+              </button>
+            )}
+            {onRepeat && (
+              <button onClick={onRepeat} className="ord-btn">
+                Qayta buyurtma
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -36,3 +36,119 @@
   padding: 2px 8px; border-radius: 8px;
 }
 .past-order-card__meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+/* ===== Buyurtma kartasi ===== */
+.orders-section-label {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 700; color: var(--ink);
+  margin: 4px 0 10px;
+}
+.orders-section-label--muted { color: var(--muted); font-weight: 600; margin-top: 22px; }
+.orders-live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--success);
+  animation: pulse-dot 1.6s infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.ord-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.ord-card--active { border-color: var(--brand); }
+
+.ord-card__head {
+  width: 100%;
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 14px;
+  text-align: left;
+  background: transparent;
+}
+.ord-card__main { flex: 1; min-width: 0; }
+.ord-card__top {
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap; margin-bottom: 3px;
+}
+.ord-card__rest { font-size: 15px; font-weight: 700; color: var(--ink); }
+.ord-card__status {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11.5px; font-weight: 600; white-space: nowrap;
+}
+.ord-card__meta { font-size: 12.5px; color: var(--muted); }
+.ord-card__right {
+  display: flex; align-items: center; gap: 6px; flex: none;
+}
+.ord-card__total { font-size: 14.5px; font-weight: 700; color: var(--brand-100); white-space: nowrap; }
+
+/* Bosqich chizig'i */
+.ord-steps {
+  display: flex; gap: 3px;
+  padding: 0 14px 12px;
+}
+.ord-steps__bar {
+  flex: 1; height: 3px; border-radius: 2px;
+  background: var(--line);
+  transition: background 0.3s var(--ease);
+}
+.ord-steps__bar.is-done { background: var(--brand); }
+
+/* Tafsilot */
+.ord-card__body {
+  padding: 0 14px 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  animation: fade-in 0.18s ease;
+}
+.ord-items { margin-bottom: 12px; }
+.ord-item {
+  display: flex; align-items: baseline; gap: 8px;
+  font-size: 13.5px; padding: 4px 0;
+}
+.ord-item__qty { color: var(--brand-100); font-weight: 700; flex: none; }
+.ord-item__name { color: var(--ink); flex: 1; min-width: 0; }
+.ord-item__price { color: var(--muted); flex: none; white-space: nowrap; }
+
+.ord-sum {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+.ord-sum__row {
+  display: flex; justify-content: space-between; gap: 10px;
+  font-size: 13px; color: var(--muted); padding: 3px 0;
+}
+.ord-sum__row--bonus { color: var(--success); }
+.ord-sum__row--total {
+  font-size: 15px; font-weight: 700; color: var(--ink);
+  border-top: 1px solid var(--line);
+  margin-top: 6px; padding-top: 8px;
+}
+
+.ord-card__addr {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12.5px; color: var(--muted);
+  margin-top: 10px;
+}
+
+.ord-card__actions { display: flex; gap: 8px; margin-top: 14px; }
+.ord-btn {
+  flex: 1; padding: 11px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  font-size: 13.5px; font-weight: 600; color: var(--ink);
+}
+.ord-btn:active { background: var(--surface-2); }
+.ord-btn--primary {
+  background: var(--brand); color: var(--brand-text); border-color: var(--brand);
+}
+
+.orders-empty__btn {
+  margin-top: 16px; padding: 12px 24px;
+  background: var(--brand); color: var(--brand-text);
+  border-radius: 14px; font-weight: 700; font-size: 14.5px;
+}

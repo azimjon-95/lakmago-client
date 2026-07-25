@@ -112,6 +112,9 @@ export const api = {
   createOrder: (payload) =>
     apiFetch('/orders', { method: 'POST', body: JSON.stringify(payload) }),
 
+  // Mening buyurtmalarim (server tarixi)
+  getMyOrders: () => apiFetch('/orders', { method: 'GET' }),
+
   getActiveOrders: (opts) => apiFetch('/orders/active', { method: 'GET', ...opts }),
 
   getOrderGroup: (groupId) => apiFetch(`/orders/group/${groupId}`, { method: 'GET' }),
