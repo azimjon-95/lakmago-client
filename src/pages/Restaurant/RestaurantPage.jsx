@@ -8,6 +8,7 @@ import { RestaurantBanner } from '@/components/DishPhoto';
 import { RestaurantInfoSheet } from '@/components/RestaurantInfoSheet';
 import { DishRowSkeleton } from '@/components/Skeleton/Skeleton';
 import { useT } from '@/i18n';
+import { useUser } from '@/store/user';
 import { useRestaurant, useDishes } from '@/hooks/queries';
 import './Restaurant.css';
 
@@ -19,7 +20,10 @@ export function RestaurantPage() {
   const location = useLocation();
   const t = useT();
   const [modalDish, setModalDish] = useState(null);
-  const [isFav, setIsFav] = useState(false);
+  // Sevimlilar — localStorage'da saqlanadi
+  const toggleFavorite = useUser((st) => st.toggleFavorite);
+  const favRestaurants = useUser((st) => st.user.favorites?.restaurants || []);
+  const isFav = favRestaurants.includes(id);
   const [infoSheet, setInfoSheet] = useState(null); // 'schedule' | 'service' | null
 
   const highlightHandled = useRef(false);
@@ -98,7 +102,7 @@ export function RestaurantPage() {
         <button onClick={() => navigate(-1)} className="rest-banner__btn rest-banner__btn--back" aria-label={t('back')}>
           <Icon name="arrowLeft" size={18} color="#fff" />
         </button>
-        <button onClick={() => setIsFav((v) => !v)} className="rest-banner__btn rest-banner__btn--fav" aria-label="♥">
+        <button onClick={() => { haptic(); toggleFavorite('restaurant', id); }} className="rest-banner__btn rest-banner__btn--fav" aria-label="♥">
           <Icon name="heart" size={17} color={isFav ? '#F5A524' : '#fff'} style={isFav ? { fill: '#F5A524' } : {}} />
         </button>
       </div>

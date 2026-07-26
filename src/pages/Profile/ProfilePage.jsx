@@ -61,7 +61,18 @@ export function ProfilePage() {
       </div>
 
       {/* Shaxsiy */}
-      {/* Bronlarim */}
+      {/* Sevimlilar va bronlar */}
+      <div className="profile-section">
+        <button onClick={() => navigate('/favorites')} className="profile-row">
+          <Icon name="heart" size={18} color="#F5A524" />
+          <div className="profile-row__body">
+            <div className="profile-row__value">Sevimlilar</div>
+            <div className="profile-row__label">Saqlangan taom va restoranlar</div>
+          </div>
+          <Icon name="chevronRight" size={18} color="#A99C8C" />
+        </button>
+      </div>
+
       <div className="profile-section">
         <button onClick={() => navigate('/my-reservations')} className="profile-row">
           <Icon name="calendarPlus" size={18} color="#F5A524" />

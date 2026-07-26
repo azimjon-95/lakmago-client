@@ -44,6 +44,7 @@ function getInitialUser() {
     phone: null,
     addresses: [],
     defaultAddressId: null,
+    favorites: { restaurants: [], dishes: [] },
     verified: false
   };
 }
@@ -63,7 +64,7 @@ function getInitialUser() {
 
 export const useUser = create(
   persist(
-    (set) => ({
+    (set, get) => ({
   user: getInitialUser(),
   authStatus: 'pending',
   lastPaymentMethod: 'payme',
@@ -73,6 +74,27 @@ export const useUser = create(
   updateUser: (patch) => set((state) => ({ user: { ...state.user, ...patch } })),
 
   // Manzil qo'shish — avval lokal (tez ko'rinadi), keyin serverga saqlanadi
+  // ===== SEVIMLILAR =====
+  // { restaurants: [id], dishes: [id] } — localStorage'da saqlanadi
+  toggleFavorite: (kind, id) =>
+    set((state) => {
+      const key = kind === 'dish' ? 'dishes' : 'restaurants';
+      const cur = state.user.favorites?.[key] || [];
+      const next = cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id];
+      return {
+        user: {
+          ...state.user,
+          favorites: { ...(state.user.favorites || {}), [key]: next },
+        },
+      };
+    }),
+
+  isFavorite: (kind, id) => {
+    const f = get().user.favorites || {};
+    const key = kind === 'dish' ? 'dishes' : 'restaurants';
+    return (f[key] || []).includes(id);
+  },
+
   addAddress: async (address) => {
     const tempId = 'addr' + Date.now();
     const newAddr = { ...address, id: tempId };
@@ -165,6 +187,7 @@ export const useUser = create(
           addresses: state.user.addresses,
           defaultAddressId: state.user.defaultAddressId,
           phone: state.user.phone,
+          favorites: state.user.favorites,
         },
         lastPaymentMethod: state.lastPaymentMethod,
       }),
