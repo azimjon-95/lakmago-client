@@ -132,7 +132,9 @@ ul { list-style: none; }
 /* Sahifa sarlavhasi (orqaga tugma + nom) */
 .page-header {
   position: sticky;
-  top: 0;
+  /* To'liq ekranda Telegram tugmalari (Закрыть, ⌄, ⋯) ostiga yopishadi —
+     aks holda sarlavha ular bilan ustma-ust tushadi */
+  top: calc(env(safe-area-inset-top, 0px) + var(--tg-content-top, 0px));
   z-index: 10;
   display: flex;
   align-items: center;

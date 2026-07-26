@@ -11,6 +11,14 @@ import './Profile.css';
 
 export function ProfilePage() {
   const navigate = useNavigate();
+  const [cards, setCards] = useState([]);
+  const cardCount = cards.length;
+  const favCount = useUser((st) =>
+    (st.user.favorites?.restaurants?.length || 0) + (st.user.favorites?.dishes?.length || 0));
+
+  useEffect(() => {
+    api.getCards().then((l) => setCards(Array.isArray(l) ? l : [])).catch(() => {});
+  }, []);
   const t = useT();
   const user = useUser((s) => s.user);
   const updateUser = useUser((s) => s.updateUser);
@@ -40,16 +48,48 @@ export function ProfilePage() {
         <h1>{t('profile')}</h1>
       </header>
 
-      {/* Telegram karta */}
-      <div className="profile-card">
-        <div className="profile-card__avatar">{user.photoInitials}</div>
-        <div className="profile-card__info">
-          <div className="profile-card__name">{user.firstName} {user.lastName}</div>
-          <div className="profile-card__id">
-            {user.username && `@${user.username} · `}ID: {user.telegramId ?? '—'}
+      {/* Hero — gradient fon, Telegram rasmi */}
+      <div className="profile-hero">
+        <div className="profile-hero__glow" />
+        <div className="profile-hero__avatar">
+          {user.photoUrl ? (
+            <img
+              src={user.photoUrl}
+              alt=""
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
+          ) : (
+            <span>{user.photoInitials}</span>
+          )}
+        </div>
+        <div className="profile-hero__name">
+          {user.firstName} {user.lastName}
+        </div>
+        <div className="profile-hero__id">
+          {user.username ? `@${user.username}` : `ID: ${user.telegramId ?? '—'}`}
+        </div>
+
+        {/* Tez statistika */}
+        <div className="profile-hero__stats">
+          <div className="profile-stat">
+            <span className="profile-stat__value">{cardCount}</span>
+            <span className="profile-stat__label">Karta</span>
+          </div>
+          <span className="profile-stat__sep" />
+          <div className="profile-stat">
+            <span className="profile-stat__value">{user.addresses?.length || 0}</span>
+            <span className="profile-stat__label">Manzil</span>
+          </div>
+          <span className="profile-stat__sep" />
+          <div className="profile-stat">
+            <span className="profile-stat__value">{favCount}</span>
+            <span className="profile-stat__label">Sevimli</span>
           </div>
         </div>
       </div>
+
+      {/* Kartalar slaydi */}
+      <CardsStrip cards={cards} onManage={() => navigate('/cards')} />
 
       {/* Do'stlarni taklif qilish (referral) */}
       <ReferralCard />
@@ -255,6 +295,60 @@ function ReferralCard() {
         </button>
         <button onClick={copy} className="referral-card__copy">
           <Icon name={copied ? 'check' : 'copy'} size={16} color="#F7F2EA" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Plastik kartalar slaydi — yonma-yon suriladi
+const CARD_STYLES = {
+  uzcard: { grad: 'linear-gradient(135deg, #0A5C8F 0%, #00A3E0 100%)', label: 'UzCard' },
+  humo: { grad: 'linear-gradient(135deg, #005E58 0%, #00B2A9 100%)', label: 'Humo' },
+  visa: { grad: 'linear-gradient(135deg, #12175E 0%, #2A3BA8 100%)', label: 'VISA' },
+  mastercard: { grad: 'linear-gradient(135deg, #7A0D12 0%, #EB4B2A 100%)', label: 'Mastercard' },
+  card: { grad: 'linear-gradient(135deg, #3D2A10 0%, #6B4A1C 100%)', label: 'Karta' },
+};
+
+function CardsStrip({ cards, onManage }) {
+  if (!cards.length) {
+    return (
+      <button onClick={onManage} className="pcards-empty">
+        <Icon name="card" size={20} color="#F5A524" />
+        <div className="pcards-empty__body">
+          <div className="pcards-empty__title">To'lov kartasi qo'shing</div>
+          <div className="pcards-empty__hint">To'lovda tezroq bo'ladi</div>
+        </div>
+        <Icon name="plus" size={18} color="#F5A524" />
+      </button>
+    );
+  }
+
+  return (
+    <div className="pcards">
+      <div className="pcards__row no-scrollbar">
+        {cards.map((c) => {
+          const st = CARD_STYLES[c.brand] || CARD_STYLES.card;
+          return (
+            <div key={c._id} className="pcard" style={{ background: st.grad }}>
+              <div className="pcard__shine" />
+              <div className="pcard__top">
+                <span className="pcard__chip" />
+                {c.isDefault && <span className="pcard__badge">Asosiy</span>}
+              </div>
+              <div className="pcard__num">•••• •••• •••• {c.last4}</div>
+              <div className="pcard__bottom">
+                <span className="pcard__holder">{c.holder || 'KARTA EGASI'}</span>
+                <span className="pcard__brand">{st.label}</span>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Qo'shish kartasi */}
+        <button onClick={onManage} className="pcard pcard--add">
+          <Icon name="plus" size={24} color="#F5A524" />
+          <span>Qo'shish</span>
         </button>
       </div>
     </div>
