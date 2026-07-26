@@ -207,6 +207,9 @@ function ReferralCard() {
 
   const som = (n) => (n ?? 0).toLocaleString('ru-RU').replace(/,/g, ' ');
 
+  // Admin panelda o'chirilgan bo'lsa karta ko'rsatilmaydi
+  if (info && info.enabled === false) return null;
+
   return (
     <div className="referral-card">
       <div className="referral-card__head">
