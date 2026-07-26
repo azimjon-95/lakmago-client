@@ -118,3 +118,13 @@
   transition: background 0.15s;
 }
 .dish-modal__share:active { background: rgba(0,0,0,0.6); }
+
+/* Sevimlilar tugmasi — ulashish yonida */
+.dish-modal__fav {
+  position: absolute; top: 12px; right: 100px;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.dish-modal__fav:active { background: rgba(0, 0, 0, 0.6); }

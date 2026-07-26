@@ -3,6 +3,7 @@ import { Icon } from './Icon';
 import { DishPhoto } from './DishPhoto';
 import { formatSom, formatSomShort } from '@/lib/utils';
 import { useCart } from '@/store/cart';
+import { useUser } from '@/store/user';
 import { haptic, shareDish } from '@/lib/telegram';
 import { useT } from '@/i18n';
 import './cards/DishModal.css';
@@ -10,6 +11,11 @@ import './cards/DishModal.css';
 export function DishModal({ dish, onClose }) {
   const t = useT();
   const addItem = useCart((s) => s.addItem);
+  // Sevimlilar — selector primitiv qaytaradi (qayta render bo'lmasin)
+  const dishId = String(dish.id || dish._id || '');
+  const toggleFavorite = useUser((st) => st.toggleFavorite);
+  const isFav = useUser((st) =>
+    Boolean(st.user.favorites?.dishes?.includes(dishId)));
   const [quantity, setQuantity] = useState(1);
   const [note, setNote] = useState('');
   const [selected, setSelected] = useState(() => {
@@ -59,6 +65,19 @@ export function DishModal({ dish, onClose }) {
           </button>
           <button onClick={() => shareDish(dish)} className="dish-modal__share" aria-label={t('share')}>
             <Icon name="share" size={17} color="#fff" />
+          </button>
+          {/* Sevimlilar */}
+          <button
+            onClick={() => { haptic(); toggleFavorite('dish', dishId); }}
+            className="dish-modal__fav"
+            aria-label="Sevimlilarga"
+          >
+            <Icon
+              name="heart"
+              size={18}
+              color={isFav ? '#F5A524' : '#fff'}
+              style={isFav ? { fill: '#F5A524' } : {}}
+            />
           </button>
           {dish.isHit && <div className="dish-modal__hit"><Icon name="flame" size={11} color="#fff" /> HIT</div>}
         </div>
