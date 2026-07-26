@@ -74,6 +74,17 @@ export function ProfilePage() {
       </div>
 
       <div className="profile-section">
+        <button onClick={() => navigate('/cards')} className="profile-row">
+          <Icon name="card" size={18} color="#F5A524" />
+          <div className="profile-row__body">
+            <div className="profile-row__value">To'lov kartalari</div>
+            <div className="profile-row__label">Karta qo'shish va boshqarish</div>
+          </div>
+          <Icon name="chevronRight" size={18} color="#A99C8C" />
+        </button>
+      </div>
+
+      <div className="profile-section">
         <button onClick={() => navigate('/my-reservations')} className="profile-row">
           <Icon name="calendarPlus" size={18} color="#F5A524" />
           <div className="profile-row__body">

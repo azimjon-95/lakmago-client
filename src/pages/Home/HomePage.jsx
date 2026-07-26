@@ -96,9 +96,6 @@ export function HomePage() {
             <Icon name="search" size={19} color="#F7F2EA" />
           </button>
           <LangSwitch compact />
-          <button onClick={() => navigate('/profile')} className="home-header__avatar">
-            {user.photoInitials}
-          </button>
         </div>
       </header>
 

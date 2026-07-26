@@ -43,6 +43,19 @@ export function CartPage() {
   const [showPhoneEdit, setShowPhoneEdit] = useState(false);
   const [phoneDraft, setPhoneDraft] = useState(user.phone ?? '');
   const [paymentMethod, setPaymentMethod] = useState(lastPaymentMethod);
+  // To'lov kartalari — server'dan yuklanadi
+  const [cards, setCards] = useState([]);
+  const [selectedCard, setSelectedCard] = useState(null);
+
+  useEffect(() => {
+    api.getCards()
+      .then((list) => {
+        const arr = Array.isArray(list) ? list : [];
+        setCards(arr);
+        setSelectedCard(arr.find((c) => c.isDefault) || arr[0] || null);
+      })
+      .catch(() => {});
+  }, []);
   const [bonusBalance, setBonusBalance] = useState(0);
   const [useBonus, setUseBonus] = useState(false);
 
@@ -130,6 +143,10 @@ export function CartPage() {
       fulfillment,
       timingMode,
       scheduledFor: timingMode === 'scheduled' ? (scheduledFor || timeSlots[0]?.value) : undefined,
+      // Karta to'lovi bo'lsa qaysi karta ekanini saqlaymiz
+      ...(paymentMethod !== 'cash' && selectedCard
+        ? { cardLast4: selectedCard.last4, cardBrand: selectedCard.brand }
+        : {}),
     })
       .then(() => {
         setPaying(false);
@@ -356,6 +373,37 @@ export function CartPage() {
             {paymentMethod === 'cash' && <Icon name="circleCheck" size={15} color="#F5A524" />}
           </button>
         </div>
+
+        {/* Karta tanlash — faqat karta to'lovi tanlanganda */}
+        {paymentMethod === 'payme' && (
+          <div className="cart-cards">
+            {cards.length === 0 ? (
+              <button onClick={() => navigate('/cards')} className="cart-cards__add">
+                <Icon name="plus" size={16} color="#F5A524" /> Karta qo'shish
+              </button>
+            ) : (
+              <>
+                {cards.map((c) => (
+                  <button
+                    key={c._id}
+                    onClick={() => { haptic(); setSelectedCard(c); }}
+                    className={`cart-card ${selectedCard?._id === c._id ? 'is-active' : ''}`}
+                  >
+                    <Icon name="card" size={16} color="#A99C8C" />
+                    <span className="cart-card__num">•••• {c.last4}</span>
+                    {c.isDefault && <span className="cart-card__tag">Asosiy</span>}
+                    {selectedCard?._id === c._id && (
+                      <Icon name="circleCheck" size={15} color="#6FBF73" />
+                    )}
+                  </button>
+                ))}
+                <button onClick={() => navigate('/cards')} className="cart-cards__manage">
+                  Kartalarni boshqarish
+                </button>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Qo'shimcha tavsiya — "Hech narsani unutmadingizmi?" */}

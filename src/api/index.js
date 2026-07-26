@@ -132,6 +132,12 @@ export const api = {
   deleteAddress: (id) => apiFetch(`/addresses/${id}`, { method: 'DELETE' }),
   setDefaultAddress: (id) => apiFetch(`/addresses/${id}/default`, { method: 'PATCH' }),
 
+  // ===== To'lov kartalari =====
+  getCards: () => apiFetch('/cards', { method: 'GET' }),
+  addCard: (data) => apiFetch('/cards', { method: 'POST', body: JSON.stringify(data) }),
+  deleteCard: (id) => apiFetch(`/cards/${id}`, { method: 'DELETE' }),
+  setDefaultCard: (id) => apiFetch(`/cards/${id}/default`, { method: 'PATCH' }),
+
   // ===== Qo'llab-quvvatlash chati =====
   getSupportChat: () => apiFetch('/support/chat', { method: 'GET' }),
   sendSupportMessage: (text) => apiFetch('/support/message', { method: 'POST', body: JSON.stringify({ text }) }),
