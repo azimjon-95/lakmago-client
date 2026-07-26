@@ -20,10 +20,12 @@ export function RestaurantPage() {
   const location = useLocation();
   const t = useT();
   const [modalDish, setModalDish] = useState(null);
-  // Sevimlilar — localStorage'da saqlanadi
+  // Sevimlilar — localStorage'da saqlanadi.
+  // Selector primitiv (boolean) qaytarishi shart: massiv qaytarilsa
+  // har render'da yangi havola bo'lib, cheksiz qayta render bo'ladi.
   const toggleFavorite = useUser((st) => st.toggleFavorite);
-  const favRestaurants = useUser((st) => st.user.favorites?.restaurants || []);
-  const isFav = favRestaurants.includes(id);
+  const isFav = useUser((st) =>
+    Boolean(st.user.favorites?.restaurants?.includes(id)));
   const [infoSheet, setInfoSheet] = useState(null); // 'schedule' | 'service' | null
 
   const highlightHandled = useRef(false);

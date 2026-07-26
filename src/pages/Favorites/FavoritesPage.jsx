@@ -10,19 +10,21 @@ import './Favorites.css';
 
 export function FavoritesPage() {
   const navigate = useNavigate();
-  const favorites = useUser((s) => s.user.favorites) || {};
+  // Ikkita alohida selector — obyekt yaratmaydi, barqaror havola
+  const favRestIds = useUser((s) => s.user.favorites?.restaurants);
+  const favDishIds = useUser((s) => s.user.favorites?.dishes);
   const { data: restaurants = [] } = useRestaurants();
   const { data: dishes = [] } = useAllDishes();
 
   const favRestaurants = useMemo(() => {
-    const ids = new Set(favorites.restaurants || []);
+    const ids = new Set(favRestIds || []);
     return restaurants.filter((r) => ids.has(String(r.id || r._id)));
-  }, [restaurants, favorites.restaurants]);
+  }, [restaurants, favRestIds]);
 
   const favDishes = useMemo(() => {
-    const ids = new Set(favorites.dishes || []);
+    const ids = new Set(favDishIds || []);
     return dishes.filter((d) => ids.has(String(d.id || d._id)));
-  }, [dishes, favorites.dishes]);
+  }, [dishes, favDishIds]);
 
   const isEmpty = favRestaurants.length === 0 && favDishes.length === 0;
 
