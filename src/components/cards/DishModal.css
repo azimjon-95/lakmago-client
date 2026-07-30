@@ -128,3 +128,18 @@
   transition: background 0.15s;
 }
 .dish-modal__fav:active { background: rgba(0, 0, 0, 0.6); }
+
+/* Ozuqaviy tarkib — oqsil / yog' / uglevod */
+.dish-nutri {
+  display: flex; gap: 8px;
+  margin-top: 12px;
+}
+.dish-nutri__item {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 9px 6px;
+  background: var(--surface-2);
+  border-radius: 12px;
+}
+.dish-nutri__value { font-size: 14px; font-weight: 700; color: var(--ink); }
+.dish-nutri__label { font-size: 11px; color: var(--muted); }

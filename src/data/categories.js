@@ -13,6 +13,7 @@ export const CATEGORIES = [
   { id: 'osh', label: 'Osh', art: 'milliy' },
   { id: 'shashlik', label: 'Shashlik', art: 'shashlik' },
   { id: 'sup', label: "Sho'rva", art: 'milliy' },
+  { id: 'salat', label: 'Salatlar', art: 'milliy' },
   { id: 'choyxona', label: 'Choyxona', art: 'choyxona' },
   { id: 'zavtroki', label: 'Nonushta', art: 'milliy' },
   { id: 'obed', label: 'Tushlik', art: 'milliy' },

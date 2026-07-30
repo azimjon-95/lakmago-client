@@ -89,10 +89,45 @@ export function DishModal({ dish, onClose }) {
           </div>
           {dish.description && <p className="dish-modal__desc">{dish.description}</p>}
 
-          {(dish.calories || dish.weightGram) && (
+          {/* Og'irlik va kaloriya — bor bo'lganlari ko'rsatiladi */}
+          {(dish.weight || dish.weightGram || dish.calories) && (
             <div className="dish-modal__nutrition">
-              {dish.calories && <span><Icon name="flame" size={15} color="#E14B42" /> {dish.calories} {t('calories')}</span>}
-              {dish.weightGram && <span><Icon name="scale" size={15} color="#A99C8C" /> {dish.weightGram} {t('gram')}</span>}
+              {(dish.weight || dish.weightGram) && (
+                <span>
+                  <Icon name="scale" size={15} color="#A99C8C" />
+                  {dish.weight || `${dish.weightGram} ${t('gram')}`}
+                </span>
+              )}
+              {dish.calories > 0 && (
+                <span>
+                  <Icon name="flame" size={15} color="#E14B42" />
+                  {dish.calories} {t('calories')}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Ozuqaviy tarkib — kiritilgan bo'lsa */}
+          {(dish.protein > 0 || dish.fat > 0 || dish.carbs > 0) && (
+            <div className="dish-nutri">
+              {dish.protein > 0 && (
+                <div className="dish-nutri__item">
+                  <span className="dish-nutri__value">{dish.protein} г</span>
+                  <span className="dish-nutri__label">Oqsil</span>
+                </div>
+              )}
+              {dish.fat > 0 && (
+                <div className="dish-nutri__item">
+                  <span className="dish-nutri__value">{dish.fat} г</span>
+                  <span className="dish-nutri__label">Yog'</span>
+                </div>
+              )}
+              {dish.carbs > 0 && (
+                <div className="dish-nutri__item">
+                  <span className="dish-nutri__value">{dish.carbs} г</span>
+                  <span className="dish-nutri__label">Uglevod</span>
+                </div>
+              )}
             </div>
           )}
 

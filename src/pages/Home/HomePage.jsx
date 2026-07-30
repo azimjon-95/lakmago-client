@@ -66,6 +66,44 @@ export function HomePage() {
       d.category === category || restIds.has(String(d.restaurantId)));
   }, [allDishes, filtered, category]);
 
+  // Har ochilganda tartib o'zgaradi — sahifa qayta render bo'lganda
+  // emas, faqat ilova ochilganda (seed sessiyada saqlanadi)
+  const shuffleSeed = useMemo(() => {
+    const KEY = 'lokma_shuffle_seed';
+    let v = sessionStorage.getItem(KEY);
+    if (!v) {
+      v = String(Math.random());
+      sessionStorage.setItem(KEY, v);
+    }
+    return Number(v);
+  }, []);
+
+  // Barqaror aralashtirish: seed bir xil bo'lsa natija ham bir xil
+  const shuffle = useCallback((arr, seed) => {
+    const a = [...arr];
+    let s = seed * 10000;
+    for (let i = a.length - 1; i > 0; i--) {
+      s = (s * 9301 + 49297) % 233280;
+      const j = Math.floor((s / 233280) * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }, []);
+
+  // Tavsiya — chegirmasizlar orasidan random 12 ta
+  const recommended = useMemo(() => {
+    const pool = filteredDishes.filter((d) => !(d.oldPrice > 0));
+    return shuffle(pool.length ? pool : filteredDishes, shuffleSeed).slice(0, 12);
+  }, [filteredDishes, shuffleSeed, shuffle]);
+
+  // Chegirmadagilar — kategoriya bo'yicha ham filtrlanadi
+  const discountedShown = useMemo(() => {
+    const base = category === 'all'
+      ? discounted
+      : discounted.filter((d) => d.category === category);
+    return shuffle(base, shuffleSeed).slice(0, 12);
+  }, [discounted, category, shuffleSeed, shuffle]);
+
   const defaultAddress = useMemo(
     () => user.addresses.find((a) => a.id === user.defaultAddressId) ?? user.addresses[0],
     [user.addresses, user.defaultAddressId],
@@ -129,23 +167,25 @@ export function HomePage() {
       )}
 
       {/* Chegirmadagi taomlar */}
-      {discounted.length > 0 && (
+      {discountedShown.length > 0 && (
         <>
-          <SectionHeader icon="discount" title={t('discountedDishes')} action={t('all')} />
-          <div className="home-scroll-row no-scrollbar">
-            {discounted.map((d) => <DishScrollCard key={d.id || d._id} dish={d} onClick={openModal} />)}
+          <SectionHeader icon="discount" title={t('discountedDishes')} />
+          <div className="home-dishes-row no-scrollbar">
+            {discountedShown.map((d) => (
+              <DishGridCard key={d.id || d._id} dish={d} onClick={openModal} />
+            ))}
           </div>
         </>
       )}
 
-      {/* Taomlar — TEPADA (Uzum uslubi: gorizontal scroll, kichik kartalar) */}
-      {(allDishesLoading || filteredDishes.length > 0) && (
+      {/* Tavsiya qilamiz — har kirganda tartib o'zgaradi */}
+      {(allDishesLoading || recommended.length > 0) && (
         <>
-          <h2 className="home-restaurants-title">{t('allDishes')}</h2>
+          <h2 className="home-restaurants-title">{t('recommended')}</h2>
           <div className="home-dishes-row no-scrollbar">
             {allDishesLoading
               ? Array.from({ length: 6 }).map((_, i) => <DishScrollСardSkeleton key={i} />)
-              : filteredDishes.map((d) => (
+              : recommended.map((d) => (
                   <DishGridCard key={d.id || d._id} dish={d} onClick={openModal} />
                 ))}
           </div>
