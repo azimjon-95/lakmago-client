@@ -397,13 +397,24 @@ ul { list-style: none; }
 }
 
 /* ===== Kategoriya fotolari =====
-   Uzum uslubidagi oq fonli taom rasmlari dark theme'da yaxshi
-   ko'rinishi uchun ochroq fon beriladi. */
+   Avval oq fon (#F7F2EA) berilardi — dark theme'da yorqin
+   kvadratlar bo'lib ajralib turardi. Endi surface rangida,
+   qolgan kartalar bilan bir xil. */
 .home-cat__art:has(.cat-photo),
 .search-cat__art:has(.cat-photo),
 .filter-cat__art:has(.cat-photo) {
-  background: #F7F2EA;
-  padding: 4px;
+  background: var(--surface-2);
+  padding: 6px;
 }
-/* :has() qo'llab-quvvatlanmasa — rasm o'zi oq fon bilan keladi */
-.cat-photo { border-radius: 12px; }
+/* Tanlangan holat ustun turishi kerak — aks holda :has()
+   qoidasi amber fonni bosib ketardi */
+.home-cat.is-active .home-cat__art:has(.cat-photo),
+.search-cat.is-active .search-cat__art:has(.cat-photo),
+.filter-cat.is-active .filter-cat__art:has(.cat-photo) {
+  background: var(--brand-tint);
+}
+.cat-photo {
+  border-radius: 10px;
+  /* Oq fonli PNG'lar uchun: qorong'i fonga yumshoq qo'shiladi */
+  mix-blend-mode: normal;
+}
