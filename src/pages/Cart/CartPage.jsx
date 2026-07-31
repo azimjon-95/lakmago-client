@@ -156,6 +156,24 @@ export function CartPage() {
       ...(paymentMethod !== 'cash' && selectedCard
         ? { cardLast4: selectedCard.last4, cardBrand: selectedCard.brand }
         : {}),
+      // Yetkazish nuqtasi — kuryer xaritada ko'radi
+      ...(!isPickup && selectedAddress?.lat && selectedAddress?.lng
+        ? {
+            addressLat: Number(selectedAddress.lat),
+            addressLng: Number(selectedAddress.lng),
+          }
+        : {}),
+      // Podez, qavat, xonadon
+      ...(!isPickup && selectedAddress
+        ? {
+            addressNote: [
+              selectedAddress.entrance && `${selectedAddress.entrance}-kirish`,
+              selectedAddress.floor && `${selectedAddress.floor}-qavat`,
+              selectedAddress.flat && `xon. ${selectedAddress.flat}`,
+              selectedAddress.note,
+            ].filter(Boolean).join(', '),
+          }
+        : {}),
     })
       .then(async (created) => {
         useCart.getState().clear();
