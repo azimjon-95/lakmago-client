@@ -85,7 +85,15 @@ export const useOrders = create((set, get) => ({
       };
     });
 
-    const order = { id: groupId, groupId, subOrders, address, paymentLabel, paymentMethod, total, createdAt: Date.now() };
+    const order = {
+      id: groupId, groupId, subOrders, address, paymentLabel,
+      paymentMethod, total, createdAt: Date.now(),
+      // To'lov havolasi uchun — birinchi buyurtma ID si
+      // (bir nechta restoran bo'lsa har biriga alohida to'lov kerak,
+      //  hozircha birinchisiga yo'naltiramiz)
+      orderId: res.orders[0] ? String(res.orders[0]._id) : null,
+      orderIds: res.orders.map((o) => String(o._id)),
+    };
     set({ activeOrder: order });
     return order;
   },

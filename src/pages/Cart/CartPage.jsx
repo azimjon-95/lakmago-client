@@ -10,7 +10,7 @@ import { useOrders } from '@/store/orders';
 import { useT } from '@/i18n';
 import { formatSom } from '@/lib/utils';
 import { api } from '@/api';
-import { haptic } from '@/lib/telegram';
+import { haptic, getTelegram } from '@/lib/telegram';
 import { useDishes } from '@/hooks/queries';
 import './Cart.css';
 
@@ -46,6 +46,14 @@ export function CartPage() {
   // To'lov kartalari — server'dan yuklanadi
   const [cards, setCards] = useState([]);
   const [selectedCard, setSelectedCard] = useState(null);
+  // Qaysi to'lov tizimlari ulangan
+  const [payStatus, setPayStatus] = useState({ payme: false, click: false });
+
+  useEffect(() => {
+    api.getPaymentStatus()
+      .then((st) => setPayStatus(st || { payme: false, click: false }))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     api.getCards()
@@ -137,7 +145,8 @@ export function CartPage() {
     const addrLabel = isPickup
       ? ''
       : `${selectedAddress.title} — ${selectedAddress.address}`;
-    const paymentLabel = paymentMethod === 'cash' ? t('cash') : 'Payme';
+    const PAY_LABEL = { cash: t('cash'), payme: 'Payme', click: 'Click' };
+    const paymentLabel = PAY_LABEL[paymentMethod] || t('cash');
     // Backendga yuboradi (async). Xato bo'lsa ham local rejim ishlaydi.
     placeOrder(groups, total, addrLabel, paymentLabel, paymentMethod, user.phone, bonusApplied, {
       fulfillment,
@@ -148,10 +157,39 @@ export function CartPage() {
         ? { cardLast4: selectedCard.last4, cardBrand: selectedCard.brand }
         : {}),
     })
-      .then(() => {
-        setPaying(false);
+      .then(async (created) => {
         useCart.getState().clear();
-        navigate('/order/track');
+
+        // Naqd — buyurtma darhol restoranga boradi
+        if (paymentMethod === 'cash') {
+          setPaying(false);
+          navigate('/orders');
+          return;
+        }
+
+        // Karta — to'lov sahifasiga o'tamiz.
+        // Buyurtma "to'lov kutilmoqda" holatida, pul kelgach
+        // avtomatik restoranga yuboriladi.
+        const orderId = created?.orderId || created?._id || created?.id;
+        if (!orderId) {
+          setPaying(false);
+          navigate('/orders');
+          return;
+        }
+
+        try {
+          const { url } = await api.getPaymentLink(orderId, paymentMethod);
+          setPaying(false);
+          const tg = getTelegram();
+          if (tg?.openLink) tg.openLink(url);
+          else window.location.href = url;
+          // To'lov oynasi ochilgach buyurtmalar sahifasiga qaytamiz
+          setTimeout(() => navigate('/orders'), 600);
+        } catch (e) {
+          setPaying(false);
+          alert(e.message || 'To\u2018lov havolasini olishda xato');
+          navigate('/orders');
+        }
       })
       .catch(() => {
         setPaying(false);
@@ -357,14 +395,6 @@ export function CartPage() {
         <div className="cart-payment__label">{t('paymentMethod')}</div>
         <div className="cart-payment__options">
           <button
-            onClick={() => setPaymentMethod('payme')}
-            className={`pay-opt ${paymentMethod === 'payme' ? 'is-active' : ''}`}
-          >
-            <Icon name="card" size={18} color="#6FBF73" />
-            <span>Payme</span>
-            {paymentMethod === 'payme' && <Icon name="circleCheck" size={15} color="#6FBF73" />}
-          </button>
-          <button
             onClick={() => setPaymentMethod('cash')}
             className={`pay-opt ${paymentMethod === 'cash' ? 'is-active' : ''}`}
           >
@@ -372,10 +402,39 @@ export function CartPage() {
             <span>{t('cash')}</span>
             {paymentMethod === 'cash' && <Icon name="circleCheck" size={15} color="#F5A524" />}
           </button>
+
+          {payStatus.payme && (
+            <button
+              onClick={() => setPaymentMethod('payme')}
+              className={`pay-opt ${paymentMethod === 'payme' ? 'is-active' : ''}`}
+            >
+              <span className="pay-opt__emoji">💳</span>
+              <span>Payme</span>
+              {paymentMethod === 'payme' && <Icon name="circleCheck" size={15} color="#6FBF73" />}
+            </button>
+          )}
+
+          {payStatus.click && (
+            <button
+              onClick={() => setPaymentMethod('click')}
+              className={`pay-opt ${paymentMethod === 'click' ? 'is-active' : ''}`}
+            >
+              <span className="pay-opt__emoji">💳</span>
+              <span>Click</span>
+              {paymentMethod === 'click' && <Icon name="circleCheck" size={15} color="#6FBF73" />}
+            </button>
+          )}
         </div>
 
+        {/* Onlayn to'lov ulanmagan bo'lsa tushuntiramiz */}
+        {!payStatus.payme && !payStatus.click && (
+          <p className="cart-payment__note">
+            Onlayn to'lov hozircha mavjud emas — kuryerga naqd to'laysiz
+          </p>
+        )}
+
         {/* Karta tanlash — faqat karta to'lovi tanlanganda */}
-        {paymentMethod === 'payme' && (
+        {(paymentMethod === 'payme' || paymentMethod === 'click') && (
           <div className="cart-cards">
             {cards.length === 0 ? (
               <button onClick={() => navigate('/cards')} className="cart-cards__add">

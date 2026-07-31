@@ -132,6 +132,11 @@ export const api = {
   deleteAddress: (id) => apiFetch(`/addresses/${id}`, { method: 'DELETE' }),
   setDefaultAddress: (id) => apiFetch(`/addresses/${id}/default`, { method: 'PATCH' }),
 
+  // ===== To'lov tizimlari =====
+  getPaymentStatus: () => apiFetch('/payments/status', { method: 'GET' }),
+  getPaymentLink: (orderId, provider) =>
+    apiFetch(`/payments/link/${orderId}?provider=${provider}`, { method: 'GET' }),
+
   // ===== To'lov kartalari =====
   getCards: () => apiFetch('/cards', { method: 'GET' }),
   addCard: (data) => apiFetch('/cards', { method: 'POST', body: JSON.stringify(data) }),
