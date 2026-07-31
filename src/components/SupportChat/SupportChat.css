@@ -136,3 +136,12 @@
   align-items: center;
 }
 .support-chat__input input { min-width: 0; }
+
+/* Chat orqa foni — hiralashadi, bosilganda yopiladi */
+.support-overlay {
+  position: fixed; inset: 0; z-index: 49;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: fade-in 0.2s var(--ease);
+}

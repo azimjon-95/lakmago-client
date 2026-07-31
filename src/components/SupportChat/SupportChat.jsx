@@ -6,6 +6,7 @@ import { Icon } from '@/components/Icon';
 import { api } from '@/api';
 import { getSocket, joinUserRoom } from '@/lib/socket';
 import { useUser } from '@/store/user';
+import { useLockScroll } from '@/hooks/useLockScroll';
 
 // Bottom-right animatsiyali chat tugmasi + oyna.
 // Mijoz sayt adminlari (yordam xizmati) bilan gaplashadi.
@@ -18,6 +19,7 @@ export function SupportChat() {
 
   const [sending, setSending] = useState(false);
   const [unread, setUnread] = useState(0);
+  useLockScroll(open);
   const userId = useUser((st) => st.user?._id || st.user?.id);
 
   // Chat ochilganda serverdan tarixni yuklaymiz
@@ -97,6 +99,9 @@ export function SupportChat() {
       )}
 
       {open && (
+        <>
+        {/* Orqa fon — bosilganda yopiladi, hiralashadi */}
+        <div className="support-overlay" onClick={() => setOpen(false)} />
         <div className="support-chat">
           <div className="support-chat__header">
             <div className="support-chat__header-info">
@@ -129,6 +134,7 @@ export function SupportChat() {
             </button>
           </div>
         </div>
+        </>
       )}
     </>
   );

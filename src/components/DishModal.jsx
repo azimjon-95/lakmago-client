@@ -3,6 +3,7 @@ import { Icon } from './Icon';
 import { DishPhoto } from './DishPhoto';
 import { formatSom, formatSomShort } from '@/lib/utils';
 import { useCart } from '@/store/cart';
+import { useLockScroll } from '@/hooks/useLockScroll';
 import { useUser } from '@/store/user';
 import { haptic, shareDish } from '@/lib/telegram';
 import { useT } from '@/i18n';
@@ -11,6 +12,7 @@ import './cards/DishModal.css';
 export function DishModal({ dish, onClose }) {
   const t = useT();
   const addItem = useCart((s) => s.addItem);
+  useLockScroll(true);
   // Sevimlilar — selector primitiv qaytaradi (qayta render bo'lmasin)
   const dishId = String(dish.id || dish._id || '');
   const toggleFavorite = useUser((st) => st.toggleFavorite);
@@ -90,7 +92,7 @@ export function DishModal({ dish, onClose }) {
           {dish.description && <p className="dish-modal__desc">{dish.description}</p>}
 
           {/* Og'irlik va kaloriya — bor bo'lganlari ko'rsatiladi */}
-          {(dish.weight || dish.weightGram || dish.calories) && (
+          {(dish.weight || dish.weightGram || dish.calories || dish.prepMinutes) && (
             <div className="dish-modal__nutrition">
               {(dish.weight || dish.weightGram) && (
                 <span>
@@ -102,6 +104,12 @@ export function DishModal({ dish, onClose }) {
                 <span>
                   <Icon name="flame" size={15} color="#E14B42" />
                   {dish.calories} {t('calories')}
+                </span>
+              )}
+              {dish.prepMinutes > 0 && (
+                <span>
+                  <Icon name="clock" size={15} color="#A99C8C" />
+                  {dish.prepMinutes} daq
                 </span>
               )}
             </div>
