@@ -338,7 +338,9 @@ function CardsStrip({ cards, onManage }) {
               </div>
               <div className="pcard__num">•••• •••• •••• {c.last4}</div>
               <div className="pcard__bottom">
-                <span className="pcard__holder">{c.holder || 'KARTA EGASI'}</span>
+                <span className="pcard__holder">
+                  {c.bankName || c.holder || 'KARTA EGASI'}
+                </span>
                 <span className="pcard__brand">{st.label}</span>
               </div>
             </div>

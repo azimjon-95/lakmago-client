@@ -390,7 +390,9 @@ export function CartPage() {
                     className={`cart-card ${selectedCard?._id === c._id ? 'is-active' : ''}`}
                   >
                     <Icon name="card" size={16} color="#A99C8C" />
-                    <span className="cart-card__num">•••• {c.last4}</span>
+                    <span className="cart-card__num">
+                      {c.bankName ? `${c.bankName} · ` : ''}•••• {c.last4}
+                    </span>
                     {c.isDefault && <span className="cart-card__tag">Asosiy</span>}
                     {selectedCard?._id === c._id && (
                       <Icon name="circleCheck" size={15} color="#6FBF73" />

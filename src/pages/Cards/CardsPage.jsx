@@ -27,7 +27,7 @@ export function CardsPage() {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState({ number: '', expiry: '', holder: '' });
+  const [form, setForm] = useState({ number: '', expiry: '', holder: '', bankName: '' });
   const [err, setErr] = useState(null);
   const [saving, setSaving] = useState(false);
 
@@ -49,9 +49,10 @@ export function CardsPage() {
         number: digits,
         expiry: form.expiry,
         holder: form.holder.trim(),
+        bankName: form.bankName.trim(),
       });
       setCards(list);
-      setForm({ number: '', expiry: '', holder: '' });
+      setForm({ number: '', expiry: '', holder: '', bankName: '' });
       setAdding(false);
     } catch (e) {
       setErr(e.message);
@@ -94,9 +95,10 @@ export function CardsPage() {
                   </div>
                   <div className="card-item__body">
                     <div className="card-item__num">
-                      {b.label} •••• {c.last4}
+                      {c.bankName || b.label} •••• {c.last4}
                     </div>
                     <div className="card-item__meta">
+                      {c.bankName && <span>{b.label}</span>}
                       {c.expiry && <span>{c.expiry}</span>}
                       {c.isDefault && <span className="card-item__default">Asosiy</span>}
                     </div>
@@ -157,6 +159,33 @@ export function CardsPage() {
                     />
                   </div>
                 </div>
+
+                <label className="card-form__label">Bank nomi</label>
+                <input
+                  value={form.bankName}
+                  onChange={(e) => setForm({ ...form, bankName: e.target.value })}
+                  placeholder="Kapitalbank, Ipoteka Bank..."
+                  list="bank-list"
+                  className="input-field"
+                />
+                <datalist id="bank-list">
+                  <option value="Kapitalbank" />
+                  <option value="Ipoteka Bank" />
+                  <option value="Xalq banki" />
+                  <option value="Asaka bank" />
+                  <option value="SQB (Sanoatqurilishbank)" />
+                  <option value="Agrobank" />
+                  <option value="Trastbank" />
+                  <option value="Hamkorbank" />
+                  <option value="InfinBank" />
+                  <option value="Anor Bank" />
+                  <option value="TBC Bank" />
+                  <option value="Davr Bank" />
+                  <option value="Ipak Yo'li banki" />
+                  <option value="Turonbank" />
+                  <option value="Aloqabank" />
+                  <option value="Milliy bank (NBU)" />
+                </datalist>
 
                 <p className="card-form__note">
                   <Icon name="info" size={13} color="#6FBF73" /> Xavfsizlik: to'liq raqam
