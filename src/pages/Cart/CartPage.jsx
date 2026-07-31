@@ -51,11 +51,15 @@ export function CartPage() {
   // Onlayn to'lov umuman mavjudmi
   const onlineAvailable = payStatus.payme || payStatus.click;
 
-  // 'card' — vaqtinchalik qiymat, mavjud tizimga almashtiriladi
-  useEffect(() => {
-    if (paymentMethod !== 'card') return;
-    setPaymentMethod(payStatus.payme ? 'payme' : payStatus.click ? 'click' : 'cash');
-  }, [paymentMethod, payStatus]);
+  // Karta tanlanganda qaysi tizim ishlatiladi
+  const pickCardProvider = () => {
+    haptic();
+    // Avval Payme, yo'q bo'lsa Click
+    setPaymentMethod(payStatus.payme ? 'payme' : 'click');
+  };
+
+  // Naqdmi yoki karta orqalimi
+  const isCard = paymentMethod === 'payme' || paymentMethod === 'click';
 
   useEffect(() => {
     api.getPaymentStatus()
@@ -443,15 +447,15 @@ export function CartPage() {
           </button>
 
           <button
-            onClick={() => { haptic(); setPaymentMethod('card'); }}
+            onClick={pickCardProvider}
             disabled={!onlineAvailable}
-            className={`pay-opt ${paymentMethod !== 'cash' ? 'is-active' : ''} ${
+            className={`pay-opt ${isCard ? 'is-active' : ''} ${
               !onlineAvailable ? 'is-disabled' : ''
             }`}
           >
             <span className="pay-opt__emoji">💳</span>
             <span>Karta orqali</span>
-            {paymentMethod !== 'cash' && <Icon name="circleCheck" size={15} color="#6FBF73" />}
+            {isCard && <Icon name="circleCheck" size={15} color="#6FBF73" />}
           </button>
         </div>
 
@@ -463,7 +467,7 @@ export function CartPage() {
         )}
 
         {/* Qaysi tizim orqali — ikkalasi ham ulangan bo'lsa */}
-        {paymentMethod !== 'cash' && payStatus.payme && payStatus.click && (
+        {isCard && payStatus.payme && payStatus.click && (
           <div className="cart-providers">
             <button
               onClick={() => { haptic(); setPaymentMethod('payme'); }}
@@ -481,7 +485,7 @@ export function CartPage() {
         )}
 
         {/* Karta tanlash — faqat karta to'lovi tanlanganda */}
-        {paymentMethod !== 'cash' && (
+        {isCard && (
           <div className="cart-cards">
             {cards.length === 0 ? (
               <button onClick={() => navigate('/cards')} className="cart-cards__add">
