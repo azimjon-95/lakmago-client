@@ -12,7 +12,7 @@ import { LangSwitch } from '@/components/LangSwitch/LangSwitch';
 import { RestaurantCardSkeleton, DishScrollСardSkeleton } from '@/components/Skeleton/Skeleton';
 import { useUser } from '@/store/user';
 import { useT } from '@/i18n';
-import { useRestaurants, useTrendingDishes, useDiscountedDishes, useBannersQuery, useAllDishes } from '@/hooks/queries';
+import { useRestaurants, useTrendingDishes, useBannersQuery, useAllDishes } from '@/hooks/queries';
 import { API_BASE } from '@/api';
 import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
 import { CategoryIcon } from '@/components/CategoryIcons/CategoryIcon';
@@ -47,7 +47,6 @@ export function HomePage() {
   // Real data — TanStack Query (cache + background refetch)
   const { data: restaurants = [], isLoading: restLoading, isError: restError, error: restErrorObj, refetch: refetchRest } = useRestaurants();
   const { data: trending = [], isLoading: trendLoading } = useTrendingDishes();
-  const { data: discounted = [] } = useDiscountedDishes();
   const { data: allDishes = [], isLoading: allDishesLoading } = useAllDishes();
   const { data: banners = [] } = useBannersQuery();
 
@@ -59,12 +58,13 @@ export function HomePage() {
 
   // Taomlar ham shu kategoriya bo'yicha. Taomda kategoriya bo'lmasa —
   // restorani mos kelsa ham ko'rsatamiz (eski ma'lumot uchun).
+  // Taomlar FAQAT o'z kategoriyasi bo'yicha filtrlanadi.
+  // Avval restoran kategoriyasi ham hisobga olinardi — natijada
+  // "Salatlar" tanlansa salat restoranining hamma taomlari chiqardi.
   const filteredDishes = useMemo(() => {
     if (category === 'all') return allDishes;
-    const restIds = new Set(filtered.map((r) => String(r.id || r._id)));
-    return allDishes.filter((d) =>
-      d.category === category || restIds.has(String(d.restaurantId)));
-  }, [allDishes, filtered, category]);
+    return allDishes.filter((d) => d.category === category);
+  }, [allDishes, category]);
 
   // Har ochilganda tartib o'zgaradi — sahifa qayta render bo'lganda
   // emas, faqat ilova ochilganda (seed sessiyada saqlanadi)
@@ -90,19 +90,22 @@ export function HomePage() {
     return a;
   }, []);
 
-  // Tavsiya — chegirmasizlar orasidan random 12 ta
-  const recommended = useMemo(() => {
-    const pool = filteredDishes.filter((d) => !(d.oldPrice > 0));
-    return shuffle(pool.length ? pool : filteredDishes, shuffleSeed).slice(0, 12);
+  // Chegirmadagilar — eski narxi bor va u hozirgisidan katta.
+  // Barcha restoranlardan yig'iladi, kategoriya tanlansa filtrlanadi.
+  const discountedShown = useMemo(() => {
+    const pool = filteredDishes.filter(
+      (d) => Number(d.oldPrice) > Number(d.price),
+    );
+    return shuffle(pool, shuffleSeed).slice(0, 20);
   }, [filteredDishes, shuffleSeed, shuffle]);
 
-  // Chegirmadagilar — kategoriya bo'yicha ham filtrlanadi
-  const discountedShown = useMemo(() => {
-    const base = category === 'all'
-      ? discounted
-      : discounted.filter((d) => d.category === category);
-    return shuffle(base, shuffleSeed).slice(0, 12);
-  }, [discounted, category, shuffleSeed, shuffle]);
+  // Tavsiya — chegirmasi yo'q taomlar (bitta narxli)
+  const recommended = useMemo(() => {
+    const pool = filteredDishes.filter(
+      (d) => !(Number(d.oldPrice) > Number(d.price)),
+    );
+    return shuffle(pool, shuffleSeed).slice(0, 20);
+  }, [filteredDishes, shuffleSeed, shuffle]);
 
   const defaultAddress = useMemo(
     () => user.addresses.find((a) => a.id === user.defaultAddressId) ?? user.addresses[0],
