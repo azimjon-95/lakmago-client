@@ -19,7 +19,6 @@ export function DishModal({ dish, onClose }) {
   const isFav = useUser((st) =>
     Boolean(st.user.favorites?.dishes?.includes(dishId)));
   const [quantity, setQuantity] = useState(1);
-  const [note, setNote] = useState('');
   const [selected, setSelected] = useState(() => {
     const init = {};
     dish.optionGroups?.forEach((g) => {
@@ -52,7 +51,7 @@ export function DishModal({ dish, onClose }) {
 
   function handleAdd() {
     haptic();
-    addItem(dish, quantity, selectedOptions, note || undefined);
+    addItem(dish, quantity, selectedOptions);
     onClose();
   }
 
@@ -172,9 +171,6 @@ export function DishModal({ dish, onClose }) {
               </div>
             </div>
           ))}
-
-          <div className="dish-modal__section-label dish-modal__section-label--comment">{t('comment')}</div>
-          <input value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('commentHint')} className="input-field" style={{ marginTop: 8 }} />
 
           <div className="dish-modal__footer">
             <div className="qty-control dish-modal__qty">
