@@ -337,3 +337,27 @@
   margin-top: 8px;
   line-height: 1.45;
 }
+
+/* To'lov tizimi tanlash — Payme / Click */
+.cart-providers {
+  display: flex; gap: 8px;
+  margin-top: 10px;
+}
+.cart-provider {
+  flex: 1;
+  padding: 9px;
+  border-radius: 11px;
+  border: 1.5px solid var(--line);
+  background: var(--surface-2);
+  font-size: 13.5px; font-weight: 600; color: var(--muted);
+}
+.cart-provider.is-active {
+  border-color: var(--success);
+  background: var(--success-bg);
+  color: var(--ink);
+}
+
+.pay-opt.is-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}

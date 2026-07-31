@@ -48,6 +48,14 @@ export function CartPage() {
   const [selectedCard, setSelectedCard] = useState(null);
   // Qaysi to'lov tizimlari ulangan
   const [payStatus, setPayStatus] = useState({ payme: false, click: false });
+  // Onlayn to'lov umuman mavjudmi
+  const onlineAvailable = payStatus.payme || payStatus.click;
+
+  // 'card' — vaqtinchalik qiymat, mavjud tizimga almashtiriladi
+  useEffect(() => {
+    if (paymentMethod !== 'card') return;
+    setPaymentMethod(payStatus.payme ? 'payme' : payStatus.click ? 'click' : 'cash');
+  }, [paymentMethod, payStatus]);
 
   useEffect(() => {
     api.getPaymentStatus()
@@ -176,37 +184,50 @@ export function CartPage() {
         : {}),
     })
       .then(async (created) => {
-        useCart.getState().clear();
-
-        // Naqd — buyurtma darhol restoranga boradi
+        // NAQD — buyurtma darhol restoranga boradi
         if (paymentMethod === 'cash') {
+          useCart.getState().clear();
           setPaying(false);
           navigate('/orders');
           return;
         }
 
-        // Karta — to'lov sahifasiga o'tamiz.
-        // Buyurtma "to'lov kutilmoqda" holatida, pul kelgach
-        // avtomatik restoranga yuboriladi.
-        const orderId = created?.orderId || created?._id || created?.id;
+        // KARTA — buyurtma "to'lov kutilmoqda" holatida yaratildi,
+        // restoranga hali KO'RINMAYDI. Pul kelgach avtomatik chiqadi.
+        const orderId = created?.orderId;
+
         if (!orderId) {
+          // Buyurtma ID kelmadi — to'lovni boshlab bo'lmaydi.
+          // Savat saqlanadi, mijoz qayta urinishi mumkin.
           setPaying(false);
+          alert('Buyurtma yaratildi, lekin to\u2018lovni boshlab bo\u2018lmadi.\n'
+            + 'Buyurtmalar bo\u2018limidan to\u2018lovni davom ettiring.');
           navigate('/orders');
           return;
         }
 
         try {
           const { url } = await api.getPaymentLink(orderId, paymentMethod);
+
+          // Havola olindi — endi savatni tozalashimiz mumkin
+          useCart.getState().clear();
           setPaying(false);
+
           const tg = getTelegram();
           if (tg?.openLink) tg.openLink(url);
           else window.location.href = url;
-          // To'lov oynasi ochilgach buyurtmalar sahifasiga qaytamiz
+
           setTimeout(() => navigate('/orders'), 600);
         } catch (e) {
+          // To'lov havolasi olinmadi — savat SAQLANADI.
+          // Buyurtma 'awaiting_payment' holatida qoladi va
+          // restoranga ko'rinmaydi. Mijoz qayta urinishi mumkin.
           setPaying(false);
-          alert(e.message || 'To\u2018lov havolasini olishda xato');
-          navigate('/orders');
+          alert(
+            (e.message || 'To\u2018lov tizimiga ulanib bo\u2018lmadi')
+            + '\n\nSavatingiz saqlandi. Qayta urinib ko\u2018ring yoki '
+            + 'naqd to\u2018lovni tanlang.',
+          );
         }
       })
       .catch(() => {
@@ -413,7 +434,7 @@ export function CartPage() {
         <div className="cart-payment__label">{t('paymentMethod')}</div>
         <div className="cart-payment__options">
           <button
-            onClick={() => setPaymentMethod('cash')}
+            onClick={() => { haptic(); setPaymentMethod('cash'); }}
             className={`pay-opt ${paymentMethod === 'cash' ? 'is-active' : ''}`}
           >
             <span className="pay-opt__emoji">💵</span>
@@ -421,38 +442,46 @@ export function CartPage() {
             {paymentMethod === 'cash' && <Icon name="circleCheck" size={15} color="#F5A524" />}
           </button>
 
-          {payStatus.payme && (
-            <button
-              onClick={() => setPaymentMethod('payme')}
-              className={`pay-opt ${paymentMethod === 'payme' ? 'is-active' : ''}`}
-            >
-              <span className="pay-opt__emoji">💳</span>
-              <span>Payme</span>
-              {paymentMethod === 'payme' && <Icon name="circleCheck" size={15} color="#6FBF73" />}
-            </button>
-          )}
-
-          {payStatus.click && (
-            <button
-              onClick={() => setPaymentMethod('click')}
-              className={`pay-opt ${paymentMethod === 'click' ? 'is-active' : ''}`}
-            >
-              <span className="pay-opt__emoji">💳</span>
-              <span>Click</span>
-              {paymentMethod === 'click' && <Icon name="circleCheck" size={15} color="#6FBF73" />}
-            </button>
-          )}
+          <button
+            onClick={() => { haptic(); setPaymentMethod('card'); }}
+            disabled={!onlineAvailable}
+            className={`pay-opt ${paymentMethod !== 'cash' ? 'is-active' : ''} ${
+              !onlineAvailable ? 'is-disabled' : ''
+            }`}
+          >
+            <span className="pay-opt__emoji">💳</span>
+            <span>Karta orqali</span>
+            {paymentMethod !== 'cash' && <Icon name="circleCheck" size={15} color="#6FBF73" />}
+          </button>
         </div>
 
         {/* Onlayn to'lov ulanmagan bo'lsa tushuntiramiz */}
-        {!payStatus.payme && !payStatus.click && (
+        {!onlineAvailable && (
           <p className="cart-payment__note">
-            Onlayn to'lov hozircha mavjud emas — kuryerga naqd to'laysiz
+            Karta orqali to'lov hozircha mavjud emas — kuryerga naqd to'laysiz
           </p>
         )}
 
+        {/* Qaysi tizim orqali — ikkalasi ham ulangan bo'lsa */}
+        {paymentMethod !== 'cash' && payStatus.payme && payStatus.click && (
+          <div className="cart-providers">
+            <button
+              onClick={() => { haptic(); setPaymentMethod('payme'); }}
+              className={`cart-provider ${paymentMethod === 'payme' ? 'is-active' : ''}`}
+            >
+              Payme
+            </button>
+            <button
+              onClick={() => { haptic(); setPaymentMethod('click'); }}
+              className={`cart-provider ${paymentMethod === 'click' ? 'is-active' : ''}`}
+            >
+              Click
+            </button>
+          </div>
+        )}
+
         {/* Karta tanlash — faqat karta to'lovi tanlanganda */}
-        {(paymentMethod === 'payme' || paymentMethod === 'click') && (
+        {paymentMethod !== 'cash' && (
           <div className="cart-cards">
             {cards.length === 0 ? (
               <button onClick={() => navigate('/cards')} className="cart-cards__add">

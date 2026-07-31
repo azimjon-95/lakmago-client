@@ -7,13 +7,14 @@ import { getSocket, joinUserRoom } from '@/lib/socket';
 import { useUser } from '@/store/user';
 import { formatSom } from '@/lib/utils';
 import { useT } from '@/i18n';
-import { haptic } from '@/lib/telegram';
+import { haptic, getTelegram } from '@/lib/telegram';
 import './Orders.css';
 
 // Buyurtma holatlari — bosqichma-bosqich
 const FLOW = ['pending', 'accepted', 'preparing', 'ready', 'delivering', 'delivered'];
 
 const STATUS = {
+  awaiting_payment: { label: "To'lov kutilmoqda", icon: 'card', color: '#E0A96D' },
   pending: { label: 'Tasdiq kutilmoqda', icon: 'clock', color: '#E0A96D' },
   accepted: { label: 'Qabul qilindi', icon: 'check', color: '#6FBF73' },
   preparing: { label: 'Tayyorlanmoqda', icon: 'flame', color: '#F5A524' },
@@ -24,6 +25,8 @@ const STATUS = {
 };
 
 // Faol = hali yetkazilmagan va bekor qilinmagan
+// To'lov kutilayotgan ham faol — mijoz uni ko'rishi va
+// to'lovni davom ettirishi kerak
 const isActive = (s) => !['delivered', 'cancelled'].includes(s);
 
 function fmtDate(d) {
@@ -229,6 +232,29 @@ function OrderCard({ order: o, open, onToggle, onRepeat, highlight }) {
           {o.fulfillment === 'pickup' && (
             <div className="ord-card__addr">
               <Icon name="bag" size={14} color="#A99C8C" /> O'zim olib ketaman
+            </div>
+          )}
+
+          {/* To'lov tugallanmagan — davom ettirish */}
+          {o.status === 'awaiting_payment' && (
+            <div className="ord-card__actions">
+              <button
+                onClick={async () => {
+                  haptic();
+                  try {
+                    const provider = o.paymentMethod === 'click' ? 'click' : 'payme';
+                    const { url } = await api.getPaymentLink(o._id, provider);
+                    const tg = getTelegram();
+                    if (tg?.openLink) tg.openLink(url);
+                    else window.location.href = url;
+                  } catch (e) {
+                    alert(e.message || 'To\u2018lovni boshlab bo\u2018lmadi');
+                  }
+                }}
+                className="ord-btn ord-btn--primary"
+              >
+                To'lovni davom ettirish
+              </button>
             </div>
           )}
 
