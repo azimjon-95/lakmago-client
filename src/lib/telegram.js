@@ -168,41 +168,6 @@ const cleanName = (v, fallback = '') =>
 
 const BOT_USERNAME = cleanName(import.meta.env.VITE_BOT_USERNAME, 'LokmaGoBot');
 const WEBAPP_NAME = cleanName(import.meta.env.VITE_WEBAPP_NAME, '');
-// Server domenи (OG meta sahifа uchun) — chiroyли rasm+nom karta bilan ulashish.
-// VITE_SHARE_BASE aniq berilса — o'sha. Aks holда VITE_API_URL'дан server domenини
-// avtomатик olamiz (chunki OG sahifани shu server beradi). Shunda alohида sozlash shart emas.
-// OG sahifа serveringiz domenи (masalan https://api.lokmago.uz).
-// MUHIM: bu yerга t.me havolаси YOZILMASLIGI kerak — u Mini App havolаси,
-// OG sahifа emas. Noto'g'ri qiymat berilса — e'tiborga olinmaydi.
-function isValidShareBase(url) {
-  if (!url) return false;
-  try {
-    const u = new URL(url);
-    // Faqat http/https
-    if (!/^https?:$/.test(u.protocol)) return false;
-    // t.me / telegram.org — bu Mini App havolаsи, OG sahifа emas
-    if (/(^|\.)t\.me$|(^|\.)telegram\.(org|me)$/i.test(u.hostname)) return false;
-    // Lokal manzil — Telegram ko'ra olmaydi
-    if (/localhost|127\.0\.0\.1|0\.0\.0\.0/.test(u.hostname)) return false;
-    // So'rov (?) yoki yo'l bo'lmasin — faqat toza domen kutiladi
-    if (u.search) return false;
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function deriveShareBase() {
-  const explicit = import.meta.env.VITE_SHARE_BASE;
-  if (isValidShareBase(explicit)) return explicit.replace(/\/$/, '');
-  // Noto'g'ri yoki bo'sh — API manzilидан olamiz
-  const api = import.meta.env.VITE_API_URL;
-  if (!api) return '';
-  const root = api.replace(/\/api\/?$/, '').replace(/\/$/, '');
-  return isValidShareBase(root) ? root : '';
-}
-const SHARE_BASE = deriveShareBase();
-
 // Taomга olib boruvchi Telegram Mini App havolasi.
 // WEBAPP_NAME bo'lsa: t.me/Bot/nom?startapp=dish_<id>
 // bo'lmasa:         t.me/Bot?startapp=dish_<id>  (ikkalasi ham webapp'ni ochadi)
@@ -213,21 +178,11 @@ function buildMiniAppLink(dishId) {
   return `${base}?startapp=food_${dishId}`;
 }
 
-// Taomга olib boruvchi havola. SHARE_BASE bo'lsa OG sahifа (chiroyли preview:
-// rasm+nom+narx karta), aks holда to'g'ridan Telegram Mini App havolаsi.
 /**
- * Taom ulashish havolasi.
- *
- * Server sahifasi qaytariladi (/d/<id>) — u Open Graph teglari
- * bilan javob beradi va Telegram RASM + NOM + tavsif kartasini
- * yasaydi. Bosilganda Mini App'dagi taom sahifasiga o'tkazadi.
- *
- * To'g'ridan t.me havolasi berilsa Telegram karta yasay olmaydi —
- * yalang'och havola bo'lib ko'rinadi.
+ * Taom ulashish havolasi — to'g'ridan Mini App.
+ * Bosilganda Telegram ilovani ochib taom sahifasiga o'tkazadi.
  */
 export function buildDishShareLink(dishId) {
-  if (SHARE_BASE) return `${SHARE_BASE}/d/${dishId}`;
-  // Server manzili aniqlanmasa — Mini App havolasi (kartasiz)
   return buildMiniAppLink(dishId);
 }
 
@@ -250,11 +205,26 @@ export function shareDish(dish) {
   haptic();
   const link = buildDishShareLink(dish.id || dish._id);
 
-  // Matn QO'SHILMAYDI. Telegram havoladagi Open Graph teglarini
-  // o'qib rasm + nom + narx kartasini o'zi chizadi. Matn qo'shilsa
-  // karta ustida ortiqcha yozuv bo'lib chiqadi.
+  // Telegram xabar formati: taom rasmi, ostida ma'lumot,
+  // oxirida "Buyurtma berish" havolasi.
+  //
+  // t.me/share/url havolani xabar OXIRIGA qo'yadi — HTML
+  // teglar ishlamaydi. Shuning uchun havoladan oldin
+  // chaqiruv matnini yozamiz.
+  const price = dish.price ? `${dish.price.toLocaleString('ru-RU')} so'm` : '';
+  const lines = [
+    `🍽 <b>${dish.name}</b>`.replace(/<\/?b>/g, ''),
+    price && `💰 ${price}`,
+    dish.restaurantName && `📍 ${dish.restaurantName}`,
+    dish.description && `\n${dish.description}`,
+    '\n👉 Buyurtma berish:',
+  ].filter(Boolean);
+  const text = lines.join('\n');
+
   const tg = getTelegram();
-  const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}`;
+  const shareUrl =
+    `https://t.me/share/url?url=${encodeURIComponent(link)}`
+    + `&text=${encodeURIComponent(text)}`;
 
   if (tg?.openTelegramLink) {
     // Telegram ichida — do'stlar ro'yxatи ochiladi
