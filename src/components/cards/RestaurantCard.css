@@ -78,3 +78,24 @@
 .rcard__sep {
   width: 1px; height: 12px; background: var(--line);
 }
+
+/* Ish vaqti va holat */
+.rcard__hours {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11.5px; color: var(--muted);
+  margin-top: 3px;
+}
+.rcard__status {
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10.5px;
+}
+.rcard__status.is-open {
+  color: var(--success);
+  background: var(--success-bg);
+}
+.rcard__status.is-closed {
+  color: var(--danger);
+  background: rgba(225, 75, 66, 0.14);
+}

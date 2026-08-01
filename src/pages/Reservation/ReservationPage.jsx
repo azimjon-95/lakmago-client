@@ -85,9 +85,16 @@ export function ReservationPage() {
         name: name.trim(),
         phone: phone.trim(),
         // Oldindan tanlangan taomlar izohga yoziladi
-        note: chosen.length
-          ? `Oldindan buyurtma: ${chosen.map((c) => `${c.name}×${c.qty || 1}`).join(', ')}`
-          : '',
+        // Oldindan tanlangan taomlar — nom va soni bilan
+        preOrder: chosen
+          .filter((c) => c.dish)
+          .map((c) => ({
+            dishId: c.dish.id || c.dish._id,
+            name: c.dish.name,
+            quantity: c.qty || 1,
+            price: c.dish.price || 0,
+          })),
+        note: '',
       });
       setPreOrderDishes(chosen);
       setStep('done');

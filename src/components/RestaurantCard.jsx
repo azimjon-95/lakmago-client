@@ -4,10 +4,15 @@ import { Icon } from './Icon';
 import { PHOTO_STYLES } from './DishPhoto';
 import { formatSomShort } from '@/lib/utils';
 import { useT } from '@/i18n';
+import { isOpenNow, workHoursLabel } from '@/lib/workHours';
 import { usePrefetchRestaurant } from '@/hooks/queries';
 import './cards/RestaurantCard.css';
 
 export const RestaurantCard = memo(function RestaurantCard({ restaurant: r }) {
+  // Ish vaqti — har render'da hisoblanadi (vaqt o'zgaradi)
+  const hours = workHoursLabel(r);
+  const open = isOpenNow(r);
+
   const navigate = useNavigate();
   const t = useT();
   const prefetch = usePrefetchRestaurant();
@@ -56,6 +61,17 @@ export const RestaurantCard = memo(function RestaurantCard({ restaurant: r }) {
           )}
         </div>
         {r.cuisine && <div className="rcard__cuisine">{r.cuisine}</div>}
+
+        {/* Ish vaqti va hozirgi holat */}
+        {hours && (
+          <div className="rcard__hours">
+            <Icon name="clock" size={12} color={open ? '#6FBF73' : '#E14B42'} />
+            <span>{hours}</span>
+            <span className={`rcard__status ${open ? 'is-open' : 'is-closed'}`}>
+              {open ? 'Ochiq' : 'Yopiq'}
+            </span>
+          </div>
+        )}
         <div className="rcard__meta">
           {r.discount > 0 && (
             <>
