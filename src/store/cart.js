@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 
 
@@ -22,7 +23,9 @@ function unitPrice(dish, options) {
   return dish.price + options.reduce((sum, o) => sum + o.price, 0);
 }
 
-export const useCart = create((set, get) => ({
+export const useCart = create(
+  persist(
+    (set, get) => ({
   items: [],
 
   addItem: (dish, quantity, selectedOptions, note) => {
@@ -81,12 +84,26 @@ export const useCart = create((set, get) => ({
         name: meta.restaurantName || meta.restaurant?.name || 'Restoran',
         tint: meta.restaurantTint || meta.restaurant?.tint || '#3D2A10',
         icon: meta.restaurantIcon || meta.restaurant?.icon || 'tools-kitchen-2',
-        deliveryMin: meta.restaurantDeliveryMin ?? 25,
-        deliveryMax: meta.restaurantDeliveryMax ?? 40,
-        deliveryFee: meta.restaurantDeliveryFee ?? 0,
+        deliveryMin: meta.restaurantDeliveryMin ?? meta.restaurant?.deliveryMin ?? 25,
+        deliveryMax: meta.restaurantDeliveryMax ?? meta.restaurant?.deliveryMax ?? 40,
+        deliveryFee: meta.restaurantDeliveryFee ?? meta.restaurant?.deliveryFee ?? 0,
+        // Yetkazish shartlari — savatda hisob uchun
+        freeDeliveryThreshold:
+          meta.restaurantFreeDeliveryThreshold ?? meta.restaurant?.freeDeliveryThreshold ?? 0,
+        minOrderAmount:
+          meta.restaurantMinOrderAmount ?? meta.restaurant?.minOrderAmount ?? 0,
+        prepMinutes: meta.restaurantPrepMinutes ?? meta.restaurant?.prepMinutes ?? 20,
       },
       items,
       subtotal: items.reduce((s, i) => s + i.unitPrice * i.quantity, 0),
     }));
   }
-}));
+}),
+    {
+      name: 'lokma-cart',
+      storage: createJSONStorage(() => localStorage),
+      // Faqat taomlar saqlanadi — funksiyalar emas
+      partialize: (state) => ({ items: state.items }),
+    },
+  ),
+);

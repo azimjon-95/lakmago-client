@@ -9,7 +9,7 @@ import { haptic, shareDish } from '@/lib/telegram';
 import { useT } from '@/i18n';
 import './cards/DishModal.css';
 
-export function DishModal({ dish, onClose }) {
+export function DishModal({ dish, restaurant, onClose }) {
   const t = useT();
   const addItem = useCart((s) => s.addItem);
   useLockScroll(true);
@@ -51,7 +51,24 @@ export function DishModal({ dish, onClose }) {
 
   function handleAdd() {
     haptic();
-    addItem(dish, quantity, selectedOptions);
+    // Restoran shartlarini taomga biriktiramiz — savatda
+    // yetkazish va minimal summa hisoblanishi uchun kerak
+    const enriched = restaurant
+      ? {
+          ...dish,
+          restaurantName: dish.restaurantName || restaurant.name,
+          restaurantTint: dish.restaurantTint || restaurant.tint,
+          restaurantIcon: dish.restaurantIcon || restaurant.icon,
+          restaurantDeliveryMin: restaurant.deliveryMin,
+          restaurantDeliveryMax: restaurant.deliveryMax,
+          restaurantDeliveryFee: restaurant.deliveryFee,
+          restaurantFreeDeliveryThreshold: restaurant.freeDeliveryThreshold,
+          restaurantMinOrderAmount: restaurant.minOrderAmount,
+          restaurantPrepMinutes: restaurant.prepMinutes,
+        }
+      : dish;
+
+    addItem(enriched, quantity, selectedOptions);
     onClose();
   }
 

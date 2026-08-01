@@ -241,7 +241,13 @@ export function RestaurantPage() {
       </div>
 
       <CartBar />
-      {modalDish && <DishModal dish={modalDish} onClose={() => setModalDish(null)} />}
+      {modalDish && (
+        <DishModal
+          dish={modalDish}
+          restaurant={restaurant}
+          onClose={() => setModalDish(null)}
+        />
+      )}
 
       {infoSheet && (
         <RestaurantInfoSheet

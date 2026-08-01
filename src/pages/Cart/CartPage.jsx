@@ -275,10 +275,14 @@ export function CartPage() {
           );
         }
       })
-      .catch(() => {
+      .catch((e) => {
+        // Buyurtma YARATILMADI — savat saqlanadi, mijoz
+        // taomlarini yo'qotmaydi va qayta urinishi mumkin.
         setPaying(false);
-        useCart.getState().clear();
-        navigate('/order/track');
+        alert(
+          (e?.message || 'Buyurtma yuborilmadi')
+          + '\n\nSavatingiz saqlandi. Qayta urinib ko\u2018ring.',
+        );
       });
   }
 
