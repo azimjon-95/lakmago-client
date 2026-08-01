@@ -203,37 +203,43 @@ export async function copyDishLink(dish) {
 
 export function shareDish(dish) {
   haptic();
-  const link = buildDishShareLink(dish.id || dish._id);
+  const dishId = dish.id || dish._id;
+  const link = buildDishShareLink(dishId);
+  const tg = getTelegram();
 
-  // Telegram xabar formati: taom rasmi, ostida ma'lumot,
-  // oxirida "Buyurtma berish" havolasi.
+  // ENG YAXSHI YO'L: inline rejim.
+  // Telegram do'stlar ro'yxatini ochadi, tanlangach bot RASM +
+  // formatlangan matn + "Buyurtma berish" tugmasini yuboradi.
   //
-  // t.me/share/url havolani xabar OXIRIGA qo'yadi — HTML
-  // teglar ishlamaydi. Shuning uchun havoladan oldin
-  // chaqiruv matnini yozamiz.
+  // t.me/share/url orqali bunday xabar yuborib bo'lmaydi —
+  // u faqat oddiy matn va havola qo'ya oladi.
+  if (typeof tg?.switchInlineQuery === 'function') {
+    try {
+      tg.switchInlineQuery(`food_${dishId}`, ['users', 'groups']);
+      return;
+    } catch {
+      // Qo'llab-quvvatlanmasa pastdagi zaxira usulga o'tamiz
+    }
+  }
+
+  // ZAXIRA: oddiy ulashish (rasm bo'lmaydi)
   const price = dish.price ? `${dish.price.toLocaleString('ru-RU')} so'm` : '';
   const lines = [
-    `🍽 <b>${dish.name}</b>`.replace(/<\/?b>/g, ''),
+    `🍽 ${dish.name}`,
     price && `💰 ${price}`,
     dish.restaurantName && `📍 ${dish.restaurantName}`,
     dish.description && `\n${dish.description}`,
     '\n👉 Buyurtma berish:',
   ].filter(Boolean);
-  const text = lines.join('\n');
 
-  const tg = getTelegram();
   const shareUrl =
     `https://t.me/share/url?url=${encodeURIComponent(link)}`
-    + `&text=${encodeURIComponent(text)}`;
+    + `&text=${encodeURIComponent(lines.join('\n'))}`;
 
-  if (tg?.openTelegramLink) {
-    // Telegram ichida — do'stlar ro'yxatи ochiladi
-    tg.openTelegramLink(shareUrl);
-  } else {
-    // Brauzerда — yangi oynада ochiladi (yoki nusxalash)
-    window.open(shareUrl, '_blank');
-  }
+  if (tg?.openTelegramLink) tg.openTelegramLink(shareUrl);
+  else window.open(shareUrl, '_blank');
 }
+
 
 // Ilova ochilганда startapp parametrини o'qish (ulashilган taomга yo'naltirish).
 // Qaytaradi: { type: 'dish', id } yoki null
