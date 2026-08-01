@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from 'react';
+import { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HomePage } from '@/pages/Home/HomePage'; // asosiy sahifa — darhol yuklanadi
@@ -7,6 +7,7 @@ const RestaurantPage = lazy(() => import('@/pages/Restaurant/RestaurantPage').th
 const CartPage = lazy(() => import('@/pages/Cart/CartPage').then((m) => ({ default: m.CartPage })));
 const OrderTrackPage = lazy(() => import('@/pages/OrderTrack/OrderTrackPage').then((m) => ({ default: m.OrderTrackPage })));
 const OrdersPage = lazy(() => import('@/pages/Orders/OrdersPage').then((m) => ({ default: m.OrdersPage })));
+const FoodPage = lazy(() => import('@/pages/Food/FoodPage').then((m) => ({ default: m.FoodPage })));
 const CardsPage = lazy(() => import('@/pages/Cards/CardsPage').then((m) => ({ default: m.CardsPage })));
 const FavoritesPage = lazy(() => import('@/pages/Favorites/FavoritesPage').then((m) => ({ default: m.FavoritesPage })));
 const MyReservationsPage = lazy(() => import('@/pages/Reservation/MyReservationsPage').then((m) => ({ default: m.MyReservationsPage })));
@@ -116,6 +117,7 @@ function AppInner() {
               <Route path="/my-reservations" element={<MyReservationsPage />} />
               <Route path="/favorites" element={<FavoritesPage />} />
               <Route path="/cards" element={<CardsPage />} />
+              <Route path="/food/:id" element={<FoodPage />} />
               <Route path="/restaurant/:id/reserve" element={<ReservationPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/order/track" element={<OrderTrackPage />} />
@@ -132,27 +134,31 @@ function AppInner() {
   );
 }
 
-// Ulashilган havola bilan ochilганда (startapp=dish_ID) — o'sha taom restoraniga
-// yo'naltiradi va taomни ochadi.
+/**
+ * Ulashilgan havola bilan ochilganda (startapp=food_<id>).
+ *
+ * Parametr getStartParam() da tekshirilgan — faqat to'g'ri
+ * ObjectId o'tadi. Taom mavjudligi sahifaning o'zida backend
+ * orqali tasdiqlanadi, topilmasa "Taom topilmadi" chiqadi.
+ *
+ * Ilova ishga tushganda BIR MARTA bajariladi va oddiy
+ * navigatsiyaga xalaqit bermaydi.
+ */
 function StartParamHandler() {
   const navigate = useNavigate();
+  const handled = useRef(false);
+
   useEffect(() => {
+    if (handled.current) return;
+    handled.current = true;
+
     const param = getStartParam();
     if (!param || param.type !== 'dish') return;
-    let cancelled = false;
-    api.getDish(param.id)
-      .then((dish) => {
-        if (cancelled || !dish) return;
-        const rid = dish.restaurantId || dish.restaurant?.id;
-        if (rid) {
-          // Restoran sahifasига o'tamiz, taom highlight uchun state
-          navigate(`/restaurant/${rid}`, { state: { highlightDish: param.id } });
-        }
-      })
-      .catch(() => { /* topilmasa bosh sahifa qoladi */ });
-    return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+    // Sahifa o'zi taomni yuklaydi va tekshiradi
+    navigate(`/food/${param.id}`, { replace: true });
+  }, [navigate]);
+
   return null;
 }
 

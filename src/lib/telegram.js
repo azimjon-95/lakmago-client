@@ -210,19 +210,37 @@ function buildMiniAppLink(dishId) {
   const base = WEBAPP_NAME
     ? `https://t.me/${BOT_USERNAME}/${WEBAPP_NAME}`
     : `https://t.me/${BOT_USERNAME}`;
-  return `${base}?startapp=dish_${dishId}`;
+  return `${base}?startapp=food_${dishId}`;
 }
 
 // Taomга olib boruvchi havola. SHARE_BASE bo'lsa OG sahifа (chiroyли preview:
 // rasm+nom+narx karta), aks holда to'g'ridan Telegram Mini App havolаsi.
+/**
+ * Taom ulashish havolasi.
+ *
+ * Har doim Mini App havolasi qaytariladi — bosilganda Telegram
+ * ilovani ochadi va to'g'ridan taom sahifasiga o'tadi.
+ * Oddiy brauzer havolasi bo'lsa ilova ochilmaydi.
+ */
 export function buildDishShareLink(dishId) {
-  if (SHARE_BASE) return `${SHARE_BASE}/share/dish/${dishId}`;
   return buildMiniAppLink(dishId);
 }
 
 // Taomni Telegram do'stlarга ulashish.
 // Telegram do'stlar ro'yxatини ochadi, taom havolasi + tavsif yuboriladi.
 // Havola bosilganда webapp o'sha taom bilan ochiladi.
+/** Havolani nusxalash — do'stга o'zi yuborish uchun. */
+export async function copyDishLink(dish) {
+  haptic();
+  const link = buildDishShareLink(dish.id || dish._id);
+  try {
+    await navigator.clipboard.writeText(link);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function shareDish(dish) {
   haptic();
   const link = buildDishShareLink(dish.id || dish._id);
@@ -267,10 +285,21 @@ export function getStartParam() {
   }
 
   if (!raw) return null;
-  if (raw.startsWith('dish_')) {
-    return { type: 'dish', id: raw.slice(5) };
-  }
-  return null;
+
+  // XAVFSIZLIK: parametr faqat kutilgan naqshga mos bo'lsa qabul
+  // qilinadi. Zararli qiymat (skript, yo'l, uzun matn) rad etiladi.
+  // MongoDB ObjectId — aynan 24 ta o'n oltilik belgi.
+  const OBJECT_ID = /^[a-f\d]{24}$/i;
+
+  // food_<id> — asosiy format (TZ bo'yicha)
+  // dish_<id> — eski havolalar uchun moslik
+  const m = String(raw).match(/^(food|dish)_([A-Za-z\d]{1,64})$/);
+  if (!m) return null;
+
+  const id = m[2];
+  if (!OBJECT_ID.test(id)) return null;
+
+  return { type: 'dish', id };
 }
 
 // Haqiqий Telegram Mini App muhitидami tekshirish.

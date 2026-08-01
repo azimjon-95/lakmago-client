@@ -1,0 +1,122 @@
+.food { padding-bottom: 0; }
+
+.food-loading,
+.food-empty {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 40px 24px;
+  color: var(--muted);
+}
+.food-empty__title {
+  font-size: 18px; font-weight: 700; color: var(--ink);
+  margin: 14px 0 6px;
+}
+.food-empty__hint { font-size: 13.5px; line-height: 1.5; max-width: 260px; }
+.food-empty__btn {
+  margin-top: 20px; padding: 12px 26px;
+  background: var(--brand); color: var(--brand-text);
+  border-radius: 14px; font-weight: 700; font-size: 14.5px;
+}
+
+/* Rasm */
+.food-photo {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  max-height: 42vh;
+  background: var(--surface-2);
+  flex: none;
+  overflow: hidden;
+}
+.food-photo__btn {
+  position: absolute; top: 12px;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+}
+.food-photo__btn--back { left: 12px; }
+.food-photo__actions {
+  position: absolute; top: 12px; right: 12px;
+  display: flex; gap: 8px;
+}
+.food-photo__actions .food-photo__btn { position: static; }
+.food-photo__badge {
+  position: absolute; bottom: 12px; left: 12px;
+  background: var(--danger); color: #fff;
+  font-size: 13px; font-weight: 700;
+  padding: 4px 11px; border-radius: 999px;
+}
+
+/* Kontent */
+.food-body { flex: 1; padding: 18px 16px 24px; overflow-y: auto; }
+
+.food-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px; margin-bottom: 8px;
+}
+.food-name {
+  font-size: 22px; font-weight: 700; color: var(--ink);
+  margin: 0; line-height: 1.25;
+}
+.food-price { text-align: right; flex: none; }
+.food-price__now {
+  display: block;
+  font-size: 19px; font-weight: 700; color: var(--brand-100);
+  white-space: nowrap;
+}
+.food-price__old {
+  font-size: 13px; color: var(--muted);
+  text-decoration: line-through;
+}
+
+.food-desc {
+  font-size: 14px; color: var(--muted);
+  line-height: 1.55; margin: 0 0 14px;
+}
+
+/* Restoran */
+.food-rest {
+  width: 100%;
+  display: flex; align-items: center; gap: 11px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  margin-bottom: 14px;
+  text-align: left;
+}
+.food-rest__body { flex: 1; min-width: 0; }
+.food-rest__name { font-size: 14.5px; font-weight: 600; color: var(--ink); }
+.food-rest__meta { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+/* Faktlar */
+.food-facts {
+  display: flex; flex-wrap: wrap; gap: 14px;
+  font-size: 13px; color: var(--muted);
+  margin-bottom: 14px;
+}
+.food-facts span { display: inline-flex; align-items: center; gap: 5px; }
+
+/* Ozuqaviy tarkib */
+.food-nutri { display: flex; gap: 8px; margin-bottom: 18px; }
+.food-nutri__item {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 10px 6px;
+  background: var(--surface-2);
+  border-radius: 12px;
+}
+.food-nutri__value { font-size: 14.5px; font-weight: 700; color: var(--ink); }
+.food-nutri__label { font-size: 11px; color: var(--muted); }
+
+/* Savatga */
+.food-actions { display: flex; gap: 10px; align-items: center; }
+.food-add {
+  flex: 1;
+  padding: 14px;
+  background: var(--brand); color: var(--brand-text);
+  border-radius: 15px;
+  font-size: 15px; font-weight: 700;
+}
