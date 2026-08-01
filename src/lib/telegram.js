@@ -218,11 +218,16 @@ function buildMiniAppLink(dishId) {
 /**
  * Taom ulashish havolasi.
  *
- * Har doim Mini App havolasi qaytariladi — bosilganda Telegram
- * ilovani ochadi va to'g'ridan taom sahifasiga o'tadi.
- * Oddiy brauzer havolasi bo'lsa ilova ochilmaydi.
+ * Server sahifasi qaytariladi (/d/<id>) — u Open Graph teglari
+ * bilan javob beradi va Telegram RASM + NOM + tavsif kartasini
+ * yasaydi. Bosilganda Mini App'dagi taom sahifasiga o'tkazadi.
+ *
+ * To'g'ridan t.me havolasi berilsa Telegram karta yasay olmaydi —
+ * yalang'och havola bo'lib ko'rinadi.
  */
 export function buildDishShareLink(dishId) {
+  if (SHARE_BASE) return `${SHARE_BASE}/d/${dishId}`;
+  // Server manzili aniqlanmasa — Mini App havolasi (kartasiz)
   return buildMiniAppLink(dishId);
 }
 
@@ -245,18 +250,11 @@ export function shareDish(dish) {
   haptic();
   const link = buildDishShareLink(dish.id || dish._id);
 
-  // Chiroyli, qisqa matn — havola matnга QO'SHILMAYDI (Telegram preview kartаsi yasaydi).
-  // Shunda do'stга toza ko'rinadi: rasm + tavsif + bosiladigan karta.
-  const price = dish.price ? `${dish.price.toLocaleString('ru-RU')} so'm` : '';
-  const lines = [
-    `🍽 ${dish.name}`,
-    price && `💰 ${price}`,
-    dish.description && `\n${dish.description}`,
-  ].filter(Boolean);
-  const text = lines.join('\n');
-
+  // Matn QO'SHILMAYDI. Telegram havoladagi Open Graph teglarini
+  // o'qib rasm + nom + narx kartasini o'zi chizadi. Matn qo'shilsa
+  // karta ustida ortiqcha yozuv bo'lib chiqadi.
   const tg = getTelegram();
-  const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
+  const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}`;
 
   if (tg?.openTelegramLink) {
     // Telegram ichida — do'stlar ro'yxatи ochiladi
