@@ -388,3 +388,8 @@
   opacity: 0.5;
   pointer-events: none;
 }
+
+.cart-footer__warn--closed {
+  color: var(--danger);
+  background: rgba(225, 75, 66, 0.12);
+}

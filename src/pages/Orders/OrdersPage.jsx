@@ -119,6 +119,7 @@ export function OrdersPage() {
                 order={o}
                 open={openId === o._id}
                 onToggle={() => toggle(o._id)}
+                onChanged={load}
                 highlight
               />
             ))}
@@ -150,7 +151,7 @@ export function OrdersPage() {
 }
 
 // Bitta buyurtma kartasi — bosilsa tafsilot ochiladi
-function OrderCard({ order: o, open, onToggle, onRepeat, highlight }) {
+function OrderCard({ order: o, open, onToggle, onRepeat, onChanged, highlight }) {
   const st = STATUS[o.status] || STATUS.pending;
   const stepIndex = FLOW.indexOf(o.status);
   const itemCount = (o.items || []).reduce((s, i) => s + (i.quantity || 1), 0);
@@ -232,6 +233,27 @@ function OrderCard({ order: o, open, onToggle, onRepeat, highlight }) {
           {o.fulfillment === 'pickup' && (
             <div className="ord-card__addr">
               <Icon name="bag" size={14} color="#A99C8C" /> O'zim olib ketaman
+            </div>
+          )}
+
+          {/* Bekor qilish — faqat naqd va restoran qabul qilgunicha */}
+          {o.status === 'pending' && !o.isPaid && (
+            <div className="ord-card__actions">
+              <button
+                onClick={async () => {
+                  haptic();
+                  if (!window.confirm('Buyurtma bekor qilinsinmi?')) return;
+                  try {
+                    await api.cancelOrder(o._id);
+                    onChanged?.();
+                  } catch (e) {
+                    alert(e.message || 'Bekor qilib bo\u2018lmadi');
+                  }
+                }}
+                className="ord-btn ord-btn--danger"
+              >
+                Bekor qilish
+              </button>
             </div>
           )}
 

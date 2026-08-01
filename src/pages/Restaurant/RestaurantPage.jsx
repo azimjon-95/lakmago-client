@@ -102,6 +102,19 @@ export function RestaurantPage() {
       {/* Banner */}
       <div className="rest-banner">
         <RestaurantBanner restaurant={restaurant} height={150} />
+
+        {/* Yopiq bo'lsa ogohlantiramiz */}
+        {restaurant && !isOpenNow(restaurant) && (
+          <div className="rest-closed">
+            <Icon name="clock" size={16} color="#E14B42" />
+            <span>
+              Hozir yopiq
+              {restaurant.openTime && (
+                <> · Ish vaqti {restaurant.openTime}–{restaurant.closeTime}</>
+              )}
+            </span>
+          </div>
+        )}
         <button onClick={() => navigate(-1)} className="rest-banner__btn rest-banner__btn--back" aria-label={t('back')}>
           <Icon name="arrowLeft" size={18} color="#fff" />
         </button>

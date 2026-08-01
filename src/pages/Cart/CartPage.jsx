@@ -10,6 +10,7 @@ import { useOrders } from '@/store/orders';
 import { useT } from '@/i18n';
 import { formatSom } from '@/lib/utils';
 import { calcDeliveryFee, calcServiceFee, checkMinOrder, freeDeliveryGap } from '@/lib/pricing';
+import { isOpenNow } from '@/lib/workHours';
 import { api } from '@/api';
 import { haptic, getTelegram } from '@/lib/telegram';
 import { useDishes } from '@/hooks/queries';
@@ -114,9 +115,10 @@ export function CartPage() {
       serviceFee,
       orderSum: subtotal + deliveryFee + serviceFee,
       blocked,
-      canOrder: blocked.length === 0,
+      closed,
+      canOrder: blocked.length === 0 && closed.length === 0,
     };
-  }, [groups, isPickup]);
+  }, [groups, isPickup, timingMode]);
 
   // Bepul yetkazishgacha qolgan eng kichik summa
   const gapToFree = useMemo(() => {
@@ -632,6 +634,20 @@ export function CartPage() {
             Bepul yetkazishgacha <b>{formatSom(gapToFree)}</b> qoldi
           </div>
         )}
+
+        {/* Yopiq restoranlar */}
+        {pricing.closed.map((c) => {
+          const r = c.restaurant;
+          return (
+            <div key={`closed-${r.id || r._id}`} className="cart-footer__warn cart-footer__warn--closed">
+              <Icon name="clock" size={14} color="#E14B42" />
+              <span>
+                <b>{r.name}</b> hozir yopiq
+                {r.openTime && ` · Ish vaqti ${r.openTime}–${r.closeTime}`}
+              </span>
+            </div>
+          );
+        })}
 
         {/* Minimal summaga yetmagan restoranlar */}
         {pricing.blocked.map((b) => (

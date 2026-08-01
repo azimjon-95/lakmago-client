@@ -152,3 +152,11 @@
   background: var(--brand); color: var(--brand-text);
   border-radius: 14px; font-weight: 700; font-size: 14.5px;
 }
+
+.ord-btn--danger {
+  border-color: rgba(225, 75, 66, 0.4);
+  color: var(--danger);
+}
+.ord-btn--danger:active {
+  background: rgba(225, 75, 66, 0.1);
+}

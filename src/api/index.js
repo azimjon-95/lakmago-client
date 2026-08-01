@@ -114,6 +114,7 @@ export const api = {
 
   // Mening buyurtmalarim (server tarixi)
   getMyOrders: () => apiFetch('/orders', { method: 'GET' }),
+  cancelOrder: (id) => apiFetch(`/orders/${id}/cancel`, { method: 'PATCH' }),
 
   getActiveOrders: (opts) => apiFetch('/orders/active', { method: 'GET', ...opts }),
 

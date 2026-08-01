@@ -123,3 +123,12 @@
   background: transparent;
 }
 .rest-service-link:active { color: var(--ink); }
+
+/* Yopiq restoran ogohlantirishi */
+.rest-closed {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px 16px;
+  background: rgba(225, 75, 66, 0.14);
+  color: var(--danger);
+  font-size: 13.5px; font-weight: 600;
+}
