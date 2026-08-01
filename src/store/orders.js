@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { api } from '@/api';
+import { calcDeliveryFee, calcServiceFee } from '@/lib/pricing';
 
 // Kuryer nomlari (backend courierName bermasa ehtiyot uchun)
 const courierNames = ['Aziz', 'Bek', 'Dilshod', 'Jasur', 'Sardor', "Ulug'bek"];
@@ -61,8 +62,10 @@ export const useOrders = create((set, get) => ({
           note: it.note,
         })),
         subtotal: g.subtotal,
-        deliveryFee: g.restaurant.deliveryFee || 0,
-        serviceFee: 0,
+        // Server bu qiymatlarni QAYTA hisoblaydi — bu faqat
+        // ma'lumot uchun. Mantiq lib/pricing.js da.
+        deliveryFee: calcDeliveryFee(g.subtotal, g.restaurant, opts.fulfillment === 'pickup'),
+        serviceFee: calcServiceFee(g.subtotal, g.restaurant),
         etaMinutes: g.restaurant.deliveryMin + Math.round(Math.random() * (g.restaurant.deliveryMax - g.restaurant.deliveryMin)),
       })),
     };

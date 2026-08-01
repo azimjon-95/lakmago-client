@@ -9,13 +9,12 @@ import { useUser } from '@/store/user';
 import { useOrders } from '@/store/orders';
 import { useT } from '@/i18n';
 import { formatSom } from '@/lib/utils';
+import { calcDeliveryFee, calcServiceFee, checkMinOrder, freeDeliveryGap } from '@/lib/pricing';
 import { api } from '@/api';
 import { haptic, getTelegram } from '@/lib/telegram';
 import { useDishes } from '@/hooks/queries';
 import './Cart.css';
 
-const SERVICE_FEE = 3000;
-const DELIVERY_FEE = 0;
 
 export function CartPage() {
   const navigate = useNavigate();
@@ -84,9 +83,51 @@ export function CartPage() {
     api.getReferralInfo().then((r) => setBonusBalance(r.bonusBalance || 0)).catch(() => {});
   }, []);
 
-  // Olib ketishda yetkazish haqi olinmaydi
-  const effectiveDeliveryFee = isPickup ? 0 : DELIVERY_FEE;
-  const orderSum = totalPrice() + effectiveDeliveryFee + SERVICE_FEE;
+  // ===== HISOB-KITOB =====
+  // Har restoran uchun alohida: yetkazish, xizmat haqi, minimal summa.
+  // Mantiq serverdagi bilan bir xil (lib/pricing.js ↔ orderPricing.js)
+  const pricing = useMemo(() => {
+    const perRestaurant = groups.map((g) => {
+      const sub = g.items.reduce((s, it) => s + it.price * it.quantity, 0);
+      const rest = g.restaurant;
+      return {
+        restaurant: rest,
+        subtotal: sub,
+        deliveryFee: calcDeliveryFee(sub, rest, isPickup),
+        serviceFee: calcServiceFee(sub, rest),
+        minCheck: checkMinOrder(sub, rest, isPickup),
+        freeGap: freeDeliveryGap(sub, rest, isPickup),
+      };
+    });
+
+    const subtotal = perRestaurant.reduce((s, r) => s + r.subtotal, 0);
+    const deliveryFee = perRestaurant.reduce((s, r) => s + r.deliveryFee, 0);
+    const serviceFee = perRestaurant.reduce((s, r) => s + r.serviceFee, 0);
+
+    // Minimal summaga yetmagan restoranlar
+    const blocked = perRestaurant.filter((r) => !r.minCheck.ok);
+
+    return {
+      perRestaurant,
+      subtotal,
+      deliveryFee,
+      serviceFee,
+      orderSum: subtotal + deliveryFee + serviceFee,
+      blocked,
+      canOrder: blocked.length === 0,
+    };
+  }, [groups, isPickup]);
+
+  // Bepul yetkazishgacha qolgan eng kichik summa
+  const gapToFree = useMemo(() => {
+    const gaps = pricing.perRestaurant
+      .map((r) => r.freeGap)
+      .filter((g) => g !== null && g > 0);
+    return gaps.length ? Math.min(...gaps) : 0;
+  }, [pricing]);
+
+  const effectiveDeliveryFee = pricing.deliveryFee;
+  const orderSum = pricing.orderSum;
 
   // Tayyorlash/yetkazish vaqtini hisoblaymiz
   const prepMinutes = groups.length
@@ -327,7 +368,7 @@ export function CartPage() {
           <Icon name="bike" size={19} color={fulfillment === 'delivery' ? '#F5A524' : '#A99C8C'} />
           <span className="cart-ftab__title">Yetkazib berish</span>
           <span className="cart-ftab__sub">
-            {DELIVERY_FEE === 0 ? 'Bepul' : formatSom(DELIVERY_FEE)}
+            {pricing.deliveryFee === 0 ? 'Bepul' : formatSom(pricing.deliveryFee)}
           </span>
         </button>
         <button
@@ -539,9 +580,16 @@ export function CartPage() {
 
       {/* Hisob */}
       <div className="cart-summary">
-        <Row label={t('subtotal')} value={formatSom(totalPrice())} />
-        <Row label={t('deliveryFee')} value={DELIVERY_FEE === 0 ? t('free') : formatSom(DELIVERY_FEE)} />
-        <Row label="Xizmat haqi" value={formatSom(SERVICE_FEE)} />
+        <Row label="Mahsulotlar" value={formatSom(pricing.subtotal)} />
+        {!isPickup && (
+          <Row
+            label="Yetkazish"
+            value={pricing.deliveryFee === 0 ? t('free') : formatSom(pricing.deliveryFee)}
+          />
+        )}
+        {pricing.serviceFee > 0 && (
+          <Row label="Xizmat haqi" value={formatSom(pricing.serviceFee)} />
+        )}
         {bonusApplied > 0 && (
           <div className="cart-summary__row cart-summary__row--bonus">
             <span>🎁 Bonus chegirmasi</span>
@@ -559,15 +607,45 @@ export function CartPage() {
       <div className="cart-footer">
         {/* Yetkazish qatori */}
         <div className="cart-footer__delivery">
-          <Icon name="truck" size={18} color={DELIVERY_FEE === 0 ? '#6FBF73' : '#A99C8C'} />
-          <span className={DELIVERY_FEE === 0 ? 'is-free' : ''}>
-            {DELIVERY_FEE === 0 ? 'Bepul yetkazib berish' : `Yetkazish · ${formatSom(DELIVERY_FEE)}`}
+          <Icon
+            name="truck"
+            size={18}
+            color={pricing.deliveryFee === 0 ? '#6FBF73' : '#A99C8C'}
+          />
+          <span className={pricing.deliveryFee === 0 ? 'is-free' : ''}>
+            {isPickup
+              ? "O'zingiz olib ketasiz"
+              : pricing.deliveryFee === 0
+                ? 'Bepul yetkazib berish'
+                : `Yetkazish · ${formatSom(pricing.deliveryFee)}`}
           </span>
           <span className="cart-footer__eta">{etaText}</span>
         </div>
 
+        {/* Bepul yetkazishgacha qolgan summa */}
+        {gapToFree > 0 && (
+          <div className="cart-footer__gap">
+            Bepul yetkazishgacha <b>{formatSom(gapToFree)}</b> qoldi
+          </div>
+        )}
+
+        {/* Minimal summaga yetmagan restoranlar */}
+        {pricing.blocked.map((b) => (
+          <div key={b.restaurant.id || b.restaurant._id} className="cart-footer__warn">
+            <Icon name="info" size={14} color="#E0A96D" />
+            <span>
+              <b>{b.restaurant.name}</b>: yana{' '}
+              <b>{formatSom(b.minCheck.missing)}</b>lik mahsulot qo'shing
+            </span>
+          </div>
+        ))}
+
         {/* To'lov tugmasi (soni + summa) */}
-        <button onClick={handlePlaceOrder} disabled={paying} className="cart-paybtn">
+        <button
+          onClick={handlePlaceOrder}
+          disabled={paying || !pricing.canOrder}
+          className="cart-paybtn"
+        >
           <span className="cart-paybtn__count">{itemCount}</span>
           <span className="cart-paybtn__label">{paying ? t('loading') : t('payTotal')}</span>
           <span className="cart-paybtn__sum">{formatSom(total)}</span>
