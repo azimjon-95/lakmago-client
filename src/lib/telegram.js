@@ -213,12 +213,15 @@ export function shareDish(dish) {
   //
   // t.me/share/url orqali bunday xabar yuborib bo'lmaydi —
   // u faqat oddiy matn va havola qo'ya oladi.
+  // Telegram 6.7+ da mavjud. Eski versiyalarda yo'q.
   if (typeof tg?.switchInlineQuery === 'function') {
     try {
-      tg.switchInlineQuery(`food_${dishId}`, ['users', 'groups']);
+      // Bo'sh joy MUHIM: usiz Telegram so'rovni yubormaydi,
+      // foydalanuvchi qo'lda Enter bosishi kerak bo'ladi.
+      tg.switchInlineQuery(`food_${dishId} `, ['users', 'groups', 'channels']);
       return;
-    } catch {
-      // Qo'llab-quvvatlanmasa pastdagi zaxira usulga o'tamiz
+    } catch (e) {
+      console.warn('[share] inline ishlamadi:', e?.message);
     }
   }
 
