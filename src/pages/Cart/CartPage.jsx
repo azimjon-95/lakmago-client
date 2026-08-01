@@ -88,7 +88,7 @@ export function CartPage() {
   // Mantiq serverdagi bilan bir xil (lib/pricing.js ↔ orderPricing.js)
   const pricing = useMemo(() => {
     const perRestaurant = groups.map((g) => {
-      const sub = g.items.reduce((s, it) => s + it.price * it.quantity, 0);
+      const sub = g.subtotal ?? g.items.reduce((s, it) => s + it.unitPrice * it.quantity, 0);
       const rest = g.restaurant;
       return {
         restaurant: rest,
