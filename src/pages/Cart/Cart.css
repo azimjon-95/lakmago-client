@@ -173,22 +173,38 @@
 .cart-summary__row--bonus span { color: var(--success); }
 
 /* ===== Savat sarlavhasi (Yandex Eda uslubi) ===== */
+/* Header — tepada qotib turadi, kontent ostidan o'tadi */
 .cart-header {
+  position: sticky;
+  /* Telegram to'liq ekranda tugmalari ostiga yopishadi */
+  top: calc(env(safe-area-inset-top, 0px) + var(--tg-content-top, 0px));
+  z-index: 30;
   display: flex; align-items: center; gap: 8px;
-  padding: 12px 12px 14px;
-  border-bottom: 1px solid var(--line);
+  padding: 10px 12px;
+  background: rgba(28, 24, 21, 0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
   flex: none;
 }
 .cart-header__btn {
-  width: 40px; height: 40px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center; flex: none;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  display: flex; align-items: center; justify-content: center;
+  flex: none;
+  transition: transform 0.14s var(--ease), background 0.15s;
 }
-.cart-header__btn:active { background: var(--surface-2); }
+.cart-header__btn:active {
+  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.13);
+}
 .cart-header__center { flex: 1; text-align: center; min-width: 0; }
-.cart-header__title { font-size: 19px; font-weight: 700; color: var(--ink); margin: 0; }
 .cart-header__sub {
-  font-size: 12.5px; color: var(--muted); margin-top: 2px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: 12.5px;
+  color: var(--muted);
+  letter-spacing: -0.1px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
 /* ===== "Hech narsani unutmadingizmi?" (upsell) ===== */

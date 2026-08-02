@@ -322,18 +322,22 @@ export function CartPage() {
     <div className="app-shell cart">
       <header className="cart-header">
         <button onClick={() => navigate(-1)} aria-label={t('back')} className="cart-header__btn">
-          <Icon name="x" size={22} color="#F7F2EA" />
+          <Icon name="arrowLeft" size={21} color="#F7F2EA" />
         </button>
+
+        {/* Sarlavha o'rniga foydali ma'lumot: vaqt va muassasa */}
         <div className="cart-header__center">
-          <h1 className="cart-header__title">{t('cart')}</h1>
           {groups.length > 0 && (
             <div className="cart-header__sub">
-              {etaText} · {groups.length === 1 ? groups[0].restaurant.name : `${groups.length} ta muassasa`}
+              {etaText} · {groups.length === 1
+                ? groups[0].restaurant.name
+                : `${groups.length} ta muassasa`}
             </div>
           )}
         </div>
+
         <button onClick={confirmClear} aria-label="Tozalash" className="cart-header__btn">
-          <Icon name="trash" size={20} color="#A99C8C" />
+          <Icon name="trash" size={19} color="#A99C8C" />
         </button>
       </header>
 
