@@ -5,6 +5,20 @@
   overflow-x: hidden;
 }
 
+/* Safe-area zonasi ham berk bo'lsin — scroll qilganda
+   header ustidan kontent ko'rinib qolmaydi */
+.cart::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: calc(env(safe-area-inset-top, 0px) + var(--tg-content-top, 0px));
+  background: rgba(28, 24, 21, 0.92);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  z-index: 31;
+  pointer-events: none;
+}
+
 /* Bo'sh savat */
 .cart-empty {
   align-items: center;
@@ -176,8 +190,10 @@
 /* Header — tepada qotib turadi, kontent ostidan o'tadi */
 .cart-header {
   position: sticky;
-  /* Telegram to'liq ekranda tugmalari ostiga yopishadi */
-  top: calc(env(safe-area-inset-top, 0px) + var(--tg-content-top, 0px));
+  /* app-shell allaqachon safe-area padding beradi — bu yerda
+     0 yetarli. Aks holda chekinish IKKI MARTA hisoblanib,
+     header pastga tushib qolardi. */
+  top: 0;
   z-index: 30;
   display: flex; align-items: center; gap: 8px;
   padding: 10px 12px;
