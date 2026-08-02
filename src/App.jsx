@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HomePage } from '@/pages/Home/HomePage'; // asosiy sahifa — darhol yuklanadi
 // Qolgan sahifalar lazy — kerak bo'lganda yuklanadi (bundle kichrayadi, tez ochiladi)
@@ -109,6 +110,7 @@ function AppInner() {
         {showSplash && <Splash onDone={finishSplash} />}
         <BrowserRouter>
           <SubscriptionGate>
+          <ErrorBoundary>
           <Suspense fallback={<div className="app-shell" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="spinner" /></div>}>
             <StartParamHandler />
             <Routes>
@@ -126,6 +128,7 @@ function AppInner() {
                             <Route path="/profile" element={<ProfilePage />} />
             </Routes>
           </Suspense>
+          </ErrorBoundary>
           </SubscriptionGate>
           <FloatingLayer />
         </BrowserRouter>

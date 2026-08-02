@@ -64,8 +64,10 @@ export function RestaurantPage() {
   const sections = useMemo(() => {
     const map = new Map();
     restaurantDishes.forEach((d) => {
-      if (!map.has(d.section)) map.set(d.section, []);
-      map.get(d.section).push(d);
+      // Bo'lim ko'rsatilmagan bo'lsa kategoriya yoki umumiy nom
+      const key = d.section || d.category || 'Menyu';
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(d);
     });
     const list = Array.from(map.entries());
     list.push([REVIEWS_TAB, []]);
@@ -144,7 +146,7 @@ export function RestaurantPage() {
               <span className="rest-stat__icon rest-stat__icon--rating">
                 <Icon name="star" size={20} color="#6FBF73" />
               </span>
-              <span className="rest-stat__value">{restaurant.rating.toFixed(1)}</span>
+              <span className="rest-stat__value">{Number(restaurant.rating).toFixed(1)}</span>
               <span className="rest-stat__label">reyting</span>
             </button>
           )}

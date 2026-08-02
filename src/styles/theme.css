@@ -418,3 +418,42 @@ ul { list-style: none; }
   /* Oq fonli PNG'lar uchun: qorong'i fonga yumshoq qo'shiladi */
   mix-blend-mode: normal;
 }
+
+/* ===== Xato ekrani ===== */
+.err-screen {
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+}
+.err-screen__box { text-align: center; max-width: 300px; }
+.err-screen__icon { font-size: 44px; margin-bottom: 14px; }
+.err-screen__title {
+  font-size: 19px; font-weight: 680; color: var(--ink);
+  margin: 0 0 8px; letter-spacing: -0.3px;
+}
+.err-screen__text {
+  font-size: 14px; color: var(--muted);
+  line-height: 1.5; margin: 0 0 22px;
+}
+.err-screen__actions { display: flex; flex-direction: column; gap: 10px; }
+.err-screen__btn {
+  padding: 13px;
+  border-radius: 15px;
+  border: 0.5px solid rgba(255, 255, 255, 0.1);
+  font-size: 14.5px; font-weight: 600;
+  color: var(--ink);
+}
+.err-screen__btn--primary {
+  background: var(--brand);
+  color: var(--brand-text);
+  border-color: transparent;
+}
+.err-screen__detail {
+  margin-top: 18px; padding: 11px;
+  background: var(--surface-2);
+  border-radius: 11px;
+  font-size: 11px; color: var(--danger);
+  text-align: left;
+  white-space: pre-wrap; word-break: break-word;
+  max-height: 160px; overflow-y: auto;
+}
