@@ -20,7 +20,15 @@ import './Cart.css';
 export function CartPage() {
   const navigate = useNavigate();
   const t = useT();
-  const { items, addItem, decrement, removeItem, totalPrice, totalCount, restaurantGroups } = useCart();
+  // Selectorlar alohida — useCart() to'liq obyekt qaytaradi va
+  // har store o'zgarishida qayta render bo'ladi.
+  const items = useCart((s) => s.items);
+  const addItem = useCart((s) => s.addItem);
+  const decrement = useCart((s) => s.decrement);
+  const removeItem = useCart((s) => s.removeItem);
+  const totalPrice = useCart((s) => s.totalPrice);
+  const totalCount = useCart((s) => s.totalCount);
+  const restaurantGroups = useCart((s) => s.restaurantGroups);
   const itemCount = totalCount();
   const user = useUser((s) => s.user);
   const updateUser = useUser((s) => s.updateUser);
@@ -30,7 +38,10 @@ export function CartPage() {
   const setLastPaymentMethod = useUser((s) => s.setLastPaymentMethod);
   const placeOrder = useOrders((s) => s.placeOrder);
 
-  const groups = restaurantGroups();
+  // Guruhlar memolanadi — restaurantGroups() har chaqirilganda
+  // YANGI massiv qaytaradi, memosiz pastdagi useMemo'lar
+  // cheksiz qayta hisoblanardi.
+  const groups = useMemo(() => restaurantGroups(), [items, restaurantGroups]);
   const [paying, setPaying] = useState(false);
   const [showAddressSheet, setShowAddressSheet] = useState(false);
   const [showAddressFlow, setShowAddressFlow] = useState(false);
