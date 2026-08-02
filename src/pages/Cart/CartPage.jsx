@@ -119,6 +119,12 @@ export function CartPage() {
     // Minimal summaga yetmagan restoranlar
     const blocked = perRestaurant.filter((r) => !r.minCheck.ok);
 
+    // Yopiq restoranlar. Belgilangan vaqtga buyurtmada
+    // tekshirilmaydi — mijoz ochilish vaqtiga rejalashtiradi.
+    const closed = timingMode === 'scheduled'
+      ? []
+      : perRestaurant.filter((r) => !isOpenNow(r.restaurant));
+
     return {
       perRestaurant,
       subtotal,
