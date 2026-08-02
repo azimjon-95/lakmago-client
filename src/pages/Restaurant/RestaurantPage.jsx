@@ -32,7 +32,7 @@ export function RestaurantPage() {
   const highlightHandled = useRef(false);
 
   // Real data — TanStack Query
-  const { data: restaurant, isLoading: restLoading } = useRestaurant(id);
+  const { data: restaurant, isLoading: restLoading, error: restError } = useRestaurant(id);
   const { data: rawDishes = [], isLoading: dishesLoading } = useDishes(id);
   const restaurantReviews = restaurant?.reviews || [];
 
@@ -95,8 +95,31 @@ export function RestaurantPage() {
     document.getElementById(`sec-${name}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  if (restLoading || !restaurant) {
+  if (restLoading) {
     return <div className="app-shell rest-loading"><div className="spinner" /></div>;
+  }
+
+  // Xato yoki topilmadi — tushunarli xabar va chiqish yo'li
+  if (restError || !restaurant) {
+    return (
+      <div className="app-shell rest-error">
+        <Icon name="info" size={48} color="#7D7264" />
+        <div className="rest-error__title">Restoran ochilmadi</div>
+        <p className="rest-error__text">
+          {restError?.message?.includes('404') || restError?.status === 404
+            ? 'Bu muassasa mavjud emas yoki vaqtincha yopilgan'
+            : 'Ma\u2018lumot yuklanmadi. Internetni tekshiring.'}
+        </p>
+        <div className="rest-error__actions">
+          <button onClick={() => window.location.reload()} className="rest-error__btn rest-error__btn--primary">
+            Qayta urinish
+          </button>
+          <button onClick={() => navigate('/')} className="rest-error__btn">
+            Bosh sahifa
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (

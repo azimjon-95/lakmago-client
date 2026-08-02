@@ -132,3 +132,30 @@
   color: var(--danger);
   font-size: 13.5px; font-weight: 600;
 }
+
+/* Restoran ochilmaganda */
+.rest-error {
+  align-items: center; justify-content: center;
+  text-align: center; padding: 40px 28px;
+}
+.rest-error__title {
+  font-size: 18px; font-weight: 700; color: var(--ink);
+  margin: 16px 0 8px;
+}
+.rest-error__text {
+  font-size: 14px; color: var(--muted);
+  line-height: 1.5; max-width: 260px; margin: 0 0 24px;
+}
+.rest-error__actions {
+  display: flex; flex-direction: column; gap: 10px;
+  width: 100%; max-width: 240px;
+}
+.rest-error__btn {
+  padding: 13px; border-radius: 14px;
+  border: 1px solid var(--line);
+  font-size: 14.5px; font-weight: 600; color: var(--ink);
+}
+.rest-error__btn--primary {
+  background: var(--brand); color: var(--brand-text);
+  border-color: transparent;
+}
