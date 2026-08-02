@@ -2,7 +2,19 @@
 .home { padding-bottom: 0; }
 
 /* Header */
+.home-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px 8px;
+}
 .home-header__addr { text-align: left; }
+.home-header__addr-label {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px; color: var(--muted);
+}
+.home-header__addr-value {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 14px; font-weight: 500; color: var(--ink); margin-top: 2px;
+}
 .home-header__right { display: flex; align-items: center; gap: 8px; }
 .home-header__avatar {
   width: 36px; height: 36px; border-radius: 50%;
@@ -31,6 +43,30 @@
   scroll-snap-type: x proximity;
 }
 /* Kategoriya — rasm tepada, nom pastda (Uzum/Yandex uslubi) */
+.home-cat {
+  flex: none;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  width: 68px;
+  background: transparent;
+  padding: 0;
+  scroll-snap-align: start;
+}
+.home-cat__art {
+  width: 60px; height: 60px;
+  border-radius: 18px;
+  background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid transparent;
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease), transform 0.12s var(--ease);
+}
+.home-cat__label {
+  font-size: 11.5px; font-weight: 500;
+  color: var(--muted);
+  text-align: center; line-height: 1.25;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 68px;
+  transition: color 0.15s var(--ease);
+}
 .home-cat:active .home-cat__art { transform: scale(0.94); }
 
 /* Tanlangan — amber ramka va yorqin nom */
@@ -72,10 +108,24 @@
 .home-mini-banner__title { font-size: 15px; font-weight: 500; color: var(--brand-text); margin-top: 2px; }
 
 /* Restoranlar */
+.home-restaurants-title {
+  font-size: 16px; font-weight: 600; color: var(--ink);
+  padding: 4px 16px 10px;
+}
+.home-restaurants {
+  padding: 0 16px 16px;
+  display: flex; flex-direction: column; gap: 12px;
+}
 .home-empty { text-align: center; color: var(--muted); font-size: 14px; padding: 32px 0; }
 
 /* ===== Barcha taomlar grid ===== */
 /* Taomlar qatori — gorizontal scroll (Uzum uslubi) */
+.home-dishes-row {
+  display: flex; gap: 10px;
+  padding: 0 16px 12px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+}
 /* Taom kartasi — kichik (Uzum uslubi: ~148px) */
 .dgcard {
   flex: none;
@@ -160,109 +210,11 @@
 }
 
 /* Sarlavhadagi ikonka tugma (qidiruv) */
-.home-header__icon-btn:active { background: var(--line); }
-
-/* ═══════════════════════════════════════════
-   BOSH SAHIFA — iOS uslubi
-   ═══════════════════════════════════════════ */
-
-/* Sarlavha — yopishqoq va shaffof */
-.home-header {
-  position: sticky;
-  top: 0;
-  z-index: 25;
-  background: rgba(28, 24, 21, 0.85);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  padding: 10px 16px 11px;
-}
-
-.home-header__addr-label {
-  font-size: 11.5px;
-  color: var(--muted);
-  display: flex; align-items: center; gap: 4px;
-  letter-spacing: -0.05px;
-}
-.home-header__addr-value {
-  font-size: 15px; font-weight: 620;
-  color: var(--ink);
-  letter-spacing: -0.25px;
-  display: flex; align-items: center; gap: 5px;
-  margin-top: 1px;
-}
-
 .home-header__icon-btn {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.07);
-  display: flex; align-items: center; justify-content: center;
-  flex: none;
-  transition: transform 0.14s var(--ease), background 0.15s;
-}
-.home-header__icon-btn:active {
-  transform: scale(0.92);
-  background: rgba(255, 255, 255, 0.13);
-}
-
-/* Kategoriyalar — silliq surilish */
-.home-cats {
-  display: flex; gap: 10px;
-  overflow-x: auto;
-  padding: 4px 16px 10px;
-  scroll-snap-type: x proximity;
-}
-.home-cat {
-  flex: none;
-  display: flex; flex-direction: column;
-  align-items: center; gap: 6px;
-  scroll-snap-align: start;
-  transition: transform 0.14s var(--ease);
-}
-.home-cat:active { transform: scale(0.94); }
-
-.home-cat__art {
-  width: 60px; height: 60px;
-  border-radius: 19px;
+  width: 38px; height: 38px;
+  border-radius: 12px;
   background: var(--surface-2);
   display: flex; align-items: center; justify-content: center;
-  border: 1.5px solid transparent;
-  transition: border-color 0.18s var(--ease), background 0.18s;
+  flex: none;
 }
-.home-cat.is-active .home-cat__art {
-  border-color: var(--brand);
-  background: rgba(245, 165, 36, 0.13);
-}
-.home-cat__label {
-  font-size: 11.5px; font-weight: 550;
-  color: var(--muted);
-  max-width: 68px;
-  text-align: center;
-  letter-spacing: -0.1px;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.home-cat.is-active .home-cat__label {
-  color: var(--brand-100);
-  font-weight: 660;
-}
-
-/* Bo'lim sarlavhalari */
-.home-restaurants-title {
-  font-size: 19px; font-weight: 700;
-  color: var(--ink);
-  letter-spacing: -0.4px;
-  margin: 22px 16px 12px;
-}
-
-/* Taomlar qatori */
-.home-dishes-row {
-  display: flex; gap: 11px;
-  overflow-x: auto;
-  padding: 2px 16px 6px;
-  scroll-snap-type: x proximity;
-}
-
-/* Restoranlar ro'yxati */
-.home-restaurants {
-  display: flex; flex-direction: column; gap: 12px;
-  padding: 0 16px;
-}
+.home-header__icon-btn:active { background: var(--line); }
