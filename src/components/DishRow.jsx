@@ -3,12 +3,13 @@ import { Icon } from './Icon';
 import { DishPhoto } from './DishPhoto';
 import { formatSomShort } from '@/lib/utils';
 import { useCart } from '@/store/cart';
+import { useOpenStatus } from '@/hooks/useOpenStatus';
 import { haptic, shareDish } from '@/lib/telegram';
 import { useT } from '@/i18n';
 import './cards/DishRow.css';
 
 // Yandex Eda uslubidagi menyu qatori.
-export const DishRow = memo(function DishRow({ dish, onOpen }) {
+export const DishRow = memo(function DishRow({ dish, onOpen, restaurant, onClosedAlert }) {
   const t = useT();
   const items = useCart((s) => s.items);
   const addItem = useCart((s) => s.addItem);
@@ -25,16 +26,30 @@ export const DishRow = memo(function DishRow({ dish, onOpen }) {
     dish.calories ? `${dish.calories} ${t('calories')}` : null,
   ].filter(Boolean).join(' · ');
 
+  // Restoran yopiq bo'lsa qo'shib bo'lmaydi
+  const { isOpen, hoursLabel, nextOpen } = useOpenStatus(restaurant || dish);
+  const blocked = stopped || !isOpen;
+
   function quickAdd(e) {
     e.stopPropagation();
     if (stopped) return;
+
     haptic();
+    if (!isOpen) {
+      onClosedAlert?.({
+        name: restaurant?.name || dish.restaurantName,
+        hoursLabel,
+        nextOpen,
+      });
+      return;
+    }
+
     if (hasOptions) onOpen(dish);
     else addItem(dish, 1, []);
   }
 
   return (
-    <button onClick={() => !stopped && onOpen(dish)} className={`dish-row ${stopped ? 'is-stopped' : ''}`}>
+    <button onClick={() => !stopped && onOpen(dish)} className={`dish-row ${stopped ? 'is-stopped' : ''} ${!isOpen && !stopped ? 'is-closed' : ''}`}>
       <div className="dish-row__photo">
         <DishPhoto dish={dish} height={88} radius={14} iconSize={34} />
         {discountPct && !stopped && <div className="dish-row__badge dish-row__badge--discount">−{discountPct}%</div>}

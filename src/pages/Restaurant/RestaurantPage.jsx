@@ -11,6 +11,8 @@ import { useT } from '@/i18n';
 import { useUser } from '@/store/user';
 import { haptic } from '@/lib/telegram';
 import { isOpenNow } from '@/lib/workHours';
+import { useClosedAlert } from '@/hooks/useOpenStatus';
+import { ClosedAlert } from '@/components/ClosedAlert';
 import { useRestaurant, useDishes } from '@/hooks/queries';
 import './Restaurant.css';
 
@@ -28,7 +30,8 @@ export function RestaurantPage() {
   const toggleFavorite = useUser((st) => st.toggleFavorite);
   const isFav = useUser((st) =>
     Boolean(st.user.favorites?.restaurants?.includes(id)));
-  const [infoSheet, setInfoSheet] = useState(null); // 'schedule' | 'service' | null
+  const [infoSheet, setInfoSheet] = useState(null);
+  const { closedInfo, showClosed, hideClosed } = useClosedAlert(); // 'schedule' | 'service' | null
 
   const highlightHandled = useRef(false);
 
@@ -272,7 +275,13 @@ export function RestaurantPage() {
               <div className="rest-dishes">
                 {dishesLoading
                   ? Array.from({ length: 3 }).map((_, i) => <DishRowSkeleton key={i} />)
-                  : list.map((d) => <DishRow key={d.id || d._id} dish={d} onOpen={setModalDish} />)}
+                  : list.map((d) => <DishRow
+                      key={d.id || d._id}
+                      dish={d}
+                      onOpen={setModalDish}
+                      restaurant={restaurant}
+                      onClosedAlert={showClosed}
+                    />)}
               </div>
             </div>
           );
@@ -285,8 +294,11 @@ export function RestaurantPage() {
           dish={modalDish}
           restaurant={restaurant}
           onClose={() => setModalDish(null)}
+          onClosedAlert={showClosed}
         />
       )}
+
+      <ClosedAlert info={closedInfo} onClose={hideClosed} />
 
       {infoSheet && (
         <RestaurantInfoSheet

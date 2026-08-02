@@ -134,6 +134,9 @@ export const api = {
   setDefaultAddress: (id) => apiFetch(`/addresses/${id}/default`, { method: 'PATCH' }),
 
   // ===== To'lov tizimlari =====
+  // Server vaqti — ish vaqtini to'g'ri hisoblash uchun
+  getServerTime: () => apiFetch('/time', { method: 'GET' }),
+
   getPaymentStatus: () => apiFetch('/payments/status', { method: 'GET' }),
   getPaymentLink: (orderId, provider) =>
     apiFetch(`/payments/link/${orderId}?provider=${provider}`, { method: 'GET' }),

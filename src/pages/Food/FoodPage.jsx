@@ -8,6 +8,8 @@ import { useUser } from '@/store/user';
 import { api } from '@/api';
 import { formatSom } from '@/lib/utils';
 import { haptic, shareDish, copyDishLink } from '@/lib/telegram';
+import { useOpenStatus, useClosedAlert } from '@/hooks/useOpenStatus';
+import { ClosedAlert } from '@/components/ClosedAlert';
 import './Food.css';
 
 /**
@@ -62,8 +64,20 @@ export function FoodPage() {
     return () => { cancelled = true; };
   }, [id]);
 
+  // Ish vaqti — yopiq bo'lsa qo'shib bo'lmaydi
+  const { isOpen, hoursLabel, nextOpen } = useOpenStatus(restaurant || dish);
+  const { closedInfo, showClosed, hideClosed } = useClosedAlert();
+
   const add = () => {
     haptic();
+    if (!isOpen) {
+      showClosed({
+        name: restaurant?.name || dish?.restaurantName,
+        hoursLabel,
+        nextOpen,
+      });
+      return;
+    }
     const enriched = restaurant
       ? {
           ...dish,
@@ -211,13 +225,14 @@ export function FoodPage() {
             <span>{quantity}</span>
             <button onClick={() => setQuantity((q) => q + 1)}>+</button>
           </div>
-          <button onClick={add} className="food-add">
+          <button onClick={add} className={`food-add ${isOpen ? '' : 'is-closed'}`}>
             Savatga · {formatSom(dish.price * quantity)}
           </button>
         </div>
       </div>
 
       <CartBar />
+      <ClosedAlert info={closedInfo} onClose={hideClosed} />
     </div>
   );
 }

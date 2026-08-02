@@ -45,3 +45,13 @@
   transition: background 0.15s;
 }
 .dish-row__share:active { background: var(--surface-2); }
+
+/* Restoran yopiq — taom ko'rinadi, lekin qo'shib bo'lmaydi */
+.dish-row.is-closed .dish-row__photo,
+.dish-row.is-closed .dish-row__name,
+.dish-row.is-closed .dish-row__price {
+  opacity: 0.55;
+}
+.dish-row.is-closed .dish-row__add {
+  opacity: 0.45;
+}

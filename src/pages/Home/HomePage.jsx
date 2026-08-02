@@ -12,6 +12,8 @@ import { LangSwitch } from '@/components/LangSwitch/LangSwitch';
 import { RestaurantCardSkeleton, DishScrollСardSkeleton } from '@/components/Skeleton/Skeleton';
 import { useUser } from '@/store/user';
 import { useT } from '@/i18n';
+import { useOpenDishes, useClosedAlert } from '@/hooks/useOpenStatus';
+import { ClosedAlert } from '@/components/ClosedAlert';
 import { useRestaurants, useTrendingDishes, useBannersQuery, useAllDishes } from '@/hooks/queries';
 import { API_BASE } from '@/api';
 import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
@@ -61,10 +63,15 @@ export function HomePage() {
   // Taomlar FAQAT o'z kategoriyasi bo'yicha filtrlanadi.
   // Avval restoran kategoriyasi ham hisobga olinardi — natijada
   // "Salatlar" tanlansa salat restoranining hamma taomlari chiqardi.
+  // Yopiq restoran taomlari ro'yxatdan chiqadi.
+  // Ish vaqti boshlanganda avtomatik qaytadi — refresh kerak emas.
+  const openDishes = useOpenDishes(allDishes);
+  const { closedInfo, showClosed, hideClosed } = useClosedAlert();
+
   const filteredDishes = useMemo(() => {
-    if (category === 'all') return allDishes;
-    return allDishes.filter((d) => d.category === category);
-  }, [allDishes, category]);
+    if (category === 'all') return openDishes;
+    return openDishes.filter((d) => d.category === category);
+  }, [openDishes, category]);
 
   // Har ochilganda tartib o'zgaradi — sahifa qayta render bo'lganda
   // emas, faqat ilova ochilganda (seed sessiyada saqlanadi)
@@ -231,7 +238,14 @@ export function HomePage() {
       <CartBar />
       <BottomNav />
 
-      {modalDish && <DishModal dish={modalDish} onClose={closeModal} />}
+      {modalDish && (
+        <DishModal
+          dish={modalDish}
+          onClose={closeModal}
+          onClosedAlert={showClosed}
+        />
+      )}
+      <ClosedAlert info={closedInfo} onClose={hideClosed} />
 
       {/* Saqlangan manzillar ro'yxati (bor bo'lsa) */}
       {showAddressSheet && (

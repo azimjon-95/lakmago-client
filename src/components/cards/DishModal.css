@@ -146,3 +146,10 @@
 }
 .dish-nutri__value { font-size: 14px; font-weight: 700; color: var(--ink); }
 .dish-nutri__label { font-size: 11px; color: var(--muted); }
+
+/* Yopiq restoran — tugma o'chiq ko'rinadi */
+.dish-modal__add.is-closed {
+  background: var(--surface-2);
+  color: var(--muted);
+  box-shadow: none;
+}

@@ -120,3 +120,8 @@
   border-radius: 15px;
   font-size: 15px; font-weight: 700;
 }
+
+.food-add.is-closed {
+  background: var(--surface-2);
+  color: var(--muted);
+}

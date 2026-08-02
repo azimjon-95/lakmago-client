@@ -5,11 +5,12 @@ import { formatSom, formatSomShort } from '@/lib/utils';
 import { useCart } from '@/store/cart';
 import { useLockScroll } from '@/hooks/useLockScroll';
 import { useUser } from '@/store/user';
+import { useOpenStatus } from '@/hooks/useOpenStatus';
 import { haptic, shareDish } from '@/lib/telegram';
 import { useT } from '@/i18n';
 import './cards/DishModal.css';
 
-export function DishModal({ dish, restaurant, onClose }) {
+export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
   const t = useT();
   const addItem = useCart((s) => s.addItem);
   useLockScroll(true);
@@ -49,7 +50,19 @@ export function DishModal({ dish, restaurant, onClose }) {
     });
   }
 
+  // Restoran ish vaqti — yopiq bo'lsa qo'shib bo'lmaydi
+  const { isOpen, hoursLabel, nextOpen } = useOpenStatus(restaurant || dish);
+
   function handleAdd() {
+    if (!isOpen) {
+      haptic();
+      onClosedAlert?.({
+        name: restaurant?.name || dish.restaurantName,
+        hoursLabel,
+        nextOpen,
+      });
+      return;
+    }
     haptic();
     // Restoran shartlarini taomga biriktiramiz — savatda
     // yetkazish va minimal summa hisoblanishi uchun kerak
@@ -195,7 +208,10 @@ export function DishModal({ dish, restaurant, onClose }) {
               <span className="qty-value">{quantity}</span>
               <button onClick={() => setQuantity((q) => q + 1)} aria-label="+"><Icon name="plus" size={18} color="#F5A524" /></button>
             </div>
-            <button onClick={handleAdd} className="btn-primary dish-modal__add">
+            <button
+              onClick={handleAdd}
+              className={`btn-primary dish-modal__add ${isOpen ? '' : 'is-closed'}`}
+            >
               {t('toCart')} · {formatSom(total)}
             </button>
           </div>
