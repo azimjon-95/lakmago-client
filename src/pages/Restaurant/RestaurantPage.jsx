@@ -10,6 +10,7 @@ import { DishRowSkeleton } from '@/components/Skeleton/Skeleton';
 import { useT } from '@/i18n';
 import { useUser } from '@/store/user';
 import { haptic } from '@/lib/telegram';
+import { isOpenNow } from '@/lib/workHours';
 import { useRestaurant, useDishes } from '@/hooks/queries';
 import './Restaurant.css';
 
