@@ -38,6 +38,14 @@ export function CartPage() {
   const setLastPaymentMethod = useUser((s) => s.setLastPaymentMethod);
   const placeOrder = useOrders((s) => s.placeOrder);
 
+  // Sahifa ochilganda tepadan boshlanadi.
+  // Aks holda oldingi sahifadagi scroll holati saqlanib qoladi.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    // Ichki scroll konteyner bo'lsa uni ham
+    document.querySelector('.cart-scroll')?.scrollTo({ top: 0 });
+  }, []);
+
   // Guruhlar memolanadi — restaurantGroups() har chaqirilganda
   // YANGI massiv qaytaradi, memosiz pastdagi useMemo'lar
   // cheksiz qayta hisoblanardi.
@@ -383,6 +391,7 @@ export function CartPage() {
       ))}
 
       {/* Yetkazish turi — kuryer yoki o'zim olib ketaman */}
+      <div className="cart-section-label">Qanday olasiz</div>
       <div className="cart-fulfillment">
         <button
           onClick={() => { haptic(); setFulfillment('delivery'); }}
@@ -405,6 +414,7 @@ export function CartPage() {
       </div>
 
       {/* Vaqt — hozir yoki belgilangan */}
+      <div className="cart-section-label">Qachon</div>
       <div className="cart-timing">
         <div className="cart-timing__tabs">
           <button
@@ -498,8 +508,8 @@ export function CartPage() {
       </button>
 
       {/* To'lov */}
+      <div className="cart-section-label">To'lov</div>
       <div className="cart-payment">
-        <div className="cart-payment__label">{t('paymentMethod')}</div>
         <div className="cart-payment__options">
           <button
             onClick={() => { haptic(); setPaymentMethod('cash'); }}
@@ -602,6 +612,7 @@ export function CartPage() {
       )}
 
       {/* Hisob */}
+      <div className="cart-section-label">Hisob</div>
       <div className="cart-summary">
         <Row label="Mahsulotlar" value={formatSom(pricing.subtotal)} />
         {!isPickup && (
