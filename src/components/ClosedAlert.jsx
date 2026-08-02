@@ -7,12 +7,14 @@ import './ClosedAlert.css';
  * Yopiq muassasadan buyurtma berishga urinilganda chiqadi.
  */
 export function ClosedAlert({ info, onClose }) {
-  // Orqa fon scroll bo'lmasin
+  // Orqa fon scroll bo'lmasin — FAQAT modal ochiq bo'lganda.
+  // Avval info bo'lmasa ham ishlab, sahifani qotirib qo'yardi.
   useEffect(() => {
+    if (!info) return undefined;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = prev; };
-  }, []);
+  }, [info]);
 
   if (!info) return null;
 
