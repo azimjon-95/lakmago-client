@@ -135,6 +135,11 @@ export const api = {
 
   // ===== To'lov tizimlari =====
   // Server vaqti — ish vaqtini to'g'ri hisoblash uchun
+  // Aksiya va reklama
+  getPromotions: (q = '') => apiFetch(`/promotions${q}`, { method: 'GET' }),
+  getAds: (placement) => apiFetch(`/ads?placement=${placement}`, { method: 'GET' }),
+  trackAdEvent: (id, type) => apiFetch(`/ads/${id}/event`, { method: 'POST', body: JSON.stringify({ type }) }),
+
   getServerTime: () => apiFetch('/time', { method: 'GET' }),
 
   getPaymentStatus: () => apiFetch('/payments/status', { method: 'GET' }),

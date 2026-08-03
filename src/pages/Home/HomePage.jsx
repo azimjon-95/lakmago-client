@@ -14,6 +14,7 @@ import { useUser } from '@/store/user';
 import { useT } from '@/i18n';
 import { useOpenDishes, useClosedAlert } from '@/hooks/useOpenStatus';
 import { ClosedAlert } from '@/components/ClosedAlert';
+import { PromoStrip, AdStrip } from '@/components/PromoStrip';
 import { useRestaurants, useTrendingDishes, useBannersQuery, useAllDishes } from '@/hooks/queries';
 import { API_BASE } from '@/api';
 import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
@@ -175,6 +176,12 @@ export function HomePage() {
           </div>
         </>
       )}
+
+      {/* Faol aksiyalar — restoran adminida yaratilgan */}
+      <PromoStrip category={category} />
+
+      {/* Reklama */}
+      <AdStrip placement="home" />
 
       {/* Chegirmadagi taomlar */}
       {discountedShown.length > 0 && (

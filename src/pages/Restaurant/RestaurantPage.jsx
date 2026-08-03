@@ -13,6 +13,7 @@ import { haptic } from '@/lib/telegram';
 import { isOpenNow } from '@/lib/workHours';
 import { useClosedAlert } from '@/hooks/useOpenStatus';
 import { ClosedAlert } from '@/components/ClosedAlert';
+import { PromoStrip } from '@/components/PromoStrip';
 import { useRestaurant, useDishes } from '@/hooks/queries';
 import './Restaurant.css';
 
@@ -297,6 +298,9 @@ export function RestaurantPage() {
           onClosedAlert={showClosed}
         />
       )}
+
+      {/* Shu restoran aksiyalari */}
+      <PromoStrip restaurantId={id} title="Aksiyalar" />
 
       <ClosedAlert info={closedInfo} onClose={hideClosed} />
 
