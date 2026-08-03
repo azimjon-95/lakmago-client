@@ -189,7 +189,7 @@
 /* ===== Savat sarlavhasi (Yandex Eda uslubi) ===== */
 /* Header — tepada qotib turadi, kontent ostidan o'tadi */
 .cart-header {
-  position: sticky;
+  position: fixed;
   /* app-shell allaqachon safe-area padding beradi — bu yerda
      0 yetarli. Aks holda chekinish IKKI MARTA hisoblanib,
      header pastga tushib qolardi. */
