@@ -1,9 +1,5 @@
 /* ============ Savatcha ============ */
-*{
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+
 .cart {
   padding-bottom: 0;
   /* Element chetdan chiqib ketsa ham sahifa yonga surilmaydi */
