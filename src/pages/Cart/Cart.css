@@ -72,6 +72,8 @@
 
 /* Maydonlar (manzil, telefon) */
 .cart-field {
+  box-sizing: border-box !important;
+
   /* box-sizing: border-box bilan width kerak emas — margin
      o'zi kenglikni belgilaydi. Avval calc(100% - 32px) va
      margin birga ishlatilgan edi, bu ortiqcha kenglik berardi. */
