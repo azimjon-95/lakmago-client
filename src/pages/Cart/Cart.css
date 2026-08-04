@@ -74,16 +74,20 @@
 .cart-field {
   box-sizing: border-box !important;
 
-  /* box-sizing: border-box bilan width kerak emas — margin
-     o'zi kenglikni belgilaydi. Avval calc(100% - 32px) va
-     margin birga ishlatilgan edi, bu ortiqcha kenglik berardi. */
-  display: flex; align-items: center; gap: 11px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
   margin: 10px 16px 0;
   padding: 13px 14px;
+
+  width: calc(100% - 32px);
+
   background: var(--surface);
   border: 0.5px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
   text-align: left;
+
   transition: transform 0.12s var(--ease), border-color 0.15s;
 }
 .cart-field:active { transform: scale(0.99); }
