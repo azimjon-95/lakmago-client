@@ -14,6 +14,7 @@ FAYL NOMLARI (aynan shunday bo'lsin):
   pitsa.png          — Pitsa
   sushi.png          — Sushi
   shashlik.png       — Shashlik
+  salatlar.png       — Salatlar
   tovuq.png          — Tovuq
   shirinlik.png      — Shirinlik
   salqin.png         — Ichimlik
