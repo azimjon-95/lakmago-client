@@ -507,6 +507,7 @@
   position: fixed;
   top: calc(env(safe-area-inset-top, 0px) + var(--tg-content-top, 0px));
   z-index: 20;
+  left: 0;right: 0;
   background: rgba(28, 24, 21, 0.82);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
