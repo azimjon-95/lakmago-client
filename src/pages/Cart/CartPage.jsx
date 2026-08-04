@@ -323,7 +323,7 @@ export function CartPage() {
       <header className="cart-header">
         <button onClick={() => navigate(-1)} aria-label={t('back')} className="cart-header__btn">
           <Icon name="arrowLeft" size={21} color="#F7F2EA" />
-        </button>
+        </button> 
 
         {/* Sarlavha o'rniga foydali ma'lumot: vaqt va muassasa */}
         <div className="cart-header__center">
@@ -344,7 +344,7 @@ export function CartPage() {
       {groups.length > 1 && (
         <div className="cart-multi-hint">
           <Icon name="bag" size={18} color="#F5A524" />
-          <div>{groups.length} ta restoran · har biri alohida yetkaziladi, bitta ekranда kuzatiladi.</div>
+          <div>{groups.length} ta restoran · har biri alohida yetkaziladi.</div>
         </div>
       )}
 
