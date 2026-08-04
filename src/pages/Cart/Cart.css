@@ -1,8 +1,15 @@
 /* ============ Savatcha ============ */
+*{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 .cart {
   padding-bottom: 0;
   /* Element chetdan chiqib ketsa ham sahifa yonga surilmaydi */
   overflow-x: hidden;
+  box-sizing: border-box;
+  margin: 0;
 }
 
 /* Safe-area zonasi ham berk bo'lsin — scroll qilganda
