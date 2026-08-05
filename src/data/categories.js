@@ -31,7 +31,7 @@ export const CATEGORIES = [
   { id: 'turetskaya', label: 'Turk taomlari', art: 'shashlik' },
 
   // Yangi rasm
-  { id: 'koffe', label: 'Qahva', art: 'ichimlik', img: '/categories/ichimlik.png' },
+  { id: 'koffe', label: 'Qahva', art: 'ichimlik' },
 
   { id: 'shirinlik', label: 'Shirinlik', art: 'shirinlik' },
 
