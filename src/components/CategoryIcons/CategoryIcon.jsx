@@ -128,7 +128,12 @@ const ART = {
     </>
   ),
 };
-
+const LOCAL_CATEGORY_IMAGES = {
+  salat: '/categories/salat.png',
+  choyxona: '/categories/choyxona.png',
+  fastfood: '/categories/fastfood.png',
+  salqin: '/categories/ichimlik.png',
+};
 // Cloudinary rasmini optimallashtirish (WebP/AVIF, kerakli o'lcham)
 function optimizeImg(url, size) {
   if (!url) return url;
@@ -148,24 +153,34 @@ export function CategoryIcon({ name, id, size = 56, img = '' }) {
   const [failed, setFailed] = useState(false);
 
   // Lokal papkadagi rasm: public/categories/<id>.png
-  const localSrc = id ? `/categories/${id}.png` : '';
+const localSrc =
+  id && LOCAL_CATEGORY_IMAGES[id]
+    ? LOCAL_CATEGORY_IMAGES[id]
+    : id
+      ? `/categories/${id}.png`
+      : '';
   const src = img || localSrc;
 
   useEffect(() => { setFailed(false); }, [src]);
 
   if (src && !failed) {
     return (
-      <img
-        src={img ? optimizeImg(img, size) : src}
-        alt=""
-        width={size}
-        height={size}
-        loading="lazy"
-        decoding="async"
-        className="cat-photo"
-        style={{ width: size, height: size, objectFit: 'contain', display: 'block' }}
-        onError={() => setFailed(true)}
-      />
+    <img
+  src={img ? optimizeImg(img, size) : src}
+  alt=""
+  width={size}
+  height={size}
+  loading="eager"
+  decoding="async"
+  className="cat-photo"
+  style={{
+    width: size,
+    height: size,
+    objectFit: 'contain',
+    display: 'block',
+  }}
+  onError={() => setFailed(true)}
+/>
     );
   }
 
