@@ -135,6 +135,12 @@ export const api = {
 
   // ===== To'lov tizimlari =====
   // Server vaqti — ish vaqtini to'g'ri hisoblash uchun
+  // Dine-in — login kerak emas
+  dineInScan: (token, deviceSessionId) => apiFetch('/dine-in/scan', {
+    method: 'POST', body: JSON.stringify({ token, deviceSessionId }),
+  }),
+  getDineInSession: (id) => apiFetch(`/dine-in/session/${id}`, { method: 'GET' }),
+
   // Aksiya va reklama
   getPromotions: (q = '') => apiFetch(`/promotions${q}`, { method: 'GET' }),
   getAds: (placement) => apiFetch(`/ads?placement=${placement}`, { method: 'GET' }),

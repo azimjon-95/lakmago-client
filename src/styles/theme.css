@@ -457,3 +457,16 @@ ul { list-style: none; }
   white-space: pre-wrap; word-break: break-word;
   max-height: 160px; overflow-y: auto;
 }
+
+/* Dine-in stol belgisi — restoran sahifasida */
+.dinein-badge {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(180deg,
+    rgba(245, 165, 36, 0.16) 0%,
+    rgba(245, 165, 36, 0.06) 100%);
+  border-bottom: 0.5px solid rgba(245, 165, 36, 0.25);
+  font-size: 13.5px;
+  color: var(--brand-100);
+  font-weight: 600;
+}

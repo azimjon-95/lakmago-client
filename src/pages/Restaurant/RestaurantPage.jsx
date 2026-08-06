@@ -11,6 +11,7 @@ import { useT } from '@/i18n';
 import { useUser } from '@/store/user';
 import { haptic } from '@/lib/telegram';
 import { isOpenNow } from '@/lib/workHours';
+import { loadSession } from '@/lib/dineInSession';
 import { useClosedAlert } from '@/hooks/useOpenStatus';
 import { ClosedAlert } from '@/components/ClosedAlert';
 import { PromoStrip } from '@/components/PromoStrip';
@@ -32,7 +33,13 @@ export function RestaurantPage() {
   const isFav = useUser((st) =>
     Boolean(st.user.favorites?.restaurants?.includes(id)));
   const [infoSheet, setInfoSheet] = useState(null);
-  const { closedInfo, showClosed, hideClosed } = useClosedAlert(); // 'schedule' | 'service' | null
+  const { closedInfo, showClosed, hideClosed } = useClosedAlert();
+
+  // Dine-in sessiyasi — QR orqali kelgan bo'lsa
+  const dineIn = useMemo(() => {
+    const s = loadSession();
+    return s && String(s.restaurantId) === String(id) ? s : null;
+  }, [id]); // 'schedule' | 'service' | null
 
   const highlightHandled = useRef(false);
 
@@ -131,6 +138,18 @@ export function RestaurantPage() {
     <div className="app-shell restaurant">
       {/* Banner */}
       <div className="rest-banner">
+        {/* Dine-in: qaysi stolda o'tirganini eslatib turadi */}
+        {dineIn && (
+          <div className="dinein-badge">
+            <Icon name="bag" size={15} color="#F5A524" />
+            <span>
+              {dineIn.tableName
+                ? `${dineIn.tableName} · ${dineIn.tableNumber}`
+                : `Stol ${dineIn.tableNumber}`}
+            </span>
+          </div>
+        )}
+
         <RestaurantBanner restaurant={restaurant} height={150} />
 
         {/* Yopiq bo'lsa ogohlantiramiz */}

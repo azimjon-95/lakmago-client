@@ -1,0 +1,72 @@
+.dinein-state {
+  align-items: center;
+  justify-content: center;
+  padding: 32px 28px;
+}
+
+.dinein-state__box {
+  text-align: center;
+  max-width: 300px;
+}
+
+.dinein-state__icon {
+  width: 62px; height: 62px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.dinein-state__icon--error {
+  background: rgba(225, 75, 66, 0.14);
+}
+
+.dinein-state__title {
+  font-size: 19px; font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 8px;
+  letter-spacing: -0.3px;
+}
+
+.dinein-state__text {
+  font-size: 14.5px; color: var(--muted);
+  line-height: 1.5;
+  margin: 0 0 10px;
+}
+
+.dinein-state__hint {
+  font-size: 13px; color: var(--muted);
+  opacity: 0.75;
+  line-height: 1.5;
+  margin: 0 0 22px;
+}
+
+.dinein-state__btn {
+  width: 100%;
+  padding: 13px;
+  background: var(--brand);
+  color: var(--brand-text);
+  border-radius: 15px;
+  font-size: 15px; font-weight: 650;
+}
+
+.dinein-state__spinner {
+  width: 34px; height: 34px;
+  margin: 0 auto 16px;
+  border: 3px solid var(--line);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: dinein-spin 0.75s linear infinite;
+}
+@keyframes dinein-spin { to { transform: rotate(360deg); } }
+
+/* Stol belgisi — menyuda ko'rinadi */
+.dinein-badge {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(180deg,
+    rgba(245, 165, 36, 0.16) 0%,
+    rgba(245, 165, 36, 0.06) 100%);
+  border-bottom: 0.5px solid rgba(245, 165, 36, 0.25);
+  font-size: 13.5px;
+  color: var(--brand-100);
+  font-weight: 600;
+}

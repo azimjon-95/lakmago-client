@@ -8,6 +8,7 @@ const RestaurantPage = lazy(() => import('@/pages/Restaurant/RestaurantPage').th
 const CartPage = lazy(() => import('@/pages/Cart/CartPage').then((m) => ({ default: m.CartPage })));
 const OrderTrackPage = lazy(() => import('@/pages/OrderTrack/OrderTrackPage').then((m) => ({ default: m.OrderTrackPage })));
 const OrdersPage = lazy(() => import('@/pages/Orders/OrdersPage').then((m) => ({ default: m.OrdersPage })));
+const DineInEntry = lazy(() => import('@/pages/DineIn/DineInEntry').then((m) => ({ default: m.DineInEntry })));
 const FoodPage = lazy(() => import('@/pages/Food/FoodPage').then((m) => ({ default: m.FoodPage })));
 const CardsPage = lazy(() => import('@/pages/Cards/CardsPage').then((m) => ({ default: m.CardsPage })));
 const FavoritesPage = lazy(() => import('@/pages/Favorites/FavoritesPage').then((m) => ({ default: m.FavoritesPage })));
@@ -120,6 +121,8 @@ function AppInner() {
               <Route path="/favorites" element={<FavoritesPage />} />
               <Route path="/cards" element={<CardsPage />} />
               <Route path="/food/:id" element={<FoodPage />} />
+              {/* QR kod: lokma.uz/d/TOKEN */}
+              <Route path="/d/:token" element={<DineInEntry />} />
               <Route path="/restaurant/:id/reserve" element={<ReservationPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/order/track" element={<OrderTrackPage />} />
