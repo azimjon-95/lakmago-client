@@ -4,13 +4,12 @@
   z-index: 10000;
   background: #080605;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   overflow: hidden;
   opacity: 1;
-  transition: opacity .4s ease;
+  transition: opacity 0.4s ease;
 }
-
 
 .splash--leaving {
   opacity: 0;
@@ -20,9 +19,8 @@
 
 .splash__video {
   width: 100%;
-  /* height: 100%; */
+  height: 100%;
   object-fit: cover;
-  animation: videoSpeed 6s linear forwards;
 }
 
 
