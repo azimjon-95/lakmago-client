@@ -20,7 +20,7 @@
 
 .splash__video {
   width: 100%;
-  height: 100%;
+  /* height: 100%; */
   object-fit: cover;
   animation: videoSpeed 6s linear forwards;
 }
