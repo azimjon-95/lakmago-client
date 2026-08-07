@@ -100,44 +100,33 @@ export function ProfilePage() {
         <LangSwitch />
       </div>
 
-      {/* Shaxsiy */}
-      {/* Sevimlilar va bronlar */}
+      {/* Tez havolalar — bitta guruhda */}
       <div className="profile-section">
-        <button onClick={() => navigate('/favorites')} className="profile-row">
-          <Icon name="heart" size={18} color="#F5A524" />
-          <div className="profile-row__body">
-            <div className="profile-row__value">Sevimlilar</div>
-            <div className="profile-row__label">Saqlangan taom va restoranlar</div>
-          </div>
-          <Icon name="chevronRight" size={18} color="#A99C8C" />
-        </button>
-      </div>
+        <div className="profile-list">
+          <button onClick={() => navigate('/favorites')} className="profile-row">
+            <Icon name="heart" size={18} color="#F5A524" />
+            <div className="profile-row__body">
+              <div className="profile-row__value">Sevimlilar</div>
+              <div className="profile-row__label">Saqlangan taom va restoranlar</div>
+            </div>
+            <Icon name="chevronRight" size={17} color="#A99C8C" />
+          </button>
 
-      <div className="profile-section">
-        <button onClick={() => navigate('/cards')} className="profile-row">
-          <Icon name="card" size={18} color="#F5A524" />
-          <div className="profile-row__body">
-            <div className="profile-row__value">To'lov kartalari</div>
-            <div className="profile-row__label">Karta qo'shish va boshqarish</div>
-          </div>
-          <Icon name="chevronRight" size={18} color="#A99C8C" />
-        </button>
-      </div>
-
-      <div className="profile-section">
-        <button onClick={() => navigate('/my-reservations')} className="profile-row">
-          <Icon name="calendarPlus" size={18} color="#F5A524" />
-          <div className="profile-row__body">
-            <div className="profile-row__value">Bronlarim</div>
-            <div className="profile-row__label">Stol bronlari tarixi</div>
-          </div>
-          <Icon name="chevronRight" size={18} color="#A99C8C" />
-        </button>
+          <button onClick={() => navigate('/my-reservations')} className="profile-row">
+            <Icon name="calendarPlus" size={18} color="#F5A524" />
+            <div className="profile-row__body">
+              <div className="profile-row__value">Bronlarim</div>
+              <div className="profile-row__label">Stol bronlari tarixi</div>
+            </div>
+            <Icon name="chevronRight" size={17} color="#A99C8C" />
+          </button>
+        </div>
       </div>
 
       <div className="profile-section">
         <div className="profile-section__label">{t('settings')}</div>
 
+        <div className="profile-list">
         {editingField === 'name' ? (
           <div className="profile-edit">
             <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Ism" className="input-field" style={{ marginBottom: 8 }} />
@@ -159,7 +148,7 @@ export function ProfilePage() {
         )}
 
         {editingField === 'phone' ? (
-          <div className="profile-edit" style={{ marginTop: 10 }}>
+          <div className="profile-edit">
             <input value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" className="input-field" style={{ marginBottom: 10 }} />
             <div className="profile-edit__actions">
               <button onClick={() => setEditingField(null)} className="btn-secondary" style={{ flex: 1 }}>{t('cancel')}</button>
@@ -167,21 +156,22 @@ export function ProfilePage() {
             </div>
           </div>
         ) : (
-          <button onClick={() => { setPhone(user.phone || ''); setEditingField('phone'); }} className={`profile-row ${user.phone ? '' : 'profile-row--required'}`} style={{ marginTop: 10 }}>
+          <button onClick={() => { setPhone(user.phone || ''); setEditingField('phone'); }} className={`profile-row ${user.phone ? '' : 'profile-row--required'}`}>
             <Icon name="phone" size={18} color={user.phone ? '#A99C8C' : '#F5A524'} />
             <div className="profile-row__body">
               <div className={`profile-row__value ${user.phone ? '' : 'profile-row__value--accent'}`}>{user.phone || t('empty')}</div>
               <div className="profile-row__label">Telefon</div>
             </div>
-            <Icon name="chevronRight" size={18} color="#A99C8C" />
+            <Icon name="chevronRight" size={17} color="#A99C8C" />
           </button>
         )}
+        </div>
       </div>
 
       {/* Manzillar */}
       <div className="profile-section">
         <div className="profile-section__label">{t('myAddresses')}</div>
-        <div className="profile-addresses">
+        <div className="profile-list">
           {user.addresses.length === 0 && <div className="profile-addresses__empty">{t('empty')}</div>}
           {user.addresses.map((a) => (
             <div key={a.id} className={`profile-address ${a.id === user.defaultAddressId ? 'is-default' : ''}`}>
@@ -336,7 +326,7 @@ function CardsStrip({ cards, onManage }) {
                 <span className="pcard__chip" />
                 {c.isDefault && <span className="pcard__badge">Asosiy</span>}
               </div>
-              <div className="pcard__num">•••• •••• •••• {c.last4}</div>
+              <div className="pcard__num">•••• {c.last4}</div>
               <div className="pcard__bottom">
                 <span className="pcard__holder">
                   {c.bankName || c.holder || 'KARTA EGASI'}
