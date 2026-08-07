@@ -39,6 +39,10 @@ export function CartPage() {
   const setLastPaymentMethod = useUser((s) => s.setLastPaymentMethod);
   const placeOrder = useOrders((s) => s.placeOrder);
 
+  // Yetkazish narxi — masofaga qarab serverda hisoblanadi
+  const [quotes, setQuotes] = useState({});
+  const [quoteLoading, setQuoteLoading] = useState(false);
+
   // Yopilgan restoran taomlari savatdan avtomatik chiqadi
   const [removedNote, setRemovedNote] = useState(null);
 
@@ -46,6 +50,31 @@ export function CartPage() {
     setRemovedNote(`${name} yopilgani uchun taomlari savatdan olib tashlandi`);
     setTimeout(() => setRemovedNote(null), 6000);
   });
+
+  // Manzil yoki savat o'zgarganda narxni qayta so'raymiz
+  useEffect(() => {
+    if (isPickup || !selectedAddress?.lat || !selectedAddress?.lng) {
+      setQuotes({});
+      return;
+    }
+
+    const ids = groups.map((g) => g.restaurant.id).filter(Boolean);
+    if (!ids.length) return;
+
+    setQuoteLoading(true);
+    Promise.all(
+      ids.map((id) =>
+        api.getDeliveryQuote(id, selectedAddress.lat, selectedAddress.lng)
+          .then((q) => [id, q])
+          .catch(() => [id, null]),
+      ),
+    )
+      .then((pairs) => {
+        setQuotes(Object.fromEntries(pairs.filter(([, q]) => q)));
+      })
+      .finally(() => setQuoteLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedAddress?.lat, selectedAddress?.lng, isPickup, groups.length]);
 
   // Sahifa ochilganda tepadan boshlanadi.
   // Aks holda oldingi sahifadagi scroll holati saqlanib qoladi.
@@ -122,7 +151,11 @@ export function CartPage() {
       return {
         restaurant: rest,
         subtotal: sub,
-        deliveryFee: calcDeliveryFee(sub, rest, isPickup),
+        // Server hisobi bo'lsa u ustun — masofaga qarab
+        deliveryFee: quotes[rest.id]?.deliveryAvailable
+          ? quotes[rest.id].deliveryPrice
+          : calcDeliveryFee(sub, rest, isPickup),
+        quote: quotes[rest.id] || null,
         serviceFee: calcServiceFee(sub, rest),
         minCheck: checkMinOrder(sub, rest, isPickup),
         freeGap: freeDeliveryGap(sub, rest, isPickup),
@@ -150,9 +183,11 @@ export function CartPage() {
       orderSum: subtotal + deliveryFee + serviceFee,
       blocked,
       closed,
-      canOrder: blocked.length === 0 && closed.length === 0,
+      outOfRange,
+      canOrder: blocked.length === 0 && closed.length === 0
+        && outOfRange.length === 0,
     };
-  }, [groups, isPickup, timingMode]);
+  }, [groups, isPickup, timingMode, quotes]);
 
   // Bepul yetkazishgacha qolgan eng kichik summa
   const gapToFree = useMemo(() => {
@@ -637,8 +672,16 @@ export function CartPage() {
         <Row label="Mahsulotlar" value={formatSom(pricing.subtotal)} />
         {!isPickup && (
           <Row
-            label="Yetkazish"
-            value={pricing.deliveryFee === 0 ? t('free') : formatSom(pricing.deliveryFee)}
+            label={
+              pricing.perRestaurant?.[0]?.quote?.distanceKm
+                ? `Yetkazish · ${pricing.perRestaurant[0].quote.distanceKm} km`
+                : 'Yetkazish'
+            }
+            value={
+              quoteLoading ? '...'
+                : pricing.deliveryFee === 0 ? t('free')
+                  : formatSom(pricing.deliveryFee)
+            }
           />
         )}
         {pricing.serviceFee > 0 && (
@@ -682,6 +725,14 @@ export function CartPage() {
             Bepul yetkazishgacha <b>{formatSom(gapToFree)}</b> qoldi
           </div>
         )}
+
+        {/* Yetkazish radiusidan tashqarida */}
+        {pricing.outOfRange?.map((r) => (
+          <div key={`range-${r.restaurant.id}`} className="cart-footer__warn cart-footer__warn--closed">
+            <Icon name="info" size={14} color="#E14B42" />
+            <span>{r.quote.reason}</span>
+          </div>
+        ))}
 
         {/* Yopiq restoranlar */}
         {pricing.closed.map((c) => {
