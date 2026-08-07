@@ -51,30 +51,10 @@ export function CartPage() {
     setTimeout(() => setRemovedNote(null), 6000);
   });
 
-  // Manzil yoki savat o'zgarganda narxni qayta so'raymiz
-  useEffect(() => {
-    if (isPickup || !selectedAddress?.lat || !selectedAddress?.lng) {
-      setQuotes({});
-      return;
-    }
-
-    const ids = groups.map((g) => g.restaurant.id).filter(Boolean);
-    if (!ids.length) return;
-
-    setQuoteLoading(true);
-    Promise.all(
-      ids.map((id) =>
-        api.getDeliveryQuote(id, selectedAddress.lat, selectedAddress.lng)
-          .then((q) => [id, q])
-          .catch(() => [id, null]),
-      ),
-    )
-      .then((pairs) => {
-        setQuotes(Object.fromEntries(pairs.filter(([, q]) => q)));
-      })
-      .finally(() => setQuoteLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedAddress?.lat, selectedAddress?.lng, isPickup, groups.length]);
+  // Manzil yoki savat o'zgarganda yetkazish narxi qayta so'raladi.
+  // Effekt selectedAddress e'lon qilingandan KEYIN turadi —
+  // pastga qarang. (Bog'liqlik massivi render paytida
+  // hisoblanadi, shuning uchun tartib muhim.)
 
   // Sahifa ochilganda tepadan boshlanadi.
   // Aks holda oldingi sahifadagi scroll holati saqlanib qoladi.
@@ -175,6 +155,13 @@ export function CartPage() {
       ? []
       : perRestaurant.filter((r) => !isOpenNow(r.restaurant));
 
+    // Yetkazish radiusidan tashqarida qolganlar.
+    // Server quote'ida deliveryAvailable=false bo'lsa — shu manzilga
+    // yetkazib bo'lmaydi. Olib ketishda tekshirilmaydi.
+    const outOfRange = isPickup
+      ? []
+      : perRestaurant.filter((r) => r.quote && r.quote.deliveryAvailable === false);
+
     return {
       perRestaurant,
       subtotal,
@@ -244,6 +231,37 @@ export function CartPage() {
   const bonusApplied = useBonus ? Math.min(bonusBalance, orderSum) : 0;
   const total = orderSum - bonusApplied;
   const selectedAddress = user.addresses.find((a) => a.id === user.defaultAddressId) ?? user.addresses[0];
+
+  // Manzil yoki savat o'zgarganda yetkazish narxi serverdan
+  // qayta so'raladi (masofaga qarab hisoblanadi).
+  useEffect(() => {
+    if (isPickup || !selectedAddress?.lat || !selectedAddress?.lng) {
+      setQuotes({});
+      return;
+    }
+
+    const ids = groups.map((g) => g.restaurant.id).filter(Boolean);
+    if (!ids.length) return;
+
+    let cancelled = false;
+    setQuoteLoading(true);
+    Promise.all(
+      ids.map((id) =>
+        api.getDeliveryQuote(id, selectedAddress.lat, selectedAddress.lng)
+          .then((q) => [id, q])
+          .catch(() => [id, null]),
+      ),
+    )
+      .then((pairs) => {
+        if (cancelled) return;
+        setQuotes(Object.fromEntries(pairs.filter(([, q]) => q)));
+      })
+      .finally(() => { if (!cancelled) setQuoteLoading(false); });
+
+    // Manzil tez o'zgarsa eski javob yangisini bosib ketmasin
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedAddress?.lat, selectedAddress?.lng, isPickup, groups.length]);
 
   if (items.length === 0) {
     return (
@@ -730,7 +748,7 @@ export function CartPage() {
         {pricing.outOfRange?.map((r) => (
           <div key={`range-${r.restaurant.id}`} className="cart-footer__warn cart-footer__warn--closed">
             <Icon name="info" size={14} color="#E14B42" />
-            <span>{r.quote.reason}</span>
+            <span>{r.quote.reason || `${r.restaurant.name} bu manzilga yetkazmaydi`}</span>
           </div>
         ))}
 

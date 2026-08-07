@@ -458,6 +458,38 @@ ul { list-style: none; }
   max-height: 160px; overflow-y: auto;
 }
 
+/* Xato matni — WebApp ichida konsol yo'q, shuning uchun
+   foydalanuvchi tafsilotni ochib nusxa ola bilishi kerak */
+.err-screen__msg {
+  margin: 16px 0 0;
+  font-size: 11.5px;
+  color: var(--muted);
+  word-break: break-word;
+  opacity: 0.75;
+}
+.err-screen__toggle {
+  margin-top: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.err-screen__report { margin-top: 4px; }
+.err-screen__btn--copy {
+  width: 100%;
+  margin-top: 10px;
+  background: var(--surface-2);
+}
+.err-screen__hint {
+  margin: 10px 0 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
 /* Dine-in stol belgisi — restoran sahifasida */
 .dinein-badge {
   display: flex; align-items: center; gap: 8px;
