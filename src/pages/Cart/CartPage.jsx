@@ -11,6 +11,7 @@ import { useT } from '@/i18n';
 import { formatSom } from '@/lib/utils';
 import { calcDeliveryFee, calcServiceFee, checkMinOrder, freeDeliveryGap } from '@/lib/pricing';
 import { isOpenNow } from '@/lib/workHours';
+import { useCartCleanup } from '@/hooks/useCartCleanup';
 import { api } from '@/api';
 import { haptic, getTelegram } from '@/lib/telegram';
 import { useDishes } from '@/hooks/queries';
@@ -37,6 +38,14 @@ export function CartPage() {
   const lastPaymentMethod = useUser((s) => s.lastPaymentMethod);
   const setLastPaymentMethod = useUser((s) => s.setLastPaymentMethod);
   const placeOrder = useOrders((s) => s.placeOrder);
+
+  // Yopilgan restoran taomlari savatdan avtomatik chiqadi
+  const [removedNote, setRemovedNote] = useState(null);
+
+  useCartCleanup((name) => {
+    setRemovedNote(`${name} yopilgani uchun taomlari savatdan olib tashlandi`);
+    setTimeout(() => setRemovedNote(null), 6000);
+  });
 
   // Sahifa ochilganda tepadan boshlanadi.
   // Aks holda oldingi sahifadagi scroll holati saqlanib qoladi.
@@ -340,6 +349,13 @@ export function CartPage() {
           <Icon name="trash" size={19} color="#A99C8C" />
         </button>
       </header>
+
+      {removedNote && (
+        <div className="cart-removed">
+          <Icon name="info" size={15} color="#E0A96D" />
+          <span>{removedNote}</span>
+        </div>
+      )}
 
       {groups.length > 1 && (
         <div className="cart-multi-hint">
