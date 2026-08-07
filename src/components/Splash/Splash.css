@@ -1,251 +1,38 @@
-/* ============================================================
-   SPLASH SCREEN STYLES (3D Premium Realistic Animation)
-   ============================================================ */
-
 .splash {
   position: fixed;
   inset: 0;
   z-index: 10000;
-  background: #080605; /* Rasm kabi chuqur, to'q fon */
+  background: #080605;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   overflow: hidden;
   opacity: 1;
-  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  font-family: 'Poppins', 'Montserrat', system-ui, -apple-system, sans-serif;
+  transition: opacity .4s ease;
 }
+
 
 .splash--leaving {
   opacity: 0;
   pointer-events: none;
 }
 
-.splash__content {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+
+.splash__video {
   width: 100%;
   height: 100%;
+  object-fit: cover;
+  animation: videoSpeed 6s linear forwards;
 }
 
-/* Orqa fondagi Zarrachali Olovli Nur */
-.splash__bg-glow {
-  position: absolute;
-  width: 320px;
-  height: 320px;
-  background: radial-gradient(circle, rgba(245, 117, 26, 0.28) 0%, rgba(245, 117, 26, 0) 70%);
-  top: 42%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  animation: sp-pulse-glow 2.5s ease-in-out infinite alternate;
-}
 
-/* Pol qismidagi qaytgan yorug'lik (Floor Glow) */
-.splash__floor-glow {
-  position: absolute;
-  bottom: 12%;
-  width: 220px;
-  height: 24px;
-  background: radial-gradient(ellipse, rgba(245, 117, 26, 0.5) 0%, rgba(0, 0, 0, 0) 75%);
-  border-radius: 50%;
-  filter: blur(8px);
-  animation: sp-floor-glow 0.8s ease 1.8s both;
-}
+/* tezkor o'qilish effekti */
+@keyframes videoSpeed {
+  from {
+    transform: scale(1);
+  }
 
-@keyframes sp-pulse-glow {
-  0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.6; }
-  100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
-}
-@keyframes sp-floor-glow {
-  0% { opacity: 0; transform: scaleX(0.3); }
-  100% { opacity: 1; transform: scaleX(1); }
-}
-
-/* ============================================================
-   SVG ELEMENTS ANIMATION
-   ============================================================ */
-
-.splash__logo-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 2;
-}
-
-.splash__svg {
-  width: 280px;
-  height: auto;
-  overflow: visible;
-}
-
-/* Qopqoq — Yuqoridan tushib sakrab o'rnashadi */
-.sp-dome {
-  transform-origin: 120px 80px;
-  animation: sp-dome-in 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s both;
-}
-@keyframes sp-dome-in {
-  0% { opacity: 0; transform: translateY(-70px) scale(0.85); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* Podnos / Tarelka — Markazdan sekin kengayadi */
-.sp-tray {
-  transform-origin: 120px 118px;
-  animation: sp-tray-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both;
-}
-@keyframes sp-tray-in {
-  0% { opacity: 0; transform: scaleX(0.2); }
-  100% { opacity: 1; transform: scaleX(1); }
-}
-
-/* Qo'l — Pastdan chiroyli ko'tariladi */
-.sp-hand {
-  transform-origin: 120px 150px;
-  animation: sp-hand-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s both;
-}
-@keyframes sp-hand-in {
-  0% { opacity: 0; transform: translateY(40px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-/* Tezlik chiziqlari — Chap tomondan uchib keladi */
-.sp-speed rect {
-  animation: sp-speed-in 0.5s cubic-bezier(0.25, 1, 0.5, 1) both;
-}
-.sp-speed rect:nth-child(1) { animation-delay: 0.8s; }
-.sp-speed rect:nth-child(2) { animation-delay: 0.9s; }
-.sp-speed rect:nth-child(3) { animation-delay: 1.0s; }
-
-@keyframes sp-speed-in {
-  0% { opacity: 0; transform: translateX(-40px) scaleX(0.3); }
-  100% { opacity: 1; transform: translateX(0) scaleX(1); }
-}
-
-/* Bug' (Steam) — Tepaga ko'tarilib sekin tebranadi */
-.sp-steam {
-  opacity: 0;
-  animation: sp-steam-fade 0.6s ease 1.2s forwards, sp-steam-wave 3s ease-in-out 1.8s infinite;
-}
-@keyframes sp-steam-fade {
-  to { opacity: 0.9; }
-}
-@keyframes sp-steam-wave {
-  0%, 100% { transform: translateY(0) scaleY(1); }
-  50% { transform: translateY(-6px) scaleY(1.05); }
-}
-
-/* ============================================================
-   TYPOGRAPHY (LOKMAGO & TAGLINE)
-   ============================================================ */
-
-.splash__text {
-  margin-top: 5px;
-  font-size: 52px;
-  font-weight: 900;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  letter-spacing: -1px;
-}
-
-/* "Lokma" — Oq / Oltinsimon 3D Matn */
-.sp-lokma {
-  color: #ECEFF1;
-  text-shadow: 
-    0 2px 0 #B0BEC5,
-    0 4px 0 #78909C,
-    0 6px 0 #37474F,
-    0 8px 15px rgba(0, 0, 0, 0.8);
-  opacity: 0;
-  animation: sp-lokma-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 1.2s both;
-}
-@keyframes sp-lokma-in {
-  0% { opacity: 0; transform: translateX(-35px); }
-  100% { opacity: 1; transform: translateX(0); }
-}
-
-/* "Go" — Zarxal Apelsin 3D va Tezlik effekti bilan keladi */
-.sp-go {
-  position: relative;
-  color: #FF9800;
-  background: linear-gradient(180deg, #FFE082 0%, #FF9800 50%, #E65100 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 4px 10px rgba(230, 81, 0, 0.6));
-  margin-left: 2px;
-  opacity: 0;
-  animation: sp-go-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 1.6s both;
-}
-
-/* "Go" ketidan tezlik ziynati (Motion Blur Effect) */
-.sp-go-blur {
-  position: absolute;
-  left: -15px;
-  top: 0;
-  background: linear-gradient(90deg, transparent, rgba(245, 117, 26, 0.8));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  opacity: 0;
-  filter: blur(4px);
-  animation: sp-go-blur 0.7s ease 1.6s both;
-}
-
-@keyframes sp-go-in {
-  0% { opacity: 0; transform: translateX(80px) skewX(-18deg) scale(1.2); }
-  100% { opacity: 1; transform: translateX(0) skewX(0) scale(1); }
-}
-@keyframes sp-go-blur {
-  0% { opacity: 0.9; transform: translateX(60px); }
-  100% { opacity: 0; transform: translateX(0); }
-}
-
-/* Tagline: BUYURTMA • BRON • DOSTAVKA */
-.splash__tagline {
-  margin-top: 18px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 3px;
-  color: #FFB74D;
-  text-shadow: 0 2px 8px rgba(245, 117, 26, 0.4);
-  opacity: 0;
-  animation: sp-tagline-in 0.6s ease 2.0s forwards;
-}
-
-/* Yon chiziqlari bor Tagline ko'rinishi */
-.splash__tagline::before,
-.splash__tagline::after {
-  content: '';
-  width: 25px;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #FF9800);
-}
-.splash__tagline::after {
-  background: linear-gradient(90deg, #FF9800, transparent);
-}
-
-.sp-dot {
-  font-size: 8px;
-  color: #E65100;
-}
-
-@keyframes sp-tagline-in {
-  0% { opacity: 0; transform: translateY(10px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-/* Motion kamaytirilgan rejim uchun */
-@media (prefers-reduced-motion: reduce) {
-  .sp-dome, .sp-tray, .sp-hand, .sp-speed rect, .sp-steam,
-  .sp-lokma, .sp-go, .splash__tagline, .splash__floor-glow {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
+  to {
+    transform: scale(1.05);
   }
 }
