@@ -140,6 +140,10 @@ export const api = {
   getAds: (placement) => apiFetch(`/ads?placement=${placement}`, { method: 'GET' }),
   trackAdEvent: (id, type) => apiFetch(`/ads/${id}/event`, { method: 'POST', body: JSON.stringify({ type }) }),
 
+  // Yetkazish masofasi va narxi
+  getDeliveryQuote: (restaurantId, lat, lng) =>
+    apiFetch(`/maps/delivery-quote?restaurantId=${restaurantId}&lat=${lat}&lng=${lng}`),
+
   getServerTime: () => apiFetch('/time', { method: 'GET' }),
 
   getPaymentStatus: () => apiFetch('/payments/status', { method: 'GET' }),

@@ -18,40 +18,64 @@
 .profile-card__name { font-size: 16px; font-weight: 600; color: var(--ink); }
 .profile-card__id { font-size: 12px; color: var(--brand-100); margin-top: 2px; }
 
-.profile-section { margin: 0 16px 12px; }
-.profile-section__label { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 8px; }
+.profile-section { margin: 0 16px 14px; }
+.profile-section__label {
+  font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--muted);
+  margin: 0 0 8px 2px;
+}
+
+/* Guruhlangan ro'yxat — qatorlar bitta qutida, orasida
+   ingichka ajratgich (iOS "grouped list"). Har qatorga alohida
+   quti berilsa ro'yxat parchalanib ko'rinardi. */
+.profile-list {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+}
 
 /* Qatorlar */
 .profile-row {
   width: 100%;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 14px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 13px 14px;
+  min-height: 56px;
   display: flex; align-items: center; gap: 12px;
   text-align: left;
+  transition: background 0.15s var(--ease);
 }
-.profile-row--required { border-color: var(--brand); border-width: 1.5px; }
-.profile-row__body { flex: 1; }
-.profile-row__value { font-size: 13px; font-weight: 500; color: var(--ink); }
+.profile-row:active { background: var(--surface-2); }
+
+/* Ajratgich — ikonka ustunidan keyin boshlanadi (iOS kabi) */
+.profile-list > * + * { box-shadow: inset 0 1px 0 var(--line); }
+
+/* Guruhdan tashqarida turgan qator o'z qutisiga ega bo'ladi */
+.profile-row:only-child { border-radius: 16px; }
+
+.profile-row--required { box-shadow: inset 0 0 0 1.5px var(--brand) !important; border-radius: 16px; }
+.profile-row__body { flex: 1; min-width: 0; }
+.profile-row__value { font-size: 14.5px; font-weight: 500; color: var(--ink); }
 .profile-row__value--accent { color: var(--brand); }
-.profile-row__label { font-size: 11px; color: var(--muted); }
+.profile-row__label { font-size: 12px; color: var(--muted); margin-top: 1px; }
 
 /* Tahrirlash */
-.profile-edit { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; }
+.profile-edit { background: var(--surface); border-radius: 16px; padding: 14px; }
 .profile-edit__actions { display: flex; gap: 8px; }
 
 /* Manzillar */
 .profile-addresses { display: flex; flex-direction: column; gap: 8px; }
 .profile-addresses__empty { font-size: 12px; color: var(--muted); text-align: center; padding: 12px 0; }
 .profile-address {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 14px;
+  background: transparent;
+  padding: 12px 14px;
+  min-height: 56px;
   display: flex; align-items: center; gap: 12px;
 }
-.profile-address.is-default { border-color: var(--brand); border-width: 1.5px; }
+.profile-address.is-default .profile-address__title { color: var(--brand-100); }
 .profile-address__body { flex: 1; min-width: 0; }
 .profile-address__title { font-size: 13px; font-weight: 500; color: var(--ink); display: flex; align-items: center; gap: 4px; }
 .profile-address__badge { font-size: 10px; color: var(--brand); }
@@ -74,10 +98,10 @@
 /* ===== Referral karta ===== */
 .referral-card {
   background: linear-gradient(135deg, var(--brand-tint), var(--surface));
-  border: 1px solid var(--brand-100);
-  border-radius: 18px;
-  padding: 18px;
-  margin: 0 16px 16px;
+  border: 1px solid rgba(245, 165, 36, 0.28);
+  border-radius: 16px;
+  padding: 16px;
+  margin: 0 16px 14px;
 }
 .referral-card__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .referral-card__title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: var(--ink); }
@@ -85,12 +109,12 @@
   background: var(--brand-400); color: var(--brand-text);
   font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px;
 }
-.referral-card__desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 16px; }
-.referral-card__stats { display: flex; gap: 12px; margin-bottom: 16px; }
+.referral-card__desc { font-size: 12.5px; color: var(--muted); line-height: 1.45; margin-bottom: 13px; }
+.referral-card__stats { display: flex; gap: 10px; margin-bottom: 13px; }
 .referral-stat {
-  flex: 1; background: var(--canvas); border-radius: 12px; padding: 12px; text-align: center;
+  flex: 1; background: var(--canvas); border-radius: 12px; padding: 10px; text-align: center;
 }
-.referral-stat__value { font-size: 22px; font-weight: 800; color: var(--brand-100); }
+.referral-stat__value { font-size: 20px; font-weight: 800; color: var(--brand-100); }
 .referral-stat__label { font-size: 11px; color: var(--muted); margin-top: 2px; }
 .referral-card__actions { display: flex; gap: 10px; }
 .referral-card__share {
@@ -113,8 +137,8 @@
 .profile-hero {
   position: relative;
   margin: 0 16px 16px;
-  padding: 26px 20px 20px;
-  border-radius: 24px;
+  padding: 22px 18px 16px;
+  border-radius: 22px;
   background:
     radial-gradient(120% 100% at 50% 0%, #4A3216 0%, #2A1D0E 55%, #1C1815 100%);
   border: 1px solid rgba(245, 165, 36, 0.18);
@@ -133,8 +157,8 @@
 
 .profile-hero__avatar {
   position: relative;
-  width: 84px; height: 84px;
-  margin: 0 auto 14px;
+  width: 72px; height: 72px;
+  margin: 0 auto 12px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--brand) 0%, #FFCE7A 100%);
   display: flex; align-items: center; justify-content: center;
@@ -150,7 +174,7 @@
 
 .profile-hero__name {
   position: relative;
-  font-size: 21px; font-weight: 700; color: var(--ink);
+  font-size: 19px; font-weight: 700; color: var(--ink);
   line-height: 1.2;
 }
 .profile-hero__id {
@@ -163,13 +187,13 @@
 .profile-hero__stats {
   position: relative;
   display: flex; align-items: center; justify-content: center;
-  gap: 4px; margin-top: 18px;
+  gap: 4px; margin-top: 15px;
 }
 .profile-stat {
   flex: 1;
   display: flex; flex-direction: column; align-items: center; gap: 2px;
 }
-.profile-stat__value { font-size: 19px; font-weight: 700; color: var(--ink); }
+.profile-stat__value { font-size: 18px; font-weight: 700; color: var(--ink); }
 .profile-stat__label { font-size: 11px; color: var(--muted); }
 .profile-stat__sep {
   width: 1px; height: 26px;
@@ -179,18 +203,21 @@
 /* ============ KARTALAR SLAYDI ============ */
 .pcards { margin: 0 0 18px; }
 .pcards__row {
-  display: flex; gap: 12px;
+  display: flex; gap: 10px;
   overflow-x: auto;
+  /* Chap chekka boshqa bo'limlar bilan bir chiziqda (16px).
+     scroll-padding — surilganda ham karta chekkaga yopishmaydi. */
   padding: 2px 16px 6px;
-  scroll-snap-type: x mandatory;
+  scroll-padding-left: 16px;
+  scroll-snap-type: x proximity;
 }
 
 .pcard {
   position: relative;
   flex: none;
-  width: 260px; height: 150px;
-  border-radius: 18px;
-  padding: 16px;
+  width: 206px; height: 124px;
+  border-radius: 16px;
+  padding: 13px 14px;
   display: flex; flex-direction: column; justify-content: space-between;
   color: #fff;
   scroll-snap-align: start;
@@ -222,14 +249,14 @@
 }
 /* Chip — haqiqiy kartadagidek */
 .pcard__chip {
-  width: 34px; height: 25px;
-  border-radius: 5px;
+  width: 28px; height: 21px;
+  border-radius: 4px;
   background: linear-gradient(135deg, #E8C87A 0%, #B8964A 50%, #E8C87A 100%);
   box-shadow: inset 0 0 0 1px rgba(0,0,0,0.18);
 }
 .pcard__badge {
-  font-size: 10px; font-weight: 700;
-  padding: 3px 9px; border-radius: 999px;
+  font-size: 9.5px; font-weight: 700;
+  padding: 3px 8px; border-radius: 999px;
   background: rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(6px);
   letter-spacing: 0.3px;
@@ -237,8 +264,9 @@
 
 .pcard__num {
   position: relative;
-  font-size: 17px; font-weight: 600;
-  letter-spacing: 1.6px;
+  white-space: nowrap;
+  font-size: 16px; font-weight: 600;
+  letter-spacing: 1.4px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -248,13 +276,13 @@
   gap: 10px;
 }
 .pcard__holder {
-  font-size: 11px; letter-spacing: 0.6px;
+  font-size: 10px; letter-spacing: 0.5px;
   text-transform: uppercase;
   opacity: 0.85;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .pcard__brand {
-  font-size: 13px; font-weight: 700;
+  font-size: 11.5px; font-weight: 700;
   letter-spacing: 0.4px; flex: none;
 }
 
@@ -266,8 +294,9 @@
   align-items: center; justify-content: center;
   gap: 8px;
   color: var(--brand-100);
-  font-size: 13.5px; font-weight: 600;
-  width: 130px;
+  font-size: 12.5px; font-weight: 600;
+  gap: 4px;
+  width: 96px;
 }
 
 /* Karta yo'q holati */

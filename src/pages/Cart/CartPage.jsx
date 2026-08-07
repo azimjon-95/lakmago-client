@@ -11,6 +11,7 @@ import { useT } from '@/i18n';
 import { formatSom } from '@/lib/utils';
 import { calcDeliveryFee, calcServiceFee, checkMinOrder, freeDeliveryGap } from '@/lib/pricing';
 import { isOpenNow } from '@/lib/workHours';
+import { useCartCleanup } from '@/hooks/useCartCleanup';
 import { api } from '@/api';
 import { haptic, getTelegram } from '@/lib/telegram';
 import { useDishes } from '@/hooks/queries';
@@ -37,6 +38,23 @@ export function CartPage() {
   const lastPaymentMethod = useUser((s) => s.lastPaymentMethod);
   const setLastPaymentMethod = useUser((s) => s.setLastPaymentMethod);
   const placeOrder = useOrders((s) => s.placeOrder);
+
+  // Yetkazish narxi — masofaga qarab serverda hisoblanadi
+  const [quotes, setQuotes] = useState({});
+  const [quoteLoading, setQuoteLoading] = useState(false);
+
+  // Yopilgan restoran taomlari savatdan avtomatik chiqadi
+  const [removedNote, setRemovedNote] = useState(null);
+
+  useCartCleanup((name) => {
+    setRemovedNote(`${name} yopilgani uchun taomlari savatdan olib tashlandi`);
+    setTimeout(() => setRemovedNote(null), 6000);
+  });
+
+  // Manzil yoki savat o'zgarganda yetkazish narxi qayta so'raladi.
+  // Effekt selectedAddress e'lon qilingandan KEYIN turadi —
+  // pastga qarang. (Bog'liqlik massivi render paytida
+  // hisoblanadi, shuning uchun tartib muhim.)
 
   // Sahifa ochilganda tepadan boshlanadi.
   // Aks holda oldingi sahifadagi scroll holati saqlanib qoladi.
@@ -113,7 +131,11 @@ export function CartPage() {
       return {
         restaurant: rest,
         subtotal: sub,
-        deliveryFee: calcDeliveryFee(sub, rest, isPickup),
+        // Server hisobi bo'lsa u ustun — masofaga qarab
+        deliveryFee: quotes[rest.id]?.deliveryAvailable
+          ? quotes[rest.id].deliveryPrice
+          : calcDeliveryFee(sub, rest, isPickup),
+        quote: quotes[rest.id] || null,
         serviceFee: calcServiceFee(sub, rest),
         minCheck: checkMinOrder(sub, rest, isPickup),
         freeGap: freeDeliveryGap(sub, rest, isPickup),
@@ -133,6 +155,13 @@ export function CartPage() {
       ? []
       : perRestaurant.filter((r) => !isOpenNow(r.restaurant));
 
+    // Yetkazish radiusidan tashqarida qolganlar.
+    // Server quote'ida deliveryAvailable=false bo'lsa — shu manzilga
+    // yetkazib bo'lmaydi. Olib ketishda tekshirilmaydi.
+    const outOfRange = isPickup
+      ? []
+      : perRestaurant.filter((r) => r.quote && r.quote.deliveryAvailable === false);
+
     return {
       perRestaurant,
       subtotal,
@@ -141,9 +170,11 @@ export function CartPage() {
       orderSum: subtotal + deliveryFee + serviceFee,
       blocked,
       closed,
-      canOrder: blocked.length === 0 && closed.length === 0,
+      outOfRange,
+      canOrder: blocked.length === 0 && closed.length === 0
+        && outOfRange.length === 0,
     };
-  }, [groups, isPickup, timingMode]);
+  }, [groups, isPickup, timingMode, quotes]);
 
   // Bepul yetkazishgacha qolgan eng kichik summa
   const gapToFree = useMemo(() => {
@@ -200,6 +231,37 @@ export function CartPage() {
   const bonusApplied = useBonus ? Math.min(bonusBalance, orderSum) : 0;
   const total = orderSum - bonusApplied;
   const selectedAddress = user.addresses.find((a) => a.id === user.defaultAddressId) ?? user.addresses[0];
+
+  // Manzil yoki savat o'zgarganda yetkazish narxi serverdan
+  // qayta so'raladi (masofaga qarab hisoblanadi).
+  useEffect(() => {
+    if (isPickup || !selectedAddress?.lat || !selectedAddress?.lng) {
+      setQuotes({});
+      return;
+    }
+
+    const ids = groups.map((g) => g.restaurant.id).filter(Boolean);
+    if (!ids.length) return;
+
+    let cancelled = false;
+    setQuoteLoading(true);
+    Promise.all(
+      ids.map((id) =>
+        api.getDeliveryQuote(id, selectedAddress.lat, selectedAddress.lng)
+          .then((q) => [id, q])
+          .catch(() => [id, null]),
+      ),
+    )
+      .then((pairs) => {
+        if (cancelled) return;
+        setQuotes(Object.fromEntries(pairs.filter(([, q]) => q)));
+      })
+      .finally(() => { if (!cancelled) setQuoteLoading(false); });
+
+    // Manzil tez o'zgarsa eski javob yangisini bosib ketmasin
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedAddress?.lat, selectedAddress?.lng, isPickup, groups.length]);
 
   if (items.length === 0) {
     return (
@@ -340,6 +402,13 @@ export function CartPage() {
           <Icon name="trash" size={19} color="#A99C8C" />
         </button>
       </header>
+
+      {removedNote && (
+        <div className="cart-removed">
+          <Icon name="info" size={15} color="#E0A96D" />
+          <span>{removedNote}</span>
+        </div>
+      )}
 
       {groups.length > 1 && (
         <div className="cart-multi-hint">
@@ -621,8 +690,16 @@ export function CartPage() {
         <Row label="Mahsulotlar" value={formatSom(pricing.subtotal)} />
         {!isPickup && (
           <Row
-            label="Yetkazish"
-            value={pricing.deliveryFee === 0 ? t('free') : formatSom(pricing.deliveryFee)}
+            label={
+              pricing.perRestaurant?.[0]?.quote?.distanceKm
+                ? `Yetkazish · ${pricing.perRestaurant[0].quote.distanceKm} km`
+                : 'Yetkazish'
+            }
+            value={
+              quoteLoading ? '...'
+                : pricing.deliveryFee === 0 ? t('free')
+                  : formatSom(pricing.deliveryFee)
+            }
           />
         )}
         {pricing.serviceFee > 0 && (
@@ -666,6 +743,14 @@ export function CartPage() {
             Bepul yetkazishgacha <b>{formatSom(gapToFree)}</b> qoldi
           </div>
         )}
+
+        {/* Yetkazish radiusidan tashqarida */}
+        {pricing.outOfRange?.map((r) => (
+          <div key={`range-${r.restaurant.id}`} className="cart-footer__warn cart-footer__warn--closed">
+            <Icon name="info" size={14} color="#E14B42" />
+            <span>{r.quote.reason || `${r.restaurant.name} bu manzilga yetkazmaydi`}</span>
+          </div>
+        ))}
 
         {/* Yopiq restoranlar */}
         {pricing.closed.map((c) => {

@@ -32,7 +32,7 @@ export function RestaurantPage() {
   const isFav = useUser((st) =>
     Boolean(st.user.favorites?.restaurants?.includes(id)));
   const [infoSheet, setInfoSheet] = useState(null);
-  const { closedInfo, showClosed, hideClosed } = useClosedAlert(); // 'schedule' | 'service' | null
+  const { closedInfo, showClosed, hideClosed } = useClosedAlert();
 
   const highlightHandled = useRef(false);
 

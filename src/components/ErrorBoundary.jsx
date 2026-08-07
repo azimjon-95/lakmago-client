@@ -6,13 +6,15 @@ import { Component } from 'react';
  * React'da komponent xatosi ushlanmasa BUTUN daraxt o'chadi —
  * foydalanuvchi qora ekran ko'radi va nima bo'lganini bilmaydi.
  *
- * Bu komponent xatoni ushlab tushunarli xabar ko'rsatadi va
- * qayta urinish imkonini beradi.
+ * Telegram WebApp ichida brauzer konsoli ochilmaydi, shuning uchun
+ * xato matni shu yerda ko'rsatiladi: foydalanuvchi "Xato tafsiloti"
+ * ni ochib nusxa oladi va yuboradi. Aks holda nosozlikni topib
+ * bo'lmaydi — faqat "nimadir ishlamayapti" degan xabar keladi.
  */
 export class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { error: null };
+    this.state = { error: null, stack: null, open: false, copied: false };
   }
 
   static getDerivedStateFromError(error) {
@@ -20,12 +22,46 @@ export class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    // Konsolda to'liq ma'lumot — nosozlikni topish uchun
     console.error('[ErrorBoundary]', error, info?.componentStack);
+    this.setState({ stack: info?.componentStack || null });
   }
+
+  /** Yuborish uchun bir bo'lak matn. */
+  report() {
+    const e = this.state.error;
+    return [
+      `Xato: ${e?.name || 'Error'}: ${e?.message || String(e)}`,
+      `Sahifa: ${window.location.pathname}${window.location.search}`,
+      `Vaqt: ${new Date().toISOString()}`,
+      e?.stack ? `\n${e.stack}` : '',
+      this.state.stack ? `\nKomponent:${this.state.stack}` : '',
+    ].filter(Boolean).join('\n');
+  }
+
+  copy = async () => {
+    const text = this.report();
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // Telegram WebView'da clipboard API bloklangan bo'lishi mumkin
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch { /* ignore */ }
+      document.body.removeChild(ta);
+    }
+    this.setState({ copied: true });
+    setTimeout(() => this.setState({ copied: false }), 2000);
+  };
 
   render() {
     if (!this.state.error) return this.props.children;
+
+    const { error, open, copied } = this.state;
+    const message = `${error?.name || 'Error'}: ${error?.message || String(error)}`;
 
     return (
       <div className="app-shell err-screen">
@@ -38,7 +74,7 @@ export class ErrorBoundary extends Component {
 
           <div className="err-screen__actions">
             <button
-              onClick={() => { this.setState({ error: null }); }}
+              onClick={() => { this.setState({ error: null, stack: null, open: false }); }}
               className="err-screen__btn err-screen__btn--primary"
             >
               Qayta urinish
@@ -51,12 +87,30 @@ export class ErrorBoundary extends Component {
             </button>
           </div>
 
-          {/* Ishlab chiqishda xato matni ko'rinadi */}
-          {import.meta.env.DEV && (
-            <pre className="err-screen__detail">
-              {String(this.state.error?.message || this.state.error)}
-            </pre>
+          {/* Tafsilot — WebApp ichida ham ochiladi, aks holda
+              xatoni aniqlab bo'lmaydi */}
+          <button
+            className="err-screen__toggle"
+            onClick={() => this.setState({ open: !open })}
+            aria-expanded={open}
+          >
+            {open ? 'Tafsilotni yashirish' : 'Xato tafsiloti'}
+          </button>
+
+          {open && (
+            <div className="err-screen__report">
+              <pre className="err-screen__detail">{this.report()}</pre>
+              <button className="err-screen__btn err-screen__btn--copy" onClick={this.copy}>
+                {copied ? 'Nusxa olindi ✓' : 'Nusxa olish'}
+              </button>
+              <p className="err-screen__hint">
+                Shu matnni qo&apos;llab-quvvatlashga yuboring — nosozlik
+                tezroq topiladi.
+              </p>
+            </div>
           )}
+
+          <p className="err-screen__msg">{message}</p>
         </div>
       </div>
     );

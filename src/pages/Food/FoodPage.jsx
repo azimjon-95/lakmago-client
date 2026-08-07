@@ -90,6 +90,8 @@ export function FoodPage() {
           restaurantFreeDeliveryThreshold: restaurant.freeDeliveryThreshold,
           restaurantMinOrderAmount: restaurant.minOrderAmount,
           restaurantPrepMinutes: restaurant.prepMinutes,
+          restaurantOpenTime: restaurant.openTime,
+          restaurantCloseTime: restaurant.closeTime,
         }
       : dish;
     addItem(enriched, quantity, []);
