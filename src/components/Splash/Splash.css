@@ -3,10 +3,13 @@
 
    Video 9:16, telefon ekrani odatda undan ingichka.
    Shuning uchun ikki qatlam ishlatiladi:
-     1. .splash__fill  — cover + blur: ekranni to'liq qoplaydi
+     1. .splash__fill  — xira POSTER: bo'shliqni to'ldiradi
      2. .splash__video — contain: hech joyi kesilmaydi
-   Ikkalasi bir xil video, shuning uchun tepa-pastdagi
-   to'ldirilgan joy videoning davomidek ko'rinadi.
+
+   Fon ilgari ikkinchi <video> edi. Bu bitta faylni ikki marta
+   dekodlash va har kadrga blur(40px) qo'llash demak edi —
+   telefonda video boshida qotib qolardi. Statik rasmda dekod
+   ham, blur ham bir martalik.
    ============================================ */
 .splash {
   position: fixed;
@@ -20,20 +23,21 @@
   transition: opacity 0.4s ease;
 }
 
-/* ── 1-qatlam: to'ldiruvchi fon ── */
+/* ── 1-qatlam: to'ldiruvchi fon (statik) ── */
 .splash__fill {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+
+  background-image: url('/splash-poster.jpg');
+  background-size: cover;
+  background-position: center;
 
   /* Blur chekkalarda shaffof hoshiya qoldiradi —
      kattalashtirib yashiramiz */
-  transform: scale(1.3);
+  transform: scale(1.3) translateZ(0);
   transform-origin: center;
 
-  filter: blur(40px) saturate(115%) brightness(0.7);
+  filter: blur(38px) saturate(115%) brightness(0.7);
 
   z-index: 0;
   pointer-events: none;
@@ -87,6 +91,15 @@
 
   z-index: 2;
   display: block;
+
+  /* Alohida GPU qatlami — blur bilan birga qayta chizilmaydi */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+
+  /* poster="" atributi shu elementning o'zida chiziladi va
+     u videoning birinchi kadri — shuning uchun elementni
+     yashirmaymiz: rasm darhol ko'rinadi, video xuddi shu
+     kadrdan davom etadi, sakrash bo'lmaydi. */
 
   /* Xira fonga yumshoq qo'shiladi — keskin chegara qolmaydi */
   box-shadow:
