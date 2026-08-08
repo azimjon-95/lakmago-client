@@ -94,11 +94,53 @@ export function RestaurantPage() {
   }, [restaurantDishes, location.state, location.pathname, navigate]);
 
   const [active, setActive] = useState('');
+  const tabsRef = useRef(null);
+  // Bosilgandan keyin kuzatuvchi darhol boshqa bo'limga
+  // o'tkazib yubormasligi uchun qisqa muddat to'xtatiladi
+  const lockRef = useRef(0);
 
   function scrollTo(name) {
     setActive(name);
+    lockRef.current = Date.now() + 700;
     document.getElementById(`sec-${name}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+
+  /**
+   * Aylantirilganda joriy bo'lim o'zi belgilanadi (Yandex Eda kabi).
+   * Avval faol tab faqat bosilganda o'zgarardi — pastga surilganda
+   * yuqorida noto'g'ri bo'lim yonib turardi.
+   */
+  useEffect(() => {
+    if (sections.length === 0) return;
+
+    const nodes = sections
+      .map(([name]) => document.getElementById(`sec-${name}`))
+      .filter(Boolean);
+    if (nodes.length === 0) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (Date.now() < lockRef.current) return;
+        // Ekranning yuqori qismidagi eng birinchi bo'lim
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+        if (visible) setActive(visible.target.id.replace('sec-', ''));
+      },
+      // Tepadagi yopishqoq panel ostidagi tor "o'qish chizig'i"
+      { rootMargin: '-96px 0px -70% 0px', threshold: 0 },
+    );
+
+    nodes.forEach((n) => io.observe(n));
+    return () => io.disconnect();
+  }, [sections]);
+
+  /** Faol chip gorizontal ro'yxatda ko'rinib tursin. */
+  useEffect(() => {
+    if (!active || !tabsRef.current) return;
+    const chip = tabsRef.current.querySelector('[data-on="1"]');
+    if (chip) chip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }, [active]);
 
   if (restLoading) {
     return <div className="app-shell rest-loading"><div className="spinner" /></div>;
@@ -217,7 +259,7 @@ export function RestaurantPage() {
       </div>
 
       {/* Tablar */}
-      <div className="rest-tabs no-scrollbar">
+      <div ref={tabsRef} className="rest-tabs no-scrollbar">
         {sections.map(([name]) => {
           const isTabActive = name === active;
           const label = name === REVIEWS_TAB ? `Sharhlar (${restaurantReviews.length})` : name;
@@ -225,6 +267,7 @@ export function RestaurantPage() {
             <button
               key={name}
               onClick={() => scrollTo(name)}
+              data-on={isTabActive ? '1' : '0'}
               className={`rest-tab ${isTabActive ? 'is-active' : ''}`}
             >
               {label}
@@ -240,32 +283,44 @@ export function RestaurantPage() {
             return (
               <div key={name} id={`sec-${name}`} className="rest-section rest-reviews">
                 <div className="rest-section__title">Mijozlar sharhlari</div>
+
                 {restaurantReviews.length === 0 ? (
-                  <div className="rest-reviews__empty">Hozircha sharhlar yo'q.</div>
-                ) : (
-                  <div className="rest-reviews__list">
-                    {restaurantReviews.map((rv, i) => (
-                      <div key={i} className="review-card">
-                        <div className="review-card__head">
-                          <div className="review-card__author">
-                            <div className="review-card__avatar">
-                              {(rv.name || 'M').split(' ').map((w) => w[0]).join('').slice(0, 2)}
-                            </div>
-                            <span className="review-card__name">{rv.name}</span>
-                          </div>
-                          <span className="review-card__date">{rv.date}</span>
-                        </div>
-                        <div className="review-card__stars">
-                          {[1, 2, 3, 4, 5].map((n) => (
-                            <Icon key={n} name="star" size={13}
-                              color={n <= rv.rating ? '#F5A524' : '#4A4A4E'}
-                              style={n <= rv.rating ? { fill: '#F5A524' } : {}} />
-                          ))}
-                        </div>
-                        {rv.comment && <div className="review-card__text">{rv.comment}</div>}
-                      </div>
-                    ))}
+                  <div className="rest-reviews__empty">
+                    Hozircha sharh yo&apos;q. Birinchi bo&apos;lib baho bering!
                   </div>
+                ) : (
+                  <>
+                    {/* Jamlanma: o'rtacha baho va taqsimot */}
+                    <ReviewSummary reviews={restaurantReviews} />
+
+                    <div className="rest-reviews__list">
+                      {restaurantReviews.map((rv, i) => (
+                        <div key={rv.id || i} className="review-card">
+                          <div className="review-card__head">
+                            <div className="review-card__author">
+                              {rv.photoUrl ? (
+                                <img src={rv.photoUrl} alt="" className="review-card__avatar" />
+                              ) : (
+                                <div className="review-card__avatar">
+                                  {(rv.name || 'M').split(' ').map((w) => w[0]).join('').slice(0, 2)}
+                                </div>
+                              )}
+                              <span className="review-card__name">{rv.name}</span>
+                            </div>
+                            <span className="review-card__date">{rv.date}</span>
+                          </div>
+                          <div className="review-card__stars">
+                            {[1, 2, 3, 4, 5].map((n) => (
+                              <Icon key={n} name="star" size={13}
+                                color={n <= rv.rating ? '#F5A524' : '#4A4A4E'}
+                                style={n <= rv.rating ? { fill: '#F5A524' } : {}} />
+                            ))}
+                          </div>
+                          {rv.comment && <div className="review-card__text">{rv.comment}</div>}
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
             );
@@ -311,6 +366,55 @@ export function RestaurantPage() {
           onClose={() => setInfoSheet(null)}
         />
       )}
+    </div>
+  );
+}
+
+/**
+ * Sharhlar jamlanmasi — o'rtacha baho va yulduzlar taqsimoti.
+ *
+ * Yalpi ro'yxatdan oldin turadi: mijoz "umuman qanday" degan
+ * savolga bir qarashda javob oladi, keyin tafsilotga tushadi.
+ */
+function ReviewSummary({ reviews }) {
+  const total = reviews.length;
+  const sum = reviews.reduce((acc, r) => acc + (Number(r.rating) || 0), 0);
+  const avg = total ? sum / total : 0;
+
+  // 5 dan 1 gacha — har bahoga nechta sharh
+  const buckets = [5, 4, 3, 2, 1].map((star) => ({
+    star,
+    count: reviews.filter((r) => Number(r.rating) === star).length,
+  }));
+
+  return (
+    <div className="rev-sum">
+      <div className="rev-sum__score">
+        <div className="rev-sum__avg">{avg.toFixed(1)}</div>
+        <div className="rev-sum__stars">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <Icon key={n} name="star" size={12}
+              color={n <= Math.round(avg) ? '#F5A524' : '#4A4A4E'}
+              style={n <= Math.round(avg) ? { fill: '#F5A524' } : {}} />
+          ))}
+        </div>
+        <div className="rev-sum__count">{total} ta baho</div>
+      </div>
+
+      <div className="rev-sum__bars">
+        {buckets.map(({ star, count }) => (
+          <div key={star} className="rev-sum__row">
+            <span className="rev-sum__star">{star}</span>
+            <span className="rev-sum__track">
+              <span
+                className="rev-sum__fill"
+                style={{ width: total ? `${(count / total) * 100}%` : 0 }}
+              />
+            </span>
+            <span className="rev-sum__n">{count}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

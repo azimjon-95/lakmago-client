@@ -34,31 +34,51 @@
 }
 
 /* Tablar */
+/* Kategoriya paneli — yopishqoq.
+   Fon to'liq shaffofmas bo'lishi shart: ostidan surilayotgan
+   taomlar ko'rinib qolmasin. */
 .rest-tabs {
-  display: flex; gap: 12px;
-  padding: 10px 16px;
+  display: flex; gap: 8px;
+  padding: 9px 16px;
   overflow-x: auto;
   border-bottom: 1px solid var(--line);
   position: sticky; top: 0;
   background: var(--surface);
   z-index: 10;
+  scroll-padding-inline: 16px;
 }
 .rest-tab {
   flex: none;
-  font-size: 14px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: var(--canvas);
+  font-size: 13.5px; font-weight: 500;
+  white-space: nowrap;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease);
   color: var(--muted);
   padding-bottom: 6px;
   border-bottom: 2px solid transparent;
   white-space: nowrap;
 }
-.rest-tab.is-active { color: var(--brand); font-weight: 500; border-bottom-color: var(--brand); }
+/* Faol kategoriya — to'ldirilgan tabletka (pastdagi chiziq
+   gorizontal surilganda deyarli bilinmasdi) */
+.rest-tab.is-active {
+  background: var(--brand);
+  color: #2C1400;
+  font-weight: 600;
+  border-bottom-color: transparent;
+}
 
 /* Kontent */
 .rest-content { flex: 1; }
 .rest-section { scroll-margin-top: 52px; }
+/* Bo'lim sarlavhasi yopishqoq panel ostida qolib ketmasin:
+   kategoriya bosilganda aynan shu balandlikka to'xtaydi */
+.rest-section { scroll-margin-top: 52px; }
+
 .rest-section__title {
   font-size: 17px; font-weight: 600; color: var(--ink);
-  padding: 14px 16px 6px;
+  padding: 16px 16px 8px;
 }
 .rest-dishes {
   padding: 0 16px 14px;
@@ -158,4 +178,51 @@
 .rest-error__btn--primary {
   background: var(--brand); color: var(--brand-text);
   border-color: transparent;
+}
+
+
+/* ═══════════ Sharhlar jamlanmasi ═══════════ */
+.rev-sum {
+  display: flex; align-items: center; gap: 18px;
+  padding: 14px;
+  margin-bottom: 12px;
+  background: var(--canvas);
+  border-radius: var(--radius);
+}
+.rev-sum__score { flex: none; text-align: center; min-width: 74px; }
+.rev-sum__avg {
+  font-size: 30px; font-weight: 700; color: var(--ink);
+  line-height: 1;
+}
+.rev-sum__stars { display: flex; gap: 2px; justify-content: center; margin: 5px 0 3px; }
+.rev-sum__count { font-size: 11px; color: var(--muted); }
+
+.rev-sum__bars { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.rev-sum__row { display: flex; align-items: center; gap: 8px; }
+.rev-sum__star { width: 8px; font-size: 11px; color: var(--muted); }
+.rev-sum__track {
+  flex: 1; height: 5px;
+  border-radius: 999px;
+  background: var(--surface-2, rgba(255,255,255,0.08));
+  overflow: hidden;
+}
+.rev-sum__fill {
+  display: block; height: 100%;
+  border-radius: 999px;
+  background: var(--brand);
+  transition: width 0.5s var(--ease);
+}
+.rev-sum__n { width: 16px; text-align: right; font-size: 11px; color: var(--muted); }
+
+/* Sharh kartasi */
+.rest-reviews__empty {
+  font-size: 13px; color: var(--muted);
+  text-align: center; padding: 28px 0; line-height: 1.5;
+}
+img.review-card__avatar { object-fit: cover; }
+.review-card__text {
+  margin-top: 7px;
+  font-size: 13px; line-height: 1.5;
+  color: var(--ink);
+  word-break: break-word;
 }
