@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
+import { CATEGORIES } from '@/data/categories';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { DishScrollCard } from '@/components/DishScrollCard';
@@ -66,13 +67,41 @@ export function RestaurantPage() {
   );
 
   const sections = useMemo(() => {
-    const map = new Map();
+    /*
+     * Taomlar platformaning YAGONA kategoriyalari bo'yicha
+     * guruhlanadi (Milliy taom, Osh, Shashlik...), restoran
+     * o'zi yozgan erkin "section" matni bo'yicha emas.
+     *
+     * Sabab: har restoran o'z bilganicha yozadi ("bambuk",
+     * "ddb", "zakuska") va mijoz uchun bu hech narsa
+     * anglatmaydi. Kategoriya esa taom qo'shilganda ro'yxatdan
+     * tanlanadi, ya'ni doim tushunarli va bir xil.
+     *
+     * Tartib ham CATEGORIES ro'yxatidagidek — barcha restoranda
+     * bir xil ketma-ketlik.
+     */
+    const byId = new Map();
     restaurantDishes.forEach((d) => {
-      // Bo'lim ko'rsatilmagan bo'lsa kategoriya yoki umumiy nom
-      const key = d.section || d.category || 'Menyu';
-      if (!map.has(key)) map.set(key, []);
-      map.get(key).push(d);
+      const key = d.category || '__other__';
+      if (!byId.has(key)) byId.set(key, []);
+      byId.get(key).push(d);
     });
+
+    const map = new Map();
+
+    // Avval ma'lum kategoriyalar — belgilangan tartibda
+    CATEGORIES.forEach(({ id, label }) => {
+      const items = byId.get(id);
+      if (items?.length) {
+        map.set(label, items);
+        byId.delete(id);
+      }
+    });
+
+    // Qolganlari (kategoriyasi yo'q yoki ro'yxatda yo'q) — oxirida
+    const rest = [];
+    byId.forEach((items) => rest.push(...items));
+    if (rest.length) map.set('Boshqa', rest);
     // Bo'sh kategoriya ko'rsatilmaydi — taomi yo'q bo'lim
     // tabda ham, ro'yxatda ham chiqmasligi kerak
     const list = Array.from(map.entries()).filter(([, items]) => items.length > 0);
