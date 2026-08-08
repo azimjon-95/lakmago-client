@@ -1,12 +1,11 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
-import { DishRow } from '@/components/DishRow';
+import { DishScrollCard } from '@/components/DishScrollCard';
 import { DishModal } from '@/components/DishModal';
 import { CartBar } from '@/components/CartBar';
 import { RestaurantBanner } from '@/components/DishPhoto';
 import { RestaurantInfoSheet } from '@/components/RestaurantInfoSheet';
-import { DishRowSkeleton } from '@/components/Skeleton/Skeleton';
 import { useT } from '@/i18n';
 import { useUser } from '@/store/user';
 import { haptic } from '@/lib/telegram';
@@ -74,7 +73,9 @@ export function RestaurantPage() {
       if (!map.has(key)) map.set(key, []);
       map.get(key).push(d);
     });
-    const list = Array.from(map.entries());
+    // Bo'sh kategoriya ko'rsatilmaydi — taomi yo'q bo'lim
+    // tabda ham, ro'yxatda ham chiqmasligi kerak
+    const list = Array.from(map.entries()).filter(([, items]) => items.length > 0);
     list.push([REVIEWS_TAB, []]);
     return list;
   }, [restaurantDishes]);
@@ -258,6 +259,11 @@ export function RestaurantPage() {
         )}
       </div>
 
+      {/* Shu restoran aksiyalari — menyudan oldin.
+          Avval sahifa oxirida, sharhlardan ham keyin turardi:
+          u yergacha hech kim yetib bormasdi. */}
+      <PromoStrip restaurantId={id} title="Aksiyalar" />
+
       {/* Tablar */}
       <div ref={tabsRef} className="rest-tabs no-scrollbar">
         {sections.map(([name]) => {
@@ -327,16 +333,23 @@ export function RestaurantPage() {
           }
           return (
             <div key={name} id={`sec-${name}`} className="rest-section">
-              <div className="rest-section__title">{name}</div>
-              <div className="rest-dishes">
+              <div className="rest-section__head">
+                <div className="rest-section__title">{name}</div>
+                <span className="rest-section__count">{list.length}</span>
+              </div>
+
+              {/* Gorizontal slayd — har kategoriya o'z qatorida.
+                  Vertikal ro'yxatda bitta kategoriya butun ekranni
+                  egallab, qolganini topish uchun uzoq surish
+                  kerak edi. */}
+              <div className="rest-row no-scrollbar">
                 {dishesLoading
-                  ? Array.from({ length: 3 }).map((_, i) => <DishRowSkeleton key={i} />)
-                  : list.map((d) => <DishRow
+                  ? Array.from({ length: 3 }).map((_, i) => <div key={i} className="rest-row__sk" />)
+                  : list.map((d) => <DishScrollCard
                       key={d.id || d._id}
                       dish={d}
-                      onOpen={setModalDish}
-                      restaurant={restaurant}
-                      onClosedAlert={showClosed}
+                      onClick={setModalDish}
+                      showRestaurant={false}
                     />)}
               </div>
             </div>
@@ -353,9 +366,6 @@ export function RestaurantPage() {
           onClosedAlert={showClosed}
         />
       )}
-
-      {/* Shu restoran aksiyalari */}
-      <PromoStrip restaurantId={id} title="Aksiyalar" />
 
       <ClosedAlert info={closedInfo} onClose={hideClosed} />
 

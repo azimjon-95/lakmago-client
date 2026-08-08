@@ -78,8 +78,57 @@
 
 .rest-section__title {
   font-size: 17px; font-weight: 600; color: var(--ink);
-  padding: 16px 16px 8px;
+  letter-spacing: -0.01em;
 }
+/* Sharhlar bo'limida sarlavha yolg'iz turadi */
+.rest-reviews .rest-section__title { padding: 0 0 10px; }
+/* ─── Kategoriya qatori: gorizontal slayd ───
+   Har kategoriya bitta qatorda, chapga suriladi. Kartalar
+   ekran chetigacha yetadi (to'liq kenglikdan foydalanish),
+   lekin birinchi va oxirgisi chetga yopishmaydi. */
+.rest-row {
+  display: flex;
+  gap: 12px;
+  padding: 0 16px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scroll-padding-left: 16px;
+}
+.rest-row > * { scroll-snap-align: start; }
+
+/* Restoran sahifasida kartalar ixchamroq — bir ekranga
+   ko'proq taom sig'adi va keyingisining chekkasi ko'rinib
+   turadi (surish mumkinligi bilinadi) */
+.rest-row .dscard { width: 136px; }
+.rest-row .dscard__name { font-size: 12.5px; }
+.rest-row .dscard__price-main { font-size: 13.5px; }
+
+/* Yuklanayotgan holat — karta o'lchamida */
+.rest-row__sk {
+  flex: none;
+  width: 136px; height: 160px;
+  border-radius: 14px;
+  background: var(--canvas);
+  animation: sk-pulse 1.4s ease-in-out infinite;
+}
+@keyframes sk-pulse { 50% { opacity: 0.55; } }
+
+/* Bo'lim sarlavhasi va taom soni */
+.rest-section__head {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 16px 16px 10px;
+}
+.rest-section__count {
+  font-size: 12px; font-weight: 600;
+  color: var(--muted);
+  background: var(--canvas);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+/* Eski vertikal ro'yxat (boshqa joyda ishlatilsa) */
 .rest-dishes {
   padding: 0 16px 14px;
   display: flex; flex-direction: column; gap: 14px;

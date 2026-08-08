@@ -6,7 +6,7 @@ import { useCart } from '@/store/cart';
 import { haptic } from '@/lib/telegram';
 import './cards/DishScrollCard.css';
 
-export const DishScrollCard = memo(function DishScrollCard({ dish, onClick }) {
+export const DishScrollCard = memo(function DishScrollCard({ dish, onClick, showRestaurant = true }) {
   const addItem = useCart((s) => s.addItem);
   const discountPct = dish.oldPrice ? Math.round((1 - dish.price / dish.oldPrice) * 100) : null;
   const hasOptions = (dish.optionGroups?.length ?? 0) > 0;
@@ -27,7 +27,9 @@ export const DishScrollCard = memo(function DishScrollCard({ dish, onClick }) {
         <button onClick={quickAdd} className="dscard__add" aria-label="+"><Icon name="plus" size={18} color="#2A1500" /></button>
       </div>
       <div className="dscard__name">{dish.name}</div>
-      {dish.restaurantName && <div className="dscard__rest">{dish.restaurantName}</div>}
+      {showRestaurant && dish.restaurantName && (
+        <div className="dscard__rest">{dish.restaurantName}</div>
+      )}
       <div className="dscard__price">
         <span className="dscard__price-main">{formatSomShort(dish.price)}</span>
         {dish.oldPrice && <span className="dscard__price-old">{formatSomShort(dish.oldPrice)}</span>}
