@@ -15,14 +15,11 @@
 }
 
 
-/* .splash__video {
-  position: absolute;
-  inset: 0;
+.splash__video {
   width: 100%;
-  height: 90%;
   object-fit: cover;
   z-index: -1;
-} */
+}
 
 /* tezkor o'qilish effekti */
 @keyframes videoSpeed {
