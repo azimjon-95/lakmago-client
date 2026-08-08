@@ -66,27 +66,32 @@
 }
 
 /* ── 3-qatlam: asosiy video ──
-   contain bo'lgani uchun ortiqcha joy shaffof qoladi va
-   ostidagi to'ldiruvchi fon ko'rinadi. */
+   MUHIM: element o'lchami videoning o'ziga tenglashtirilgan.
+   Agar element butun ekranni egallab, ichida 'contain' qilinsa,
+   border-radius EKRAN burchaklarini yumaloqlaydi — videoning
+   ko'rinadigan chekkasini emas. Shuning uchun aspect-ratio bilan
+   quti aynan video o'lchamiga moslanadi va markazga tushadi. */
 .splash__video {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  margin: auto;
+
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: 720 / 1280;
+
   object-fit: contain;
+  border-radius: 30px;
+
   z-index: 2;
   display: block;
 
-  /* Chekkalari sal shaffoflashadi — ostidagi xira fonga
-     qo'shilib ketadi, keskin chegara qolmaydi */
-  -webkit-mask-image:
-    linear-gradient(180deg, transparent 0, #000 3.5%, #000 96.5%, transparent 100%),
-    linear-gradient(90deg, transparent 0, #000 2.5%, #000 97.5%, transparent 100%);
-  -webkit-mask-composite: source-in;
-  mask-image:
-    linear-gradient(180deg, transparent 0, #000 3.5%, #000 96.5%, transparent 100%),
-    linear-gradient(90deg, transparent 0, #000 2.5%, #000 97.5%, transparent 100%);
-  mask-composite: intersect;
+  /* Xira fonga yumshoq qo'shiladi — keskin chegara qolmaydi */
+  box-shadow:
+    0 10px 34px rgba(0, 0, 0, 0.32),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 /* ── Chiqish ── */
