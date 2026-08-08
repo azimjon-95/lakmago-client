@@ -1,56 +1,100 @@
+/* ============================================
+   Ochilish ekrani
+
+   Video 9:16, telefon ekrani odatda undan ingichka.
+   Shuning uchun ikki qatlam ishlatiladi:
+     1. .splash__fill  — cover + blur: ekranni to'liq qoplaydi
+     2. .splash__video — contain: hech joyi kesilmaydi
+   Ikkalasi bir xil video, shuning uchun tepa-pastdagi
+   to'ldirilgan joy videoning davomidek ko'rinadi.
+   ============================================ */
 .splash {
   position: fixed;
   inset: 0;
   z-index: 10000;
 
+  /* Videoning eng to'q rangi — yuklanguncha ko'rinadi */
   background: #080605;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   overflow: hidden;
-
   transition: opacity 0.4s ease;
 }
 
-/* Orqa fon */
-.splash__background {
+/* ── 1-qatlam: to'ldiruvchi fon ── */
+.splash__fill {
   position: absolute;
-  inset: -5%;
-
-  width: 110%;
-  height: 110%;
-
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 
-  filter: blur(30px);
-  transform: scale(1.1);
+  /* Blur chekkalarda shaffof hoshiya qoldiradi —
+     kattalashtirib yashiramiz */
+  transform: scale(1.3);
+  transform-origin: center;
 
-  opacity: 0.45;
+  filter: blur(40px) saturate(115%) brightness(0.7);
 
   z-index: 0;
+  pointer-events: none;
 }
 
-/* Asosiy video */
-.splash__video {
-  position: relative;
-
-  width: auto;
-  height: auto;
-
-  max-width: 100%;
-  max-height: 100%;
-
-  object-fit: contain;
-
+/* ── 2-qatlam: chegarani yumshatuvchi parda ──
+   Aniq video bilan xira fon tutashgan joyda keskin chiziq
+   ko'rinmasligi uchun tepa-past qorayadi. Asosiy video bundan
+   yuqorida turgani uchun uning o'ziga ta'sir qilmaydi. */
+.splash__veil {
+  position: absolute;
+  inset: 0;
   z-index: 1;
-
-  display: block;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(8, 6, 5, 0.5) 0%,
+      rgba(8, 6, 5, 0.14) 12%,
+      rgba(8, 6, 5, 0) 22%,
+      rgba(8, 6, 5, 0) 78%,
+      rgba(8, 6, 5, 0.14) 88%,
+      rgba(8, 6, 5, 0.5) 100%
+    ),
+    radial-gradient(
+      130% 78% at 50% 50%,
+      rgba(8, 6, 5, 0) 58%,
+      rgba(8, 6, 5, 0.42) 100%
+    );
 }
 
-/* Chiqish */
+/* ── 3-qatlam: asosiy video ──
+   contain bo'lgani uchun ortiqcha joy shaffof qoladi va
+   ostidagi to'ldiruvchi fon ko'rinadi. */
+.splash__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  z-index: 2;
+  display: block;
+
+  /* Chekkalari sal shaffoflashadi — ostidagi xira fonga
+     qo'shilib ketadi, keskin chegara qolmaydi */
+  -webkit-mask-image:
+    linear-gradient(180deg, transparent 0, #000 3.5%, #000 96.5%, transparent 100%),
+    linear-gradient(90deg, transparent 0, #000 2.5%, #000 97.5%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(180deg, transparent 0, #000 3.5%, #000 96.5%, transparent 100%),
+    linear-gradient(90deg, transparent 0, #000 2.5%, #000 97.5%, transparent 100%);
+  mask-composite: intersect;
+}
+
+/* ── Chiqish ── */
 .splash--leaving {
   opacity: 0;
   pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash { transition: opacity 0.15s linear; }
 }
