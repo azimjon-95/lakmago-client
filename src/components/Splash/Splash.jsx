@@ -42,12 +42,10 @@ export function Splash({ onDone }) {
 
     prefetch();
 
-    // Video sozlamalari
     if (videoRef.current) {
-      videoRef.current.volume = 0.10; // 12% ovoz
+      videoRef.current.volume = 0.1;
     }
 
-    // 6 sekund splash
     const leaveTimer = setTimeout(() => {
       setLeaving(true);
     }, 5600);
@@ -62,16 +60,25 @@ export function Splash({ onDone }) {
     };
   }, [qc, onDone]);
 
-
   return (
     <div className={`splash ${leaving ? 'splash--leaving' : ''}`}>
+      {/* Fon — videoning xira/soya nusxasi */}
+      <video
+        className="splash__background"
+        src="/splash.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+      />
+
+      {/* Asosiy video — o'z razmerida */}
       <video
         ref={videoRef}
         className="splash__video"
-        src="/gif_yasab_ber.mp4"
+        src="/splash.mp4"
         autoPlay
         playsInline
-        preload="auto"
       />
     </div>
   );

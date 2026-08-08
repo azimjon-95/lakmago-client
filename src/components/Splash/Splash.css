@@ -2,32 +2,55 @@
   position: fixed;
   inset: 0;
   z-index: 10000;
+
   background: #080605;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   overflow: hidden;
+
+  transition: opacity 0.4s ease;
 }
 
+/* Orqa fon */
+.splash__background {
+  position: absolute;
+  inset: -5%;
+
+  width: 110%;
+  height: 110%;
+
+  object-fit: cover;
+
+  filter: blur(25px);
+  transform: scale(1.1);
+
+  opacity: 0.55;
+
+  z-index: 0;
+}
+
+/* Asosiy video */
+.splash__video {
+  position: relative;
+
+  width: auto;
+  height: auto;
+
+  max-width: 100%;
+  max-height: 100%;
+
+  object-fit: contain;
+
+  z-index: 1;
+
+  display: block;
+}
+
+/* Chiqish */
 .splash--leaving {
   opacity: 0;
   pointer-events: none;
-}
-
-
-.splash__video {
-  width: 100%;
-  object-fit: cover;
-  z-index: -1;
-}
-
-/* tezkor o'qilish effekti */
-@keyframes videoSpeed {
-  from {
-    transform: scale(1);
-  }
-
-  to {
-    transform: scale(1.05);
-  }
 }
