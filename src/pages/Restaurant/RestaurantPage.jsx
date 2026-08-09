@@ -10,8 +10,7 @@ import { RestaurantInfoSheet } from '@/components/RestaurantInfoSheet';
 import { useT } from '@/i18n';
 import { useUser } from '@/store/user';
 import { haptic } from '@/lib/telegram';
-import { isOpenNow } from '@/lib/workHours';
-import { useClosedAlert } from '@/hooks/useOpenStatus';
+import { useClosedAlert, useOpenStatus } from '@/hooks/useOpenStatus';
 import { ClosedAlert } from '@/components/ClosedAlert';
 import { PromoStrip } from '@/components/PromoStrip';
 import { useRestaurant, useDishes } from '@/hooks/queries';
@@ -31,7 +30,7 @@ export function RestaurantPage() {
   const toggleFavorite = useUser((st) => st.toggleFavorite);
   const isFav = useUser((st) =>
     Boolean(st.user.favorites?.restaurants?.includes(id)));
-  const [infoSheet, setInfoSheet] = useState(null);
+  const [infoOpen, setInfoOpen] = useState(false);
   const { closedInfo, showClosed, hideClosed } = useClosedAlert();
 
   const highlightHandled = useRef(false);
@@ -41,13 +40,17 @@ export function RestaurantPage() {
   const { data: rawDishes = [], isLoading: dishesLoading } = useDishes(id);
   const restaurantReviews = restaurant?.reviews || [];
 
+  // Ish vaqti har daqiqada qayta hisoblanadi: restoran ochilganda
+  // sahifa o'zi jonlanadi, mijoz yangilashi shart emas
+  const { isOpen, hoursLabel } = useOpenStatus(restaurant);
+
   // Bo'sh ma'lumotlar ko'rsatilmasin — element umuman chizilmaydi
-  const hasScheduleInfo = Boolean(
+  // Oyna ichida ko'rsatishga biror narsa bormi
+  const hasInfo = Boolean(
     restaurant?.openTime || restaurant?.closeTime || restaurant?.legalName ||
-    restaurant?.legalAddress || restaurant?.inn || restaurant?.address || restaurant?.phone,
-  );
-  const hasServiceInfo = Boolean(
-    restaurant?.minOrderAmount > 0 || restaurant?.serviceFeePercent > 0 || restaurant?.deliveryFee > 0,
+    restaurant?.legalAddress || restaurant?.inn || restaurant?.address ||
+    restaurant?.phone || restaurant?.minOrderAmount > 0 ||
+    restaurant?.serviceFeePercent > 0 || restaurant?.deliveryFee > 0,
   );
 
   // Taomlarga restoran meta'sini biriktiramiz (savatга to'g'ri o'tishi uchun)
@@ -206,7 +209,7 @@ export function RestaurantPage() {
         <RestaurantBanner restaurant={restaurant} height={150} />
 
         {/* Yopiq bo'lsa ogohlantiramiz */}
-        {restaurant && !isOpenNow(restaurant) && (
+        {restaurant && !isOpen && (
           <div className="rest-closed">
             <Icon name="clock" size={16} color="#E14B42" />
             <span>
@@ -262,23 +265,16 @@ export function RestaurantPage() {
           )}
 
           {/* Ish tartibi — faqat ma'lumot kiritilgan bo'lsa */}
-          {hasScheduleInfo && (
-            <button onClick={() => setInfoSheet('schedule')} className="rest-stat">
+          {hasInfo && (
+            <button onClick={() => setInfoOpen(true)} className="rest-stat">
               <span className="rest-stat__icon rest-stat__icon--info">
                 <Icon name="info" size={20} color="#E0A96D" />
               </span>
-              <span className="rest-stat__value">Xabar</span>
-              <span className="rest-stat__label">ish tartibi</span>
+              <span className="rest-stat__value">Shartlar</span>
+              <span className="rest-stat__label">va ish vaqti</span>
             </button>
           )}
         </div>
-
-        {/* Xizmat haqi (agar sozlangan bo'lsa) */}
-        {hasServiceInfo && (
-          <button onClick={() => setInfoSheet('service')} className="rest-service-link">
-            <Icon name="info" size={14} color="#A99C8C" /> Xizmat haqi va shartlar
-          </button>
-        )}
 
         {/* Stol bron qilish — bizning ustunligimiz */}
         {restaurant.reservationEnabled !== false && (
@@ -379,6 +375,11 @@ export function RestaurantPage() {
                       dish={d}
                       onClick={setModalDish}
                       showRestaurant={false}
+                      disabled={!isOpen}
+                      onDisabledTap={() => showClosed({
+                        name: restaurant?.name,
+                        hoursLabel,
+                      })}
                     />)}
               </div>
             </div>
@@ -398,11 +399,10 @@ export function RestaurantPage() {
 
       <ClosedAlert info={closedInfo} onClose={hideClosed} />
 
-      {infoSheet && (
+      {infoOpen && (
         <RestaurantInfoSheet
-          kind={infoSheet}
           restaurant={restaurant}
-          onClose={() => setInfoSheet(null)}
+          onClose={() => setInfoOpen(false)}
         />
       )}
     </div>

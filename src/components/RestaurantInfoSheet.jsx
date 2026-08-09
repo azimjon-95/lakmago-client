@@ -1,12 +1,25 @@
 import { Icon } from './Icon';
 import { formatSom } from '@/lib/utils';
+import { useOpenStatus } from '@/hooks/useOpenStatus';
 import './cards/RestaurantInfoSheet.css';
 
-// Restoran ma'lumot oynasi (Uzum uslubi).
-//   kind='schedule' — ish tartibi, yuridik ma'lumot
-//   kind='service'  — xizmat haqi, minimal buyurtma
-export function RestaurantInfoSheet({ kind, restaurant, onClose }) {
+/**
+ * Restoran ma'lumot oynasi.
+ *
+ * Avval ikkita alohida oyna bor edi — "ish tartibi" va "xizmat
+ * haqi va shartlar". Mijoz uchun bu bitta savol: "shartlar
+ * qanday?". Ikkiga bo'lish faqat qidirishni qiyinlashtirardi,
+ * ustiga sahifada ikkita alohida havola joy egallardi.
+ * Endi hammasi bitta oynada, tartib bilan.
+ */
+export function RestaurantInfoSheet({ restaurant, onClose }) {
   const r = restaurant || {};
+  const { isOpen, hoursLabel, nextOpen } = useOpenStatus(r);
+
+  const hasFees = r.serviceFeePercent > 0 || r.deliveryFee > 0
+    || r.minOrderAmount > 0 || r.deliveryMin > 0;
+
+  const hasLegal = Boolean(r.legalName || r.address || r.legalAddress || r.inn || r.phone);
 
   return (
     <div className="rinfo-overlay" onClick={onClose}>
@@ -16,85 +29,90 @@ export function RestaurantInfoSheet({ kind, restaurant, onClose }) {
           <Icon name="x" size={18} color="#A99C8C" />
         </button>
 
-        {kind === 'schedule' ? (
-          <div className="rinfo-body rinfo-body--center">
-            <span className="rinfo-icon"><Icon name="info" size={26} color="#E0A96D" /></span>
-            <h3 className="rinfo-title">Ish tartibi</h3>
+        <div className="rinfo-body">
+          <h3 className="rinfo-title rinfo-title--left">{r.name || 'Restoran'}</h3>
 
-            <div className="rinfo-text">
-              {r.legalName && <p>{r.legalName}</p>}
-              {r.address && <p>Manzil: {r.address}</p>}
-              {r.legalAddress && <p>Yur. manzil: {r.legalAddress}</p>}
-              {r.inn && <p>INN: {r.inn}</p>}
-              {r.phone && <p>Tel: {r.phone}</p>}
-            </div>
-
-            <div className="rinfo-hours">
-              {r.openTime || '09:00'} dan {r.closeTime || '23:00'} gacha
-            </div>
+          {/* Hozirgi holat — eng kerakli ma'lumot yuqorida */}
+          <div className={`rinfo-status ${isOpen ? 'is-open' : 'is-closed'}`}>
+            <Icon name="clock" size={16} color={isOpen ? '#6FBF73' : '#E14B42'} />
+            <span>
+              {isOpen ? 'Hozir ochiq' : 'Hozir yopiq'}
+              {hoursLabel && ` · ${hoursLabel}`}
+            </span>
           </div>
-        ) : (
-          <div className="rinfo-body">
-            <h3 className="rinfo-title rinfo-title--left">Xizmat haqi</h3>
+          {!isOpen && nextOpen && (
+            <p className="rinfo-note rinfo-note--tight">{nextOpen}</p>
+          )}
 
-            <div className="rinfo-rows">
-              {r.serviceFeePercent > 0 ? (
-                <div className="rinfo-row">
-                  <span className="rinfo-row__label">Buyurtma summasidan</span>
-                  <span className="rinfo-row__value">
-                    {r.serviceFeePercent}%
-                    {r.serviceFeeMin > 0 && r.serviceFeeMax > 0 && (
-                      <span className="rinfo-row__note">*</span>
-                    )}
-                  </span>
-                </div>
-              ) : (
-                <div className="rinfo-row">
-                  <span className="rinfo-row__label">Xizmat haqi</span>
-                  <span className="rinfo-row__value rinfo-row__value--free">Bepul</span>
-                </div>
-              )}
-
-              {r.deliveryFee > 0 ? (
-                <div className="rinfo-row">
-                  <span className="rinfo-row__label">Yetkazib berish</span>
-                  <span className="rinfo-row__value">{formatSom(r.deliveryFee)}</span>
-                </div>
-              ) : (
-                <div className="rinfo-row">
-                  <span className="rinfo-row__label">Yetkazib berish</span>
-                  <span className="rinfo-row__value rinfo-row__value--free">Bepul</span>
-                </div>
-              )}
-            </div>
-
-            <h3 className="rinfo-title rinfo-title--left rinfo-title--mt">Tafsilotlar</h3>
-            <div className="rinfo-rows">
-              <div className="rinfo-row">
-                <span className="rinfo-row__label">Minimal buyurtma miqdori</span>
-                <span className="rinfo-row__value">
-                  {r.minOrderAmount > 0 ? formatSom(r.minOrderAmount) : 'Cheklovsiz'}
-                </span>
+          {hasFees && (
+            <>
+              <h4 className="rinfo-title rinfo-title--left rinfo-title--mt">
+                Xizmat haqi va yetkazish
+              </h4>
+              <div className="rinfo-rows">
+                <Row
+                  label="Xizmat haqi"
+                  value={r.serviceFeePercent > 0
+                    ? `${r.serviceFeePercent}%${r.serviceFeeMin > 0 && r.serviceFeeMax > 0 ? ' *' : ''}`
+                    : 'Bepul'}
+                  free={!(r.serviceFeePercent > 0)}
+                />
+                <Row
+                  label="Yetkazib berish"
+                  value={r.deliveryFee > 0 ? formatSom(r.deliveryFee) : 'Bepul'}
+                  free={!(r.deliveryFee > 0)}
+                />
+                <Row
+                  label="Minimal buyurtma"
+                  value={r.minOrderAmount > 0 ? formatSom(r.minOrderAmount) : 'Cheklovsiz'}
+                />
+                {r.deliveryMin > 0 && (
+                  <Row label="Yetkazish vaqti" value={`${r.deliveryMin}–${r.deliveryMax} daq`} />
+                )}
               </div>
-              <div className="rinfo-row">
-                <span className="rinfo-row__label">Yetkazish vaqti</span>
-                <span className="rinfo-row__value">{r.deliveryMin}–{r.deliveryMax} daq</span>
+
+              {r.serviceFeePercent > 0 && r.serviceFeeMin > 0 && r.serviceFeeMax > 0 && (
+                <p className="rinfo-note">
+                  * Xizmat haqi buyurtma summasining {r.serviceFeePercent}% ini tashkil etadi,
+                  lekin {formatSom(r.serviceFeeMin)} dan kam va {formatSom(r.serviceFeeMax)} dan
+                  ko&apos;p bo&apos;lmaydi
+                </p>
+              )}
+            </>
+          )}
+
+          {r.reservationEnabled && r.reservationNote && (
+            <>
+              <h4 className="rinfo-title rinfo-title--left rinfo-title--mt">Stol bron qilish</h4>
+              <p className="rinfo-note">{r.reservationNote}</p>
+            </>
+          )}
+
+          {hasLegal && (
+            <>
+              <h4 className="rinfo-title rinfo-title--left rinfo-title--mt">Muassasa</h4>
+              <div className="rinfo-rows">
+                {r.legalName && <Row label="Nomi" value={r.legalName} />}
+                {r.address && <Row label="Manzil" value={r.address} />}
+                {r.legalAddress && <Row label="Yuridik manzil" value={r.legalAddress} />}
+                {r.inn && <Row label="INN" value={r.inn} />}
+                {r.phone && <Row label="Telefon" value={r.phone} />}
               </div>
-            </div>
-
-            {r.serviceFeePercent > 0 && r.serviceFeeMin > 0 && r.serviceFeeMax > 0 && (
-              <p className="rinfo-note">
-                * Servis haqi buyurtma summasining {r.serviceFeePercent}% ini tashkil etadi,
-                lekin {formatSom(r.serviceFeeMax)} dan oshmaydi va {formatSom(r.serviceFeeMin)} dan kam bo'lmaydi
-              </p>
-            )}
-
-            {r.reservationEnabled && r.reservationNote && (
-              <p className="rinfo-note">Stol bron qilish: {r.reservationNote}</p>
-            )}
-          </div>
-        )}
+            </>
+          )}
+        </div>
       </div>
+    </div>
+  );
+}
+
+function Row({ label, value, free }) {
+  return (
+    <div className="rinfo-row">
+      <span className="rinfo-row__label">{label}</span>
+      <span className={`rinfo-row__value ${free ? 'rinfo-row__value--free' : ''}`}>
+        {value}
+      </span>
     </div>
   );
 }

@@ -6,7 +6,9 @@ import { useCart } from '@/store/cart';
 import { haptic } from '@/lib/telegram';
 import './cards/DishScrollCard.css';
 
-export const DishScrollCard = memo(function DishScrollCard({ dish, onClick, showRestaurant = true }) {
+export const DishScrollCard = memo(function DishScrollCard({
+  dish, onClick, showRestaurant = true, disabled = false, onDisabledTap,
+}) {
   const addItem = useCart((s) => s.addItem);
   const discountPct = dish.oldPrice ? Math.round((1 - dish.price / dish.oldPrice) * 100) : null;
   const hasOptions = (dish.optionGroups?.length ?? 0) > 0;
@@ -14,17 +16,30 @@ export const DishScrollCard = memo(function DishScrollCard({ dish, onClick, show
   function quickAdd(e) {
     e.stopPropagation();
     haptic();
+    // Restoran yopiq — savatga qo'shilmaydi, sabab ko'rsatiladi
+    if (disabled) { onDisabledTap?.(); return; }
     if (hasOptions) onClick(dish);
     else addItem(dish, 1, []);
   }
 
+  function openDish() {
+    if (disabled) { haptic(); onDisabledTap?.(); return; }
+    onClick(dish);
+  }
+
   return (
-    <button onClick={() => onClick(dish)} className="dscard">
+    <button onClick={openDish} className={`dscard ${disabled ? 'is-closed' : ''}`}>
       <div className="dscard__photo">
         <DishPhoto dish={dish} height={112} radius={14} iconSize={38} />
         {discountPct && <div className="dscard__badge dscard__badge--discount">−{discountPct}%</div>}
         {dish.isHit && !discountPct && <div className="dscard__badge dscard__badge--hit">HIT</div>}
-        <button onClick={quickAdd} className="dscard__add" aria-label="+"><Icon name="plus" size={18} color="#2A1500" /></button>
+        <button
+          onClick={quickAdd}
+          className="dscard__add"
+          aria-label={disabled ? 'Restoran yopiq' : '+'}
+        >
+          <Icon name={disabled ? 'clock' : 'plus'} size={18} color="#2A1500" />
+        </button>
       </div>
       <div className="dscard__name">{dish.name}</div>
       {showRestaurant && dish.restaurantName && (

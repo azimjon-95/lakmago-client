@@ -16,3 +16,15 @@
 .dscard__price { display: flex; align-items: baseline; gap: 6px; margin-top: 4px; }
 .dscard__price-main { font-size: 14px; font-weight: 600; color: var(--ink); }
 .dscard__price-old { font-size: 11px; color: var(--muted); text-decoration: line-through; }
+
+/* Restoran yopiq — taom bosilmaydi, lekin ko'rinib turadi
+   (mijoz menyuni ko'rib, ochilishini kutishi mumkin) */
+.dscard.is-closed .dscard__photo,
+.dscard.is-closed .dscard__name,
+.dscard.is-closed .dscard__price { opacity: 0.42; }
+
+.dscard.is-closed .dscard__add {
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: none;
+  opacity: 1;
+}

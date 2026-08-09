@@ -65,3 +65,15 @@
   margin-top: 16px; font-size: 12.5px; color: var(--muted-2);
   line-height: 1.55;
 }
+
+/* Hozirgi holat — oynadagi eng muhim satr */
+.rinfo-status {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 12px;
+  margin: 10px 0 2px;
+  border-radius: 12px;
+  font-size: 13.5px; font-weight: 600;
+}
+.rinfo-status.is-open { background: rgba(111, 191, 115, 0.12); color: #6FBF73; }
+.rinfo-status.is-closed { background: rgba(225, 75, 66, 0.12); color: #E14B42; }
+.rinfo-note--tight { margin-top: 6px; }
