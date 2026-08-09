@@ -5,7 +5,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { api } from '@/api';
 import { getSocket, joinUserRoom } from '@/lib/socket';
 import { useUser } from '@/store/user';
-import { formatSom } from '@/lib/utils';
+import { formatSom, formatUzDate } from '@/lib/utils';
 import { useT } from '@/i18n';
 import { haptic, getTelegram } from '@/lib/telegram';
 import './Orders.css';
@@ -37,7 +37,7 @@ function fmtDate(d) {
   if (isToday) return `Bugun, ${time}`;
   const yesterday = new Date(today.getTime() - 86400000);
   if (date.toDateString() === yesterday.toDateString()) return `Kecha, ${time}`;
-  return `${date.toLocaleDateString('uz-UZ', { day: '2-digit', month: 'long' })}, ${time}`;
+  return `${formatUzDate(date)}, ${time}`;
 }
 
 export function OrdersPage() {

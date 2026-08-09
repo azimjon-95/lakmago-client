@@ -1,13 +1,15 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
-import { DishPhoto } from '@/components/DishPhoto';
 import { haptic } from '@/lib/telegram';
 import { useT } from '@/i18n';
 import { api } from '@/api';
 import { useUser } from '@/store/user';
-import { formatSom, formatSomShort } from '@/lib/utils';
-import { useRestaurant, useDishes } from '@/hooks/queries';
+import { formatSomShort, formatUzDate, uzWeekday } from '@/lib/utils';
+import { useRestaurant } from '@/hooks/queries';
+import { buildSlots, keepOrReset } from '@/lib/reservationSlots';
+import { TimePicker } from './TimePicker';
+import { PreOrderScreen } from './PreOrderScreen';
 import './Reservation.css';
 
 // Telefon raqamni chiroyli formatlash: +998 90 123 45 67
@@ -24,15 +26,13 @@ function formatPhone(v) {
   return out;
 }
 
-const TIMES = ['18:00', '18:30', '19:00', '19:30', '20:00', '20:30'];
-const WEEKDAYS = ['Yak', 'Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Sha'];
 
 function nextDays(count, todayLabel) {
   const out = [];
   for (let i = 0; i < count; i++) {
     const d = new Date();
     d.setDate(d.getDate() + i);
-    out.push({ date: d, label: i === 0 ? todayLabel : WEEKDAYS[d.getDay()] });
+    out.push({ date: d, label: i === 0 ? todayLabel : uzWeekday(d) });
   }
   return out;
 }
@@ -45,7 +45,8 @@ export function ReservationPage() {
 
   const days = useMemo(() => nextDays(7, 'Bugun'), []);
   const [dayIdx, setDayIdx] = useState(0);
-  const [time, setTime] = useState('18:30');
+  const [time, setTime] = useState(null);
+  const [timeOpen, setTimeOpen] = useState(false);
   const [guests, setGuests] = useState(4);
   // Profildagi ma'lumot bilan avtomatik to'ldiriladi (qayta yozish shart emas)
   const user = useUser((st) => st.user);
@@ -56,10 +57,23 @@ export function ReservationPage() {
   const [preOrderDishes, setPreOrderDishes] = useState([]);
 
   const selectedDate = days[dayIdx].date;
-  const dateLabel = selectedDate.toLocaleDateString('uz', { day: 'numeric', month: 'long' });
+
+  // Bo'sh vaqtlar restoran ish vaqtidan hosil qilinadi.
+  // Sana o'zgarsa qayta hisoblanadi — bugungi kunda o'tib
+  // ketgan vaqtlar chiqmaydi.
+  const slots = useMemo(
+    () => buildSlots(restaurant, selectedDate),
+    [restaurant, selectedDate],
+  );
+
+  // Tanlangan vaqt yangi ro'yxatda bo'lmasa — eng yaqiniga o'tadi
+  useEffect(() => {
+    setTime((prev) => keepOrReset(prev, slots));
+  }, [slots]);
+  const dateLabel = formatUzDate(selectedDate);
   // Tekshiruv: ism kamida 2 harf, telefon kamida 9 raqam
   const phoneDigits = phone.replace(/\D/g, '');
-  const valid = name.trim().length >= 2 && phoneDigits.length >= 9;
+  const valid = Boolean(time) && name.trim().length >= 2 && phoneDigits.length >= 9;
 
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
@@ -179,13 +193,14 @@ export function ReservationPage() {
         </div>
 
         <div className="resv-label">{t('time')}</div>
-        <div className="resv-times">
-          {TIMES.map((tm) => (
-            <button key={tm} onClick={() => setTime(tm)} className={`resv-time ${tm === time ? 'is-active' : ''}`}>
-              {tm}
-            </button>
-          ))}
-        </div>
+        <TimePicker
+          value={time}
+          slots={slots}
+          onChange={setTime}
+          open={timeOpen}
+          onOpen={() => setTimeOpen(true)}
+          onClose={() => setTimeOpen(false)}
+        />
 
         <div className="resv-label">{t('guests')}</div>
         <div className="resv-guests">
@@ -227,113 +242,8 @@ export function ReservationPage() {
         </div>
 
         <button onClick={() => { haptic(); setStep('preorder'); }} disabled={!valid} className="btn-primary btn-block">
-          {t('confirmReservation')} · {dateLabel}, {time}
+          {t('confirmReservation')}{time ? ` · ${dateLabel}, ${time}` : ''}
         </button>
-      </div>
-    </div>
-  );
-}
-
-function PreOrderScreen({ restaurant, reservationInfo, onCancelAll, onConfirm, onBack, saving, saveError, t }) {
-  const { data: restaurantDishes = [] } = useDishes(restaurant.id);
-  const [selections, setSelections] = useState({});
-
-  const sections = useMemo(() => {
-    const map = new Map();
-    restaurantDishes.forEach((d) => {
-      if (!map.has(d.section)) map.set(d.section, []);
-      map.get(d.section).push(d);
-    });
-    return Array.from(map.entries());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [restaurant.id]);
-
-  function setQty(dishId, qty) {
-    setSelections((prev) => {
-      const next = { ...prev };
-      if (qty <= 0) delete next[dishId];
-      else next[dishId] = qty;
-      return next;
-    });
-  }
-
-  const selectedList = Object.entries(selections).map(([dishId, qty]) => ({
-    dish: restaurantDishes.find((d) => d.id === dishId),
-    qty,
-  }));
-  const totalCount = selectedList.reduce((s, i) => s + i.qty, 0);
-  const totalPrice = selectedList.reduce((s, i) => s + i.dish.price * i.qty, 0);
-
-  return (
-    <div className="app-shell reservation">
-      <header className="page-header">
-        <button onClick={onBack} aria-label={t('back')}><Icon name="arrowLeft" size={22} color="#F7F2EA" /></button>
-        <h1>{t('extras')}</h1>
-      </header>
-
-      <div className="resv-preorder-hint">
-        <div className="resv-preorder-hint__title">
-          <Icon name="calendarPlus" size={18} color="#F5A524" /> {reservationInfo.dateLabel}, {reservationInfo.time}
-        </div>
-        <div className="resv-preorder-hint__text">
-          Kelishingizga tayyor bo'lib tursin — hoziroq tanlang yoki joyida buyurtma bering.
-        </div>
-      </div>
-
-      <div className="resv-preorder-list">
-        {sections.map(([name, list]) => (
-          <div key={name}>
-            <div className="resv-preorder-section">{name}</div>
-            <div className="resv-preorder-dishes">
-              {list.map((d) => {
-                const qty = selections[d.id] ?? 0;
-                return (
-                  <div key={d.id} className="resv-preorder-dish">
-                    <div className="resv-preorder-dish__photo"><DishPhoto dish={d} height={56} radius={12} iconSize={26} /></div>
-                    <div className="resv-preorder-dish__body">
-                      <div className="resv-preorder-dish__name">{d.name}</div>
-                      <div className="resv-preorder-dish__price">{formatSomShort(d.price)} {t('som')}</div>
-                    </div>
-                    {qty === 0 ? (
-                      <button onClick={() => setQty(d.id, 1)} className="resv-preorder-dish__select">{t('add')}</button>
-                    ) : (
-                      <div className="qty-control">
-                        <button onClick={() => setQty(d.id, qty - 1)} className="qty-btn qty-btn--minus" aria-label="−"><Icon name="minus" size={16} color="#A99C8C" /></button>
-                        <span className="qty-value">{qty}</span>
-                        <button onClick={() => setQty(d.id, qty + 1)} className="qty-btn qty-btn--plus" aria-label="+"><Icon name="plus" size={16} color="#2A1500" /></button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="resv-preorder-footer">
-        {saveError && <div className="resv-error">{saveError}</div>}
-        {totalCount > 0 && (
-          <div className="resv-preorder-total">
-            <span>{totalCount} · {t('addToCart')}</span>
-            <span className="resv-preorder-total__price">{formatSom(totalPrice)}</span>
-          </div>
-        )}
-        <div className="resv-preorder-actions">
-          {/* Bekor qilish — butun bron jarayoni to'xtaydi */}
-          <button onClick={onCancelAll} className="btn-secondary" style={{ flex: 1 }}>
-            Bekor qilish
-          </button>
-          {/* Tasdiqlash — taom tanlanmasa ham faol (taom ixtiyoriy) */}
-          <button
-            onClick={() => onConfirm(selectedList)}
-            disabled={saving}
-            className="btn-primary"
-            style={{ flex: 1.4 }}
-          >
-            {saving ? 'Saqlanmoqda...' : totalCount > 0 ? `Tasdiqlash · ${formatSom(totalPrice)}` : 'Tasdiqlash'}
-          </button>
-        </div>
       </div>
     </div>
   );
