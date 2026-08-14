@@ -4,7 +4,7 @@ import { searchAddress, getCurrentPosition, reverseGeocode } from '@/lib/locatio
 import { haptic } from '@/lib/telegram';
 
 // 2-bosqich: manzil qidirish (debounce + AbortController)
-export function AddressSearch({ onPick, onBack }) {
+export function AddressSearch({ onPick, onMap, onBack }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -67,13 +67,26 @@ export function AddressSearch({ onPick, onBack }) {
         )}
       </div>
 
-      {/* Joriy joylashuv tugmasi */}
-      <button onClick={useCurrent} disabled={detecting} className="addr-search__current">
-        <div className="addr-search__current-icon">
-          <Icon name="navigation" size={18} color="#F5A524" />
-        </div>
-        <span>{detecting ? 'Aniqlanmoqda...' : 'Joriy joylashuvim'}</span>
-      </button>
+      {/* Tezkor tanlovlar */}
+      <div className="addr-search__quick">
+        <button onClick={useCurrent} disabled={detecting} className="addr-search__current">
+          <div className="addr-search__current-icon">
+            <Icon name="navigation" size={18} color="#F5A524" />
+          </div>
+          <span>{detecting ? 'Aniqlanmoqda...' : 'Joriy joylashuvim'}</span>
+        </button>
+
+        {/*
+          Karta orqali tanlash — GPS ruxsat bermagan yoki noaniq
+          bo'lganda mijoz o'zi aniq nuqtani ko'rsatishi mumkin.
+        */}
+        <button onClick={() => { haptic(); onMap(); }} className="addr-search__current">
+          <div className="addr-search__current-icon addr-search__current-icon--map">
+            <Icon name="pin" size={18} color="#F5A524" />
+          </div>
+          <span>Karta orqali tanlash</span>
+        </button>
+      </div>
 
       {/* Natijalar */}
       <div className="addr-search__results">

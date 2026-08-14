@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { LocationPermission } from './LocationPermission';
 import { AddressSearch } from './AddressSearch';
 import { AddressDetails } from './AddressDetails';
+import { MapAddressPicker } from './MapAddressPicker';
 import './AddressFlow.css';
 
 // Manzil qo'shish oqimи (3 bosqich):
@@ -36,7 +37,15 @@ export function AddressFlow({ onSave, onClose, startStep = 'permission' }) {
       {step === 'search' && (
         <AddressSearch
           onPick={handlePicked}
+          onMap={() => setStep('map')}
           onBack={() => setStep('permission')}
+        />
+      )}
+
+      {step === 'map' && (
+        <MapAddressPicker
+          onPick={handlePicked}
+          onBack={() => setStep('search')}
         />
       )}
 

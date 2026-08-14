@@ -9,10 +9,14 @@
 
 .addrflow { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 
-/* Sarlavha (2 va 3-bosqich) */
+/* Sarlavha (2, 3 va 4-bosqich).
+   Telegram to'liq ekranda "Закрыть / ⌄ / ⋯" tugmalari status
+   bar ostida turadi — ularning balandligi qurilma va ilova
+   holatiga qarab o'zgaradi (--tg-content-top). Shu joy hisobga
+   olinmasa sarlavha soat/tugmalar bilan ustma-ust tushadi. */
 .addrflow__header {
   display: flex; align-items: center; gap: 12px;
-  padding: 14px 16px;
+  padding: calc(14px + env(safe-area-inset-top, 0px) + var(--tg-content-top, 0px)) 16px 14px;
   border-bottom: 1px solid var(--line);
   flex: none;
 }
@@ -22,7 +26,10 @@
   flex: none;
 }
 .addrflow__back-btn:active { background: var(--surface-2); }
-.addrflow__back { position: absolute; top: 14px; right: 14px; }
+.addrflow__back {
+  position: absolute; right: 14px;
+  top: calc(14px + env(safe-area-inset-top, 0px) + var(--tg-content-top, 0px));
+}
 .addrflow__header-title { font-size: 17px; font-weight: 700; color: var(--ink); margin: 0; }
 
 /* 1-bosqich: ruxsat ekrani */
@@ -162,3 +169,92 @@
 }
 
 .spinner--sm { width: 16px; height: 16px; border-width: 2px; }
+
+/* ═══════════════════════════════════════════
+   Tezkor tanlovlar qatori (Joriy joylashuv / Karta)
+   ═══════════════════════════════════════════ */
+.addr-search__quick {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 0 16px 4px;
+}
+.addr-search__quick .addr-search__current { padding: 12px; }
+.addr-search__current-icon--map { background: rgba(245, 165, 36, 0.12); }
+
+/* ═══════════════════════════════════════════
+   Karta orqali manzil tanlash
+   ═══════════════════════════════════════════ */
+.addrflow--map { background: var(--canvas); }
+
+.map-picker {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  background: var(--surface-2, #1a1a1a);
+}
+.map-picker__box { position: absolute; inset: 0; }
+
+/* Yandex logotipi va boshqa elementlar dizaynga mos bo'lsin */
+.map-picker__box :global(ymaps),
+.map-picker :where([class*="ymaps"]) { font-family: inherit; }
+
+.map-picker__overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px;
+  background: var(--canvas);
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+  padding: 0 32px;
+}
+
+/*
+  Qotib turuvchi igna — karta suriladi, igna doim ekran
+  markazida turadi (Yandex Taxi / Uber uslubi). Uchi aynan
+  markazga to'g'ri kelishi uchun pastga suriladi.
+*/
+.map-picker__pin {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -100%);
+  z-index: 5;
+  pointer-events: none;
+  display: flex; flex-direction: column; align-items: center;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.35));
+}
+.map-picker__pin-shadow {
+  width: 10px; height: 4px;
+  margin-top: 2px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.3);
+  filter: blur(1px);
+}
+
+.map-picker__locate {
+  position: absolute;
+  right: 12px; bottom: 16px;
+  z-index: 5;
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+.map-picker__locate:active { transform: scale(0.94); }
+
+.map-picker__footer {
+  flex: none;
+  padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+  background: var(--canvas);
+  border-top: 1px solid var(--line);
+}
+.map-picker__address {
+  min-height: 40px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--surface);
+}
+.map-picker__street { font-size: 14px; font-weight: 600; color: var(--ink); }
+.map-picker__city { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.map-picker__address-loading { font-size: 13px; color: var(--muted); }

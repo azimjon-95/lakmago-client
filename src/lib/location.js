@@ -2,6 +2,7 @@
 // Telegram Mini App'да LocationManager, aks holда brauzer geolocation.
 
 import { getTelegram } from './telegram';
+import { api } from '@/api';
 
 // 1) Joriy koordinatani olish
 // Qaytaradi: { lat, lng } yoki xato tashlaydi
@@ -103,6 +104,34 @@ export async function searchAddress(query, signal) {
     if (e.name === 'AbortError') throw e;
     return [];
   }
+}
+
+/**
+ * Koordinatadan manzil — Yandex Geocoder orqali (server proksi).
+ *
+ * Nominatim'дан farqi: O'zbekiston manzillarini ancha aniqroq
+ * biladi (ko'cha-uy darajasida). Karta orqali tanlashda shu
+ * ishlatiladi. Xato bo'lsa Nominatim'ga o'tiladi — xarita
+ * baribir ishlashda davom etadi.
+ */
+export async function reverseGeocodeViaYandex(lat, lng) {
+  try {
+    const { address } = await api.reverseGeocodeYandex(lat, lng);
+    if (address) return formatYandexAddress(address);
+  } catch { /* Nominatim'ga o'tamiz */ }
+  return reverseGeocode(lat, lng);
+}
+
+/**
+ * Yandex "Toshkent shahri, Chilonzor tumani, ko'cha, 5" kabi
+ * bitta qatorni bizning { street, city, full } shakliga bo'ladi.
+ */
+function formatYandexAddress(text) {
+  const parts = text.split(',').map((p) => p.trim()).filter(Boolean);
+  // Odatda oxirgi bo'lak eng aniq (ko'cha/uy), birinchisi shahar
+  const street = parts.length > 1 ? parts[parts.length - 1] : text;
+  const city = parts.find((p) => /shahri|shahar|tuman|viloyat/i.test(p)) || parts[0] || '';
+  return { street, city: city === street ? '' : city, full: text };
 }
 
 // Nominatim javobини chiroyли manzilga aylantirish

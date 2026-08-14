@@ -77,6 +77,14 @@ async function apiFetch(path, { signal, ...options } = {}) {
 }
 
 export const api = {
+  // ===== Xarita =====
+  // Yandex JS API kaliti — server domenga cheklab beradi,
+  // kodda saqlanmaydi
+  getMapsConfig: (opts) => apiFetch('/maps/config', opts),
+  // Koordinatadan manzil (kalit serverda qoladi — proksi)
+  reverseGeocodeYandex: (lat, lng, opts) =>
+    apiFetch(`/maps/reverse?lat=${lat}&lng=${lng}`, opts),
+
   // ===== Katalog =====
   getBanners: (opts) => apiFetch('/banners', opts),
 
