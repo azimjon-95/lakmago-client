@@ -19,7 +19,9 @@ import { CATEGORIES } from '@/data/categories';
 export function PreOrderScreen({
   restaurant, reservationInfo, onCancelAll, onConfirm, onBack, saving, saveError, t,
 }) {
-  const { data: dishes = [] } = useDishes(restaurant.id);
+  const {
+    data: dishes = [], isLoading, isError, error, refetch,
+  } = useDishes(restaurant.id);
   const [selections, setSelections] = useState({});
   const [summaryOpen, setSummaryOpen] = useState(false);
 
@@ -85,11 +87,28 @@ export function PreOrderScreen({
       </div>
 
       <div className="resv-preorder-list">
-        {sections.length === 0 && (
+        {isLoading ? (
+          <div className="resv-error-state">
+            <span className="spinner" style={{ margin: '0 auto 14px' }} />
+            <div className="resv-error-state__text">Menyu yuklanmoqda...</div>
+          </div>
+        ) : isError ? (
+          <div className="resv-error-state">
+            <div className="resv-error-state__icon">📡</div>
+            <div className="resv-error-state__title">Menyu yuklanmadi</div>
+            <div className="resv-error-state__text">
+              {error?.kind === 'network'
+                ? 'Serverga ulanib bo\u2018lmadi. Internet aloqasini tekshiring.'
+                : (error?.message || 'Server javob bermadi.')}
+            </div>
+            <button onClick={() => refetch()} className="resv-error-state__btn">
+              Qayta urinish
+            </button>
+          </div>
+        ) : sections.length === 0 ? (
           <div className="resv-preorder-empty">Menyu hozircha bo&apos;sh</div>
-        )}
-
-        {sections.map(([name, list]) => (
+        ) : (
+          sections.map(([name, list]) => (
           <section key={name}>
             <div className="resv-preorder-section">{name}</div>
             <div className="resv-preorder-dishes">
@@ -127,7 +146,8 @@ export function PreOrderScreen({
               })}
             </div>
           </section>
-        ))}
+          ))
+        )}
       </div>
 
       <div className="resv-preorder-footer">

@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { haptic } from '@/lib/telegram';
@@ -10,6 +10,7 @@ import { useRestaurant } from '@/hooks/queries';
 import { buildSlots, keepOrReset } from '@/lib/reservationSlots';
 import { TimePicker } from './TimePicker';
 import { PreOrderScreen } from './PreOrderScreen';
+import { RestaurantLocationMap } from './RestaurantLocationMap';
 import './Reservation.css';
 
 // Telefon raqamni chiroyli formatlash: +998 90 123 45 67
@@ -77,11 +78,13 @@ export function ReservationPage() {
 
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
+  const submittingRef = useRef(false);
 
   // Bronni serverga saqlaydi — restoran shu orqali ko'radi,
   // mijozga bot orqali eslatma keladi.
   async function finishReservation(chosen) {
-    if (saving) return;
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setSaving(true);
     setSaveError(null);
 
@@ -114,6 +117,7 @@ export function ReservationPage() {
       setStep('done');
     } catch (e) {
       setSaveError(e.message || 'Bron saqlanmadi');
+      submittingRef.current = false;
     } finally {
       setSaving(false);
     }
@@ -240,6 +244,8 @@ export function ReservationPage() {
           />
           <p className="resv-field__hint">Restoran bron bo'yicha shu raqamga qo'ng'iroq qiladi</p>
         </div>
+
+        <RestaurantLocationMap restaurant={restaurant} />
 
         <button onClick={() => { haptic(); setStep('preorder'); }} disabled={!valid} className="btn-primary btn-block">
           {t('confirmReservation')}{time ? ` · ${dateLabel}, ${time}` : ''}

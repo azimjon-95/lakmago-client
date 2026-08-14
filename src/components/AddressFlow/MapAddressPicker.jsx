@@ -2,27 +2,11 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Icon } from '@/components/Icon';
 import { api } from '@/api';
 import { getCurrentPosition, reverseGeocodeViaYandex } from '@/lib/location';
+import { loadYmaps } from '@/lib/yandexMaps';
 import { haptic } from '@/lib/telegram';
 
 // Toshkent markazi — joylashuv aniqlanmagunicha shu ko'rsatiladi
 const DEFAULT_CENTER = [41.311081, 69.240562];
-
-let ymapsPromise = null;
-
-/** Yandex Maps JS skriptini bir marta yuklaydi. */
-function loadYmaps(apiKey) {
-  if (window.ymaps?.Map) return Promise.resolve(window.ymaps);
-  if (ymapsPromise) return ymapsPromise;
-
-  ymapsPromise = new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = `https://api-maps.yandex.ru/2.1/?apikey=${apiKey}&lang=uz_UZ`;
-    script.onload = () => window.ymaps.ready(() => resolve(window.ymaps));
-    script.onerror = () => reject(new Error('Xarita yuklanmadi'));
-    document.head.appendChild(script);
-  });
-  return ymapsPromise;
-}
 
 /**
  * 2-bosqichdan kirilgan karta orqali manzil tanlash.

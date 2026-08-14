@@ -65,7 +65,19 @@ async function apiFetch(path, { signal, ...options } = {}) {
     throw err;
   }
   if (!res.ok) {
-    const err = new Error(`Server xatosi (${res.status})`);
+    /*
+     * Serverning haqiqiy sababi ({ error: '...' }) o'qib
+     * olinadi. Avval bu tashlab yuborilardi va foydalanuvchi
+     * har doim "Server xatosi (400)" kabi umumiy xabar ko'rardi
+     * — masalan "Telefon raqam noto'g'ri" o'rniga.
+     */
+    let serverMessage = '';
+    try {
+      const body = await res.clone().json();
+      serverMessage = body?.error || '';
+    } catch { /* JSON emas yoki bo'sh — umumiy xabar qoladi */ }
+
+    const err = new Error(serverMessage || `Server xatosi (${res.status})`);
     err.status = res.status;
     err.kind = 'http';
     err.url = url;

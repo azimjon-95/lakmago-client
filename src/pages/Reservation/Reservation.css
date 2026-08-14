@@ -205,3 +205,145 @@
   padding: 32px 16px; text-align: center;
   font-size: 13px; color: var(--muted);
 }
+
+/* ═══════════ Restoran joylashuvi — xarita ═══════════ */
+.resv-map-preview {
+  position: relative;
+  width: 100%;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.resv-map-preview__box { position: absolute; inset: 0; }
+.resv-map-preview__overlay {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface);
+}
+.resv-map-preview .spinner--sm { width: 18px; height: 18px; border-width: 2px; }
+
+/* Preview ustidagi shaffof bosish qatlami — xaritaning o'z
+   surish-kattalashtirish imo-ishoralarini to'smaydi, chunki
+   preview'da ular allaqachon o'chirilgan (behaviors.disable) */
+.resv-map-preview__tap {
+  position: absolute; inset: 0;
+  display: flex; align-items: flex-end; justify-content: flex-end;
+  padding: 8px;
+}
+.resv-map-preview__hint {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(20, 17, 15, 0.75);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  font-size: 11px; font-weight: 600;
+}
+
+/* To'liq ekran xarita — sahifa emas, shu komponent ustida
+   overlay. Forma maydonlari hech qachon unmount bo'lmaydi. */
+.resv-map-full {
+  position: fixed; inset: 0; z-index: 110;
+  display: flex; flex-direction: column;
+  background: var(--canvas);
+  animation: fade-in 0.2s var(--ease);
+}
+.resv-map-full__head {
+  flex: none;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+  padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.resv-map-full__title {
+  font-size: 15px; font-weight: 600; color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.resv-map-full__close {
+  flex: none;
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+.resv-map-full__box { flex: 1; min-height: 0; position: relative; }
+.resv-map-full__box .resv-map-preview { height: 100%; border-radius: 0; border: none; }
+
+/* ═══════════ Xato holati (dishlar yuklanmadi) ═══════════ */
+.resv-error-state {
+  text-align: center;
+  padding: 36px 20px;
+}
+.resv-error-state__icon { font-size: 34px; margin-bottom: 10px; }
+.resv-error-state__title { font-size: 14.5px; font-weight: 700; color: var(--ink); margin-bottom: 5px; }
+.resv-error-state__text { font-size: 12.5px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
+.resv-error-state__btn {
+  padding: 9px 18px;
+  border-radius: 12px;
+  background: var(--brand-tint);
+  color: var(--brand-100);
+  font-size: 13px; font-weight: 600;
+}
+.resv-error-state__btn:active { transform: scale(0.98); }
+
+/* ═══════════ Vaqt — aylanuvchi baraban (wheel) ═══════════ */
+.resv-wheel {
+  position: relative;
+  height: 220px;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  /* Scrollbar yashiriladi — bu tugma emas, g'ildirak */
+  scrollbar-width: none;
+}
+.resv-wheel::-webkit-scrollbar { display: none; }
+
+/* Yuqori/pastda bo'sh joy — birinchi/oxirgi element ham
+   markazga kela olishi uchun (44px qator balandligi × 2) */
+.resv-wheel__pad { height: 88px; scroll-snap-align: none; }
+
+.resv-sheet__footer {
+  flex: none;
+  padding: 12px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line);
+}
+
+.resv-wheel__item {
+  height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  scroll-snap-align: center;
+  font-size: 20px; font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  transition: opacity 0.15s, transform 0.15s;
+  user-select: none;
+}
+
+/* Markazni belgilovchi ustki chiziqlar — g'ildirak old
+   oynasi kabi, bosilgan vaqt doim shu orada turadi */
+.resv-wheel__frame {
+  position: absolute;
+  left: 12px; right: 12px; top: 50%;
+  height: 44px;
+  transform: translateY(-50%);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--brand-tint);
+  pointer-events: none;
+}
+
+/* Tepa/pastdagi qiyalik — uzoqroqdagi raqamlar xira ko'rinsin,
+   qog'oz varag'i o'ralayotgandek taassurot beradi */
+.resv-wheel-wrap {
+  position: relative;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0, #000 28%, #000 72%, transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0, #000 28%, #000 72%, transparent 100%
+  );
+}
