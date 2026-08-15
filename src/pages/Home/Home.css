@@ -104,7 +104,6 @@
 }
 .home-section-banner {
   display: flex; align-items: center; gap: 7px;
-  margin: 0 16px;
   padding: 11px 16px;
   background: var(--brand);
   color: #fff;
