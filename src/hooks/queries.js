@@ -31,6 +31,18 @@ export const useDishes = (restaurantId) =>
     enabled: !!restaurantId,
   });
 
+/**
+ * Restoranning o'z narxidagi menyu (yetkazish ustamasi va mijoz
+ * xizmat haqisiz). Bron oldindan buyurtmasi shuni ishlatadi —
+ * mehmon zalda o'tirib yeydi, kuryer kerak emas.
+ */
+export const useDineInMenu = (restaurantId) =>
+  useQuery({
+    queryKey: ['dinein-menu', restaurantId],
+    queryFn: ({ signal }) => api.getDineInMenu(restaurantId, { signal }),
+    enabled: !!restaurantId,
+  });
+
 export const useTrendingDishes = () =>
   useQuery({
     queryKey: ['dishes', 'trending'],

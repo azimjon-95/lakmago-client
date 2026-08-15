@@ -109,6 +109,14 @@ export const api = {
 
   getDishes: (restaurantId, opts) => apiFetch(`/restaurants/${restaurantId}/dishes`, opts),
 
+  /**
+   * Restoranning O'Z narxidagi menyu — yetkazish ustamasi va
+   * mijoz xizmat haqi QO'LLANMAGAN. QR orqali zalda ishlatiladi,
+   * shuningdek bron oldindan buyurtmasi (PreOrderScreen) ham
+   * shuni ishlatadi: mehmon zalga kelib yeydi, yetkazish emas.
+   */
+  getDineInMenu: (restaurantId, opts) => apiFetch(`/dine-in/menu/${restaurantId}`, opts),
+
   getDish: (id, opts) => apiFetch(`/dishes/${id}`, opts),
 
   getTrendingDishes: (opts) => apiFetch('/dishes/trending', opts),

@@ -3,7 +3,7 @@ import { Icon } from '@/components/Icon';
 import { DishPhoto } from '@/components/DishPhoto';
 import { haptic } from '@/lib/telegram';
 import { formatSom, formatSomShort } from '@/lib/utils';
-import { useDishes } from '@/hooks/queries';
+import { useDineInMenu } from '@/hooks/queries';
 import { CATEGORIES } from '@/data/categories';
 
 /**
@@ -19,9 +19,14 @@ import { CATEGORIES } from '@/data/categories';
 export function PreOrderScreen({
   restaurant, reservationInfo, onCancelAll, onConfirm, onBack, saving, saveError, t,
 }) {
+  /*
+   * BAZA narx — restoranning o'zi ko'rgan narxi. Mehmon zalga
+   * kelib yeydi, yetkazish emas — shuning uchun bu yerda
+   * yetkazish ustamasi ham, mijoz xizmat haqi ham qo'llanmaydi.
+   */
   const {
     data: dishes = [], isLoading, isError, error, refetch,
-  } = useDishes(restaurant.id);
+  } = useDineInMenu(restaurant.id);
   const [selections, setSelections] = useState({});
   const [summaryOpen, setSummaryOpen] = useState(false);
 
