@@ -25,11 +25,24 @@ import './Home.css';
 
 // Kategoriyalar markaziy ro'yxatdan (src/data/categories.js)
 
-const SectionHeader = memo(function SectionHeader({ icon, title, action }) {
+/*
+ * Oddiy sarlavha (Trend taomlar kabi) va Express24 uslubidagi
+ * to'liq oranjevа banner (Chegirmadagi taomlar) — ikkalasi ham
+ * shu komponentdan, `variant` orqali tanlanadi.
+ */
+const SectionHeader = memo(function SectionHeader({ icon, title, action, variant = 'plain' }) {
+  if (variant === 'banner') {
+    return (
+      <div className="home-section-banner">
+        {icon && <Icon name={icon} size={18} color="#fff" />}
+        <span>{title}</span>
+      </div>
+    );
+  }
   return (
     <div className="home-section-header">
       <div className="home-section-header__title">
-        {icon && <Icon name={icon} size={17} color="#D85A30" />} {title}
+        {icon && <Icon name={icon} size={17} color="var(--appetite)" />} {title}
       </div>
       {action && <div className="home-section-header__action">{action}</div>}
     </div>
@@ -183,16 +196,19 @@ export function HomePage() {
       {/* Reklama */}
       <AdStrip placement="home" />
 
-      {/* Chegirmadagi taomlar */}
+      {/* Chegirmadagi taomlar — Express24 uslubida bitta ramka:
+          tepasi qattiq oranjevа banner, ichi och fon */}
       {discountedShown.length > 0 && (
-        <>
-          <SectionHeader icon="discount" title={t('discountedDishes')} />
-          <div className="home-dishes-row no-scrollbar">
-            {discountedShown.map((d) => (
-              <DishGridCard key={d.id || d._id} dish={d} onClick={openModal} />
-            ))}
+        <div className="home-discount-frame">
+          <SectionHeader icon="discount" title={t('discountedDishes')} variant="banner" />
+          <div className="home-discount-frame__body">
+            <div className="home-dishes-row no-scrollbar">
+              {discountedShown.map((d) => (
+                <DishGridCard key={d.id || d._id} dish={d} onClick={openModal} />
+              ))}
+            </div>
           </div>
-        </>
+        </div>
       )}
 
       {/* Tavsiya qilamiz — har kirganda tartib o'zgaradi */}

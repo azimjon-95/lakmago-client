@@ -81,6 +81,14 @@
 
   /* Animatsiya */
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---- BURCHAK RADIUSI ----
+     MUHIM: bu o'zgaruvchi avval HECH QAYERDA ta'riflanmagan
+     edi — 17 joyda `var(--radius)` ishlatilgan, lekin
+     qiymati yo'q edi, shuning uchun kartalar burchagi
+     TO'G'RI (0px) chiqib qolardi. */
+  --radius: 15px;
+  --radius-sm: 10px;
 }
 
 /* Global reset */

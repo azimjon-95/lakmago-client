@@ -71,13 +71,14 @@
 }
 .home-cat:active .home-cat__art { transform: scale(0.94); }
 
-/* Tanlangan — to'q sariq ramka va yorqin nom */
+/* Tanlangan — "+" savat tugmasi bilan bir xil ko'k urg'u */
 .home-cat.is-active .home-cat__art {
-  border-color: var(--brand);
-  background: var(--brand-tint);
+  border-color: var(--accent-2);
+  border-width: 3px;
+  background: #EAF2FA;
 }
 .home-cat.is-active .home-cat__label {
-  color: var(--brand);
+  color: var(--accent-2);
   font-weight: 700;
 }
 
@@ -91,6 +92,26 @@
   font-size: 16px; font-weight: 600; color: var(--ink);
 }
 .home-section-header__action { font-size: 13px; color: var(--brand-600); }
+
+/* ═══ Chegirmadagi taomlar — Express24 uslubidagi ramka ═══
+   Tepasi qattiq oranjevа banner (rounded-top), ichi och
+   pastel fon — bitta yaxlit "karta" taassurotini beradi. */
+.home-discount-frame {
+  margin: 18px 16px 6px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--food-tint-1);
+}
+.home-section-banner {
+  display: flex; align-items: center; gap: 7px;
+  padding: 11px 16px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 15.5px; font-weight: 700;
+}
+.home-discount-frame__body { padding: 12px 0 4px; }
+.home-discount-frame .home-dishes-row { padding-left: 12px; padding-right: 12px; }
 
 /* Gorizontal taom qatori */
 .home-scroll-row {
