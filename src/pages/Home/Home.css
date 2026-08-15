@@ -93,25 +93,49 @@
 }
 .home-section-header__action { font-size: 13px; color: var(--brand-600); }
 
-/* ═══ Chegirmadagi taomlar — Express24 uslubidagi ramka ═══
-   Tepasi qattiq oranjevа banner (rounded-top), ichi och
-   pastel fon — bitta yaxlit "karta" taassurotini beradi. */
+/* ═══ Chegirmadagi taomlar — Express24 uslubida ═══
+   Banner o'zi ikki pog'onali SVG shakl (foydalanuvchi bergan
+   aniq path) — chapda baland (matn joyi), o'ngga qarab pastga
+   tushadi, kartalar undan chiqib turgandek ko'rinadi. Ostidagi
+   taomlar YOPIQ QUTIGA o'ralmaydi, o'ng tomoni ekran chetigacha
+   suriladi. */
 .home-discount-frame {
-  margin: 18px 16px 6px;
-  border-radius: var(--radius);
-  overflow: hidden;
-  border: 1px solid var(--line);
-  background: var(--food-tint-1);
+  margin: 18px 0 6px;
 }
 .home-section-banner {
-  display: flex; align-items: center; gap: 7px;
-  padding: 11px 16px;
-  background: var(--brand);
+  position: relative;
+  height: 78px;
   color: #fff;
-  font-size: 15.5px; font-weight: 700;
 }
-.home-discount-frame__body { padding: 12px 0 4px; }
-.home-discount-frame .home-dishes-row { padding-left: 12px; padding-right: 12px; }
+.home-section-banner__shape {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+}
+.home-section-banner__shape path { fill: var(--brand); }
+.home-section-banner__text {
+  position: relative;
+  z-index: 1;
+  display: flex; align-items: center; gap: 6px;
+  height: 100%;
+  padding: 0 16px;
+  padding-right: 30%;   /* qisqa (pastki) qism ustiga chiqib ketmasin */
+  font-size: 14.5px; font-weight: 700;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+.home-discount-frame__body {
+  background: var(--food-tint-1);
+  padding: 12px 0 6px;
+  margin-top: -1px;
+}
+/* Chapdan sahifa bilan bir xil qirqim (16px), o'ngdan
+   CHEGARASIZ — karta ekran chetiga chiqib qirqilishi kerak */
+.home-discount-frame .home-dishes-row {
+  padding-left: 16px;
+  padding-right: 4px;
+}
 
 /* Gorizontal taom qatori */
 .home-scroll-row {

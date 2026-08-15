@@ -27,15 +27,26 @@ import './Home.css';
 
 /*
  * Oddiy sarlavha (Trend taomlar kabi) va Express24 uslubidagi
- * to'liq oranjevа banner (Chegirmadagi taomlar) — ikkalasi ham
- * shu komponentdan, `variant` orqali tanlanadi.
+ * ikki pog'onali oranjevа banner (Chegirmadagi taomlar) — SVG
+ * shakli foydalanuvchi bergan aniq yo'l (path) asosida, har
+ * qanday ekran kengligiga cho'ziladi (preserveAspectRatio="none").
  */
 const SectionHeader = memo(function SectionHeader({ icon, title, action, variant = 'plain' }) {
   if (variant === 'banner') {
     return (
       <div className="home-section-banner">
-        {icon && <Icon name={icon} size={18} color="#fff" />}
-        <span>{title}</span>
+        <svg
+          className="home-section-banner__shape"
+          viewBox="0 0 100 82"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path d="M0,82 L0,34 A3.409,24 0 0 1 3.409,10 L60.511,10 A3.409,24 0 0 1 63.920,34 L63.920,51 A3.409,24 0 0 0 67.330,75 L100,75 L100,82 Z" />
+        </svg>
+        <span className="home-section-banner__text">
+          {icon && <Icon name={icon} size={18} color="#fff" />}
+          {title}
+        </span>
       </div>
     );
   }
