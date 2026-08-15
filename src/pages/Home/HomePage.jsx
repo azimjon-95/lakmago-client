@@ -36,6 +36,18 @@ const SectionHeader = memo(function SectionHeader({ icon, title, action, variant
       <div className="home-section-banner">
         {icon && <Icon name={icon} size={18} color="#fff" />}
         <span>{title}</span>
+        {/* Pastki to'lqinsimon chet — har qanday kenglikka
+            cho'ziladi (preserveAspectRatio="none"), shakli
+            proportsional saqlanadi. Rangi bannerning o'zi bilan
+            bir xil, shuning uchun tagida ko'rinadi. */}
+        <svg
+          className="home-section-banner__wave"
+          viewBox="0 0 100 20"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path d="M0,0 H100 V0 C 78,0 74,20 44,18 C 20,16 8,0 0,0 Z" />
+        </svg>
       </div>
     );
   }

@@ -103,13 +103,29 @@
   margin: 18px 0 6px;
 }
 .home-section-banner {
+  position: relative;
   display: flex; align-items: center; gap: 7px;
-  padding: 11px 16px;
+  padding: 12px 16px 14px;
   background: var(--brand);
   color: #fff;
   font-size: 15.5px; font-weight: 700;
   border-radius: var(--radius) var(--radius) 0 0;
 }
+/*
+ * To'lqinsimon chet — bannerdan BUTUNLAY PASTDA, faqat krem
+ * fon ustida (top:100% — banner ichiga umuman kirmaydi).
+ * Avvalgi urinishda to'lqin banner ICHIDA turgani uchun
+ * uning o'zining fonida "yashiringan" edi (ikkalasi bir xil
+ * rang) — shuning uchun umuman ko'rinmasdi.
+ */
+.home-section-banner__wave {
+  position: absolute;
+  top: 100%; left: 0; right: 0;
+  width: 100%; height: 20px;
+  display: block;
+  margin-top: -1px;
+}
+.home-section-banner__wave path { fill: var(--brand); }
 .home-discount-frame__body {
   background: var(--food-tint-1);
   padding: 12px 0 6px;
