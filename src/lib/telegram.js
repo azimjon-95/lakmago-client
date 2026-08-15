@@ -81,10 +81,17 @@ export async function authenticateWithTelegram() {
       try { tg.disableVerticalSwipes(); } catch { /* qo'llab-quvvatlanmaydi */ }
     }
 
-    // Dark theme — Telegram header va fon ranglari
+    // Yorug' mavzu — Telegram header va fon ranglari.
+    // MUHIM: bu Telegram'ning O'Z native UI elementlarini
+    // (status bar orqasidagi hudud, header) boshqaradi — CSS
+    // o'zgaruvchilaridan MUSTAQIL. Ilova mavzusi (--canvas)
+    // oq bo'lgach bu ham yangilanishi shart edi — aks holda
+    // Telegram'ning o'zi hamon eski to'q rangni ko'rsatib,
+    // status bar atrofida qora chiziq qolib ketardi.
     try {
-      tg.setHeaderColor?.('#12100E');
-      tg.setBackgroundColor?.('#12100E');
+      tg.setHeaderColor?.('#FFFFFF');
+      tg.setBackgroundColor?.('#FFFFFF');
+      tg.setBottomBarColor?.('#FFFFFF');
     } catch {
       // eski Telegram versiyalarida bo'lmasligi mumkin
     }

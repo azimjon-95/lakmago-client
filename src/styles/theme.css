@@ -94,7 +94,7 @@
 /* Global reset */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { color-scheme: dark; }
+html { color-scheme: light; }
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
