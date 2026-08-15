@@ -6,7 +6,6 @@
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
   padding: 8px 8px 10px;
 }
 .dscard:active { transform: scale(0.98); }
