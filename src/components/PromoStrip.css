@@ -21,8 +21,8 @@
   min-height: 96px;
   padding: 12px;
   border-radius: 17px;
-  background: linear-gradient(135deg, #3D2A10 0%, #5C3F18 100%);
-  border: 0.5px solid rgba(245, 165, 36, 0.3);
+  background: linear-gradient(135deg, var(--brand-tint) 0%, #5C3F18 100%);
+  border: 0.5px solid rgba(255, 92, 0, 0.3);
   text-align: left;
   scroll-snap-align: start;
   position: relative;

@@ -183,7 +183,7 @@ export function RestaurantPage() {
   if (restError || !restaurant) {
     return (
       <div className="app-shell rest-error">
-        <Icon name="info" size={48} color="#7D7264" />
+        <Icon name="info" size={48} color="var(--muted-2)" />
         <div className="rest-error__title">Restoran ochilmadi</div>
         <p className="rest-error__text">
           {restError?.message?.includes('404') || restError?.status === 404
@@ -211,7 +211,7 @@ export function RestaurantPage() {
         {/* Yopiq bo'lsa ogohlantiramiz */}
         {restaurant && !isOpen && (
           <div className="rest-closed">
-            <Icon name="clock" size={16} color="#E14B42" />
+            <Icon name="clock" size={16} color="var(--danger)" />
             <span>
               Hozir yopiq
               {restaurant.openTime && (
@@ -231,7 +231,7 @@ export function RestaurantPage() {
           <Icon name="arrowLeft" size={18} color="#fff" />
         </button>
         <button onClick={() => { haptic(); toggleFavorite('restaurant', id); }} className="rest-banner__btn rest-banner__btn--fav" aria-label="♥">
-          <Icon name="heart" size={17} color={isFav ? '#F5A524' : '#fff'} style={isFav ? { fill: '#F5A524' } : {}} />
+          <Icon name="heart" size={17} color={isFav ? 'var(--brand)' : '#fff'} style={isFav ? { fill: 'var(--brand)' } : {}} />
         </button>
       </div>
 
@@ -244,7 +244,7 @@ export function RestaurantPage() {
         <div className="rest-stats">
           <div className="rest-stat">
             <span className="rest-stat__icon rest-stat__icon--time">
-              <Icon name="clock" size={20} color="#F5A524" />
+              <Icon name="clock" size={20} color="var(--brand)" />
             </span>
             <span className="rest-stat__value">{restaurant.deliveryMin}–{restaurant.deliveryMax} {t('min')}</span>
             <span className="rest-stat__label">eshikkacha</span>
@@ -254,7 +254,7 @@ export function RestaurantPage() {
           {restaurant.rating > 0 && (
             <button onClick={() => scrollTo(REVIEWS_TAB)} className="rest-stat">
               <span className="rest-stat__icon rest-stat__icon--rating">
-                <Icon name="star" size={20} color="#6FBF73" />
+                <Icon name="star" size={20} color="var(--success)" />
               </span>
               <span className="rest-stat__value">{Number(restaurant.rating).toFixed(1)}</span>
               <span className="rest-stat__label">reyting</span>
@@ -264,7 +264,7 @@ export function RestaurantPage() {
           {restaurant.deliveryFee === 0 && (
             <div className="rest-stat">
               <span className="rest-stat__icon rest-stat__icon--free">
-                <Icon name="bike" size={20} color="#F5A524" />
+                <Icon name="bike" size={20} color="var(--brand)" />
               </span>
               <span className="rest-stat__value">Bepul</span>
               <span className="rest-stat__label">yetkazish</span>
@@ -275,7 +275,7 @@ export function RestaurantPage() {
           {hasInfo && (
             <button onClick={() => setInfoOpen(true)} className="rest-stat">
               <span className="rest-stat__icon rest-stat__icon--info">
-                <Icon name="info" size={20} color="#E0A96D" />
+                <Icon name="info" size={20} color="var(--info)" />
               </span>
               <span className="rest-stat__value">Shartlar</span>
               <span className="rest-stat__label">va ish vaqti</span>
@@ -286,7 +286,7 @@ export function RestaurantPage() {
         {/* Stol bron qilish — bizning ustunligimiz */}
         {restaurant.reservationEnabled !== false && (
           <button onClick={() => navigate(`/restaurant/${id}/reserve`)} className="rest-reserve-btn">
-            <Icon name="calendarPlus" size={17} color="#F5A524" /> {t('reserveTable')}
+            <Icon name="calendarPlus" size={17} color="var(--brand)" /> {t('reserveTable')}
           </button>
         )}
       </div>
@@ -350,8 +350,8 @@ export function RestaurantPage() {
                           <div className="review-card__stars">
                             {[1, 2, 3, 4, 5].map((n) => (
                               <Icon key={n} name="star" size={13}
-                                color={n <= rv.rating ? '#F5A524' : '#4A4A4E'}
-                                style={n <= rv.rating ? { fill: '#F5A524' } : {}} />
+                                color={n <= rv.rating ? 'var(--brand)' : '#4A4A4E'}
+                                style={n <= rv.rating ? { fill: 'var(--brand)' } : {}} />
                             ))}
                           </div>
                           {rv.comment && <div className="review-card__text">{rv.comment}</div>}
@@ -440,8 +440,8 @@ function ReviewSummary({ reviews }) {
         <div className="rev-sum__stars">
           {[1, 2, 3, 4, 5].map((n) => (
             <Icon key={n} name="star" size={12}
-              color={n <= Math.round(avg) ? '#F5A524' : '#4A4A4E'}
-              style={n <= Math.round(avg) ? { fill: '#F5A524' } : {}} />
+              color={n <= Math.round(avg) ? 'var(--brand)' : '#4A4A4E'}
+              style={n <= Math.round(avg) ? { fill: 'var(--brand)' } : {}} />
           ))}
         </div>
         <div className="rev-sum__count">{total} ta baho</div>

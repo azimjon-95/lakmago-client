@@ -108,8 +108,8 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
             <Icon
               name="heart"
               size={18}
-              color={isFav ? '#F5A524' : '#fff'}
-              style={isFav ? { fill: '#F5A524' } : {}}
+              color={isFav ? 'var(--brand)' : '#fff'}
+              style={isFav ? { fill: 'var(--brand)' } : {}}
             />
           </button>
           {dish.isHit && <div className="dish-modal__hit"><Icon name="flame" size={11} color="#fff" /> HIT</div>}
@@ -127,19 +127,19 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
             <div className="dish-modal__nutrition">
               {(dish.weight || dish.weightGram) && (
                 <span>
-                  <Icon name="scale" size={15} color="#A99C8C" />
+                  <Icon name="scale" size={15} color="var(--muted)" />
                   {dish.weight || `${dish.weightGram} ${t('gram')}`}
                 </span>
               )}
               {dish.calories > 0 && (
                 <span>
-                  <Icon name="flame" size={15} color="#E14B42" />
+                  <Icon name="flame" size={15} color="var(--danger)" />
                   {dish.calories} {t('calories')}
                 </span>
               )}
               {dish.prepMinutes > 0 && (
                 <span>
-                  <Icon name="clock" size={15} color="#A99C8C" />
+                  <Icon name="clock" size={15} color="var(--muted)" />
                   {dish.prepMinutes} daq
                 </span>
               )}
@@ -193,7 +193,7 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
                         {o.name}{o.price > 0 && <span className="dish-modal__option-price"> +{formatSomShort(o.price)}</span>}
                       </span>
                       {g.multiple ? (
-                        <span className={`dish-modal__check ${isSel ? 'is-sel' : ''}`}>{isSel && <Icon name="check" size={15} color="#2A1500" />}</span>
+                        <span className={`dish-modal__check ${isSel ? 'is-sel' : ''}`}>{isSel && <Icon name="check" size={15} color="var(--brand-text)" />}</span>
                       ) : (
                         <span className={`dish-modal__radio ${isSel ? 'is-sel' : ''}`} />
                       )}
@@ -206,9 +206,9 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
 
           <div className="dish-modal__footer">
             <div className="qty-control dish-modal__qty">
-              <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} aria-label="−"><Icon name="minus" size={18} color="#A99C8C" /></button>
+              <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} aria-label="−"><Icon name="minus" size={18} color="var(--muted)" /></button>
               <span className="qty-value">{quantity}</span>
-              <button onClick={() => setQuantity((q) => q + 1)} aria-label="+"><Icon name="plus" size={18} color="#F5A524" /></button>
+              <button onClick={() => setQuantity((q) => q + 1)} aria-label="+"><Icon name="plus" size={18} color="var(--brand)" /></button>
             </div>
             <button
               onClick={handleAdd}

@@ -95,7 +95,7 @@ export function SearchPage() {
       {/* Qidiruv qatori */}
       <div className="search-top">
         <div className="search-field">
-          <Icon name="search" size={18} color="#A99C8C" />
+          <Icon name="search" size={18} color="var(--muted)" />
           <input
             ref={inputRef}
             value={query}
@@ -105,7 +105,7 @@ export function SearchPage() {
           />
           {query && (
             <button onClick={() => setQuery('')} aria-label={t('close')}>
-              <Icon name="x" size={16} color="#A99C8C" />
+              <Icon name="x" size={16} color="var(--muted)" />
             </button>
           )}
         </div>
@@ -114,7 +114,7 @@ export function SearchPage() {
           className={`search-filter-btn ${activeCount ? 'is-active' : ''}`}
           aria-label="Filtr"
         >
-          <Icon name="filter" size={20} color={activeCount ? '#2A1500' : '#F7F2EA'} />
+          <Icon name="filter" size={20} color={activeCount ? 'var(--brand-text)' : 'var(--ink)'} />
           {activeCount > 0 && <span className="search-filter-btn__badge">{activeCount}</span>}
         </button>
       </div>
@@ -140,18 +140,18 @@ export function SearchPage() {
             const meta = SPECIALS.find((x) => x.id === s);
             return (
               <button key={s} onClick={() => setSpecials((p) => p.filter((x) => x !== s))} className="search-chip">
-                {meta?.label} <Icon name="x" size={12} color="#FFCE7A" />
+                {meta?.label} <Icon name="x" size={12} color="var(--brand-100)" />
               </button>
             );
           })}
           {maxTime && (
             <button onClick={() => setMaxTime(null)} className="search-chip">
-              {maxTime} daq <Icon name="x" size={12} color="#FFCE7A" />
+              {maxTime} daq <Icon name="x" size={12} color="var(--brand-100)" />
             </button>
           )}
           {sort !== 'default' && (
             <button onClick={() => setSort('default')} className="search-chip">
-              {SORTS.find((s) => s.id === sort)?.label} <Icon name="x" size={12} color="#FFCE7A" />
+              {SORTS.find((s) => s.id === sort)?.label} <Icon name="x" size={12} color="var(--brand-100)" />
             </button>
           )}
           <button onClick={reset} className="search-chip search-chip--reset">Tozalash</button>
@@ -164,7 +164,7 @@ export function SearchPage() {
           Array.from({ length: 3 }).map((_, i) => <RestaurantCardSkeleton key={i} />)
         ) : nothingFound ? (
           <div className="search-empty">
-            <Icon name="search" size={44} color="#7D7264" />
+            <Icon name="search" size={44} color="var(--muted-2)" />
             <div className="search-empty__title">Hech narsa topilmadi</div>
             <p className="search-empty__hint">Boshqa so'z bilan qidiring yoki filtrlarni o'zgartiring</p>
             {activeCount > 0 && (

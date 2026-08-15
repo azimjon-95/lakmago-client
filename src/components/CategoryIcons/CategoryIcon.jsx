@@ -110,7 +110,7 @@ const ART = {
   // Magazin (do'kon)
   magazin: (
     <>
-      <path d="M12 24h40l-3-9H15z" fill="#E85D3D" />
+      <path d="M12 24h40l-3-9H15z" fill="var(--appetite)" />
       <rect x="12" y="24" width="40" height="26" rx="3" fill="#F0DFC0" />
       <rect x="18" y="32" width="12" height="18" rx="2" fill="#C97B4A" />
       <rect x="34" y="32" width="12" height="10" rx="2" fill="#7FA0D8" />
@@ -124,7 +124,7 @@ const ART = {
       <path d="M21 30h20l-2 18a3 3 0 0 1-3 3h-10a3 3 0 0 1-3-3z" fill="#8B5A2B" />
       <ellipse cx="31" cy="30" rx="10" ry="2.5" fill="#C99A5B" />
       <path d="M42 28c4 0 6 2 6 5s-2 5-6 5" stroke="#F5EFE0" strokeWidth="3" fill="none" strokeLinecap="round" />
-      <path d="M27 18c0-2 1-3 1-5M33 18c0-2 1-3 1-5" stroke="#A99C8C" strokeWidth="2" strokeLinecap="round" />
+      <path d="M27 18c0-2 1-3 1-5M33 18c0-2 1-3 1-5" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" />
     </>
   ),
 };

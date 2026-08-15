@@ -179,7 +179,7 @@
   padding: 0 6px;
   border-radius: 999px;
   background: var(--brand);
-  color: #2A1500;
+  color: var(--brand-text);
   font-size: 12px; font-weight: 700;
 }
 .resv-basket__label { flex: 1; min-width: 0; font-size: 13.5px; color: var(--ink); }
@@ -198,8 +198,8 @@
 .resv-basket__del { padding: 4px; opacity: 0.8; }
 
 .resv-preorder-dish.is-picked {
-  border-color: rgba(245, 165, 36, 0.45);
-  background: rgba(245, 165, 36, 0.06);
+  border-color: rgba(255, 92, 0, 0.45);
+  background: rgba(255, 92, 0, 0.06);
 }
 .resv-preorder-empty {
   padding: 32px 16px; text-align: center;

@@ -120,7 +120,7 @@ export function AdStrip({ placement = 'home' }) {
                 <img src={img} alt="" className="ad-card__img" />
               ) : (
                 <div className="ad-card__img ad-card__img--empty">
-                  <Icon name="bag" size={22} color="#7D7264" />
+                  <Icon name="bag" size={22} color="var(--muted-2)" />
                 </div>
               )}
               <div className="ad-card__name">{name}</div>

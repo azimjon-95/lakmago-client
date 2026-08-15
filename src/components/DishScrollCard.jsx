@@ -38,7 +38,7 @@ export const DishScrollCard = memo(function DishScrollCard({
           className="dscard__add"
           aria-label={disabled ? 'Restoran yopiq' : '+'}
         >
-          <Icon name={disabled ? 'clock' : 'plus'} size={18} color="#2A1500" />
+          <Icon name={disabled ? 'clock' : 'plus'} size={18} color="var(--brand-text)" />
         </button>
       </div>
       <div className="dscard__name">{dish.name}</div>

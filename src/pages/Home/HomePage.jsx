@@ -128,11 +128,11 @@ export function HomePage() {
       <header className="home-header">
         <button onClick={() => (user.addresses.length ? setShowAddressSheet(true) : setShowAddressFlow(true))} className="home-header__addr">
           <span className="home-header__addr-label">
-            <Icon name="pin" size={12} color="#F5A524" /> {t('deliveryAddress')}
+            <Icon name="pin" size={12} color="var(--brand)" /> {t('deliveryAddress')}
           </span>
           <span className="home-header__addr-value">
             {defaultAddress ? `${defaultAddress.title}, ${defaultAddress.address}`.slice(0, 26) : t('address')}
-            <Icon name="chevronDown" size={13} color="#A99C8C" />
+            <Icon name="chevronDown" size={13} color="var(--muted)" />
           </span>
         </button>
         <div className="home-header__right">
@@ -142,7 +142,7 @@ export function HomePage() {
             className="home-header__icon-btn"
             aria-label={t('search')}
           >
-            <Icon name="search" size={19} color="#F7F2EA" />
+            <Icon name="search" size={19} color="var(--ink)" />
           </button>
           <LangSwitch compact />
         </div>

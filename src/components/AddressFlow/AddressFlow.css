@@ -178,7 +178,7 @@
   padding: 0 16px 4px;
 }
 .addr-search__quick .addr-search__current { padding: 12px; }
-.addr-search__current-icon--map { background: rgba(245, 165, 36, 0.12); }
+.addr-search__current-icon--map { background: rgba(255, 92, 0, 0.12); }
 
 /* ═══════════════════════════════════════════
    Karta orqali manzil tanlash
@@ -189,7 +189,7 @@
   position: relative;
   flex: 1;
   min-height: 0;
-  background: var(--surface-2, #1a1a1a);
+  background: var(--surface-2, #F4F5F7);
 }
 .map-picker__box { position: absolute; inset: 0; }
 

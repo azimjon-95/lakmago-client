@@ -32,7 +32,7 @@ export function FavoritesPage() {
     <div className="app-shell fav">
       <header className="fav-header">
         <button onClick={() => navigate(-1)} aria-label="Orqaga" className="fav-header__btn">
-          <Icon name="arrowLeft" size={22} color="#F7F2EA" />
+          <Icon name="arrowLeft" size={22} color="var(--ink)" />
         </button>
         <h1 className="fav-header__title">Sevimlilar</h1>
       </header>
@@ -40,7 +40,7 @@ export function FavoritesPage() {
       <div className="fav-body">
         {isEmpty ? (
           <div className="fav-empty">
-            <Icon name="heart" size={52} color="#7D7264" />
+            <Icon name="heart" size={52} color="var(--muted-2)" />
             <div className="fav-empty__title">Sevimlilar bo'sh</div>
             <p className="fav-empty__hint">
               Restoran yoki taom sahifasida ♥ tugmasini bosing — shu yerda saqlanadi

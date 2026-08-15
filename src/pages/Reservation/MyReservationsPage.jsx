@@ -53,7 +53,7 @@ export function MyReservationsPage() {
     <div className="app-shell">
       <header className="myresv-header">
         <button onClick={() => navigate(-1)} aria-label="Orqaga" className="myresv-header__btn">
-          <Icon name="arrowLeft" size={22} color="#F7F2EA" />
+          <Icon name="arrowLeft" size={22} color="var(--ink)" />
         </button>
         <h1 className="myresv-header__title">Bronlarim</h1>
       </header>
@@ -63,7 +63,7 @@ export function MyReservationsPage() {
           <div className="myresv-empty">Yuklanmoqda...</div>
         ) : list.length === 0 ? (
           <div className="myresv-empty">
-            <Icon name="calendarPlus" size={44} color="#7D7264" />
+            <Icon name="calendarPlus" size={44} color="var(--muted-2)" />
             <div className="myresv-empty__title">Bron yo'q</div>
             <p className="myresv-empty__hint">
               Restoran sahifasidan stol bron qilishingiz mumkin
@@ -79,10 +79,10 @@ export function MyReservationsPage() {
                   <span className={`myresv-card__status ${st.cls}`}>{st.label}</span>
                 </div>
                 <div className="myresv-card__row">
-                  <Icon name="clock" size={14} color="#A99C8C" />
+                  <Icon name="clock" size={14} color="var(--muted)" />
                   {r.date} · {r.time}
                   <span className="myresv-card__sep" />
-                  <Icon name="users" size={14} color="#A99C8C" />
+                  <Icon name="users" size={14} color="var(--muted)" />
                   {r.guests} kishi
                 </div>
                 {r.note && <div className="myresv-card__note">Izoh: {r.note}</div>}

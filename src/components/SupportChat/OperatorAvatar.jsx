@@ -6,8 +6,8 @@ export function OperatorAvatar({ size = 56, online = true }) {
       <defs>
         <clipPath id="op-clip"><circle cx="32" cy="32" r="32" /></clipPath>
         <linearGradient id="op-bg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FFCE7A" />
-          <stop offset="100%" stopColor="#F5A524" />
+          <stop offset="0%" stopColor="var(--brand-100)" />
+          <stop offset="100%" stopColor="var(--brand)" />
         </linearGradient>
       </defs>
 
@@ -16,7 +16,7 @@ export function OperatorAvatar({ size = 56, online = true }) {
         <rect width="64" height="64" fill="url(#op-bg)" />
 
         {/* Yelka / kiyim */}
-        <path d="M8 64c0-12 10.7-19 24-19s24 7 24 19H8z" fill="#2A1500" />
+        <path d="M8 64c0-12 10.7-19 24-19s24 7 24 19H8z" fill="var(--brand-text)" />
         <path d="M26 46c2 4 10 4 12 0l-2-4h-8l-2 4z" fill="#F0C9A0" />
 
         {/* Bo'yin */}
@@ -52,7 +52,7 @@ export function OperatorAvatar({ size = 56, online = true }) {
       {online && (
         <>
           <circle cx="52" cy="52" r="9" fill="#1C1815" />
-          <circle cx="52" cy="52" r="6" fill="#6FBF73" />
+          <circle cx="52" cy="52" r="6" fill="var(--success)" />
         </>
       )}
     </svg>

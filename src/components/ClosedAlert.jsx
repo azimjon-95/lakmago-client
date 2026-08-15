@@ -22,7 +22,7 @@ export function ClosedAlert({ info, onClose }) {
     <div className="closed-alert" onClick={onClose}>
       <div className="closed-alert__box" onClick={(e) => e.stopPropagation()}>
         <div className="closed-alert__icon">
-          <Icon name="clock" size={28} color="#E14B42" />
+          <Icon name="clock" size={28} color="var(--danger)" />
         </div>
 
         <h3 className="closed-alert__title">
@@ -35,7 +35,7 @@ export function ClosedAlert({ info, onClose }) {
 
         {info.hoursLabel && (
           <div className="closed-alert__hours">
-            <Icon name="clock" size={14} color="#A99C8C" />
+            <Icon name="clock" size={14} color="var(--muted)" />
             <span>Ish vaqti: {info.hoursLabel}</span>
           </div>
         )}

@@ -1,12 +1,12 @@
 .tg-only {
   position: fixed; inset: 0; z-index: 99999;
-  background: var(--canvas, #12100E);
+  background: var(--canvas, #FFFFFF);
   display: flex; align-items: center; justify-content: center;
   padding: 24px;
 }
 .tg-only__card {
   max-width: 360px; width: 100%; text-align: center;
-  background: var(--surface, #1C1815);
+  background: var(--surface, #FFFFFF);
   border: 1px solid var(--line, #332A22);
   border-radius: 24px;
   padding: 40px 28px;
@@ -14,24 +14,24 @@
 .tg-only__logo {
   width: 88px; height: 88px; margin: 0 auto 20px;
   border-radius: 24px;
-  background: linear-gradient(135deg, #F5A524, #FFCE7A);
+  background: linear-gradient(135deg, var(--brand), var(--brand-100));
   display: flex; align-items: center; justify-content: center;
   font-size: 44px;
 }
-.tg-only__title { font-size: 26px; font-weight: 800; color: var(--ink, #F7F2EA); margin: 0 0 12px; }
-.tg-only__text { font-size: 15px; color: var(--muted, #A99C8C); line-height: 1.6; margin-bottom: 28px; }
+.tg-only__title { font-size: 26px; font-weight: 800; color: var(--ink, var(--ink)); margin: 0 0 12px; }
+.tg-only__text { font-size: 15px; color: var(--muted, var(--muted)); line-height: 1.6; margin-bottom: 28px; }
 .tg-only__btn {
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  background: #F5A524; color: #2A1500;
+  background: var(--brand); color: var(--brand-text);
   text-decoration: none; font-weight: 700; font-size: 16px;
   padding: 15px; border-radius: 14px;
 }
 .tg-only__btn:active { transform: scale(0.98); }
-.tg-only__hint { font-size: 13px; color: var(--muted, #A99C8C); margin-top: 16px; }
+.tg-only__hint { font-size: 13px; color: var(--muted, var(--muted)); margin-top: 16px; }
 
 .tg-only__link {
   display: inline-block; margin-top: 16px;
-  color: var(--muted, #A99C8C); font-size: 13px;
+  color: var(--muted, var(--muted)); font-size: 13px;
   text-decoration: underline;
 }
-.tg-only__link:active { color: var(--ink, #F7F2EA); }
+.tg-only__link:active { color: var(--ink, var(--ink)); }

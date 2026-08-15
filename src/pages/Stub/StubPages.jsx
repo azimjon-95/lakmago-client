@@ -7,7 +7,7 @@ function Stub({ icon, title, text }) {
   return (
     <div className="app-shell stub">
       <div className="empty-state">
-        <Icon name={icon} size={48} color="#A99C8C" />
+        <Icon name={icon} size={48} color="var(--muted)" />
         <div className="empty-state__title">{title}</div>
         <p className="empty-state__hint">{text}</p>
       </div>

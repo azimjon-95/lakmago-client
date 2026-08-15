@@ -40,7 +40,7 @@ export const RestaurantCard = memo(function RestaurantCard({ restaurant: r }) {
         ) : (
           <>
             {style && <div className="rcard__banner-glow" />}
-            <Icon name={r.icon} size={46} color={style ? style.iconColor : '#F5A524'} strokeWidth={style ? 1.4 : 2} className="rcard__icon" />
+            <Icon name={r.icon} size={46} color={style ? style.iconColor : 'var(--brand)'} strokeWidth={style ? 1.4 : 2} className="rcard__icon" />
           </>
         )}
         {r.discount && <div className="rcard__tag rcard__tag--discount">−{r.discount}%</div>}
@@ -56,7 +56,7 @@ export const RestaurantCard = memo(function RestaurantCard({ restaurant: r }) {
           <div className="rcard__name">{r.name}</div>
           {r.rating > 0 && (
             <div className="rcard__rating">
-              <Icon name="star" size={13} color="#FFCE7A" /> {r.rating.toFixed(1)}
+              <Icon name="star" size={13} color="var(--brand-100)" /> {r.rating.toFixed(1)}
             </div>
           )}
         </div>
@@ -65,7 +65,7 @@ export const RestaurantCard = memo(function RestaurantCard({ restaurant: r }) {
         {/* Ish vaqti va hozirgi holat */}
         {hours && (
           <div className="rcard__hours">
-            <Icon name="clock" size={12} color={open ? '#6FBF73' : '#E14B42'} />
+            <Icon name="clock" size={12} color={open ? 'var(--success)' : 'var(--danger)'} />
             <span>{hours}</span>
             <span className={`rcard__status ${open ? 'is-open' : 'is-closed'}`}>
               {open ? 'Ochiq' : 'Yopiq'}
@@ -76,15 +76,15 @@ export const RestaurantCard = memo(function RestaurantCard({ restaurant: r }) {
           {r.discount > 0 && (
             <>
               <span className="rcard__promo">
-                <Icon name="discount" size={13} color="#E85D3D" /> Chegirma −{r.discount}%
+                <Icon name="discount" size={13} color="var(--appetite)" /> Chegirma −{r.discount}%
               </span>
               <span className="rcard__sep" />
             </>
           )}
           {freeDelivery ? (
-            <span className="rcard__free"><Icon name="bike" size={13} color="#6FBF73" /> {t('freeDelivery')}</span>
+            <span className="rcard__free"><Icon name="bike" size={13} color="var(--success)" /> {t('freeDelivery')}</span>
           ) : (
-            <span className="rcard__meta-item"><Icon name="bike" size={13} color="#A99C8C" /> {formatSomShort(r.deliveryFee)} {t('som')}</span>
+            <span className="rcard__meta-item"><Icon name="bike" size={13} color="var(--muted)" /> {formatSomShort(r.deliveryFee)} {t('som')}</span>
           )}
         </div>
       </div>

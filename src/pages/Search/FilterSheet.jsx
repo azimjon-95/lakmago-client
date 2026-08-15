@@ -5,10 +5,10 @@ import { CATEGORIES as CATS } from '@/data/categories';
 
 // Maxsus istaklar (Uzum uslubida)
 export const SPECIALS = [
-  { id: 'discount', label: 'Chegirmalar', icon: 'discount', color: '#E85D3D' },
-  { id: 'free', label: 'Bepul yetkazish', icon: 'bike', color: '#6FBF73' },
-  { id: 'top', label: 'Yuqori reyting', icon: 'star', color: '#FFCE7A' },
-  { id: 'fresh', label: 'Yangi', icon: 'flame', color: '#F5A524' },
+  { id: 'discount', label: 'Chegirmalar', icon: 'discount', color: 'var(--appetite)' },
+  { id: 'free', label: 'Bepul yetkazish', icon: 'bike', color: 'var(--success)' },
+  { id: 'top', label: 'Yuqori reyting', icon: 'star', color: 'var(--brand-100)' },
+  { id: 'fresh', label: 'Yangi', icon: 'flame', color: 'var(--brand)' },
 ];
 
 // Yetkazish vaqti
@@ -48,7 +48,7 @@ export function FilterSheet({
         <div className="filter-sheet__header">
           <h2 className="filter-sheet__title">Filtr</h2>
           <button onClick={onClose} className="filter-sheet__close" aria-label="Yopish">
-            <Icon name="x" size={20} color="#A99C8C" />
+            <Icon name="x" size={20} color="var(--muted)" />
           </button>
         </div>
 
@@ -114,7 +114,7 @@ export function FilterSheet({
                   className={`filter-sort ${sort === s.id ? 'is-active' : ''}`}
                 >
                   <span>{s.label}</span>
-                  {sort === s.id && <Icon name="check" size={18} color="#F5A524" />}
+                  {sort === s.id && <Icon name="check" size={18} color="var(--brand)" />}
                 </button>
               ))}
             </div>

@@ -117,7 +117,7 @@ export function FoodPage() {
     return (
       <div className="app-shell food">
         <div className="food-empty">
-          <Icon name="search" size={52} color="#7D7264" />
+          <Icon name="search" size={52} color="var(--muted-2)" />
           <div className="food-empty__title">Taom topilmadi</div>
           <p className="food-empty__hint">
             Bu taom o'chirilgan yoki havola noto'g'ri bo'lishi mumkin
@@ -146,8 +146,8 @@ export function FoodPage() {
           <button onClick={() => { haptic(); toggleFavorite('dish', String(id)); }} className="food-photo__btn">
             <Icon
               name="heart" size={18}
-              color={isFav ? '#F5A524' : '#fff'}
-              style={isFav ? { fill: '#F5A524' } : {}}
+              color={isFav ? 'var(--brand)' : '#fff'}
+              style={isFav ? { fill: 'var(--brand)' } : {}}
             />
           </button>
           <button onClick={copy} className="food-photo__btn">
@@ -184,7 +184,7 @@ export function FoodPage() {
             onClick={() => navigate(`/restaurant/${restaurant.id || restaurant._id}`)}
             className="food-rest"
           >
-            <Icon name="bag" size={17} color="#F5A524" />
+            <Icon name="bag" size={17} color="var(--brand)" />
             <div className="food-rest__body">
               <div className="food-rest__name">{restaurant.name}</div>
               <div className="food-rest__meta">
@@ -192,7 +192,7 @@ export function FoodPage() {
                 {restaurant.rating > 0 && ` · ★ ${restaurant.rating.toFixed(1)}`}
               </div>
             </div>
-            <Icon name="chevronRight" size={18} color="#A99C8C" />
+            <Icon name="chevronRight" size={18} color="var(--muted)" />
           </button>
         )}
 
@@ -200,13 +200,13 @@ export function FoodPage() {
         {(dish.weight || dish.calories > 0 || dish.prepMinutes > 0) && (
           <div className="food-facts">
             {dish.weight && (
-              <span><Icon name="scale" size={14} color="#A99C8C" /> {dish.weight}</span>
+              <span><Icon name="scale" size={14} color="var(--muted)" /> {dish.weight}</span>
             )}
             {dish.calories > 0 && (
-              <span><Icon name="flame" size={14} color="#E14B42" /> {dish.calories} ккал</span>
+              <span><Icon name="flame" size={14} color="var(--danger)" /> {dish.calories} ккал</span>
             )}
             {dish.prepMinutes > 0 && (
-              <span><Icon name="clock" size={14} color="#A99C8C" /> {dish.prepMinutes} daq</span>
+              <span><Icon name="clock" size={14} color="var(--muted)" /> {dish.prepMinutes} daq</span>
             )}
           </div>
         )}

@@ -141,7 +141,7 @@ export function ReservationPage() {
   if (step === 'done') {
     return (
       <div className="app-shell resv-done">
-        <div className="resv-done__icon"><Icon name="calendarPlus" size={32} color="#F5A524" /></div>
+        <div className="resv-done__icon"><Icon name="calendarPlus" size={32} color="var(--brand)" /></div>
         <div className="resv-done__title">{t('reservationSent')}</div>
         <p className="resv-done__text">
           {restaurant?.name} · {dateLabel}, {time}, {guests} {t('guests').toLowerCase()}.
@@ -170,7 +170,7 @@ export function ReservationPage() {
             o'tilsa, stek o'sib ketib, boshqa sahifalardagi
             "orqaga" tugmalari kutilmagan joyga olib borardi. */}
         <button onClick={() => navigate(`/restaurant/${id}`, { replace: true })} aria-label={t('back')}>
-          <Icon name="arrowLeft" size={22} color="#F7F2EA" />
+          <Icon name="arrowLeft" size={22} color="var(--ink)" />
         </button>
         <h1>{t('reserveTable')}</h1>
       </header>
@@ -179,12 +179,12 @@ export function ReservationPage() {
         {restaurant && (
           <div className="resv-restaurant">
             <div className="resv-restaurant__icon" style={{ background: restaurant.tint }}>
-              <Icon name={restaurant.icon} size={26} color="#F5A524" />
+              <Icon name={restaurant.icon} size={26} color="var(--brand)" />
             </div>
             <div>
               <div className="resv-restaurant__name">{restaurant.name}</div>
               <div className="resv-restaurant__meta">
-                <Icon name="star" size={12} color="#F5A524" /> {restaurant.rating.toFixed(1)} · Toshkent
+                <Icon name="star" size={12} color="var(--brand)" /> {restaurant.rating.toFixed(1)} · Toshkent
               </div>
             </div>
           </div>
@@ -212,14 +212,14 @@ export function ReservationPage() {
 
         <div className="resv-label">{t('guests')}</div>
         <div className="resv-guests">
-          <span className="resv-guests__label"><Icon name="users" size={16} color="#A99C8C" /> {t('guests')}</span>
+          <span className="resv-guests__label"><Icon name="users" size={16} color="var(--muted)" /> {t('guests')}</span>
           <div className="qty-control">
             <button onClick={() => setGuests((g) => Math.max(1, g - 1))} className="qty-btn qty-btn--minus" aria-label="−">
-              <Icon name="minus" size={16} color="#A99C8C" />
+              <Icon name="minus" size={16} color="var(--muted)" />
             </button>
             <span className="qty-value">{guests}</span>
             <button onClick={() => setGuests((g) => g + 1)} className="qty-btn qty-btn--plus" aria-label="+">
-              <Icon name="plus" size={16} color="#2A1500" />
+              <Icon name="plus" size={16} color="var(--brand-text)" />
             </button>
           </div>
         </div>

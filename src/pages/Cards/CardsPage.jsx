@@ -10,7 +10,7 @@ const BRANDS = {
   humo: { label: 'Humo', color: '#00B2A9' },
   visa: { label: 'Visa', color: '#1A1F71' },
   mastercard: { label: 'Mastercard', color: '#EB001B' },
-  card: { label: 'Karta', color: '#7D7264' },
+  card: { label: 'Karta', color: 'var(--muted-2)' },
 };
 
 // Karta raqamini 4 talab ajratamiz
@@ -76,7 +76,7 @@ export function CardsPage() {
     <div className="app-shell cards">
       <header className="cards-header">
         <button onClick={() => navigate(-1)} aria-label="Orqaga" className="cards-header__btn">
-          <Icon name="arrowLeft" size={22} color="#F7F2EA" />
+          <Icon name="arrowLeft" size={22} color="var(--ink)" />
         </button>
         <h1 className="cards-header__title">To'lov kartalari</h1>
       </header>
@@ -110,7 +110,7 @@ export function CardsPage() {
                       </button>
                     )}
                     <button onClick={() => remove(c._id)} className="card-item__btn card-item__btn--del">
-                      <Icon name="trash" size={15} color="#E14B42" />
+                      <Icon name="trash" size={15} color="var(--danger)" />
                     </button>
                   </div>
                 </div>
@@ -119,7 +119,7 @@ export function CardsPage() {
 
             {cards.length === 0 && !adding && (
               <div className="cards-empty">
-                <Icon name="card" size={48} color="#7D7264" />
+                <Icon name="card" size={48} color="var(--muted-2)" />
                 <div className="cards-empty__title">Karta qo'shilmagan</div>
                 <p className="cards-empty__hint">
                   Karta qo'shsangiz to'lovda tanlashingiz mumkin
@@ -188,7 +188,7 @@ export function CardsPage() {
                 </datalist>
 
                 <p className="card-form__note">
-                  <Icon name="info" size={13} color="#6FBF73" /> Xavfsizlik: to'liq raqam
+                  <Icon name="info" size={13} color="var(--success)" /> Xavfsizlik: to'liq raqam
                   saqlanmaydi, faqat oxirgi 4 raqam
                 </p>
 
@@ -205,7 +205,7 @@ export function CardsPage() {
               </div>
             ) : (
               <button onClick={() => { haptic(); setAdding(true); }} className="cards-add">
-                <Icon name="plus" size={18} color="#F5A524" /> Karta qo'shish
+                <Icon name="plus" size={18} color="var(--brand)" /> Karta qo'shish
               </button>
             )}
           </>

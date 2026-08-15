@@ -83,14 +83,14 @@ export function PreOrderScreen({
       <div className="resv-preorder-sticky">
         <header className="page-header">
           <button onClick={onBack} aria-label={t('back')}>
-            <Icon name="arrowLeft" size={22} color="#F7F2EA" />
+            <Icon name="arrowLeft" size={22} color="var(--ink)" />
           </button>
           <h1>{t('extras')}</h1>
         </header>
 
         <div className="resv-preorder-hint">
           <div className="resv-preorder-hint__title">
-            <Icon name="calendarPlus" size={18} color="#F5A524" />
+            <Icon name="calendarPlus" size={18} color="var(--brand)" />
             {reservationInfo.dateLabel}, {reservationInfo.time}
           </div>
           <div className="resv-preorder-hint__text">
@@ -147,11 +147,11 @@ export function PreOrderScreen({
                     ) : (
                       <div className="qty-control">
                         <button onClick={() => setQty(id, qty - 1)} className="qty-btn qty-btn--minus" aria-label="−">
-                          <Icon name="minus" size={16} color="#A99C8C" />
+                          <Icon name="minus" size={16} color="var(--muted)" />
                         </button>
                         <span className="qty-value">{qty}</span>
                         <button onClick={() => setQty(id, qty + 1)} className="qty-btn qty-btn--plus" aria-label="+">
-                          <Icon name="plus" size={16} color="#2A1500" />
+                          <Icon name="plus" size={16} color="var(--brand-text)" />
                         </button>
                       </div>
                     )}
@@ -178,7 +178,7 @@ export function PreOrderScreen({
               <span className="resv-basket__count">{count}</span>
               <span className="resv-basket__label">Tanlangan taomlar</span>
               <span className="resv-basket__sum">{formatSom(total)}</span>
-              <Icon name="chevronDown" size={16} color="#A99C8C"
+              <Icon name="chevronDown" size={16} color="var(--muted)"
                 style={{ transform: summaryOpen ? 'rotate(180deg)' : 'none', transition: 'transform .25s' }} />
             </button>
 
@@ -196,7 +196,7 @@ export function PreOrderScreen({
                       className="resv-basket__del"
                       aria-label="O'chirish"
                     >
-                      <Icon name="trash" size={14} color="#E14B42" />
+                      <Icon name="trash" size={14} color="var(--danger)" />
                     </button>
                   </div>
                 ))}

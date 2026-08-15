@@ -98,7 +98,7 @@
 /* ===== Referral karta ===== */
 .referral-card {
   background: linear-gradient(135deg, var(--brand-tint), var(--surface));
-  border: 1px solid rgba(245, 165, 36, 0.28);
+  border: 1px solid rgba(255, 92, 0, 0.28);
   border-radius: 16px;
   padding: 16px;
   margin: 0 16px 14px;
@@ -133,15 +133,15 @@
 
 /* ============ PREMIUM PROFIL ============ */
 
-/* Hero — gradient fon, yumshoq yorug'lik */
+/* Hero — yorug' fon, yumshoq iliq soya */
 .profile-hero {
   position: relative;
   margin: 0 16px 16px;
   padding: 22px 18px 16px;
   border-radius: 22px;
   background:
-    radial-gradient(120% 100% at 50% 0%, #4A3216 0%, #2A1D0E 55%, #1C1815 100%);
-  border: 1px solid rgba(245, 165, 36, 0.18);
+    radial-gradient(120% 100% at 50% 0%, #FFF1E8 0%, #FFF8F3 55%, #FFFFFF 100%);
+  border: 1px solid rgba(255, 92, 0, 0.16);
   text-align: center;
   overflow: hidden;
 }
@@ -151,7 +151,7 @@
   top: -60px; left: 50%;
   width: 240px; height: 240px;
   transform: translateX(-50%);
-  background: radial-gradient(circle, rgba(245,165,36,0.28) 0%, transparent 68%);
+  background: radial-gradient(circle, rgba(255,92,0,0.12) 0%, transparent 68%);
   pointer-events: none;
 }
 
@@ -160,13 +160,13 @@
   width: 72px; height: 72px;
   margin: 0 auto 12px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--brand) 0%, #FFCE7A 100%);
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-600) 100%);
   display: flex; align-items: center; justify-content: center;
   font-size: 30px; font-weight: 700; color: var(--brand-text);
   overflow: hidden;
   box-shadow:
-    0 0 0 3px rgba(245, 165, 36, 0.22),
-    0 10px 28px rgba(0, 0, 0, 0.45);
+    0 0 0 3px rgba(255, 92, 0, 0.16),
+    0 10px 24px rgba(255, 92, 0, 0.18);
 }
 .profile-hero__avatar img {
   width: 100%; height: 100%; object-fit: cover; display: block;

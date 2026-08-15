@@ -124,7 +124,7 @@ export function MapAddressPicker({ onPick, onBack }) {
     <div className="addrflow addrflow--map">
       <div className="addrflow__header">
         <button onClick={onBack} className="addrflow__back-btn" aria-label="Orqaga">
-          <Icon name="arrowLeft" size={22} color="#F7F2EA" />
+          <Icon name="arrowLeft" size={22} color="var(--ink)" />
         </button>
         <h3 className="addrflow__header-title">Kartadan tanlang</h3>
       </div>
@@ -140,7 +140,7 @@ export function MapAddressPicker({ onPick, onBack }) {
 
         {status === 'error' && (
           <div className="map-picker__overlay">
-            <Icon name="pin" size={32} color="#A99C8C" />
+            <Icon name="pin" size={32} color="var(--muted)" />
             <p>{error}</p>
           </div>
         )}
@@ -149,7 +149,7 @@ export function MapAddressPicker({ onPick, onBack }) {
           <>
             {/* Qotib turuvchi igna — karta suriladi, igna markazda qoladi */}
             <div className="map-picker__pin">
-              <Icon name="pin" size={40} color="#F5A524" strokeWidth={1.5} />
+              <Icon name="pin" size={40} color="var(--brand)" strokeWidth={1.5} />
               <span className="map-picker__pin-shadow" />
             </div>
 
@@ -160,7 +160,7 @@ export function MapAddressPicker({ onPick, onBack }) {
               aria-label="Joriy joylashuv"
             >
               {locating ? <span className="spinner spinner--sm" /> : (
-                <Icon name="navigation" size={20} color="#F5A524" />
+                <Icon name="navigation" size={20} color="var(--brand)" />
               )}
             </button>
           </>
@@ -186,7 +186,7 @@ export function MapAddressPicker({ onPick, onBack }) {
           disabled={status !== 'ready' || resolving}
           className="addrflow__btn-primary"
         >
-          <Icon name="check" size={18} color="#2A1500" />
+          <Icon name="check" size={18} color="var(--brand-text)" />
           Shu manzilni tanlash
         </button>
       </div>

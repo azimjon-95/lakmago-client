@@ -38,7 +38,7 @@ export function CartBar() {
       {/* Bepul yetkazish progress — undovchi */}
       <div className="cart-bar-promo">
         {freeReached ? (
-          <span className="cart-bar-promo__free"><Icon name="gift" size={14} color="#6FBF73" /> {t('freeDelivery')} qo'lga kiritildi!</span>
+          <span className="cart-bar-promo__free"><Icon name="gift" size={14} color="var(--success)" /> {t('freeDelivery')} qo'lga kiritildi!</span>
         ) : (
           <span className="cart-bar-promo__text">
             {t('freeDelivery')}gacha <b>{formatSomShort(remaining)} {t('som')}</b>

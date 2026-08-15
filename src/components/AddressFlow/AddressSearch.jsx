@@ -46,13 +46,13 @@ export function AddressSearch({ onPick, onMap, onBack }) {
     <div className="addrflow addrflow--search">
       <div className="addrflow__header">
         <button onClick={onBack} className="addrflow__back-btn" aria-label="Orqaga">
-          <Icon name="arrowLeft" size={22} color="#F7F2EA" />
+          <Icon name="arrowLeft" size={22} color="var(--ink)" />
         </button>
         <h3 className="addrflow__header-title">Qayerga yetkazib berilsin</h3>
       </div>
 
       <div className="addr-search__field">
-        <Icon name="search" size={18} color="#A99C8C" />
+        <Icon name="search" size={18} color="var(--muted)" />
         <input
           ref={inputRef}
           value={query}
@@ -62,7 +62,7 @@ export function AddressSearch({ onPick, onMap, onBack }) {
         />
         {query && (
           <button onClick={() => setQuery('')} aria-label="Tozalash">
-            <Icon name="x" size={16} color="#A99C8C" />
+            <Icon name="x" size={16} color="var(--muted)" />
           </button>
         )}
       </div>
@@ -71,7 +71,7 @@ export function AddressSearch({ onPick, onMap, onBack }) {
       <div className="addr-search__quick">
         <button onClick={useCurrent} disabled={detecting} className="addr-search__current">
           <div className="addr-search__current-icon">
-            <Icon name="navigation" size={18} color="#F5A524" />
+            <Icon name="navigation" size={18} color="var(--brand)" />
           </div>
           <span>{detecting ? 'Aniqlanmoqda...' : 'Joriy joylashuvim'}</span>
         </button>
@@ -82,7 +82,7 @@ export function AddressSearch({ onPick, onMap, onBack }) {
         */}
         <button onClick={() => { haptic(); onMap(); }} className="addr-search__current">
           <div className="addr-search__current-icon addr-search__current-icon--map">
-            <Icon name="pin" size={18} color="#F5A524" />
+            <Icon name="pin" size={18} color="var(--brand)" />
           </div>
           <span>Karta orqali tanlash</span>
         </button>
@@ -96,7 +96,7 @@ export function AddressSearch({ onPick, onMap, onBack }) {
         )}
         {results.map((r, i) => (
           <button key={i} onClick={() => { haptic(); onPick(r); }} className="addr-result">
-            <Icon name="pin" size={18} color="#A99C8C" />
+            <Icon name="pin" size={18} color="var(--muted)" />
             <div className="addr-result__body">
               <div className="addr-result__street">{r.street}</div>
               {r.city && <div className="addr-result__city">{r.city}</div>}

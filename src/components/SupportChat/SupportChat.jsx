@@ -147,7 +147,7 @@ export function SupportChat() {
                 )}
               </div>
             </div>
-            <button className="support-chat__close" onClick={() => setOpen(false)} aria-label={t('close')}><Icon name="x" size={18} color="#A99C8C" /></button>
+            <button className="support-chat__close" onClick={() => setOpen(false)} aria-label={t('close')}><Icon name="x" size={18} color="var(--muted)" /></button>
           </div>
 
           <div className="support-chat__body" ref={bodyRef}>
@@ -166,7 +166,7 @@ export function SupportChat() {
               placeholder={t('chatPlaceholder')}
             />
             <button onClick={send} aria-label={t('send')} className="support-chat__send">
-              <Icon name="telegram" size={20} color="#2A1500" />
+              <Icon name="telegram" size={20} color="var(--brand-text)" />
             </button>
           </div>
         </div>

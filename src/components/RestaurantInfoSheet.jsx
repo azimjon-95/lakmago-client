@@ -26,7 +26,7 @@ export function RestaurantInfoSheet({ restaurant, onClose }) {
       <div className="rinfo-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="rinfo-sheet__grabber" />
         <button onClick={onClose} className="rinfo-sheet__close" aria-label="Yopish">
-          <Icon name="x" size={18} color="#A99C8C" />
+          <Icon name="x" size={18} color="var(--muted)" />
         </button>
 
         <div className="rinfo-body">
@@ -34,7 +34,7 @@ export function RestaurantInfoSheet({ restaurant, onClose }) {
 
           {/* Hozirgi holat — eng kerakli ma'lumot yuqorida */}
           <div className={`rinfo-status ${isOpen ? 'is-open' : 'is-closed'}`}>
-            <Icon name="clock" size={16} color={isOpen ? '#6FBF73' : '#E14B42'} />
+            <Icon name="clock" size={16} color={isOpen ? 'var(--success)' : 'var(--danger)'} />
             <span>
               {isOpen ? 'Hozir ochiq' : 'Hozir yopiq'}
               {hoursLabel && ` · ${hoursLabel}`}

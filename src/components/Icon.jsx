@@ -20,12 +20,16 @@ export function Icon({ name, size = 20, color = 'currentColor', strokeWidth = 2,
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke={color}
+      // currentColor — CSS `color` orqali beriladi (pastda). Bu
+      // color="var(--ink)" kabi CSS o'zgaruvchilarini xavfsiz
+      // qabul qiladi: xom SVG atributi sifatida var() har doim
+      // ham ishlay bermaydi, lekin CSS `style.color` orqali
+      // ALBATTA to'g'ri hisoblanadi.
+      stroke="currentColor"
       strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
-      // color — to'ldirilgan ikonlar (fill: currentColor) uchun kerak
       style={{ flexShrink: 0, color, ...style }}
       aria-hidden="true">
       

@@ -44,7 +44,7 @@ export function ProfilePage() {
   return (
     <div className="app-shell profile">
       <header className="page-header">
-        <button onClick={() => navigate('/')} aria-label={t('back')}><Icon name="arrowLeft" size={22} color="#F7F2EA" /></button>
+        <button onClick={() => navigate('/')} aria-label={t('back')}><Icon name="arrowLeft" size={22} color="var(--ink)" /></button>
         <h1>{t('profile')}</h1>
       </header>
 
@@ -104,21 +104,21 @@ export function ProfilePage() {
       <div className="profile-section">
         <div className="profile-list">
           <button onClick={() => navigate('/favorites')} className="profile-row">
-            <Icon name="heart" size={18} color="#F5A524" />
+            <Icon name="heart" size={18} color="var(--brand)" />
             <div className="profile-row__body">
               <div className="profile-row__value">Sevimlilar</div>
               <div className="profile-row__label">Saqlangan taom va restoranlar</div>
             </div>
-            <Icon name="chevronRight" size={17} color="#A99C8C" />
+            <Icon name="chevronRight" size={17} color="var(--muted)" />
           </button>
 
           <button onClick={() => navigate('/my-reservations')} className="profile-row">
-            <Icon name="calendarPlus" size={18} color="#F5A524" />
+            <Icon name="calendarPlus" size={18} color="var(--brand)" />
             <div className="profile-row__body">
               <div className="profile-row__value">Bronlarim</div>
               <div className="profile-row__label">Stol bronlari tarixi</div>
             </div>
-            <Icon name="chevronRight" size={17} color="#A99C8C" />
+            <Icon name="chevronRight" size={17} color="var(--muted)" />
           </button>
         </div>
       </div>
@@ -138,12 +138,12 @@ export function ProfilePage() {
           </div>
         ) : (
           <button onClick={() => { setFirstName(user.firstName); setLastName(user.lastName); setEditingField('name'); }} className="profile-row">
-            <Icon name="edit" size={18} color="#A99C8C" />
+            <Icon name="edit" size={18} color="var(--muted)" />
             <div className="profile-row__body">
               <div className="profile-row__value">{user.firstName} {user.lastName}</div>
               <div className="profile-row__label">{t('profile')}</div>
             </div>
-            <Icon name="chevronRight" size={18} color="#A99C8C" />
+            <Icon name="chevronRight" size={18} color="var(--muted)" />
           </button>
         )}
 
@@ -157,12 +157,12 @@ export function ProfilePage() {
           </div>
         ) : (
           <button onClick={() => { setPhone(user.phone || ''); setEditingField('phone'); }} className={`profile-row ${user.phone ? '' : 'profile-row--required'}`}>
-            <Icon name="phone" size={18} color={user.phone ? '#A99C8C' : '#F5A524'} />
+            <Icon name="phone" size={18} color={user.phone ? 'var(--muted)' : 'var(--brand)'} />
             <div className="profile-row__body">
               <div className={`profile-row__value ${user.phone ? '' : 'profile-row__value--accent'}`}>{user.phone || t('empty')}</div>
               <div className="profile-row__label">Telefon</div>
             </div>
-            <Icon name="chevronRight" size={17} color="#A99C8C" />
+            <Icon name="chevronRight" size={17} color="var(--muted)" />
           </button>
         )}
         </div>
@@ -175,7 +175,7 @@ export function ProfilePage() {
           {user.addresses.length === 0 && <div className="profile-addresses__empty">{t('empty')}</div>}
           {user.addresses.map((a) => (
             <div key={a.id} className={`profile-address ${a.id === user.defaultAddressId ? 'is-default' : ''}`}>
-              <Icon name="pin" size={18} color={a.id === user.defaultAddressId ? '#F5A524' : '#A99C8C'} />
+              <Icon name="pin" size={18} color={a.id === user.defaultAddressId ? 'var(--brand)' : 'var(--muted)'} />
               <div className="profile-address__body">
                 <div className="profile-address__title">
                   {a.title}
@@ -186,7 +186,7 @@ export function ProfilePage() {
               {a.id !== user.defaultAddressId && (
                 <button onClick={() => setDefaultAddress(a.id)} className="profile-address__set">{t('save')}</button>
               )}
-              <button onClick={() => removeAddress(a.id)} aria-label={t('close')}><Icon name="trash" size={16} color="#E14B42" /></button>
+              <button onClick={() => removeAddress(a.id)} aria-label={t('close')}><Icon name="trash" size={16} color="var(--danger)" /></button>
             </div>
           ))}
         </div>
@@ -206,7 +206,7 @@ export function ProfilePage() {
           </div>
         ) : (
           <button onClick={() => setShowAddAddress(true)} className="profile-add-address">
-            <Icon name="plus" size={16} color="#A99C8C" /> {t('add')}
+            <Icon name="plus" size={16} color="var(--muted)" /> {t('add')}
           </button>
         )}
       </div>
@@ -255,7 +255,7 @@ function ReferralCard() {
     <div className="referral-card">
       <div className="referral-card__head">
         <div className="referral-card__title">
-          <Icon name="users" size={18} color="#F5A524" /> Do'stlarni taklif qiling
+          <Icon name="users" size={18} color="var(--brand)" /> Do'stlarni taklif qiling
         </div>
         {info?.reward > 0 && (
           <div className="referral-card__badge">+{som(info.reward)} so'm</div>
@@ -281,10 +281,10 @@ function ReferralCard() {
       {/* Amallar */}
       <div className="referral-card__actions">
         <button onClick={share} className="referral-card__share">
-          <Icon name="send" size={16} color="#2A1500" /> Do'stlarga yuborish
+          <Icon name="send" size={16} color="var(--brand-text)" /> Do'stlarga yuborish
         </button>
         <button onClick={copy} className="referral-card__copy">
-          <Icon name={copied ? 'check' : 'copy'} size={16} color="#F7F2EA" />
+          <Icon name={copied ? 'check' : 'copy'} size={16} color="var(--ink)" />
         </button>
       </div>
     </div>
@@ -297,19 +297,19 @@ const CARD_STYLES = {
   humo: { grad: 'linear-gradient(135deg, #005E58 0%, #00B2A9 100%)', label: 'Humo' },
   visa: { grad: 'linear-gradient(135deg, #12175E 0%, #2A3BA8 100%)', label: 'VISA' },
   mastercard: { grad: 'linear-gradient(135deg, #7A0D12 0%, #EB4B2A 100%)', label: 'Mastercard' },
-  card: { grad: 'linear-gradient(135deg, #3D2A10 0%, #6B4A1C 100%)', label: 'Karta' },
+  card: { grad: 'linear-gradient(135deg, var(--brand) 0%, var(--brand-600) 100%)', label: 'Karta' },
 };
 
 function CardsStrip({ cards, onManage }) {
   if (!cards.length) {
     return (
       <button onClick={onManage} className="pcards-empty">
-        <Icon name="card" size={20} color="#F5A524" />
+        <Icon name="card" size={20} color="var(--brand)" />
         <div className="pcards-empty__body">
           <div className="pcards-empty__title">To'lov kartasi qo'shing</div>
           <div className="pcards-empty__hint">To'lovda tezroq bo'ladi</div>
         </div>
-        <Icon name="plus" size={18} color="#F5A524" />
+        <Icon name="plus" size={18} color="var(--brand)" />
       </button>
     );
   }
@@ -339,7 +339,7 @@ function CardsStrip({ cards, onManage }) {
 
         {/* Qo'shish kartasi */}
         <button onClick={onManage} className="pcard pcard--add">
-          <Icon name="plus" size={24} color="#F5A524" />
+          <Icon name="plus" size={24} color="var(--brand)" />
           <span>Qo'shish</span>
         </button>
       </div>

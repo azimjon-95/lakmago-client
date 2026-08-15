@@ -38,7 +38,7 @@ export function RestaurantLocationMap({ restaurant }) {
               className="resv-map-full__close"
               aria-label="Yopish"
             >
-              <Icon name="x" size={20} color="#F7F2EA" />
+              <Icon name="x" size={20} color="var(--ink)" />
             </button>
           </div>
           <div className="resv-map-full__box" onClick={(e) => e.stopPropagation()}>
@@ -127,7 +127,7 @@ function MapBox({ lat, lng, name, height, interactive = false, onExpand }) {
       )}
       {status === 'error' && (
         <div className="resv-map-preview__overlay">
-          <Icon name="pin" size={22} color="#A99C8C" />
+          <Icon name="pin" size={22} color="var(--muted)" />
         </div>
       )}
 

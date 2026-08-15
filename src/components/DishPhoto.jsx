@@ -70,9 +70,9 @@ export function DishPhoto({ dish, height = 96, radius = 12, iconSize = 34, fill 
 
   return (
     <div style={{ height, borderRadius: radius, background: dish.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-      <Icon name={dish.icon} size={iconSize} color="#F5A524" />
+      <Icon name={dish.icon} size={iconSize} color="var(--brand)" />
       <div style={{ position: 'absolute', bottom: 5, right: 6, display: 'flex', alignItems: 'center', gap: 2, background: 'rgba(255,255,255,0.65)', borderRadius: 6, padding: '1px 5px' }}>
-        <Icon name="camera" size={9} color="#A99C8C" />
+        <Icon name="camera" size={9} color="var(--muted)" />
       </div>
     </div>);
 
@@ -102,7 +102,7 @@ export function RestaurantBanner({ restaurant, height = 150 }) {
       ? realUrl.replace('/upload/', '/upload/f_auto,q_auto,w_800,c_fill/')
       : realUrl;
     return (
-      <div style={{ height, position: 'relative', flex: 'none', overflow: 'hidden', background: '#1C1815' }}>
+      <div style={{ height, position: 'relative', flex: 'none', overflow: 'hidden', background: 'var(--surface-2)' }}>
         <img src={optimized} alt={restaurant.name || ''} loading="lazy" decoding="async"
           style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.35), transparent 45%)' }} />
@@ -117,12 +117,12 @@ export function RestaurantBanner({ restaurant, height = 150 }) {
     return (
       <div style={{
         height,
-        background: 'linear-gradient(135deg, #3D2A10 0%, #2A1D0E 100%)',
+        background: 'linear-gradient(135deg, var(--brand-tint) 0%, #2A1D0E 100%)',
         position: 'relative',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         flex: 'none',
       }}>
-        <Icon name={restaurant.icon} size={64} color="#F5A524" style={{ opacity: 0.35 }} />
+        <Icon name={restaurant.icon} size={64} color="var(--brand)" style={{ opacity: 0.35 }} />
       </div>
     );
   }

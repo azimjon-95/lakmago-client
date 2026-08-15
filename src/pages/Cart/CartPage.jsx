@@ -266,7 +266,7 @@ export function CartPage() {
   if (items.length === 0) {
     return (
       <div className="app-shell cart-empty">
-        <Icon name="bag" size={48} color="#A99C8C" />
+        <Icon name="bag" size={48} color="var(--muted)" />
         <div className="cart-empty__title">{t('cartEmpty')}</div>
         <p className="cart-empty__hint">{t('cartEmptyHint')}</p>
         <button onClick={() => navigate('/')} className="btn-primary">{t('allRestaurants')}</button>
@@ -384,7 +384,7 @@ export function CartPage() {
     <div className="app-shell cart">
       <header className="cart-header">
         <button onClick={() => navigate(-1)} aria-label={t('back')} className="cart-header__btn">
-          <Icon name="arrowLeft" size={21} color="#F7F2EA" />
+          <Icon name="arrowLeft" size={21} color="var(--ink)" />
         </button> 
 
         {/* Sarlavha o'rniga foydali ma'lumot: vaqt va muassasa */}
@@ -399,20 +399,20 @@ export function CartPage() {
         </div>
 
         <button onClick={confirmClear} aria-label="Tozalash" className="cart-header__btn">
-          <Icon name="trash" size={19} color="#A99C8C" />
+          <Icon name="trash" size={19} color="var(--muted)" />
         </button>
       </header>
 
       {removedNote && (
         <div className="cart-removed">
-          <Icon name="info" size={15} color="#E0A96D" />
+          <Icon name="info" size={15} color="var(--info)" />
           <span>{removedNote}</span>
         </div>
       )}
 
       {groups.length > 1 && (
         <div className="cart-multi-hint">
-          <Icon name="bag" size={18} color="#F5A524" />
+          <Icon name="bag" size={18} color="var(--brand)" />
           <div>{groups.length} ta restoran · har biri alohida yetkaziladi.</div>
         </div>
       )}
@@ -421,11 +421,11 @@ export function CartPage() {
         <div key={group.restaurant.id} className="cart-group">
           <div className="cart-group__head">
             <div className="cart-group__icon" style={{ background: group.restaurant.tint }}>
-              <Icon name={group.restaurant.icon} size={13} color="#F5A524" />
+              <Icon name={group.restaurant.icon} size={13} color="var(--brand)" />
             </div>
             <div className="cart-group__name">{group.restaurant.name}</div>
             <div className="cart-group__time">
-              <Icon name="clock" size={12} color="#A99C8C" /> {group.restaurant.deliveryMin}–{group.restaurant.deliveryMax} {t('min')}
+              <Icon name="clock" size={12} color="var(--muted)" /> {group.restaurant.deliveryMin}–{group.restaurant.deliveryMax} {t('min')}
             </div>
           </div>
           <div className="cart-items">
@@ -438,7 +438,7 @@ export function CartPage() {
                   <div className="cart-item__top">
                     <div className="cart-item__name">{item.dish.name}</div>
                     <button onClick={() => removeItem(item.key)} aria-label={t('close')}>
-                      <Icon name="trash" size={16} color="#A99C8C" />
+                      <Icon name="trash" size={16} color="var(--muted)" />
                     </button>
                   </div>
                   {item.selectedOptions.length > 0 && (
@@ -448,11 +448,11 @@ export function CartPage() {
                     <div className="cart-item__price">{formatSom(item.unitPrice * item.quantity)}</div>
                     <div className="qty-control">
                       <button onClick={() => decrement(item.key)} className="qty-btn qty-btn--minus" aria-label="−">
-                        <Icon name="minus" size={14} color="#A99C8C" />
+                        <Icon name="minus" size={14} color="var(--muted)" />
                       </button>
                       <span className="qty-value">{item.quantity}</span>
                       <button onClick={() => addItem(item.dish, 1, item.selectedOptions, item.note)} className="qty-btn qty-btn--plus" aria-label="+">
-                        <Icon name="plus" size={14} color="#2A1500" />
+                        <Icon name="plus" size={14} color="var(--brand-text)" />
                       </button>
                     </div>
                   </div>
@@ -470,7 +470,7 @@ export function CartPage() {
           onClick={() => { haptic(); setFulfillment('delivery'); }}
           className={`cart-ftab ${fulfillment === 'delivery' ? 'is-active' : ''}`}
         >
-          <Icon name="bike" size={19} color={fulfillment === 'delivery' ? '#F5A524' : '#A99C8C'} />
+          <Icon name="bike" size={19} color={fulfillment === 'delivery' ? 'var(--brand)' : 'var(--muted)'} />
           <span className="cart-ftab__title">Yetkazib berish</span>
           <span className="cart-ftab__sub">
             {pricing.deliveryFee === 0 ? 'Bepul' : formatSom(pricing.deliveryFee)}
@@ -480,7 +480,7 @@ export function CartPage() {
           onClick={() => { haptic(); setFulfillment('pickup'); }}
           className={`cart-ftab ${fulfillment === 'pickup' ? 'is-active' : ''}`}
         >
-          <Icon name="bag" size={19} color={fulfillment === 'pickup' ? '#F5A524' : '#A99C8C'} />
+          <Icon name="bag" size={19} color={fulfillment === 'pickup' ? 'var(--brand)' : 'var(--muted)'} />
           <span className="cart-ftab__title">O'zim olib ketaman</span>
           <span className="cart-ftab__sub cart-ftab__sub--free">Yetkazish bepul</span>
         </button>
@@ -506,7 +506,7 @@ export function CartPage() {
 
         {timingMode === 'asap' ? (
           <div className="cart-timing__hint">
-            <Icon name="clock" size={15} color="#6FBF73" />
+            <Icon name="clock" size={15} color="var(--success)" />
             <span>
               {isPickup
                 ? `Taxminan ${readyTimeLabel} da tayyor bo'ladi`
@@ -534,7 +534,7 @@ export function CartPage() {
         onClick={() => setShowAddressSheet(true)}
         className={`cart-field ${selectedAddress ? '' : 'cart-field--required'}`}
       >
-        <Icon name="pin" size={22} color="#F5A524" />
+        <Icon name="pin" size={22} color="var(--brand)" />
         <div className="cart-field__body">
           {selectedAddress ? (
             <>
@@ -545,14 +545,14 @@ export function CartPage() {
             <div className="cart-field__value cart-field__value--accent">{t('address')}</div>
           )}
         </div>
-        <Icon name="chevronRight" size={18} color="#A99C8C" />
+        <Icon name="chevronRight" size={18} color="var(--muted)" />
       </button>
       )}
 
       {/* Olib ketish manzili — restoran qayerdan olinadi */}
       {isPickup && groups.length > 0 && (
         <div className="cart-pickup-info">
-          <Icon name="pin" size={20} color="#F5A524" />
+          <Icon name="pin" size={20} color="var(--brand)" />
           <div className="cart-pickup-info__body">
             <div className="cart-pickup-info__title">Olib ketish manzili</div>
             {groups.map((g) => (
@@ -570,14 +570,14 @@ export function CartPage() {
         onClick={() => { setPhoneDraft(user.phone || ''); setShowPhoneEdit(true); }}
         className={`cart-field ${user.phone ? '' : 'cart-field--required'}`}
       >
-        <Icon name="phone" size={22} color={user.phone ? '#6FBF73' : '#F5A524'} />
+        <Icon name="phone" size={22} color={user.phone ? 'var(--success)' : 'var(--brand)'} />
         <div className="cart-field__body">
           <div className={`cart-field__value ${user.phone ? '' : 'cart-field__value--accent'}`}>
             {user.phone || '+998 __ ___ __ __'}
           </div>
           <div className="cart-field__label">Telefon</div>
         </div>
-        <Icon name="chevronRight" size={18} color="#A99C8C" />
+        <Icon name="chevronRight" size={18} color="var(--muted)" />
       </button>
 
       {/* To'lov */}
@@ -590,7 +590,7 @@ export function CartPage() {
           >
             <span className="pay-opt__emoji">💵</span>
             <span>{t('cash')}</span>
-            {paymentMethod === 'cash' && <Icon name="circleCheck" size={15} color="#F5A524" />}
+            {paymentMethod === 'cash' && <Icon name="circleCheck" size={15} color="var(--brand)" />}
           </button>
 
           <button
@@ -602,7 +602,7 @@ export function CartPage() {
           >
             <span className="pay-opt__emoji">💳</span>
             <span>Karta orqali</span>
-            {isCard && <Icon name="circleCheck" size={15} color="#6FBF73" />}
+            {isCard && <Icon name="circleCheck" size={15} color="var(--success)" />}
           </button>
         </div>
 
@@ -636,7 +636,7 @@ export function CartPage() {
           <div className="cart-cards">
             {cards.length === 0 ? (
               <button onClick={() => navigate('/cards')} className="cart-cards__add">
-                <Icon name="plus" size={16} color="#F5A524" /> Karta qo'shish
+                <Icon name="plus" size={16} color="var(--brand)" /> Karta qo'shish
               </button>
             ) : (
               <>
@@ -646,13 +646,13 @@ export function CartPage() {
                     onClick={() => { haptic(); setSelectedCard(c); }}
                     className={`cart-card ${selectedCard?._id === c._id ? 'is-active' : ''}`}
                   >
-                    <Icon name="card" size={16} color="#A99C8C" />
+                    <Icon name="card" size={16} color="var(--muted)" />
                     <span className="cart-card__num">
                       {c.bankName ? `${c.bankName} · ` : ''}•••• {c.last4}
                     </span>
                     {c.isDefault && <span className="cart-card__tag">Asosiy</span>}
                     {selectedCard?._id === c._id && (
-                      <Icon name="circleCheck" size={15} color="#6FBF73" />
+                      <Icon name="circleCheck" size={15} color="var(--success)" />
                     )}
                   </button>
                 ))}
@@ -672,7 +672,7 @@ export function CartPage() {
       {bonusBalance > 0 && (
         <button onClick={() => setUseBonus((v) => !v)} className={`cart-bonus ${useBonus ? 'is-active' : ''}`}>
           <div className="cart-bonus__left">
-            <Icon name="gift" size={20} color={useBonus ? '#6FBF73' : '#F5A524'} />
+            <Icon name="gift" size={20} color={useBonus ? 'var(--success)' : 'var(--brand)'} />
             <div>
               <div className="cart-bonus__title">Bonus bilan to'lash</div>
               <div className="cart-bonus__balance">Mavjud: {formatSom(bonusBalance)}</div>
@@ -725,7 +725,7 @@ export function CartPage() {
           <Icon
             name="truck"
             size={18}
-            color={pricing.deliveryFee === 0 ? '#6FBF73' : '#A99C8C'}
+            color={pricing.deliveryFee === 0 ? 'var(--success)' : 'var(--muted)'}
           />
           <span className={pricing.deliveryFee === 0 ? 'is-free' : ''}>
             {isPickup
@@ -747,7 +747,7 @@ export function CartPage() {
         {/* Yetkazish radiusidan tashqarida */}
         {pricing.outOfRange?.map((r) => (
           <div key={`range-${r.restaurant.id}`} className="cart-footer__warn cart-footer__warn--closed">
-            <Icon name="info" size={14} color="#E14B42" />
+            <Icon name="info" size={14} color="var(--danger)" />
             <span>{r.quote.reason || `${r.restaurant.name} bu manzilga yetkazmaydi`}</span>
           </div>
         ))}
@@ -757,7 +757,7 @@ export function CartPage() {
           const r = c.restaurant;
           return (
             <div key={`closed-${r.id || r._id}`} className="cart-footer__warn cart-footer__warn--closed">
-              <Icon name="clock" size={14} color="#E14B42" />
+              <Icon name="clock" size={14} color="var(--danger)" />
               <span>
                 <b>{r.name}</b> hozir yopiq
                 {r.openTime && ` · Ish vaqti ${r.openTime}–${r.closeTime}`}
@@ -769,7 +769,7 @@ export function CartPage() {
         {/* Minimal summaga yetmagan restoranlar */}
         {pricing.blocked.map((b) => (
           <div key={b.restaurant.id || b.restaurant._id} className="cart-footer__warn">
-            <Icon name="info" size={14} color="#E0A96D" />
+            <Icon name="info" size={14} color="var(--info)" />
             <span>
               <b>{b.restaurant.name}</b>: yana{' '}
               <b>{formatSom(b.minCheck.missing)}</b>lik mahsulot qo'shing
@@ -885,7 +885,7 @@ function CartUpsell({ groups }) {
             <div className="upsell-card__name">{d.name}</div>
             <div className="upsell-card__price">{formatSom(d.price)}</div>
             <button onClick={() => add(d)} className="upsell-card__add" aria-label="Qo'shish">
-              <Icon name="plus" size={18} color="#F5A524" />
+              <Icon name="plus" size={18} color="var(--brand)" />
             </button>
           </div>
         ))}

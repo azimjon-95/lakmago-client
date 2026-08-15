@@ -14,14 +14,14 @@ import './Orders.css';
 const FLOW = ['pending', 'accepted', 'preparing', 'ready', 'delivering', 'delivered'];
 
 const STATUS = {
-  awaiting_payment: { label: "To'lov kutilmoqda", icon: 'card', color: '#E0A96D' },
-  pending: { label: 'Tasdiq kutilmoqda', icon: 'clock', color: '#E0A96D' },
-  accepted: { label: 'Qabul qilindi', icon: 'check', color: '#6FBF73' },
-  preparing: { label: 'Tayyorlanmoqda', icon: 'flame', color: '#F5A524' },
-  ready: { label: 'Tayyor', icon: 'bag', color: '#6FBF73' },
-  delivering: { label: "Yo'lda", icon: 'scooter', color: '#F5A524' },
-  delivered: { label: 'Yetkazildi', icon: 'check', color: '#6FBF73' },
-  cancelled: { label: 'Bekor qilindi', icon: 'x', color: '#E14B42' },
+  awaiting_payment: { label: "To'lov kutilmoqda", icon: 'card', color: 'var(--info)' },
+  pending: { label: 'Tasdiq kutilmoqda', icon: 'clock', color: 'var(--info)' },
+  accepted: { label: 'Qabul qilindi', icon: 'check', color: 'var(--success)' },
+  preparing: { label: 'Tayyorlanmoqda', icon: 'flame', color: 'var(--brand)' },
+  ready: { label: 'Tayyor', icon: 'bag', color: 'var(--success)' },
+  delivering: { label: "Yo'lda", icon: 'scooter', color: 'var(--brand)' },
+  delivered: { label: 'Yetkazildi', icon: 'check', color: 'var(--success)' },
+  cancelled: { label: 'Bekor qilindi', icon: 'x', color: 'var(--danger)' },
 };
 
 // Faol = hali yetkazilmagan va bekor qilinmagan
@@ -90,7 +90,7 @@ export function OrdersPage() {
       <div className="app-shell orders">
         <header className="orders-header">{t('navOrders')}</header>
         <div className="orders-empty">
-          <Icon name="bag" size={56} color="#7D7264" />
+          <Icon name="bag" size={56} color="var(--muted-2)" />
           <div className="orders-empty__title">Buyurtmalar yo'q</div>
           <p className="orders-empty__hint">Menyudan taom tanlang</p>
           <button onClick={() => navigate('/')} className="orders-empty__btn">
@@ -172,7 +172,7 @@ function OrderCard({ order: o, open, onToggle, onRepeat, onChanged, highlight })
         </div>
         <div className="ord-card__right">
           <span className="ord-card__total">{formatSom(o.total)}</span>
-          <Icon name={open ? 'chevronDown' : 'chevronRight'} size={17} color="#A99C8C" />
+          <Icon name={open ? 'chevronDown' : 'chevronRight'} size={17} color="var(--muted)" />
         </div>
       </button>
 
@@ -227,12 +227,12 @@ function OrderCard({ order: o, open, onToggle, onRepeat, onChanged, highlight })
 
           {o.address && (
             <div className="ord-card__addr">
-              <Icon name="pin" size={14} color="#A99C8C" /> {o.address}
+              <Icon name="pin" size={14} color="var(--muted)" /> {o.address}
             </div>
           )}
           {o.fulfillment === 'pickup' && (
             <div className="ord-card__addr">
-              <Icon name="bag" size={14} color="#A99C8C" /> O'zim olib ketaman
+              <Icon name="bag" size={14} color="var(--muted)" /> O'zim olib ketaman
             </div>
           )}
 
