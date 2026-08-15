@@ -59,6 +59,7 @@
   /* Express24'da HAR BIR kategoriya doim ko'k hoshiyali —
      faqat tanlanganda emas */
   border: 2px solid var(--accent-2);
+  box-shadow: var(--shadow-sm);
   transition: border-color 0.15s var(--ease), background 0.15s var(--ease), transform 0.12s var(--ease);
 }
 .home-cat__label {
@@ -93,25 +94,33 @@
 }
 .home-section-header__action { font-size: 13px; color: var(--brand-600); }
 
-/* ═══ Chegirmadagi taomlar — Express24 uslubidagi ramka ═══
-   Tepasi qattiq oranjevа banner (rounded-top), ichi och
-   pastel fon — bitta yaxlit "karta" taassurotini beradi. */
+/* ═══ Chegirmadagi taomlar — Express24 uslubida ═══
+   Faqat banner o'zi karta — ostidagi taomlar YOPIQ QUTIGA
+   o'ralmaydi, chegarasiz, o'ng tomoni ekran chetigacha
+   suriladi (Express24'dagidek — oxirgi karta qirqilib
+   ko'rinadi, "yana bor" degan taassurot beradi). */
 .home-discount-frame {
-  margin: 18px 16px 6px;
-  border-radius: var(--radius);
-  overflow: hidden;
-  border: 1px solid var(--line);
-  background: var(--food-tint-1);
+  margin: 18px 0 6px;
 }
 .home-section-banner {
   display: flex; align-items: center; gap: 7px;
+  margin: 0 16px;
   padding: 11px 16px;
   background: var(--brand);
   color: #fff;
   font-size: 15.5px; font-weight: 700;
+  border-radius: var(--radius) var(--radius) 0 0;
 }
-.home-discount-frame__body { padding: 12px 0 4px; }
-.home-discount-frame .home-dishes-row { padding-left: 12px; padding-right: 12px; }
+.home-discount-frame__body {
+  background: var(--food-tint-1);
+  padding: 12px 0 6px;
+}
+/* Chapdan sahifa bilan bir xil qirqim (16px), o'ngdan
+   CHEGARASIZ — karta ekran chetiga chiqib qirqilishi kerak */
+.home-discount-frame .home-dishes-row {
+  padding-left: 16px;
+  padding-right: 4px;
+}
 
 /* Gorizontal taom qatori */
 .home-scroll-row {
@@ -157,6 +166,7 @@
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 14px;
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
   position: relative;
   text-align: left;
