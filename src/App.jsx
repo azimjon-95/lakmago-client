@@ -42,12 +42,17 @@ const queryClient = new QueryClient({
 // Global suzuvchi elementlar (badge + chat) — ba'zi sahifalarda yashiriladi
 function FloatingLayer() {
   const location = useLocation();
-  // Savatcha va kuzatuv sahifalarida chat/badge ko'rsatmaymiz (joy band)
-  const hideChat = ['/cart', '/order/track'].includes(location.pathname);
+  /*
+   * Yordam xizmati FAQAT bosh sahifada ko'rinadi — ichki
+   * sahifalarda (restoran, savat, bron va h.k.) umuman
+   * chiqmaydi. Oq ro'yxat: faqat "/" ga teng bo'lsa ko'rinadi,
+   * boshqa har qanday sahifa avtomatik yashiradi.
+   */
+  const showChat = location.pathname === '/';
   return (
     <>
       <ActiveOrderBadge />
-      {!hideChat && <SupportChat />}
+      {showChat && <SupportChat />}
     </>
   );
 }

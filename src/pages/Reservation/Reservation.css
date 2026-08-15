@@ -347,3 +347,20 @@
     transparent 0, #000 28%, #000 72%, transparent 100%
   );
 }
+
+/* ═══════════ Qo'shimchalar: sarlavha + eslatma BIRGA qotadi ═══════════ */
+.resv-preorder-sticky {
+  position: sticky;
+  top: calc(env(safe-area-inset-top, 0px) + var(--tg-content-top, 0px));
+  z-index: 10;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+/* Ichkaridagi umumiy sarlavha endi o'zi emas, TASHQI qatlam
+   suriladi — ikkalasi alohida suzsa oraliq holatda tepa qism
+   kesilib qolgandek ko'rinardi (aynan shu xato tuzatilmoqda) */
+.resv-preorder-sticky .page-header {
+  position: static;
+  border-bottom: none;
+}
+.resv-preorder-sticky .resv-preorder-hint { margin-top: 0; }

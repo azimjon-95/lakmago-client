@@ -220,7 +220,14 @@ export function RestaurantPage() {
             </span>
           </div>
         )}
-        <button onClick={() => navigate(-1)} className="rest-banner__btn rest-banner__btn--back" aria-label={t('back')}>
+        {/*
+          navigate(-1) emas — ATAYLAB. Bron sahifasiga kirib
+          (push), u yerdan ushbu sahifaga qaytilsa (yana push),
+          tarix stekida bir necha "Restoran" yozuvi paydo bo'lib
+          qolardi — shu tugma bosilganda ORQAGA emas, BRON
+          sahifasiga qaytib ketardi. Bosh sahifaga aniq
+          yo'naltirish bu chalkashlikni butunlay yo'q qiladi. */}
+        <button onClick={() => navigate('/')} className="rest-banner__btn rest-banner__btn--back" aria-label={t('back')}>
           <Icon name="arrowLeft" size={18} color="#fff" />
         </button>
         <button onClick={() => { haptic(); toggleFavorite('restaurant', id); }} className="rest-banner__btn rest-banner__btn--fav" aria-label="♥">

@@ -73,21 +73,30 @@ export function PreOrderScreen({
 
   return (
     <div className="app-shell reservation">
-      <header className="page-header">
-        <button onClick={onBack} aria-label={t('back')}>
-          <Icon name="arrowLeft" size={22} color="#F7F2EA" />
-        </button>
-        <h1>{t('extras')}</h1>
-      </header>
+      {/*
+        Sarlavha va bron eslatmasi BITTA qattiq (sticky) blok —
+        alohida bo'lganda ro'yxat surilganda ular orasida
+        oraliq holat paydo bo'lib, tepa qism kesilib qolgandek
+        ko'rinardi (Telegram'ning o'z boshqaruvlari bilan
+        ustma-ust tushib). Endi ikkalasi birga suriladi/qotadi.
+      */}
+      <div className="resv-preorder-sticky">
+        <header className="page-header">
+          <button onClick={onBack} aria-label={t('back')}>
+            <Icon name="arrowLeft" size={22} color="#F7F2EA" />
+          </button>
+          <h1>{t('extras')}</h1>
+        </header>
 
-      <div className="resv-preorder-hint">
-        <div className="resv-preorder-hint__title">
-          <Icon name="calendarPlus" size={18} color="#F5A524" />
-          {reservationInfo.dateLabel}, {reservationInfo.time}
-        </div>
-        <div className="resv-preorder-hint__text">
-          Kelishingizga tayyor bo&apos;lib tursin — hoziroq tanlang
-          yoki joyida buyurtma bering.
+        <div className="resv-preorder-hint">
+          <div className="resv-preorder-hint__title">
+            <Icon name="calendarPlus" size={18} color="#F5A524" />
+            {reservationInfo.dateLabel}, {reservationInfo.time}
+          </div>
+          <div className="resv-preorder-hint__text">
+            Kelishingizga tayyor bo&apos;lib tursin — hoziroq tanlang
+            yoki joyida buyurtma bering.
+          </div>
         </div>
       </div>
 

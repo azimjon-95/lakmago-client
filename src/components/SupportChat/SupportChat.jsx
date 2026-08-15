@@ -22,6 +22,38 @@ export function SupportChat() {
   useLockScroll(open);
   const userId = useUser((st) => st.user?._id || st.user?.id);
 
+  /*
+   * "Online" holati — Telegram kabi. Admin qo'llab-quvvatlash
+   * sahifasini ochib, oynasi faol bo'lsa — online. Sahifadan
+   * chiqsa yoki boshqa ilovaga o'tsa — "N daqiqa oldin faol edi",
+   * refreshsiz, socket orqali jonli.
+   */
+  const [presence, setPresence] = useState({ online: false, lastSeenAt: null });
+  const [, forceTick] = useState(0);   // "N daqiqa oldin" matnini yangilash uchun
+
+  useEffect(() => {
+    let dead = false;
+    api.getSupportPresence().then((p) => { if (!dead) setPresence(p); }).catch(() => {});
+
+    const socket = getSocket();
+    const onPresence = (p) => setPresence(p);
+    socket.on('support:presence', onPresence);
+
+    const tick = setInterval(() => forceTick((n) => n + 1), 30_000);
+    return () => { dead = true; socket.off('support:presence', onPresence); clearInterval(tick); };
+  }, []);
+
+  function presenceLabel() {
+    if (presence.online) return null;   // "● online" JSX'da alohida chiziladi
+    if (!presence.lastSeenAt) return 'Odatda tez javob beradi';
+    const minutes = Math.max(0, Math.round((Date.now() - new Date(presence.lastSeenAt).getTime()) / 60000));
+    if (minutes < 1) return 'Hozirgina faol edi';
+    if (minutes < 60) return `${minutes} daqiqa oldin faol edi`;
+    const hours = Math.round(minutes / 60);
+    if (hours < 24) return `${hours} soat oldin faol edi`;
+    return `${Math.round(hours / 24)} kun oldin faol edi`;
+  }
+
   // Chat ochilganda serverdan tarixni yuklaymiz
   useEffect(() => {
     if (!open) return;
@@ -108,7 +140,11 @@ export function SupportChat() {
               <span className="support-chat__avatar"><OperatorAvatar size={36} /></span>
               <div>
                 <div className="support-chat__title">{t('chatTitle')}</div>
-                <div className="support-chat__online">● online</div>
+                {presence.online ? (
+                  <div className="support-chat__online">● online</div>
+                ) : (
+                  <div className="support-chat__offline">{presenceLabel()}</div>
+                )}
               </div>
             </div>
             <button className="support-chat__close" onClick={() => setOpen(false)} aria-label={t('close')}><Icon name="x" size={18} color="#A99C8C" /></button>

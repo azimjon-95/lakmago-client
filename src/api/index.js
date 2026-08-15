@@ -186,6 +186,8 @@ export const api = {
 
   // ===== Qo'llab-quvvatlash chati =====
   getSupportChat: () => apiFetch('/support/chat', { method: 'GET' }),
+  // Boshlang'ich "online/offline" holati — socket ulanishidan oldin
+  getSupportPresence: () => apiFetch('/support/presence', { method: 'GET' }),
   sendSupportMessage: (text) => apiFetch('/support/message', { method: 'POST', body: JSON.stringify({ text }) }),
 
   // ===== Referral =====

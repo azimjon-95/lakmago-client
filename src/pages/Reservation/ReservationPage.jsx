@@ -165,7 +165,11 @@ export function ReservationPage() {
   return (
     <div className="app-shell reservation">
       <header className="page-header">
-        <button onClick={() => navigate(`/restaurant/${id}`)} aria-label={t('back')}>
+        {/* replace: true — tarix stekiga yangi yozuv qo'shmaydi.
+            Aks holda Restoran<->Bron orasida bir necha marta
+            o'tilsa, stek o'sib ketib, boshqa sahifalardagi
+            "orqaga" tugmalari kutilmagan joyga olib borardi. */}
+        <button onClick={() => navigate(`/restaurant/${id}`, { replace: true })} aria-label={t('back')}>
           <Icon name="arrowLeft" size={22} color="#F7F2EA" />
         </button>
         <h1>{t('reserveTable')}</h1>

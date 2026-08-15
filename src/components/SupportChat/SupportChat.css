@@ -63,6 +63,7 @@
 .support-chat__avatar svg { display: block; border-radius: 50%; }
 .support-chat__title { font-size: 14px; font-weight: 600; color: var(--ink); }
 .support-chat__online { font-size: 11px; color: var(--success); }
+.support-chat__offline { font-size: 11px; color: var(--muted); }
 .support-chat__close { font-size: 16px; color: var(--muted); width: 28px; height: 28px; }
 
 .support-chat__body {
