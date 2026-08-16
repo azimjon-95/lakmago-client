@@ -1,10 +1,15 @@
 /**
  * Restoran ish vaqti.
  *
- * openTime/closeTime "HH:MM" ko'rinishida saqlanadi.
+ * openTime/closeTime "HH:MM" ko'rinishida saqlanadi — bu doim
+ * O'ZBEKISTON (Toshkent) mahalliy vaqti. Shuning uchun "hozir
+ * necha soat" ni ham DOIM Toshkent vaqtida hisoblash kerak —
+ * foydalanuvchining o'z qurilmasi qaysi mamlakatda/vaqt
+ * mintaqasida bo'lishidan qat'i nazar (lib/tashkentTime.js).
  * Yarim tundan oshadigan vaqt ham to'g'ri hisoblanadi
  * (masalan 10:00–02:00).
  */
+import { tashkentMinutesOfDay } from './tashkentTime';
 
 /** "HH:MM" → daqiqalarda. Noto'g'ri bo'lsa null. */
 function toMinutes(hhmm) {
@@ -30,7 +35,7 @@ export function isOpenNow(restaurant, now = new Date()) {
   // Bir xil bo'lsa 24 soat ishlaydi
   if (open === close) return true;
 
-  const cur = now.getHours() * 60 + now.getMinutes();
+  const cur = tashkentMinutesOfDay(now);
 
   // Odatiy holat: 09:00–23:00
   if (open < close) return cur >= open && cur < close;
@@ -57,7 +62,7 @@ export function nextOpenLabel(restaurant, now = new Date()) {
   const open = toMinutes(restaurant?.openTime);
   if (open === null) return null;
 
-  const cur = now.getHours() * 60 + now.getMinutes();
+  const cur = tashkentMinutesOfDay(now);
   // Bugun ochiladimi yoki ertagami
   return cur < open ? `${restaurant.openTime} da ochiladi` : `Ertaga ${restaurant.openTime}`;
 }
