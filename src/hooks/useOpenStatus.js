@@ -102,8 +102,27 @@ export function useOpenStatus(source) {
   };
 
   const now = serverNow();
+  const localIsOpen = isOpenNow(hours, now);
+
+  /*
+   * Server /restaurants javobida tayyor `isOpen` maydonini
+   * beradi (services/restaurantTime.js orqali) — bu ish
+   * kunlari (workingDays) va restoranning o'z vaqt mintaqasini
+   * ham hisobga oladi, mijozdagi soddaroq hisob esa faqat
+   * soat/daqiqani biladi.
+   *
+   * Shuning uchun: server aniq "YOPIQ" (false) desa — DARHOL
+   * shunga ishonamiz (masalan bugun dam olish kuni bo'lishi
+   * mumkin, buni mijoz bilmaydi). Server "OCHIQ" desa yoki
+   * umuman bermagan bo'lsa (eski keshlangan ma'lumot) — mijoz
+   * o'zi har daqiqada jonli hisoblagan natijasiga tayanamiz,
+   * shunda soat aynan yopilish daqiqasida ham darhol yangilanadi
+   * (server javobini qayta so'ramasdan).
+   */
+  const isOpen = source?.isOpen === false ? false : localIsOpen;
+
   return {
-    isOpen: isOpenNow(hours, now),
+    isOpen,
     hoursLabel: workHoursLabel(hours),
     nextOpen: nextOpenLabel(hours, now),
     openTime: hours.openTime,

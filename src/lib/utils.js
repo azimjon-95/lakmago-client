@@ -1,3 +1,5 @@
+import { tashkentParts } from './tashkentTime';
+
 export function formatSom(value) {
   return value.toLocaleString('ru-RU').replace(/,/g, ' ') + " so'm";
 }
@@ -24,19 +26,24 @@ const UZ_MONTHS = [
 
 const UZ_WEEKDAYS = ['Yak', 'Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Sha'];
 
-/** "9-avgust" */
+/** "9-avgust" — doim Toshkent kalendar kuni (qurilma vaqt
+    mintaqasidan qat'i nazar) — yarim tunga yaqin paytlarda
+    boshqa mamlakatdan kirgan foydalanuvchiga noto'g'ri sana
+    ko'rsatilib qolmasligi uchun. */
 export function formatUzDate(date) {
   const d = date instanceof Date ? date : new Date(date);
   if (Number.isNaN(d.getTime())) return '';
-  return `${d.getDate()}-${UZ_MONTHS[d.getMonth()]}`;
+  const { day, month } = tashkentParts(d);
+  return `${day}-${UZ_MONTHS[month - 1]}`;
 }
 
-/** "9-avgust, 20:00" */
+/** "9-avgust, 20:00" — doim Toshkent vaqtida. */
 export function formatUzDateTime(date) {
   const d = date instanceof Date ? date : new Date(date);
   if (Number.isNaN(d.getTime())) return '';
-  const hh = String(d.getHours()).padStart(2, '0');
-  const mm = String(d.getMinutes()).padStart(2, '0');
+  const { hour, minute } = tashkentParts(d);
+  const hh = String(hour).padStart(2, '0');
+  const mm = String(minute).padStart(2, '0');
   return `${formatUzDate(d)}, ${hh}:${mm}`;
 }
 

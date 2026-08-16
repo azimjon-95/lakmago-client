@@ -11,7 +11,11 @@ import './cards/RestaurantCard.css';
 export const RestaurantCard = memo(function RestaurantCard({ restaurant: r }) {
   // Ish vaqti — har render'da hisoblanadi (vaqt o'zgaradi)
   const hours = workHoursLabel(r);
-  const open = isOpenNow(r);
+  // Server /restaurants javobida ish kunlarini (workingDays) ham
+  // hisobga olgan tayyor isOpen keladi — aniq "yopiq" desa unga
+  // ishonamiz, aks holda mijozning o'z (Toshkent vaqtiga mos)
+  // jonli hisobiga tayanamiz.
+  const open = r.isOpen === false ? false : isOpenNow(r);
 
   const navigate = useNavigate();
   const t = useT();

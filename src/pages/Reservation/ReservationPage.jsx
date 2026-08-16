@@ -8,6 +8,7 @@ import { useUser } from '@/store/user';
 import { formatSomShort, formatUzDate, uzWeekday } from '@/lib/utils';
 import { useRestaurant } from '@/hooks/queries';
 import { buildSlots, keepOrReset } from '@/lib/reservationSlots';
+import { tashkentTodayAsLocalDate } from '@/lib/tashkentTime';
 import { TimePicker } from './TimePicker';
 import { PreOrderScreen } from './PreOrderScreen';
 import { RestaurantLocationMap } from './RestaurantLocationMap';
@@ -30,8 +31,12 @@ function formatPhone(v) {
 
 function nextDays(count, todayLabel) {
   const out = [];
+  // Toshkent "bugun"idan boshlanadi — qurilma vaqt mintaqasidan
+  // qat'i nazar (masalan Moskvadan kirgan foydalanuvchi uchun
+  // ham "Bugun" tugmasi Toshkent kalendariga mos bo'lishi kerak)
+  const base = tashkentTodayAsLocalDate();
   for (let i = 0; i < count; i++) {
-    const d = new Date();
+    const d = new Date(base);
     d.setDate(d.getDate() + i);
     out.push({ date: d, label: i === 0 ? todayLabel : uzWeekday(d) });
   }

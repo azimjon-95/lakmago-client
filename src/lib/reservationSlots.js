@@ -6,7 +6,14 @@
  * ochilsa ham kunduzgi vaqtga bron qilib bo'lmasdi.
  *
  * Mantiq toza funksiya: UI'dan mustaqil, tekshirish oson.
+ *
+ * MUHIM: "hozir necha soat/kun" — doim TOSHKENT vaqtida
+ * hisoblanadi (lib/tashkentTime.js), foydalanuvchining o'z
+ * qurilmasi qaysi vaqt mintaqasida bo'lishidan qat'i nazar.
+ * Aks holda masalan Moskvadan kirgan mijoz uchun bugungi
+ * bo'sh vaqtlar noto'g'ri hisoblanardi (2 soat farq bilan).
  */
+import { tashkentMinutesOfDay, isSameTashkentDay } from './tashkentTime';
 
 const DEFAULT_OPEN = '10:00';
 const DEFAULT_CLOSE = '22:00';
@@ -25,12 +32,6 @@ function toMinutes(hhmm) {
 function toLabel(mins) {
   const m = ((mins % 1440) + 1440) % 1440;
   return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
-}
-
-function isSameDay(a, b) {
-  return a.getFullYear() === b.getFullYear()
-    && a.getMonth() === b.getMonth()
-    && a.getDate() === b.getDate();
 }
 
 /**
@@ -57,9 +58,9 @@ export function buildSlots(restaurant, date, opts = {}) {
   const lastStart = close - lastMin;
 
   // Bugungi kun bo'lsa o'tib ketgan vaqtlar chiqmaydi
-  const todaySelected = isSameDay(date, now);
+  const todaySelected = isSameTashkentDay(date, now);
   const earliest = todaySelected
-    ? Math.max(open, now.getHours() * 60 + now.getMinutes() + leadMin)
+    ? Math.max(open, tashkentMinutesOfDay(now) + leadMin)
     : open;
 
   // Qadamga yaxlitlash: 19:07 + 45 = 19:52 → 20:00
