@@ -59,7 +59,7 @@ margin-left: 13px;
   display: flex; align-items: center; justify-content: center;
   /* Express24'da HAR BIR kategoriya doim ko'k hoshiyali —
      faqat tanlanganda emas */
-  border: 2px solid var(--accent-2);
+  border: 1px solid var(--accent-2);
   transition: border-color 0.15s var(--ease), background 0.15s var(--ease), transform 0.12s var(--ease);
 }
 .home-cat__label {
