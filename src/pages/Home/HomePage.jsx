@@ -174,20 +174,28 @@ export function HomePage() {
 
       <BannerSlider banners={banners} />
 
-      <div className="home-categories no-scrollbar">
-        {categories.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => setCategory((cur) => (cur === c.id ? 'all' : c.id))}
-            className={`home-cat ${category === c.id ? 'is-active' : ''}`}
-          >
-            <span className="home-cat__art">
-              <CategoryIcon name={c.art} id={c.id} img={c.img} size={52} />
-            </span>
-            <span className="home-cat__label">{c.key ? t(c.key) : c.label}</span>
-          </button>
-        ))}
-      </div>
+    <button
+  key={c.id}
+  onClick={() => {
+    navigator.vibrate?.(20);
+
+    setCategory((cur) => (cur === c.id ? 'all' : c.id));
+  }}
+  className={`home-cat ${category === c.id ? 'is-active' : ''}`}
+>
+  <span className="home-cat__art">
+    <CategoryIcon
+      name={c.art}
+      id={c.id}
+      img={c.img}
+      size={52}
+    />
+  </span>
+
+  <span className="home-cat__label">
+    {c.key ? t(c.key) : c.label}
+  </span>
+</button>
 
       {/* Trend taomlar */}
       {(trendLoading || trending.length > 0) && (
