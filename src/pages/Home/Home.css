@@ -167,7 +167,7 @@ margin-left: 13px;
 .home-discount-frame .home-dishes-row {
   padding-left: 16px;
   padding-right: 4px;
-  margin-left: 13px;
+  /* margin-left: 13px; */
 
 }
 
@@ -176,7 +176,7 @@ margin-left: 13px;
   display: flex; gap: 10px;
   padding: 0 16px 12px;
   overflow-x: auto;
-  margin-left: 13px;
+  /* margin-left: 13px; */
 }
 
 /* Kichik reklama banner */
@@ -206,7 +206,7 @@ margin-left: 13px;
   display: flex; gap: 10px;
   padding: 0 16px 12px;
   overflow-x: auto;
-  margin-left: 13px;
+  /* margin-left: 13px; */
   scroll-snap-type: x proximity;
 }
 /* Taom kartasi — kichik (Uzum uslubi: ~148px) */
