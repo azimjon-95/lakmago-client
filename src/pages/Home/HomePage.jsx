@@ -65,47 +65,51 @@ const SectionHeader = memo(function SectionHeader({ icon, title, action, variant
           fill="none"
           aria-hidden="true"
         >
-          <defs>
-            <linearGradient id="sc-grad" x1="0" y1="0" x2="950" y2="0">
-              <stop offset="0%" stopColor="#ff9a32" />
-              <stop offset="100%" stopColor="#ff6500" />
-            </linearGradient>
-            <filter id="sc-shadow" x="-10%" y="-20%" width="120%" height="150%">
-              <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#ff6500" floodOpacity="0.28" />
-            </filter>
-          </defs>
+            <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="950" y2="0">
+      <stop offset="0%" stop-color="#ff9a32"/>
+      <stop offset="100%" stop-color="#ff6500"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-20%" width="120%" height="150%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#ff6500" flood-opacity="0.28"/>
+    </filter>
+    <filter id="textShadow">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="1.2" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <path d="
+        M 39 8
+        H 410
+        C 440 8, 453 23, 470 38
+        C 486 50.5, 501 58, 530 58
+        H 911
+        Q 930 58 930 77
+        V 181
+        Q 930 200 911 200
+        H 39
+        Q 20 200 20 181
+        V 27
+        Q 20 8 39 8
+        Z" fill="none" stroke="#ffb24d" stroke-width="4" stroke-linejoin="round"/>
+  <path d="
+        M 39 8
+        H 410
+        C 440 8, 453 23, 470 38
+        C 486 50.5, 501 58, 530 58
+        H 911
+        Q 930 58 930 77
+        V 181
+        Q 930 200 911 200
+        H 39
+        Q 20 200 20 181
+        V 27
+        Q 20 8 39 8
+        Z" fill="url(#grad)" filter="url(#shadow)"/>
 
-          <path d="
-                M 39 8
-                H 410
-                C 440 8, 453 23, 470 38
-                C 486 50.5, 501 58, 530 58
-                C 562 58, 583 92, 601 127
-                H 911
-                Q 930 127 930 146
-                V 153
-                Q 930 172 911 172
-                H 39
-                Q 20 172 20 153
-                V 27
-                Q 20 8 39 8
-                Z" fill="url(#sc-grad)" filter="url(#sc-shadow)" />
-
-          {/* Yupqa urg'u chizig'i — chap qism yuqori chetida */}
-          <path d="M 23 15 H 408
-            C 436 15, 448 27.5, 464 42.5
-            C 481 55, 497 62, 527 62"
-            stroke="#ffcd65" strokeWidth="2.5" strokeLinecap="round" opacity="0.7" />
-
+  
           {/* Yaltiroq bezaklar — faqat baland (chap) qismda */}
-          <path d="M92 32.5 L93.05 34.95 L95.5 36 L93.05 37.05 L92 39.5 L90.95 37.05 L88.5 36 L90.95 34.95 Z" fill="#ffd45a" />
-          <circle cx="140" cy="28" r="2.4" fill="#ffd45a" opacity="0.9" />
-          <circle cx="181" cy="47" r="2.4" fill="#ffd45a" opacity="0.9" />
-          <circle cx="222" cy="66" r="2.4" fill="#ffd45a" opacity="0.9" />
-          <circle cx="263" cy="30" r="2.4" fill="#ffd45a" opacity="0.9" />
-          <circle cx="304" cy="49" r="2.4" fill="#ffd45a" opacity="0.9" />
-          <circle cx="345" cy="68" r="2.4" fill="#ffd45a" opacity="0.9" />
-          <circle cx="386" cy="32" r="2.4" fill="#ffd45a" opacity="0.9" />
+          <path d="M92 32.5 L93.05 34.95 L95.5 36 L93.05 37.05 L92 39.5 L90.95 37.05 L88.5 36 L90.95 34.95 Z" fill="#ffd45a"/><path d="M520 44.5 L521.05 46.95 L523.5 48 L521.05 49.05 L520 51.5 L518.95 49.05 L516.5 48 L518.95 46.95 Z" fill="#ffd45a"/>
+  <circle cx="140" cy="28" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="181" cy="47" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="222" cy="66" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="263" cy="30" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="304" cy="49" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="345" cy="68" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="386" cy="32" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="427" cy="51" r="2.4" fill="#ffd45a" opacity="0.9"/>
         </svg>
         <span className="home-section-banner__text">
           {icon && <Icon name={icon} size={18} color="#fff" />}
