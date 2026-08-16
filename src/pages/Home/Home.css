@@ -40,7 +40,7 @@
   display: flex; gap: 14px;
   padding: 10px 16px 14px;
   overflow-x: auto;
-margin-left: 13px;
+/* margin-left: 13px; */
   scroll-snap-type: x proximity;
 }
 /* Kategoriya — rasm tepada, nom pastda (Uzum/Yandex uslubi) */
@@ -94,7 +94,7 @@ margin-left: 13px;
 /* Tanlangan — "+" savat tugmasi bilan bir xil ko'k urg'u */
 .home-cat.is-active .home-cat__art {
   border-color: var(--accent-2);
-  border-width: 3px;
+  border-width: 2px;
   background: #EAF2FA;
 }
 .home-cat.is-active .home-cat__label {
