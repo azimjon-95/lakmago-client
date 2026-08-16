@@ -35,14 +35,14 @@ const SectionHeader = memo(function SectionHeader({ icon, title, action, variant
   if (variant === 'banner') {
     return (
       <div className="home-section-banner">
-        {/* <svg
+        <svg
           className="home-section-banner__shape"
           viewBox="0 0 100 82"
           preserveAspectRatio="none"
           aria-hidden="true"
         >
           <path d="M0,82 L0,34 A3.409,24 0 0 1 3.409,10 L60.511,10 A3.409,24 0 0 1 63.920,34 L63.920,51 A3.409,24 0 0 0 67.330,75 L100,75 L100,82 Z" />
-        </svg> */}
+        </svg>
         <span className="home-section-banner__text">
           {icon && <Icon name={icon} size={18} color="#fff" />}
           {title}
