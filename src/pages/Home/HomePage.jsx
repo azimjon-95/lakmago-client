@@ -35,14 +35,64 @@ const SectionHeader = memo(function SectionHeader({ icon, title, action, variant
   if (variant === 'banner') {
     return (
       <div className="home-section-banner">
-        <svg
-          className="home-section-banner__shape"
-          viewBox="0 0 100 82"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <path d="M0,82 L0,34 A3.409,24 0 0 1 3.409,10 L60.511,10 A3.409,24 0 0 1 63.920,34 L63.920,51 A3.409,24 0 0 0 67.330,75 L100,75 L100,82 Z" />
-        </svg>
+    <svg width="100%" viewBox="0 0 950 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="950" y2="0">
+      <stop offset="0%" stop-color="#ff9a32"/>
+      <stop offset="100%" stop-color="#ff6500"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-20%" width="120%" height="150%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#ff6500" flood-opacity="0.28"/>
+    </filter>
+    <filter id="textShadow">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="1.2" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <path d="
+        M 39 8
+        H 410
+        C 440 8, 453 23, 470 38
+        C 486 50.5, 501 58, 530 58
+        H 911
+        Q 930 58 930 77
+        V 181
+        Q 930 200 911 200
+        H 39
+        Q 20 200 20 181
+        V 27
+        Q 20 8 39 8
+        Z" fill="none" stroke="#ffb24d" stroke-width="4" stroke-linejoin="round"/>
+  <path d="
+        M 39 8
+        H 410
+        C 440 8, 453 23, 470 38
+        C 486 50.5, 501 58, 530 58
+        H 911
+        Q 930 58 930 77
+        V 181
+        Q 930 200 911 200
+        H 39
+        Q 20 200 20 181
+        V 27
+        Q 20 8 39 8
+        Z" fill="url(#grad)" filter="url(#shadow)"/>
+
+  
+  <path d="M 23 15 H 408
+    C 436 15, 448 27.5, 464 42.5
+    C 481 55, 497 62, 527 62
+    H 924" stroke="#ffcd65" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+
+  <text x="38" y="50" fill="#ffffff" font-family="Arial,Helvetica,sans-serif"
+        font-size="31" font-weight="800" filter="url(#textShadow)">%</text>
+
+  <text x="78" y="48" fill="#ffffff" font-family="Arial,Helvetica,sans-serif"
+        font-size="33" font-weight="800" letter-spacing="-1.1" filter="url(#textShadow)">Super chegirmalar!</text>
+
+  <path d="M92 32.5 L93.05 34.95 L95.5 36 L93.05 37.05 L92 39.5 L90.95 37.05 L88.5 36 L90.95 34.95 Z" fill="#ffd45a"/><path d="M320 44.5 L321.05 46.95 L323.5 48 L321.05 49.05 L320 51.5 L318.95 49.05 L316.5 48 L318.95 46.95 Z" fill="#ffd45a"/>
+  <circle cx="140" cy="28" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="181" cy="47" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="222" cy="66" r="2.4" fill="#ffd45a" opacity="0.9"/>
+</svg>
         <span className="home-section-banner__text">
           {icon && <Icon name={icon} size={18} color="#fff" />}
           {title}
