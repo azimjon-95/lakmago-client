@@ -27,27 +27,32 @@ import './Home.css';
 
 /*
  * Oddiy sarlavha (Trend taomlar kabi) va Express24 uslubidagi
- * ikki pog'onali oranjevа banner (Chegirmadagi taomlar) — SVG
- * shakli foydalanuvchi bergan aniq yo'l (path) asosida, har
- * qanday ekran kengligiga cho'ziladi (preserveAspectRatio="none").
- */
-/*
- * Oddiy sarlavha (Trend taomlar kabi) va Express24 uslubidagi
- * ikki pog'onali oranjevа banner ("Super Chegirmalar") — SVG
- * shakli aniq yo'l (path) asosida, har qanday ekran kengligiga
- * to'g'ri cho'ziladi (preserveAspectRatio="none").
+ * ikki pog'onali oranjevа banner ("Super Chegirmalar") — sizning
+ * bezakli (gradient, soya, yaltiroq nuqtalar) SVG dizayningiz
+ * asosida, faqat geometriyasi tuzatilgan.
  *
- * MUHIM: SVG elementida albatta className="home-section-banner__shape"
- * bo'lishi shart — shu orqali CSS uni konteyner o'lchamiga
- * (position:absolute, width/height:100%) bog'laydi. Bo'lmasa
- * SVG o'zining tabiiy (viewBox'dan kelib chiqqan) o'lchamida
- * chiqib, konteynerdan tashqariga oshib ketadi va pastdagi
- * kartalar ustiga tushib qoladi — aynan shu xato bir marta
- * yuz berdi va tuzatildi.
+ * TUZATILGAN XATO: avvalgi shaklda O'NG (qisqa) qism ham xuddi
+ * CHAP (baland) qism kabi PASTKI chetigacha (y=200) to'liq
+ * bo'yalgan edi — faqat TEPADA bezakli "kesim" bor edi. Bu
+ * degani rangli maydon butun kenglik bo'yicha deyarli bir xil
+ * balandlikda edi va pastdagi kartalar unga "minib chiqa"
+ * olmasdi (orqasida ko'rinadigan bo'sh joy yo'q edi).
  *
- * Matn HTML <span> orqali, SVG ICHIGA yozilmagan — shrift aniq
- * chiqadi, ekran o'quvchilari to'g'ri o'qiydi, va ikki marta
- * (SVG matni + HTML matni) chiqib ketish xavfi yo'q.
+ * Endi: ikkala qism ham BIR XIL pastki chiziqda tugaydi (baza
+ * umumiy), lekin O'NG qismning TEPA chetigi PASTGA — deyarli
+ * pastki chiziqqacha — tushiriladi. Natijada o'ng tomonda faqat
+ * ingichka rangli "lenta" qoladi, uning USTIDA esa katta bo'sh
+ * (shaffof) maydon paydo bo'ladi — pastdagi kartalar aynan shu
+ * bo'sh maydonga "chiqib" turgandek ko'rinadi.
+ *
+ * MUHIM: className="home-section-banner__shape" va
+ * preserveAspectRatio="none" — shular orqali SVG konteyner
+ * o'lchamiga (CSS) to'g'ri bog'lanadi, aks holda o'zining
+ * tabiiy (juda katta) o'lchamida chiqib, pastdagi kartalar
+ * ustiga tushib qoladi (bir marta shu xato bo'lgan va tuzatilgan).
+ *
+ * Matn HTML <span> orqali (SVG ICHIDA emas) — shunda tarjima
+ * (uz/ru) to'g'ri ishlaydi va matn ikki marta chiqib ketmaydi.
  */
 const SectionHeader = memo(function SectionHeader({ icon, title, action, variant = 'plain' }) {
   if (variant === 'banner') {
@@ -55,11 +60,52 @@ const SectionHeader = memo(function SectionHeader({ icon, title, action, variant
       <div className="home-section-banner">
         <svg
           className="home-section-banner__shape"
-          viewBox="0 0 100 82"
+          viewBox="0 0 950 200"
           preserveAspectRatio="none"
+          fill="none"
           aria-hidden="true"
         >
-          <path d="M0,82 L0,34 A3.409,24 0 0 1 3.409,10 L60.511,10 A3.409,24 0 0 1 63.920,34 L63.920,51 A3.409,24 0 0 0 67.330,75 L100,75 L100,82 Z" />
+          <defs>
+            <linearGradient id="sc-grad" x1="0" y1="0" x2="950" y2="0">
+              <stop offset="0%" stopColor="#ff9a32" />
+              <stop offset="100%" stopColor="#ff6500" />
+            </linearGradient>
+            <filter id="sc-shadow" x="-10%" y="-20%" width="120%" height="150%">
+              <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#ff6500" floodOpacity="0.28" />
+            </filter>
+          </defs>
+
+          <path d="
+                M 39 8
+                H 410
+                C 440 8, 453 23, 470 38
+                C 486 50.5, 501 58, 530 58
+                C 562 58, 583 92, 601 127
+                H 911
+                Q 930 127 930 146
+                V 153
+                Q 930 172 911 172
+                H 39
+                Q 20 172 20 153
+                V 27
+                Q 20 8 39 8
+                Z" fill="url(#sc-grad)" filter="url(#sc-shadow)" />
+
+          {/* Yupqa urg'u chizig'i — chap qism yuqori chetida */}
+          <path d="M 23 15 H 408
+            C 436 15, 448 27.5, 464 42.5
+            C 481 55, 497 62, 527 62"
+            stroke="#ffcd65" strokeWidth="2.5" strokeLinecap="round" opacity="0.7" />
+
+          {/* Yaltiroq bezaklar — faqat baland (chap) qismda */}
+          <path d="M92 32.5 L93.05 34.95 L95.5 36 L93.05 37.05 L92 39.5 L90.95 37.05 L88.5 36 L90.95 34.95 Z" fill="#ffd45a" />
+          <circle cx="140" cy="28" r="2.4" fill="#ffd45a" opacity="0.9" />
+          <circle cx="181" cy="47" r="2.4" fill="#ffd45a" opacity="0.9" />
+          <circle cx="222" cy="66" r="2.4" fill="#ffd45a" opacity="0.9" />
+          <circle cx="263" cy="30" r="2.4" fill="#ffd45a" opacity="0.9" />
+          <circle cx="304" cy="49" r="2.4" fill="#ffd45a" opacity="0.9" />
+          <circle cx="345" cy="68" r="2.4" fill="#ffd45a" opacity="0.9" />
+          <circle cx="386" cy="32" r="2.4" fill="#ffd45a" opacity="0.9" />
         </svg>
         <span className="home-section-banner__text">
           {icon && <Icon name={icon} size={18} color="#fff" />}

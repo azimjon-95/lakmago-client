@@ -140,7 +140,10 @@ margin-left: 13px;
   width: 100%; height: 100%;
   display: block;
 }
-.home-section-banner__shape path { fill: var(--brand); }
+/* Endi SVG ichidagi har bir <path>/<circle> o'z rangini
+   (gradient, stroke) ICHKI atribut orqali belgilaydi — bu yerda
+   MAJBURAN bitta rang berilmaydi, aks holda gradient va
+   bezaklar (yaltiroq nuqtalar) ko'rinmay qoladi. */
 .home-section-banner__text {
   position: relative;
   z-index: 1;
