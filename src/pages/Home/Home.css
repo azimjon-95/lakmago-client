@@ -149,6 +149,7 @@ margin-left: 13px;
   background: var(--food-tint-1);
   padding: 12px 0 6px;
   margin-top: -1px;
+  margin-left: 13px;  /* banner bilan bir xil qirqim */
 }
 /* Chapdan sahifa bilan bir xil qirqim (16px), o'ngdan
    CHEGARASIZ — karta ekran chetiga chiqib qirqilishi kerak */
@@ -162,6 +163,7 @@ margin-left: 13px;
   display: flex; gap: 10px;
   padding: 0 16px 12px;
   overflow-x: auto;
+  margin-left: 13px;
 }
 
 /* Kichik reklama banner */
@@ -191,6 +193,7 @@ margin-left: 13px;
   display: flex; gap: 10px;
   padding: 0 16px 12px;
   overflow-x: auto;
+  margin-left: 13px;
   scroll-snap-type: x proximity;
 }
 /* Taom kartasi — kichik (Uzum uslubi: ~148px) */
