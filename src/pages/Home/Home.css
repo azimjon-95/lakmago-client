@@ -85,7 +85,12 @@ margin-left: 13px;
   transition: color 0.15s var(--ease);
 }
 .home-cat:active .home-cat__art { transform: scale(0.94); }
-
+.home-cat__art:active {
+  transform: scale(0.94);
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.08),
+    inset 0 2px 5px rgba(0, 0, 0, 0.08);
+}
 /* Tanlangan — "+" savat tugmasi bilan bir xil ko'k urg'u */
 .home-cat.is-active .home-cat__art {
   border-color: var(--accent-2);
