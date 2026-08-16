@@ -40,12 +40,8 @@
   display: flex; gap: 14px;
   padding: 10px 16px 14px;
   overflow-x: auto;
-/* margin-left: 13px; */
+margin-left: 13px;
   scroll-snap-type: x proximity;
-}
-.nobtn{
-  width: 68px;
-  
 }
 /* Kategoriya — rasm tepada, nom pastda (Uzum/Yandex uslubi) */
 .home-cat {

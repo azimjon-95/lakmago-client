@@ -175,7 +175,6 @@ export function HomePage() {
       <BannerSlider banners={banners} />
 
       <div className="home-categories no-scrollbar">
-      <button className='nobtn'>I</button>
         {categories.map((c) => (
           <button
             key={c.id}
