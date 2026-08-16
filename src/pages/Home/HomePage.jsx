@@ -84,14 +84,14 @@ const SectionHeader = memo(function SectionHeader({ icon, title, action, variant
     C 481 55, 497 62, 527 62
     H 924" stroke="#ffcd65" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
 
-  <text x="38" y="50" fill="#ffffff" font-family="Arial,Helvetica,sans-serif"
-        font-size="31" font-weight="800" filter="url(#textShadow)">%</text>
+  <text x="38" y="56" fill="#ffffff" font-family="Arial,Helvetica,sans-serif"
+        font-size="33" font-weight="800" filter="url(#textShadow)">%</text>
 
-  <text x="78" y="48" fill="#ffffff" font-family="Arial,Helvetica,sans-serif"
-        font-size="33" font-weight="800" letter-spacing="-1.1" filter="url(#textShadow)">Super chegirmalar!</text>
+  <text x="78" y="54" fill="#ffffff" font-family="Arial,Helvetica,sans-serif"
+        font-size="38" font-weight="800" letter-spacing="-1.1" filter="url(#textShadow)">Super chegirmalar!</text>
 
-  <path d="M92 32.5 L93.05 34.95 L95.5 36 L93.05 37.05 L92 39.5 L90.95 37.05 L88.5 36 L90.95 34.95 Z" fill="#ffd45a"/><path d="M320 44.5 L321.05 46.95 L323.5 48 L321.05 49.05 L320 51.5 L318.95 49.05 L316.5 48 L318.95 46.95 Z" fill="#ffd45a"/>
-  <circle cx="140" cy="28" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="181" cy="47" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="222" cy="66" r="2.4" fill="#ffd45a" opacity="0.9"/>
+  <path d="M92 32.5 L93.05 34.95 L95.5 36 L93.05 37.05 L92 39.5 L90.95 37.05 L88.5 36 L90.95 34.95 Z" fill="#ffd45a"/><path d="M445 44.5 L446.05 46.95 L448.5 48 L446.05 49.05 L445 51.5 L443.95 49.05 L441.5 48 L443.95 46.95 Z" fill="#ffd45a"/>
+  <circle cx="140" cy="28" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="181" cy="47" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="222" cy="66" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="263" cy="30" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="304" cy="49" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="345" cy="68" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="386" cy="32" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="427" cy="51" r="2.4" fill="#ffd45a" opacity="0.9"/>
 </svg>
         <span className="home-section-banner__text">
           {icon && <Icon name={icon} size={18} color="#fff" />}
