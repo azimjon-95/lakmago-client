@@ -38,9 +38,9 @@
 /* Kategoriyalar */
 .home-categories {
   display: flex; gap: 14px;
-  padding: 10px 0px 16px 20px;
+  padding: 10px 16px 14px;
   overflow-x: auto;
-background: #0000005f;
+margin-left: 15px;
   scroll-snap-type: x proximity;
 }
 /* Kategoriya — rasm tepada, nom pastda (Uzum/Yandex uslubi) */
