@@ -190,9 +190,9 @@ export function HomePage() {
       </div>
 
       {/* Trend taomlar */}
-      <SectionHeader icon="flame" title={t('trendingDishes')} action={t('all')} />
       {(trendLoading || trending.length > 0) && (
         <>
+          <SectionHeader icon="flame" title={t('trendingDishes')} action={t('all')} />
           <div className="home-scroll-row no-scrollbar">
             {trendLoading
               ? Array.from({ length: 4 }).map((_, i) => <DishScrollСardSkeleton key={i} />)
