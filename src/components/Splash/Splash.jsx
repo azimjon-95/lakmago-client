@@ -14,7 +14,7 @@ import './Splash.css';
  *
  * Ikkalasi ham 3 soniya ko'rsatiladi, keyin ilova ochiladi.
  */
-const SHOW_MS = 3000;    // ko'rsatish vaqti — video ham, gif ham
+const SHOW_MS = 3400;    // ko'rsatish vaqti — video ham, gif ham
 const FADE_MS = 400;     // chiqish animatsiyasi
 const HARD_STOP_MS = 6000; // hech narsa yurmasa ham o'tib ketamiz
 
