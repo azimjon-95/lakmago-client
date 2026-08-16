@@ -278,7 +278,7 @@ export function HomePage() {
       {/* Chegirmadagi taomlar — Express24 uslubida bitta ramka:
           tepasi qattiq oranjevа banner, ichi och fon */}
       {discountedShown.length > 0 && (
-        <div className="home-discount-frame">
+        <>
           <SectionHeader icon="discount" title={t('discountedDishes')} variant="banner" />
           {/* <div className="home-discount-frame__body"> */}
             <div className="home-dishes-row no-scrollbar">
@@ -287,7 +287,7 @@ export function HomePage() {
               ))}
             </div>
           {/* </div> */}
-        </div>
+        </>
       )}
 
       {/* Tavsiya qilamiz — har kirganda tartib o'zgaradi */}
