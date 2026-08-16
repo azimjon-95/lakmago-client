@@ -116,3 +116,27 @@
 @media (prefers-reduced-motion: reduce) {
   .splash { transition: opacity 0.15s linear; }
 }
+
+/* ============================================
+   GIF versiyasi — keyingi ochilishlar
+
+   Video uchun ishlatilgan xira-fon texnikasi bu yerda ortiqcha:
+   GIF foni allaqachon deyarli bir tekis rang (to'q ko'k-yashil),
+   shuning uchun tepa-pastdagi bo'shliq shunchaki O'SHA rang bilan
+   to'ldiriladi — hech qanday blur/qayta chizish kerak emas,
+   bitta <img> — eng tez yo'l.
+   ============================================ */
+.splash--gif {
+  /* GIF'ning o'z fon rangidan olingan — burchak piksellaridan
+     namuna olindi (rgb(0,37,52) va rgb(0,40,53) o'rtachasi) */
+  background: #002634;
+}
+.splash__gif {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}

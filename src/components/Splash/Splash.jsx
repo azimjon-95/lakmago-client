@@ -4,27 +4,55 @@ import { api } from '@/api';
 import './Splash.css';
 
 /**
- * Ochilish ekrani — logo videosi.
+ * Ochilish ekrani.
  *
- * Video 9:16 (720×1280), telefon ekrani odatda undan ingichka.
- * Shuning uchun video "contain" bilan chiziladi (hech joyi
- * kesilmaydi), tepa-pastdagi bo'shliqni esa xira POSTER
- * to'ldiradi.
+ * BIRINCHI MAROTABA (butun vaqt davomida, localStorage orqali
+ * — sessiya emas) — brend videosi. Keyingi barcha ochilishlarda
+ * — yengil GIF (kuryer animatsiyasi). Video ancha katta va faqat
+ * bir marta ko'rilishi kerak; GIF esa har safar tez yuklanishi
+ * uchun ataylab kichik (~1MB) qilib siqilgan.
  *
- * MUHIM: bo'shliqni ilgari ikkinchi <video> to'ldirardi. Bu
- * bitta faylni ikki marta dekodlash va har kadrga blur(40px)
- * qo'llash demak edi — telefonda video boshida qotib qolardi.
- * Endi fon statik rasm: dekod bir marta, blur bir marta.
+ * Ikkalasi ham 3 soniya ko'rsatiladi, keyin ilova ochiladi.
  */
-const SHOW_MS = 5600;   // video ko'rsatiladigan vaqt
-const FADE_MS = 400;    // chiqish animatsiyasi
-const HARD_STOP_MS = 8000; // video umuman yurmasa ham o'tib ketamiz
+const SHOW_MS = 3000;    // ko'rsatish vaqti — video ham, gif ham
+const FADE_MS = 400;     // chiqish animatsiyasi
+const HARD_STOP_MS = 6000; // hech narsa yurmasa ham o'tib ketamiz
+
+const FIRST_OPEN_KEY = 'lokmago_first_open_done';
 
 export function Splash({ onDone }) {
   const qc = useQueryClient();
   const videoRef = useRef(null);
   const [leaving, setLeaving] = useState(false);
   const prefetched = useRef(false);
+
+  /*
+   * Bir marta hisoblanadi — FAQAT O'QIYDI, yon ta'sir yo'q.
+   *
+   * MUHIM: localStorage.setItem() ni bu yerga yozib bo'lmaydi —
+   * React StrictMode useState boshlang'ich funksiyasini RIVOJLANISH
+   * rejimida ATAYLAB ikki marta chaqiradi (aynan shunday yon
+   * ta'sirlarni tutish uchun). Agar shu yerda yozilsa: 1-chaqiruv
+   * bayroqni o'rnatadi -> 2-chaqiruv uni allaqachon o'rnatilgan
+   * deb topadi -> natija noto'g'ri "false" bo'lib qoladi, birinchi
+   * tashrifda ham video o'rniga gif ko'rinadi.
+   */
+  const [isFirstOpen] = useState(() => {
+    try {
+      return !localStorage.getItem(FIRST_OPEN_KEY);
+    } catch {
+      // localStorage yo'q (masalan cookie o'chirilgan) — video
+      // ko'rsatmaymiz, gif yengilroq va xavfsizroq zaxira
+      return false;
+    }
+  });
+
+  // Yon ta'sir shu yerda, useEffect ichida — faqat bir marta,
+  // xavfsiz ishlaydi.
+  useEffect(() => {
+    if (!isFirstOpen) return;
+    try { localStorage.setItem(FIRST_OPEN_KEY, '1'); } catch { /* yo'q qilib bo'lmaydi */ }
+  }, [isFirstOpen]);
 
   // onDone har renderda yangidan yaratiladi. Uni to'g'ridan-to'g'ri
   // effekt bog'liqligiga qo'ysak taymerlar qayta ishga tushib,
@@ -36,8 +64,8 @@ export function Splash({ onDone }) {
    * Ma'lumotlarni oldindan yuklash.
    *
    * Bu beshta so'rov va ularning JSON tahlili asosiy oqimni
-   * band qiladi. Video ijrosi bilan bir vaqtda boshlansa,
-   * birinchi kadrlar kechikadi. Shuning uchun video yurib
+   * band qiladi. Media ijrosi bilan bir vaqtda boshlansa,
+   * birinchi kadrlar kechikadi. Shuning uchun media yurib
    * ketgandan keyin chaqiriladi.
    */
   const prefetch = useCallback(() => {
@@ -72,8 +100,9 @@ export function Splash({ onDone }) {
     const leaveTimer = setTimeout(() => setLeaving(true), SHOW_MS);
     const doneTimer = setTimeout(() => onDoneRef.current(), SHOW_MS + FADE_MS);
 
-    // Video yuklanmasa yoki ijro bloklansa ham ilova ochilsin
-    const guard = setTimeout(() => { prefetch(); }, 1200);
+    // Media yuklanmasa yoki ijro bloklansa ham ilova ochilsin —
+    // ma'lumot yuklashni istalgan holatda darhol boshlaymiz
+    const guard = setTimeout(() => { prefetch(); }, 400);
 
     return () => {
       clearTimeout(leaveTimer);
@@ -103,6 +132,21 @@ export function Splash({ onDone }) {
     v.play().catch(() => { v.muted = true; v.play().catch(() => {}); });
   };
 
+  if (!isFirstOpen) {
+    // ═══ Keyingi ochilishlar — yengil GIF ═══
+    return (
+      <div className={`splash splash--gif ${leaving ? 'splash--leaving' : ''}`}>
+        <img
+          className="splash__gif"
+          src="/splash-courier.gif"
+          alt=""
+          onLoad={prefetch}
+        />
+      </div>
+    );
+  }
+
+  // ═══ Birinchi marotaba — brend videosi ═══
   return (
     <div className={`splash ${leaving ? 'splash--leaving' : ''}`}>
       {/* To'ldiruvchi fon — statik kadr, har kadrda qayta
