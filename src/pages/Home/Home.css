@@ -121,6 +121,13 @@ margin-left: 13px;
    suriladi. */
 .home-discount-frame {
   margin: 18px 0 6px;
+  /* Banner ostidagi karta qatori uchun fon — avval alohida
+     .home-discount-frame__body divi orqali berilardi, u JSX'da
+     olib tashlangani uchun endi shu yerga ko'chirildi. Banner
+     o'zi shape orqali ustidan chiziladi, bu fon faqat PASTKI
+     (qisqa) qismda ko'rinadi. */
+  background: var(--food-tint-1);
+  padding-top: 6px;
 }
 .home-section-banner {
   position: relative;
@@ -146,10 +153,11 @@ margin-left: 13px;
   box-sizing: border-box;
 }
 .home-discount-frame__body {
-  background: var(--food-tint-1);
-  padding: 12px 0 6px;
-  margin-top: -1px;
-  margin-left: 13px;  /* banner bilan bir xil qirqim */
+  /* JSX'da bu wrapper endi ishlatilmaydi (home-dishes-row
+     to'g'ridan-to'g'ri home-discount-frame ichida) — fon rangi
+     yuqorida .home-discount-frame'ning o'ziga ko'chirildi. Bu
+     qoida hozircha eski/boshqa joyda ishlatilib qolgan bo'lsa
+     deb qoldirildi, lekin amalda bo'sh. */
 }
 /* Chapdan sahifa bilan bir xil qirqim (16px), o'ngdan
    CHEGARASIZ — karta ekran chetiga chiqib qirqilishi kerak */

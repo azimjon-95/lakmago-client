@@ -31,7 +31,7 @@ export const translations = {
     // Bosh sahifa
     deliveryAddress: 'Yetkazish manzili',
     trendingDishes: 'Trend taomlar',
-    discountedDishes: 'Chegirmadagi taomlar',
+    discountedDishes: 'Super Chegirmalar',
     recommended: 'Tavsiya qilamiz',
     allRestaurants: 'Barcha restoranlar',
     allDishes: 'Barcha taomlar',
@@ -135,7 +135,7 @@ export const translations = {
 
     deliveryAddress: 'Етказиш манзили',
     trendingDishes: 'Тренд таомлар',
-    discountedDishes: 'Чегирмадаги таомлар',
+    discountedDishes: 'Супер Чегирмалар',
     recommended: 'Тавсия қиламиз',
     allRestaurants: 'Барча ресторанлар',
     allDishes: 'Барча таомлар',
@@ -232,7 +232,7 @@ export const translations = {
 
     deliveryAddress: 'Адрес доставки',
     trendingDishes: 'Популярные блюда',
-    discountedDishes: 'Блюда со скидкой',
+    discountedDishes: 'Супер скидки',
     recommended: 'Рекомендуем',
     allRestaurants: 'Все рестораны',
     allDishes: 'Все блюда',
