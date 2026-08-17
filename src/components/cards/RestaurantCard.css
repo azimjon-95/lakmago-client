@@ -3,6 +3,7 @@
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
+  box-shadow: var(--card-lift);
   overflow: hidden;
   transition: transform 0.1s var(--ease);
 }

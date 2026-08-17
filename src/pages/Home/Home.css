@@ -113,64 +113,6 @@ margin-left: 13px;
 }
 .home-section-header__action { font-size: 13px; color: var(--brand-600); }
 
-/* ═══ Chegirmadagi taomlar — Express24 uslubida ═══
-   Banner o'zi ikki pog'onali SVG shakl (foydalanuvchi bergan
-   aniq path) — chapda baland (matn joyi), o'ngga qarab pastga
-   tushadi, kartalar undan chiqib turgandek ko'rinadi. Ostidagi
-   taomlar YOPIQ QUTIGA o'ralmaydi, o'ng tomoni ekran chetigacha
-   suriladi. */
-.home-discount-frame {
-  margin: 18px 0 6px;
-  /* Banner ostidagi karta qatori uchun fon — avval alohida
-     .home-discount-frame__body divi orqali berilardi, u JSX'da
-     olib tashlangani uchun endi shu yerga ko'chirildi. Banner
-     o'zi shape orqali ustidan chiziladi, bu fon faqat PASTKI
-     (qisqa) qismda ko'rinadi. */
-  background: var(--food-tint-1);
-  padding-top: 6px;
-}
-.home-section-banner {
-  position: relative;
-  height: 78px;
-  color: #fff;
-}
-.home-section-banner__shape {
-  position: absolute;
-  inset: 0;
-  width: 100%; height: 100%;
-  display: block;
-}
-/* Endi SVG ichidagi har bir <path>/<circle> o'z rangini
-   (gradient, stroke) ICHKI atribut orqali belgilaydi — bu yerda
-   MAJBURAN bitta rang berilmaydi, aks holda gradient va
-   bezaklar (yaltiroq nuqtalar) ko'rinmay qoladi. */
-.home-section-banner__text {
-  position: relative;
-  z-index: 1;
-  display: flex; align-items: center; gap: 6px;
-  height: 100%;
-  padding: 0 16px;
-  padding-right: 30%;   /* qisqa (pastki) qism ustiga chiqib ketmasin */
-  font-size: 14.5px; font-weight: 700;
-  white-space: nowrap;
-  box-sizing: border-box;
-}
-.home-discount-frame__body {
-  /* JSX'da bu wrapper endi ishlatilmaydi (home-dishes-row
-     to'g'ridan-to'g'ri home-discount-frame ichida) — fon rangi
-     yuqorida .home-discount-frame'ning o'ziga ko'chirildi. Bu
-     qoida hozircha eski/boshqa joyda ishlatilib qolgan bo'lsa
-     deb qoldirildi, lekin amalda bo'sh. */
-}
-/* Chapdan sahifa bilan bir xil qirqim (16px), o'ngdan
-   CHEGARASIZ — karta ekran chetiga chiqib qirqilishi kerak */
-.home-discount-frame .home-dishes-row {
-  padding-left: 16px;
-  padding-right: 4px;
-  /* margin-left: 13px; */
-
-}
-
 /* Gorizontal taom qatori */
 .home-scroll-row {
   display: flex; gap: 10px;
@@ -217,6 +159,7 @@ margin-left: 13px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 14px;
+  box-shadow: var(--card-lift);
   overflow: hidden;
   position: relative;
   text-align: left;

@@ -26,98 +26,14 @@ import './Home.css';
 // Kategoriyalar markaziy ro'yxatdan (src/data/categories.js)
 
 /*
- * Oddiy sarlavha (Trend taomlar kabi) va Express24 uslubidagi
- * ikki pog'onali oranjevа banner ("Super Chegirmalar") — sizning
- * bezakli (gradient, soya, yaltiroq nuqtalar) SVG dizayningiz
- * asosida, faqat geometriyasi tuzatilgan.
- *
- * TUZATILGAN XATO: avvalgi shaklda O'NG (qisqa) qism ham xuddi
- * CHAP (baland) qism kabi PASTKI chetigacha (y=200) to'liq
- * bo'yalgan edi — faqat TEPADA bezakli "kesim" bor edi. Bu
- * degani rangli maydon butun kenglik bo'yicha deyarli bir xil
- * balandlikda edi va pastdagi kartalar unga "minib chiqa"
- * olmasdi (orqasida ko'rinadigan bo'sh joy yo'q edi).
- *
- * Endi: ikkala qism ham BIR XIL pastki chiziqda tugaydi (baza
- * umumiy), lekin O'NG qismning TEPA chetigi PASTGA — deyarli
- * pastki chiziqqacha — tushiriladi. Natijada o'ng tomonda faqat
- * ingichka rangli "lenta" qoladi, uning USTIDA esa katta bo'sh
- * (shaffof) maydon paydo bo'ladi — pastdagi kartalar aynan shu
- * bo'sh maydonga "chiqib" turgandek ko'rinadi.
- *
- * MUHIM: className="home-section-banner__shape" va
- * preserveAspectRatio="none" — shular orqali SVG konteyner
- * o'lchamiga (CSS) to'g'ri bog'lanadi, aks holda o'zining
- * tabiiy (juda katta) o'lchamida chiqib, pastdagi kartalar
- * ustiga tushib qoladi (bir marta shu xato bo'lgan va tuzatilgan).
- *
- * Matn HTML <span> orqali (SVG ICHIDA emas) — shunda tarjima
- * (uz/ru) to'g'ri ishlaydi va matn ikki marta chiqib ketmaydi.
+ * Bo'lim sarlavhasi — oddiy, toza matn. Avval oranjevа SVG
+ * banner ("Super Chegirmalar") ishlatilgan edi, lekin
+ * murakkabligi (o'lcham nomuvofiqligi, kartalar ustiga tushib
+ * qolishi) va joylashuv muammolari tufayli olib tashlandi —
+ * endi barcha bo'limlar (shu jumladan chegirmadagi taomlar)
+ * bir xil, sodda sarlavha uslubida.
  */
-const SectionHeader = memo(function SectionHeader({ icon, title, action, variant = 'plain' }) {
-  if (variant === 'banner') {
-    return (
-      <div className="home-section-banner">
-        <svg
-          className="home-section-banner__shape"
-          viewBox="0 0 950 200"
-          preserveAspectRatio="none"
-          fill="none"
-          aria-hidden="true"
-        >
-            <defs>
-    <linearGradient id="grad" x1="0" y1="0" x2="950" y2="0">
-      <stop offset="0%" stop-color="#ff9a32"/>
-      <stop offset="100%" stop-color="#ff6500"/>
-    </linearGradient>
-    <filter id="shadow" x="-10%" y="-20%" width="120%" height="150%">
-      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#ff6500" flood-opacity="0.28"/>
-    </filter>
-    <filter id="textShadow">
-      <feDropShadow dx="0" dy="1.5" stdDeviation="1.2" flood-color="#000" flood-opacity="0.35"/>
-    </filter>
-  </defs>
-  <path d="
-        M 39 8
-        H 410
-        C 440 8, 453 23, 470 38
-        C 486 50.5, 501 58, 530 58
-        H 911
-        Q 930 58 930 77
-        V 181
-        Q 930 200 911 200
-        H 39
-        Q 20 200 20 181
-        V 27
-        Q 20 8 39 8
-        Z" fill="none" stroke="#ffb24d" stroke-width="4" stroke-linejoin="round"/>
-  <path d="
-        M 39 8
-        H 410
-        C 440 8, 453 23, 470 38
-        C 486 50.5, 501 58, 530 58
-        H 911
-        Q 930 58 930 77
-        V 181
-        Q 930 200 911 200
-        H 39
-        Q 20 200 20 181
-        V 27
-        Q 20 8 39 8
-        Z" fill="url(#grad)" filter="url(#shadow)"/>
-
-  
-          {/* Yaltiroq bezaklar — faqat baland (chap) qismda */}
-          <path d="M92 32.5 L93.05 34.95 L95.5 36 L93.05 37.05 L92 39.5 L90.95 37.05 L88.5 36 L90.95 34.95 Z" fill="#ffd45a"/><path d="M520 44.5 L521.05 46.95 L523.5 48 L521.05 49.05 L520 51.5 L518.95 49.05 L516.5 48 L518.95 46.95 Z" fill="#ffd45a"/>
-  <circle cx="140" cy="28" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="181" cy="47" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="222" cy="66" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="263" cy="30" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="304" cy="49" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="345" cy="68" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="386" cy="32" r="2.4" fill="#ffd45a" opacity="0.9"/><circle cx="427" cy="51" r="2.4" fill="#ffd45a" opacity="0.9"/>
-        </svg>
-        <span className="home-section-banner__text">
-          {icon && <Icon name={icon} size={18} color="#fff" />}
-          {title}
-        </span>
-      </div>
-    );
-  }
+const SectionHeader = memo(function SectionHeader({ icon, title, action }) {
   return (
     <div className="home-section-header">
       <div className="home-section-header__title">
@@ -275,18 +191,15 @@ export function HomePage() {
       {/* Reklama */}
       <AdStrip placement="home" />
 
-      {/* Chegirmadagi taomlar — Express24 uslubida bitta ramka:
-          tepasi qattiq oranjevа banner, ichi och fon */}
+      {/* Chegirmadagi taomlar */}
       {discountedShown.length > 0 && (
         <>
-          <SectionHeader icon="discount" title={t('discountedDishes')} variant="banner" />
-          {/* <div className="home-discount-frame__body"> */}
-            <div className="home-dishes-row no-scrollbar">
-              {discountedShown.map((d) => (
-                <DishGridCard key={d.id || d._id} dish={d} onClick={openModal} />
-              ))}
-            </div>
-          {/* </div> */}
+          <SectionHeader icon="discount" title={t('discountedDishes')} />
+          <div className="home-dishes-row no-scrollbar">
+            {discountedShown.map((d) => (
+              <DishGridCard key={d.id || d._id} dish={d} onClick={openModal} />
+            ))}
+          </div>
         </>
       )}
 

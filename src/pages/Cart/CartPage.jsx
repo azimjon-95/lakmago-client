@@ -482,7 +482,6 @@ export function CartPage() {
         >
           <Icon name="bag" size={19} color={fulfillment === 'pickup' ? 'var(--brand)' : 'var(--muted)'} />
           <span className="cart-ftab__title">O'zim olib ketaman</span>
-          <span className="cart-ftab__sub cart-ftab__sub--free">Yetkazish bepul</span>
         </button>
       </div>
 
