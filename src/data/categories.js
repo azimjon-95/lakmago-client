@@ -38,7 +38,7 @@ export const CATEGORIES = [
   // Shu rasm Ichimlik kategoriyasiga ham ishlatiladi
   { id: 'salqin', label: 'Ichimlik', art: 'ichimlik', img: '/categories/ichimlik.png' },
 
-  { id: 'magazin_oziq', label: "Do'konlar", art: 'magazin' },
+  { id: 'gazak', label: 'Gazaklar', art: 'milliy' },
 ];
 
 export const HOME_CATEGORIES = CATEGORIES;
