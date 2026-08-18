@@ -599,3 +599,24 @@ ul { list-style: none; }
   color: var(--brand-100);
   font-weight: 600;
 }
+
+/* ============================================
+   PULL-TO-REFRESH — pastga tortib yangilash
+   ============================================ */
+.ptr-indicator {
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  transition: opacity 0.15s;
+}
+.ptr-spinner {
+  width: 26px; height: 26px;
+  border: 2.5px solid var(--line);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+}
+.ptr-spinner--spin {
+  animation: ptr-spin 0.7s linear infinite;
+}
+@keyframes ptr-spin {
+  to { transform: rotate(360deg); }
+}

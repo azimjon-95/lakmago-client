@@ -6,6 +6,7 @@ import { RestaurantCard } from '@/components/RestaurantCard';
 import { DishScrollCard } from '@/components/DishScrollCard';
 import { DishGridCard } from '@/components/DishGridCard';
 import { DishModal } from '@/components/DishModal';
+import { AdModal } from '@/components/AdModal';
 import { BottomNav } from '@/components/BottomNav';
 import { CartBar } from '@/components/CartBar';
 import { LangSwitch } from '@/components/LangSwitch/LangSwitch';
@@ -15,8 +16,9 @@ import { useT } from '@/i18n';
 import { useOpenDishes, useClosedAlert } from '@/hooks/useOpenStatus';
 import { ClosedAlert } from '@/components/ClosedAlert';
 import { PromoStrip, AdStrip } from '@/components/PromoStrip';
-import { useRestaurants, useTrendingDishes, useBannersQuery, useAllDishes } from '@/hooks/queries';
-import { API_BASE } from '@/api';
+import { useRestaurants, useTrendingDishes, useBannersQuery, useAllDishes, useBannerAds } from '@/hooks/queries';
+import { PullToRefresh } from '@/components/PullToRefresh';
+import { API_BASE, api } from '@/api';
 import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
 import { CategoryIcon } from '@/components/CategoryIcons/CategoryIcon';
 import { HOME_CATEGORIES as categories } from '@/data/categories';
@@ -57,9 +59,33 @@ export function HomePage() {
 
   // Real data — TanStack Query (cache + background refetch)
   const { data: restaurants = [], isLoading: restLoading, isError: restError, error: restErrorObj, refetch: refetchRest } = useRestaurants();
-  const { data: trending = [], isLoading: trendLoading } = useTrendingDishes();
-  const { data: allDishes = [], isLoading: allDishesLoading } = useAllDishes();
-  const { data: banners = [] } = useBannersQuery();
+  const { data: trending = [], isLoading: trendLoading, refetch: refetchTrending } = useTrendingDishes();
+  const { data: allDishes = [], isLoading: allDishesLoading, refetch: refetchAllDishes } = useAllDishes();
+  const { data: banners = [], refetch: refetchBanners } = useBannersQuery();
+  const { data: bannerAds = [], refetch: refetchAds } = useBannerAds();
+
+  // Bosh sahifani pastga tortib yangilash — barcha ma'lumotlarni
+  // qayta so'raydi (sahifa qayta yuklanmaydi, faqat ma'lumot
+  // yangilanadi — zamonaviy ilovalar shunday ishlaydi)
+  const handlePullRefresh = useCallback(() => Promise.all([
+    refetchRest(), refetchTrending(), refetchAllDishes(), refetchBanners(), refetchAds(),
+  ]), [refetchRest, refetchTrending, refetchAllDishes, refetchBanners, refetchAds]);
+
+  // Reklamalar (restoran/taom) oddiy bannerlar bilan BITTA
+  // karuselda aralashadi — foydalanuvchi uchun farqi yo'q, faqat
+  // pastki-o'ng burchakda kichik "Reklama" belgisi bilan
+  const [adModal, setAdModal] = useState(null);
+  const slidesWithAds = useMemo(() => {
+    const adSlides = bannerAds.map((a) => ({
+      id: `ad-${a.id}`, isAd: true, imageUrl: a.imageUrl, adData: a,
+    }));
+    return [...banners, ...adSlides];
+  }, [banners, bannerAds]);
+
+  const openAdModal = useCallback((slide) => {
+    api.clickAd(slide.adData.id).catch(() => {});
+    setAdModal(slide.adData);
+  }, []);
 
   // Kategoriya tanlanganda restoranlar VA taomlar birga filtrlanadi
   const filtered = useMemo(
@@ -132,6 +158,7 @@ export function HomePage() {
   const closeModal = useCallback(() => setModalDish(null), []);
 
   return (
+    <PullToRefresh onRefresh={handlePullRefresh}>
     <div className="app-shell home">
       <header className="home-header">
         <button onClick={() => (user.addresses.length ? setShowAddressSheet(true) : setShowAddressFlow(true))} className="home-header__addr">
@@ -156,7 +183,7 @@ export function HomePage() {
         </div>
       </header>
 
-      <BannerSlider banners={banners} />
+      <BannerSlider banners={slidesWithAds} onAdClick={openAdModal} />
 
       <div className="home-categories no-scrollbar">
         {categories.map((c) => (
@@ -280,6 +307,25 @@ export function HomePage() {
           onClose={() => setShowAddressFlow(false)}
         />
       )}
+
+      {/* Restoran/taom reklamasi bosilganda — havola emas, shu
+          modal ochiladi (dastur ichida qoladi) */}
+      {adModal && (
+        <AdModal
+          ad={adModal}
+          onClose={() => setAdModal(null)}
+          onOpenDish={(dish) => {
+            setAdModal(null);
+            const found = allDishes.find((d) => (d.id || d._id) === dish.id);
+            openModal(found || dish);
+          }}
+          onOpenRestaurant={(restaurantId) => {
+            setAdModal(null);
+            navigate(`/restaurant/${restaurantId}`);
+          }}
+        />
+      )}
     </div>
+    </PullToRefresh>
   );
 }

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Icon } from './Icon';
 import './cards/BannerSlider.css';
 
-export function BannerSlider({ banners }) {
+export function BannerSlider({ banners, onAdClick }) {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -20,6 +20,13 @@ export function BannerSlider({ banners }) {
     else window.open(url, '_blank');
   };
 
+  const handleClick = (b) => {
+    // Restoran/taom reklamasi — havola emas, modal ochiladi
+    // (dastur ichida qoladi, tashqariga chiqmaydi)
+    if (b.isAd) { onAdClick?.(b); return; }
+    if (b.hasButton && b.linkUrl) openLink(b.linkUrl);
+  };
+
   if (!banners.length) return null;
   const b = banners[index];
   // Rasm bo'lsa fon sifatida rasm, bo'lmasa rang
@@ -30,14 +37,14 @@ export function BannerSlider({ banners }) {
   return (
     <div className="banner-slider">
       <div
-        className={`banner-slide ${b.hasButton ? '' : 'banner-slide--plain'}`}
+        className={`banner-slide ${b.hasButton || b.isAd ? '' : 'banner-slide--plain'}`}
         style={slideStyle}
         key={b.id || b._id}
-        onClick={() => b.hasButton && b.linkUrl && openLink(b.linkUrl)}
-        role={b.hasButton && b.linkUrl ? 'button' : undefined}
+        onClick={() => handleClick(b)}
+        role={(b.isAd || (b.hasButton && b.linkUrl)) ? 'button' : undefined}
       >
         {/* Matn va tugma faqat yoqilganda — aks holda toza rasm */}
-        {b.hasButton && (
+        {b.hasButton && !b.isAd && (
           <div className="banner-slide__body">
             {b.eyebrow && (
               <div className="banner-slide__eyebrow" style={{ color: b.accentText }}>{b.eyebrow}</div>
@@ -48,6 +55,8 @@ export function BannerSlider({ banners }) {
             </div>
           </div>
         )}
+        {/* Reklama — kichik "Reklama" belgisi, pastki-o'ng burchakda */}
+        {b.isAd && <div className="banner-slide__ad-tag">Reklama</div>}
         {!b.imageUrl && <Icon name={b.icon} size={52} color={b.ctaBg} />}
       </div>
       <div className="banner-slider__dots">

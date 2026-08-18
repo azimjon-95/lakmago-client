@@ -99,6 +99,9 @@ export const api = {
 
   // ===== Katalog =====
   getBanners: (opts) => apiFetch('/banners', opts),
+  // Restoran/taom reklamalari — admin tasdiqlagan, bosh sahifa banneriga qo'shiladi
+  getBannerAds: (opts) => apiFetch('/ads/banner', opts),
+  clickAd: (id) => apiFetch(`/ads/${id}/click`, { method: 'POST' }),
 
   getRestaurants: async (opts) => {
     const res = await apiFetch('/restaurants', opts);

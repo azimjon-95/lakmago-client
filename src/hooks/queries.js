@@ -11,6 +11,16 @@ export const useBannersQuery = () =>
     staleTime: 10 * 60_000, // bannerlar kam o'zgaradi
   });
 
+// Restoran/taom reklamalari — admin tasdiqlagan, tez-tez o'zgarishi
+// mumkin (yangi tasdiqlanadi/muddati tugaydi), shuning uchun
+// bannerlarga qaraganda qisqaroq staleTime.
+export const useBannerAds = () =>
+  useQuery({
+    queryKey: ['ads', 'banner'],
+    queryFn: ({ signal }) => api.getBannerAds({ signal }),
+    staleTime: 2 * 60_000,
+  });
+
 export const useRestaurants = () =>
   useQuery({
     queryKey: ['restaurants'],
