@@ -1,44 +1,205 @@
-.banner-slider { margin: 0 16px 8px; border-radius: 18px; overflow: hidden; position: relative; height: 130px; }
-.banner-slide {
+.banner-slider {
+  margin: 0 16px 8px;
+  border-radius: 18px;
+  overflow: hidden;
+  position: relative;
   height: 130px;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 18px;
-  animation: fade-in 0.5s var(--ease);
+  isolation: isolate;
 }
-.banner-slide__eyebrow { font-size: 11px; font-weight: 500; }
-.banner-slide__title { font-size: 19px; color: #fff; font-weight: 500; line-height: 1.2; margin-top: 2px; max-width: 210px; }
-.banner-slide__cta { margin-top: 8px; display: inline-block; font-size: 12px; font-weight: 500; padding: 5px 12px; border-radius: 9px; }
-.banner-slider__dots { position: absolute; bottom: 10px; left: 18px; display: flex; gap: 6px; }
-.banner-slider__dot { height: 5px; width: 5px; border-radius: 3px; background: rgba(255,255,255,0.5); transition: all 0.3s var(--ease); }
-.banner-slider__dot.is-active { width: 16px; background: var(--brand); }
 
-/* Tugmasiz banner — faqat rasm, matn bloki yo'q */
+.banner-slide {
+  position: absolute;
+  inset: 0;
+
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+
+  animation:
+    banner-enter 0.8s cubic-bezier(.22, 1, .36, 1) both;
+
+  transform-origin: center;
+  will-change: transform, opacity, filter;
+}
+
+/* Yangi banner yumshoq zoom + yuqoridan/pastdan ozgina siljib kiradi */
+@keyframes banner-enter {
+  0% {
+    opacity: 0;
+    transform: scale(1.08) translateX(18px);
+    filter: blur(5px);
+  }
+
+  45% {
+    opacity: 0.75;
+    filter: blur(1.5px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+    filter: blur(0);
+  }
+}
+
+/* Rasmning o'zi uchun juda sekin cinematic zoom */
+.banner-slide[style*="url"] {
+  background-size: 105% !important;
+  animation:
+    banner-enter 0.8s cubic-bezier(.22, 1, .36, 1) both,
+    banner-image-zoom 4s ease-out 0.2s forwards;
+}
+
+@keyframes banner-image-zoom {
+  0% {
+    background-size: 105%;
+    background-position: 52% 50%;
+  }
+
+  100% {
+    background-size: 100%;
+    background-position: 50% 50%;
+  }
+}
+
+.banner-slide__eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.banner-slide__title {
+  font-size: 19px;
+  color: #fff;
+  font-weight: 500;
+  line-height: 1.2;
+  margin-top: 2px;
+  max-width: 210px;
+}
+
+.banner-slide__cta {
+  margin-top: 8px;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 9px;
+}
+
+.banner-slider__dots {
+  position: absolute;
+  bottom: 10px;
+  left: 18px;
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
+.banner-slider__dot {
+  height: 5px;
+  width: 5px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.5);
+  transition:
+    width 0.4s cubic-bezier(.22, 1, .36, 1),
+    background 0.3s ease;
+}
+
+.banner-slider__dot.is-active {
+  width: 16px;
+  background: var(--brand);
+}
+
 .banner-slide--plain {
   justify-content: center;
 }
+
 .banner-slide__body {
   position: relative;
-  z-index: 1;
+  z-index: 2;
+
+  animation: banner-content 0.7s cubic-bezier(.22, 1, .36, 1) 0.12s both;
 }
-/* Tugma bo'lsa matn o'qilishi uchun yengil qoraytirish */
+
+@keyframes banner-content {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Matnli banner uchun gradient */
 .banner-slide:not(.banner-slide--plain)::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 60%, transparent 100%);
-  border-radius: inherit;
-}
-.banner-slide[role="button"] { cursor: pointer; }
-.banner-slide[role="button"]:active { transform: scale(0.995); }
 
-/* Reklama belgisi — kichik, ko'zga tashlanmaydigan, lekin aniq */
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0,0,0,0.55) 0%,
+      rgba(0,0,0,0.20) 55%,
+      transparent 100%
+    );
+
+  border-radius: inherit;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.banner-slide[role="button"] {
+  cursor: pointer;
+}
+
+.banner-slide[role="button"]:active {
+  transform: scale(0.99);
+}
+
+/* Reklama belgisi */
 .banner-slide__ad-tag {
   position: absolute;
-  bottom: 10px; right: 12px;
+  bottom: 10px;
+  right: 12px;
+
   padding: 3px 9px;
   border-radius: 999px;
+
   background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(4px);
+
   color: #fff;
-  font-size: 10.5px; font-weight: 600;
+  font-size: 10.5px;
+  font-weight: 600;
+
+  z-index: 3;
+
+  animation: ad-tag-in 0.6s ease 0.25s both;
+}
+
+@keyframes ad-tag-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Telefonlarda animationni o'chirishni xohlagan foydalanuvchilar uchun */
+@media (prefers-reduced-motion: reduce) {
+  .banner-slide,
+  .banner-slide[style*="url"],
+  .banner-slide__body,
+  .banner-slide__ad-tag {
+    animation: none !important;
+  }
 }
