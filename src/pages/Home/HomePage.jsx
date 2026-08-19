@@ -156,6 +156,7 @@ export function HomePage() {
 
   const openModal = useCallback((d) => setModalDish(d), []);
   const closeModal = useCallback(() => setModalDish(null), []);
+  const shuffledRestaurants = [...filtered].sort(() => Math.random() - 0.5);
 
   return (
     <PullToRefresh onRefresh={handlePullRefresh}>
@@ -269,11 +270,16 @@ export function HomePage() {
               </div>
             </details>
           </div>
-        ) : filtered.length > 0 ? (
-          filtered.map((r) => <RestaurantCard key={r.id || r._id} restaurant={r} />)
-        ) : (
-          <div className="home-empty">{t('empty')}</div>
-        )}
+        ) : shuffledRestaurants.length > 0 ? (
+  shuffledRestaurants.map((r) => (
+    <RestaurantCard
+      key={r.id || r._id}
+      restaurant={r}
+    />
+  ))
+) : (
+  <div className="home-empty">{t('empty')}</div>
+)}
       </div>
 
       <div style={{ flex: 1 }} />
