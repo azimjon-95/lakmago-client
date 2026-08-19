@@ -201,7 +201,7 @@ export function HomePage() {
       </div>
 
       {/* Trend taomlar */}
-      {(trendLoading || trending.length > 0) && (
+    {/*  {(trendLoading || trending.length > 0) && (
         <>
           <SectionHeader icon="flame" title={t('trendingDishes')} action={t('all')} />
           <div className="home-scroll-row no-scrollbar">
@@ -210,13 +210,13 @@ export function HomePage() {
               : trending.map((d) => <DishScrollCard key={d.id || d._id} dish={d} onClick={openModal} />)}
           </div>
         </>
-      )}
+      )} */}
 
       {/* Faol aksiyalar — restoran adminida yaratilgan */}
-      <PromoStrip category={category} />
+      {/*<PromoStrip category={category} />  */}
 
       {/* Reklama */}
-      <AdStrip placement="home" />
+       {/* <AdStrip placement="home" />   */}
 
       {/* Chegirmadagi taomlar */}
       {discountedShown.length > 0 && (
