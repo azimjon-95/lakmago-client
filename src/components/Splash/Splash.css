@@ -127,17 +127,49 @@
    bitta <img> — eng tez yo'l.
    ============================================ */
 .splash--gif {
-  /* GIF'ning o'z fon rangidan olingan — burchak piksellaridan
-     namuna olindi (rgb(0,37,52) va rgb(0,40,53) o'rtachasi) */
-  background: #002634;
-}
-.splash__gif {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  margin: auto;
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  display: block;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #002634;
+
+  /* Yumshoq va toza radius */
   border-radius: 30px;
+  overflow: hidden;
+
+  /* GPU compositing */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.splash__gif {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  /* GIFning o'zini ham clip qilish */
+  border-radius: inherit;
+
+  /* Renderni silliq qilish */
+  image-rendering: auto;
+
+  /* GIF animatsiyasida flicker/aliasingni kamaytirish */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  /* Keraksiz interaction */
+  pointer-events: none;
+
+  /* Browser default image baseline muammosini yo'qotish */
+  vertical-align: middle;
 }
