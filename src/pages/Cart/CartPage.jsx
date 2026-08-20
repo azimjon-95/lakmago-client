@@ -14,7 +14,7 @@ import { isOpenNow } from '@/lib/workHours';
 import { useCartCleanup } from '@/hooks/useCartCleanup';
 import { api } from '@/api';
 import { haptic, getTelegram } from '@/lib/telegram';
-import { useDishes } from '@/hooks/queries';
+import { useDishes, useRestaurants } from '@/hooks/queries';
 import './Cart.css';
 
 
@@ -68,6 +68,25 @@ export function CartPage() {
   // YANGI massiv qaytaradi, memosiz pastdagi useMemo'lar
   // cheksiz qayta hisoblanardi.
   const groups = useMemo(() => restaurantGroups(), [items, restaurantGroups]);
+
+  /*
+   * Yetkazish xizmati mavjudmi — serverdan JONLI tekshiriladi.
+   *
+   * Savatdagi `dish` obyektida bu ma'lumot bo'lmasligi mumkin
+   * (eski localStorage yozuvi), shuning uchun restoranlar
+   * ro'yxatidan olamiz. Savatdagi restoranlardan HECH BO'LMASA
+   * BITTASIDA yetkazish o'chirilgan bo'lsa — butun buyurtmani
+   * yetkazib bo'lmaydi (bitta kuryer hammasini olib keladi).
+   */
+  const { data: allRestaurants = [] } = useRestaurants();
+  const deliveryOff = useMemo(() => {
+    if (!allRestaurants.length) return null;   // hali yuklanmagan — cheklamaymiz
+    const blocked = groups
+      .map((g) => allRestaurants.find((r) => String(r.id || r._id) === String(g.restaurant.id)))
+      .filter((r) => r && r.deliveryEnabled === false);
+    return blocked.length ? blocked : null;
+  }, [groups, allRestaurants]);
+
   const [paying, setPaying] = useState(false);
   const [showAddressSheet, setShowAddressSheet] = useState(false);
   const [showAddressFlow, setShowAddressFlow] = useState(false);
@@ -77,6 +96,18 @@ export function CartPage() {
   const [timingMode, setTimingMode] = useState('asap');       // 'asap' | 'scheduled'
   const [scheduledFor, setScheduledFor] = useState(null);
   const isPickup = fulfillment === 'pickup';
+
+  /*
+   * Yetkazish o'chirilgan bo'lsa — avtomatik "O'zim olib
+   * ketaman"ga o'tkazamiz. Foydalanuvchi tanlab qo'ygan bo'lsa
+   * ham: aks holda tugma bosib bo'lmaydigan holatda qolib,
+   * "nega buyurtma bermayapti" degan chalkashlik bo'lardi.
+   */
+  useEffect(() => {
+    if (deliveryOff && fulfillment === 'delivery') {
+      setFulfillment('pickup');
+    }
+  }, [deliveryOff, fulfillment]);
   const [showPhoneEdit, setShowPhoneEdit] = useState(false);
   const [phoneDraft, setPhoneDraft] = useState(user.phone ?? '');
   const [paymentMethod, setPaymentMethod] = useState(lastPaymentMethod);
@@ -467,13 +498,16 @@ export function CartPage() {
       <div className="cart-section-label">Qanday olasiz</div>
       <div className="cart-fulfillment">
         <button
-          onClick={() => { haptic(); setFulfillment('delivery'); }}
-          className={`cart-ftab ${fulfillment === 'delivery' ? 'is-active' : ''}`}
+          onClick={() => { if (deliveryOff) return; haptic(); setFulfillment('delivery'); }}
+          disabled={!!deliveryOff}
+          className={`cart-ftab ${fulfillment === 'delivery' ? 'is-active' : ''} ${deliveryOff ? 'is-disabled' : ''}`}
         >
           <Icon name="bike" size={19} color={fulfillment === 'delivery' ? 'var(--brand)' : 'var(--muted)'} />
           <span className="cart-ftab__title">Yetkazib berish</span>
           <span className="cart-ftab__sub">
-            {pricing.deliveryFee === 0 ? 'Bepul' : formatSom(pricing.deliveryFee)}
+            {deliveryOff
+              ? 'Mavjud emas'
+              : (pricing.deliveryFee === 0 ? 'Bepul' : formatSom(pricing.deliveryFee))}
           </span>
         </button>
         <button
@@ -484,6 +518,19 @@ export function CartPage() {
           <span className="cart-ftab__title">O'zim olib ketaman</span>
         </button>
       </div>
+
+      {/* Yetkazish mavjud emasligi haqida aniq ogohlantirish */}
+      {deliveryOff && (
+        <div className="cart-delivery-off">
+          <Icon name="info" size={16} color="var(--appetite)" />
+          <span>
+            {deliveryOff.length === 1
+              ? `${deliveryOff[0].name} yetkazib berish xizmatini ko'rsatmaydi.`
+              : 'Savatdagi ba\u2018zi muassasalar yetkazib berish xizmatini ko\u2018rsatmaydi.'}
+            {' '}Buyurtmani o'zingiz olib ketishingiz mumkin.
+          </span>
+        </div>
+      )}
 
       {/* Vaqt — hozir yoki belgilangan */}
       <div className="cart-section-label">Qachon</div>
