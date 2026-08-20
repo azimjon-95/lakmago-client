@@ -160,7 +160,7 @@ export function Splash({ onDone }) {
       <video
         ref={videoRef}
         className="splash__video"
-        poster="/splash-poster.jpg"
+        // poster="/splash-poster.jpg"
         autoPlay
         muted
         playsInline
