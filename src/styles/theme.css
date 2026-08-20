@@ -609,7 +609,7 @@ ul { list-style: none; }
   transition: opacity 0.15s;
 }
 .ptr-spinner {
-  width: 26px; height: 26px;
+  width: 22px; height: 22px;
   border: 2.5px solid var(--line);
   border-top-color: var(--brand);
   border-radius: 50%;

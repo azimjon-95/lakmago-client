@@ -1,7 +1,7 @@
 import { useRef, useState, useCallback } from 'react';
 
-const THRESHOLD = 68;     // shuncha piksel tortilsa — yangilash boshlanadi
-const MAX_PULL = 110;     // vizual cho'zilishning maksimal chegarasi
+const THRESHOLD = 56;     // shuncha piksel tortilsa — yangilash boshlanadi
+const MAX_PULL = 88;      // vizual cho'zilishning maksimal chegarasi
 
 /**
  * Pastga tortib yangilash — Instagram/Telegram/Yandex ilovalari
@@ -89,7 +89,17 @@ export function PullToRefresh({ onRefresh, children }) {
 
       <div
         style={{
-          transform: `translateY(${pull}px)`,
+          // MUHIM: transform FAQAT tortish jarayonida (pull>0)
+          // qo'llaniladi. Agar doim (hatto pull===0 da ham)
+          // translateY(0px) qo'yilsa, CSS qoidasiga ko'ra bu
+          // ELEMENT o'zi position:fixed BOLALAR uchun yangi
+          // "containing block" yaratadi — natijada ichkaridagi
+          // barcha modallar (DishModal, AdModal va h.k.) ENDI
+          // BUTUN EKRANGA emas, shu (kichikroq) konteynerga
+          // nisbatan joylashadi — ular ko'rinmay, faqat orqa fon
+          // (qora, xira) qolib ketadi. Aynan shu xato tufayli
+          // taom/reklama bosilganda ekran "qorayib qolgan" edi.
+          transform: pull > 0 ? `translateY(${pull}px)` : undefined,
           transition: startY.current === null ? 'transform 0.25s var(--ease, ease-out)' : 'none',
         }}
       >

@@ -15,7 +15,6 @@ import { useUser } from '@/store/user';
 import { useT } from '@/i18n';
 import { useOpenDishes, useClosedAlert } from '@/hooks/useOpenStatus';
 import { ClosedAlert } from '@/components/ClosedAlert';
-import { PromoStrip, AdStrip } from '@/components/PromoStrip';
 import { useRestaurants, useTrendingDishes, useBannersQuery, useAllDishes, useBannerAds } from '@/hooks/queries';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { API_BASE, api } from '@/api';
@@ -159,8 +158,8 @@ export function HomePage() {
   const shuffledRestaurants = [...filtered].sort(() => Math.random() - 0.5);
 
   return (
-    <PullToRefresh onRefresh={handlePullRefresh}>
     <div className="app-shell home">
+    <PullToRefresh onRefresh={handlePullRefresh}>
       <header className="home-header">
         <button onClick={() => (user.addresses.length ? setShowAddressSheet(true) : setShowAddressFlow(true))} className="home-header__addr">
           <span className="home-header__addr-label">
@@ -202,7 +201,7 @@ export function HomePage() {
       </div>
 
       {/* Trend taomlar */}
-    {/*  {(trendLoading || trending.length > 0) && (
+      {(trendLoading || trending.length > 0) && (
         <>
           <SectionHeader icon="flame" title={t('trendingDishes')} action={t('all')} />
           <div className="home-scroll-row no-scrollbar">
@@ -211,13 +210,7 @@ export function HomePage() {
               : trending.map((d) => <DishScrollCard key={d.id || d._id} dish={d} onClick={openModal} />)}
           </div>
         </>
-      )} */}
-
-      {/* Faol aksiyalar — restoran adminida yaratilgan */}
-      {/*<PromoStrip category={category} />  */}
-
-      {/* Reklama */}
-       {/* <AdStrip placement="home" />   */}
+      )}
 
       {/* Chegirmadagi taomlar */}
       {discountedShown.length > 0 && (
@@ -283,6 +276,14 @@ export function HomePage() {
       </div>
 
       <div style={{ flex: 1 }} />
+    </PullToRefresh>
+
+      {/* CartBar/BottomNav ATAYLAB PullToRefresh TASHQARISIDA —
+          pastga tortilganda faqat kontent (tepadagi) siljishi
+          kerak, pastki navigatsiya joyida qotib turishi kerak.
+          Aks holda butun ekran (nav bilan birga) bir vaqtda
+          siljib, "hammasi qayta yuklanayotgandek" noxush
+          taassurot berardi. */}
       <CartBar />
       <BottomNav />
 
@@ -332,6 +333,5 @@ export function HomePage() {
         />
       )}
     </div>
-    </PullToRefresh>
   );
 }

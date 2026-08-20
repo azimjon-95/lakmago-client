@@ -12,7 +12,6 @@ import { useUser } from '@/store/user';
 import { haptic } from '@/lib/telegram';
 import { useClosedAlert, useOpenStatus } from '@/hooks/useOpenStatus';
 import { ClosedAlert } from '@/components/ClosedAlert';
-import { PromoStrip } from '@/components/PromoStrip';
 import { useRestaurant, useDishes } from '@/hooks/queries';
 import './Restaurant.css';
 
@@ -290,11 +289,6 @@ export function RestaurantPage() {
           </button>
         )}
       </div>
-
-      {/* Shu restoran aksiyalari — menyudan oldin.
-          Avval sahifa oxirida, sharhlardan ham keyin turardi:
-          u yergacha hech kim yetib bormasdi. */}
-      <PromoStrip restaurantId={id} title="Aksiyalar" />
 
       {/* Tablar */}
       <div ref={tabsRef} className="rest-tabs no-scrollbar">

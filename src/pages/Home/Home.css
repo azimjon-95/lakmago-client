@@ -116,9 +116,12 @@ margin-left: 13px;
 /* Gorizontal taom qatori */
 .home-scroll-row {
   display: flex; gap: 10px;
-  padding: 0 16px 12px;
+  padding: 14px 16px 16px;
   overflow-x: auto;
-  /* margin-left: 13px; */
+  /* Yengil fon — kartalar shunchaki oq sahifada "yamalgan"dek
+     emas, yumshoq patnisda turgandek chiroyli ko'rinadi (soya
+     bilan birga professional taassurot beradi) */
+  background: var(--surface-2);
 }
 
 /* Kichik reklama banner */
