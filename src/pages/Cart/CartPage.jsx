@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { DishPhoto } from '@/components/DishPhoto';
 import { AddressSheet } from '@/components/AddressSheet';
+import { OrderConfirmModal } from '@/components/OrderConfirmModal';
 import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
 import { useCart } from '@/store/cart';
 import { useUser } from '@/store/user';
@@ -27,6 +28,15 @@ export function CartPage() {
   const addItem = useCart((s) => s.addItem);
   const decrement = useCart((s) => s.decrement);
   const removeItem = useCart((s) => s.removeItem);
+  // Buyurtma tasdiqlash modali — REACT HOOKLAR QOIDASI: bu yerda,
+  // pastdagi "savat bo'sh" erta return'idan OLDIN e'lon qilinishi
+  // SHART. Avval pastda edi — buyurtma yuborilgach savat
+  // tozalanib (items.length===0 bo'lib) komponent erta return'ga
+  // tushardi, lekin bu hook oldingi renderda chaqirilgan edi —
+  // "Rendered fewer hooks than expected" xatosi shu tufayli
+  // chiqardi. Endi barcha shart-sharoitlarda bir xil sonda
+  // hook chaqiriladi.
+  const [showConfirm, setShowConfirm] = useState(false);
   const totalPrice = useCart((s) => s.totalPrice);
   const totalCount = useCart((s) => s.totalCount);
   const restaurantGroups = useCart((s) => s.restaurantGroups);
@@ -313,6 +323,17 @@ export function CartPage() {
     if (timingMode === 'scheduled' && !scheduledFor && timeSlots.length) {
       setScheduledFor(timeSlots[0].value);
     }
+    /*
+     * Bu yerda ENDI to'g'ridan-to'g'ri yubormaymiz — avval
+     * SO'NGGI TEKSHIRUV modali ochiladi (OrderConfirmModal).
+     * Haqiqiy yuborish confirmAndSubmit() da, mijoz "Ha,
+     * yuborish" bosgandan keyin bo'ladi.
+     */
+    setShowConfirm(true);
+  }
+
+  function confirmAndSubmit() {
+    setShowConfirm(false);
     setPaying(true);
     setLastPaymentMethod(paymentMethod);
     const addrLabel = isPickup
@@ -870,6 +891,18 @@ export function CartPage() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* SO'NGGI TEKSHIRUV — chek ko'rinishida, ongli tasdiqlash */}
+      {showConfirm && (
+        <OrderConfirmModal
+          groups={groups}
+          pricing={pricing}
+          total={total}
+          submitting={paying}
+          onClose={() => setShowConfirm(false)}
+          onConfirm={confirmAndSubmit}
+        />
       )}
     </div>
   );
