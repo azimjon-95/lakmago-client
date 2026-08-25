@@ -58,3 +58,26 @@ export function freeDeliveryGap(subtotal, restaurant, isPickup) {
 
   return threshold - subtotal;
 }
+
+/**
+ * Olib ketish chegirmasi.
+ *
+ * Restoran o'zi olib ketuvchilarga foiz beradi — kuryer
+ * xarajati yo'q, shuning uchun mijozga ham arzonroq.
+ *
+ * Faqat TAOMLAR summasidan hisoblanadi: yetkazish haqi
+ * olib ketishda allaqachon nol, xizmat haqidan chegirma
+ * berish esa restoran nazarda tutgan narsa emas.
+ *
+ * Serverdagi controllers/misc.js bilan AYNAN bir xil
+ * bo'lishi shart — aks holda mijoz bir summani ko'rib
+ * boshqasini to'laydi.
+ */
+export function calcPickupDiscount(subtotal, restaurant, isPickup) {
+  if (!isPickup) return 0;
+
+  const percent = Number(restaurant?.pickupDiscountPercent) || 0;
+  if (percent <= 0) return 0;
+
+  return Math.round(subtotal * percent / 100);
+}

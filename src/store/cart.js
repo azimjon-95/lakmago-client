@@ -103,6 +103,12 @@ export const useCart = create(
         minOrderAmount:
           meta.restaurantMinOrderAmount ?? meta.restaurant?.minOrderAmount ?? 0,
         prepMinutes: meta.restaurantPrepMinutes ?? meta.restaurant?.prepMinutes ?? 20,
+        // Xizmat haqi — savatda ko'rsatish uchun
+        serviceFeePercent:
+          meta.restaurantServiceFeePercent ?? meta.restaurant?.serviceFeePercent ?? 0,
+        // O'zi olib ketish chegirmasi
+        pickupDiscountPercent:
+          meta.restaurantPickupDiscountPercent ?? meta.restaurant?.pickupDiscountPercent ?? 0,
         // Ish vaqti — yopiq restoran taomlari savatdan chiqadi
         openTime: meta.restaurantOpenTime ?? meta.restaurant?.openTime ?? '',
         closeTime: meta.restaurantCloseTime ?? meta.restaurant?.closeTime ?? '',

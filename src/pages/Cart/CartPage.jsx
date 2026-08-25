@@ -10,7 +10,7 @@ import { useUser } from '@/store/user';
 import { useOrders } from '@/store/orders';
 import { useT } from '@/i18n';
 import { formatSom } from '@/lib/utils';
-import { calcDeliveryFee, calcServiceFee, checkMinOrder, freeDeliveryGap } from '@/lib/pricing';
+import { calcDeliveryFee, calcServiceFee, checkMinOrder, freeDeliveryGap, calcPickupDiscount } from '@/lib/pricing';
 import { isOpenNow } from '@/lib/workHours';
 import { useCartCleanup } from '@/hooks/useCartCleanup';
 import { api } from '@/api';
@@ -178,6 +178,7 @@ export function CartPage() {
           : calcDeliveryFee(sub, rest, isPickup),
         quote: quotes[rest.id] || null,
         serviceFee: calcServiceFee(sub, rest),
+        pickupDiscount: calcPickupDiscount(sub, rest, isPickup),
         minCheck: checkMinOrder(sub, rest, isPickup),
         freeGap: freeDeliveryGap(sub, rest, isPickup),
       };
@@ -186,6 +187,7 @@ export function CartPage() {
     const subtotal = perRestaurant.reduce((s, r) => s + r.subtotal, 0);
     const deliveryFee = perRestaurant.reduce((s, r) => s + r.deliveryFee, 0);
     const serviceFee = perRestaurant.reduce((s, r) => s + r.serviceFee, 0);
+    const pickupDiscount = perRestaurant.reduce((s, r) => s + r.pickupDiscount, 0);
 
     // Minimal summaga yetmagan restoranlar
     const blocked = perRestaurant.filter((r) => !r.minCheck.ok);
@@ -208,7 +210,8 @@ export function CartPage() {
       subtotal,
       deliveryFee,
       serviceFee,
-      orderSum: subtotal + deliveryFee + serviceFee,
+      pickupDiscount,
+      orderSum: subtotal + deliveryFee + serviceFee - pickupDiscount,
       blocked,
       closed,
       outOfRange,
@@ -771,6 +774,14 @@ export function CartPage() {
         )}
         {pricing.serviceFee > 0 && (
           <Row label="Xizmat haqi" value={formatSom(pricing.serviceFee)} />
+        )}
+        {/* Olib ketish chegirmasi — mijoz nima uchun arzonlaganini
+            ko'rishi kerak, aks holda summa tushunarsiz o'zgaradi */}
+        {pricing.pickupDiscount > 0 && (
+          <div className="cart-summary__row cart-summary__row--bonus">
+            <span>🛍 O'zi olib ketish chegirmasi</span>
+            <span>−{formatSom(pricing.pickupDiscount)}</span>
+          </div>
         )}
         {bonusApplied > 0 && (
           <div className="cart-summary__row cart-summary__row--bonus">

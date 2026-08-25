@@ -78,6 +78,8 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
           restaurantFreeDeliveryThreshold: restaurant.freeDeliveryThreshold,
           restaurantMinOrderAmount: restaurant.minOrderAmount,
           restaurantPrepMinutes: restaurant.prepMinutes,
+          restaurantServiceFeePercent: restaurant.serviceFeePercent,
+          restaurantPickupDiscountPercent: restaurant.pickupDiscountPercent,
           restaurantOpenTime: restaurant.openTime,
           restaurantCloseTime: restaurant.closeTime,
         }
