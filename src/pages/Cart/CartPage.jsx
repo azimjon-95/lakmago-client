@@ -162,13 +162,61 @@ export function CartPage() {
     api.getReferralInfo().then((r) => setBonusBalance(r.bonusBalance || 0)).catch(() => {});
   }, []);
 
+  /*
+   * ═══ RESTORAN SHARTLARINI YANGILAB OLAMIZ ═══
+   *
+   * MUAMMO: savat restoran ma'lumotini taom qo'shilgan
+   * paytdagi NUSXADAN oladi (cart store'dagi meta) va uni
+   * hech qachon yangilamaydi. Bundan ikki xil xato chiqadi:
+   *
+   *   1) Savatda eski taom yotgan bo'lsa va o'shandan beri
+   *      yangi maydon qo'shilgan bo'lsa (masalan olib ketish
+   *      chegirmasi) — u nusxada YO'Q va hisobga kirmaydi.
+   *      Mijoz uchun bu "chegirma ishlamayapti" bo'lib ko'rinadi.
+   *
+   *   2) Restoran shartni o'zgartirsa (chegirma, yetkazish
+   *      haqi, minimal summa) savatdagi eski qiymat qoladi va
+   *      mijoz ko'rgan summa server hisoblaganidan farq qiladi.
+   *
+   * Server baribir hammasini QAYTA hisoblaydi va u haqiqat
+   * manbai. Shuning uchun mijozga ham aynan o'sha shartlarni
+   * ko'rsatishimiz kerak.
+   */
+  const [freshRest, setFreshRest] = useState({});
+
+  useEffect(() => {
+    const ids = [...new Set(groups.map((g) => g.restaurant.id))];
+    if (ids.length === 0) return;
+
+    let alive = true;
+    Promise.all(
+      ids.map((id) => api.getRestaurant(id).catch(() => null)),
+    ).then((list) => {
+      if (!alive) return;
+      const map = {};
+      list.forEach((r) => { if (r?._id) map[String(r._id)] = r; });
+      setFreshRest(map);
+    });
+
+    return () => { alive = false; };
+    // Restoranlar to'plami o'zgargandagina qayta so'raymiz —
+    // taom sonini o'zgartirish so'rov yubormasin
+  }, [groups.map((g) => g.restaurant.id).sort().join(',')]);
+
   // ===== HISOB-KITOB =====
   // Har restoran uchun alohida: yetkazish, xizmat haqi, minimal summa.
   // Mantiq serverdagi bilan bir xil (lib/pricing.js ↔ orderPricing.js)
   const pricing = useMemo(() => {
     const perRestaurant = groups.map((g) => {
       const sub = g.subtotal ?? g.items.reduce((s, it) => s + it.unitPrice * it.quantity, 0);
-      const rest = g.restaurant;
+
+      /*
+       * Jonli ma'lumot USTUN, nusxa esa zaxira: so'rov hali
+       * kelmagan yoki tarmoq yiqilgan bo'lsa ham savat
+       * ishlayveradi, faqat eski shartlar bilan.
+       */
+      const live = freshRest[g.restaurant.id];
+      const rest = live ? { ...g.restaurant, ...live } : g.restaurant;
       return {
         restaurant: rest,
         subtotal: sub,
@@ -218,7 +266,7 @@ export function CartPage() {
       canOrder: blocked.length === 0 && closed.length === 0
         && outOfRange.length === 0,
     };
-  }, [groups, isPickup, timingMode, quotes]);
+  }, [groups, isPickup, timingMode, quotes, freshRest]);
 
   // Bepul yetkazishgacha qolgan eng kichik summa
   const gapToFree = useMemo(() => {
