@@ -65,6 +65,14 @@ export function OrderConfirmModal({ groups, pricing, total, onClose, onConfirm, 
               <span>{formatSom(pricing.serviceFee)}</span>
             </div>
           )}
+          {/* Chegirmasiz qatorlar yig'indisi "Jami" ga to'g'ri
+              kelmasdi — mijoz chekni o'qib chalkashardi */}
+          {pricing.pickupDiscount > 0 && (
+            <div className="ocm-receipt__row ocm-receipt__row--sum">
+              <span>O'zi olib ketish chegirmasi</span>
+              <span>−{formatSom(pricing.pickupDiscount)}</span>
+            </div>
+          )}
 
           <div className="ocm-receipt__dashed" />
           <div className="ocm-receipt__row ocm-receipt__row--total">
