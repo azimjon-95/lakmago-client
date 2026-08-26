@@ -604,19 +604,48 @@ ul { list-style: none; }
    PULL-TO-REFRESH — pastga tortib yangilash
    ============================================ */
 .ptr-indicator {
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: flex-end; justify-content: center;
   overflow: hidden;
-  transition: opacity 0.15s;
+  padding-bottom: 2px;
 }
-.ptr-spinner {
-  width: 22px; height: 22px;
-  border: 2.5px solid var(--line);
-  border-top-color: var(--brand);
-  border-radius: 50%;
+
+.ptr-loader {
+  display: flex; align-items: center; justify-content: center;
+  /* Balandlik o'zgarganda sakramasin */
+  flex: none;
+  transition: opacity 0.12s linear;
 }
-.ptr-spinner--spin {
-  animation: ptr-spin 0.7s linear infinite;
+
+/* Chegaraga yetganda kichik sakrash — foydalanuvchi matn
+   o'qimasdan ham "endi qo'yib yuborsam bo'ladi" deb tushunadi */
+.ptr-loader.is-ready {
+  animation: ptr-pop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes ptr-pop {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+/* Yangilanayotganda butun belgi aylanadi */
+.ptr-loader.is-spinning svg {
+  animation: ptr-spin 0.85s cubic-bezier(0.6, 0.1, 0.4, 0.9) infinite;
 }
 @keyframes ptr-spin {
   to { transform: rotate(360deg); }
+}
+
+/* Yoy uzunligi silliq o'zgarsin — tortishda sakrab qolmasin */
+.ptr-loader__arc {
+  transition: stroke-dashoffset 0.08s linear;
+}
+.ptr-loader.is-spinning .ptr-loader__arc {
+  transition: none;
+}
+
+/* Harakatni kamaytirish yoqilgan bo'lsa — aylanish sekinroq,
+   sakrash umuman yo'q */
+@media (prefers-reduced-motion: reduce) {
+  .ptr-loader.is-ready { animation: none; }
+  .ptr-loader.is-spinning svg { animation-duration: 1.8s; }
 }
