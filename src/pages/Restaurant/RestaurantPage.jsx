@@ -187,7 +187,7 @@ export function RestaurantPage() {
         <p className="rest-error__text">
           {restError?.message?.includes('404') || restError?.status === 404
             ? 'Bu muassasa mavjud emas yoki vaqtincha yopilgan'
-            : 'Ma\u2018lumot yuklanmadi. Internetni tekshiring.'}
+            : 'Ma‘lumot yuklanmadi. Internetni tekshiring.'}
         </p>
         <div className="rest-error__actions">
           <button onClick={() => window.location.reload()} className="rest-error__btn rest-error__btn--primary">

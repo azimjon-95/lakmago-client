@@ -437,8 +437,8 @@ export function CartPage() {
           // Buyurtma ID kelmadi — to'lovni boshlab bo'lmaydi.
           // Savat saqlanadi, mijoz qayta urinishi mumkin.
           setPaying(false);
-          alert('Buyurtma yaratildi, lekin to\u2018lovni boshlab bo\u2018lmadi.\n'
-            + 'Buyurtmalar bo\u2018limidan to\u2018lovni davom ettiring.');
+          alert('Buyurtma yaratildi, lekin to‘lovni boshlab bo‘lmadi.\n'
+            + 'Buyurtmalar bo‘limidan to‘lovni davom ettiring.');
           navigate('/orders');
           return;
         }
@@ -461,9 +461,9 @@ export function CartPage() {
           // restoranga ko'rinmaydi. Mijoz qayta urinishi mumkin.
           setPaying(false);
           alert(
-            (e.message || 'To\u2018lov tizimiga ulanib bo\u2018lmadi')
-            + '\n\nSavatingiz saqlandi. Qayta urinib ko\u2018ring yoki '
-            + 'naqd to\u2018lovni tanlang.',
+            (e.message || 'To‘lov tizimiga ulanib bo‘lmadi')
+            + '\n\nSavatingiz saqlandi. Qayta urinib ko‘ring yoki '
+            + 'naqd to‘lovni tanlang.',
           );
         }
       })
@@ -473,7 +473,7 @@ export function CartPage() {
         setPaying(false);
         alert(
           (e?.message || 'Buyurtma yuborilmadi')
-          + '\n\nSavatingiz saqlandi. Qayta urinib ko\u2018ring.',
+          + '\n\nSavatingiz saqlandi. Qayta urinib ko‘ring.',
         );
       });
   }
@@ -598,7 +598,7 @@ export function CartPage() {
           <span>
             {deliveryOff.length === 1
               ? `${deliveryOff[0].name} yetkazib berish xizmatini ko'rsatmaydi.`
-              : 'Savatdagi ba\u2018zi muassasalar yetkazib berish xizmatini ko\u2018rsatmaydi.'}
+              : 'Savatdagi ba‘zi muassasalar yetkazib berish xizmatini ko‘rsatmaydi.'}
             {' '}Buyurtmani o'zingiz olib ketishingiz mumkin.
           </span>
         </div>
@@ -612,7 +612,7 @@ export function CartPage() {
             onClick={() => { haptic(); setTimingMode('asap'); }}
             className={`cart-ttab ${timingMode === 'asap' ? 'is-active' : ''}`}
           >
-            {isPickup ? 'Tayyor bo\u2018lishi bilan' : 'Imkon qadar tez'}
+            {isPickup ? 'Tayyor bo‘lishi bilan' : 'Imkon qadar tez'}
           </button>
           <button
             onClick={() => { haptic(); setTimingMode('scheduled'); }}

@@ -247,7 +247,7 @@ function OrderCard({ order: o, open, onToggle, onRepeat, onChanged, highlight })
                     await api.cancelOrder(o._id);
                     onChanged?.();
                   } catch (e) {
-                    alert(e.message || 'Bekor qilib bo\u2018lmadi');
+                    alert(e.message || 'Bekor qilib bo‘lmadi');
                   }
                 }}
                 className="ord-btn ord-btn--danger"
@@ -270,7 +270,7 @@ function OrderCard({ order: o, open, onToggle, onRepeat, onChanged, highlight })
                     if (tg?.openLink) tg.openLink(url);
                     else window.location.href = url;
                   } catch (e) {
-                    alert(e.message || 'To\u2018lovni boshlab bo\u2018lmadi');
+                    alert(e.message || 'To‘lovni boshlab bo‘lmadi');
                   }
                 }}
                 className="ord-btn ord-btn--primary"

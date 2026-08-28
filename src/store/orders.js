@@ -35,7 +35,7 @@ export const useOrders = create((set, get) => ({
     for (const g of groups) {
       const rid = pickId(g.restaurant);
       if (!isObjectId(rid)) {
-        throw new Error('Savatда eski ma\u2018lumot bor. Savatni tozalab, qaytadan tanlang.');
+        throw new Error('Savatда eski ma‘lumot bor. Savatni tozalab, qaytadan tanlang.');
       }
     }
 

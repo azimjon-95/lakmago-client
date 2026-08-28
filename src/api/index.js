@@ -58,7 +58,7 @@ async function apiFetch(path, { signal, ...options } = {}) {
   } catch (e) {
     // Tarmoq darajasidagi xato: CORS, Mixed Content (HTTPS→HTTP), server o'chiq
     if (e.name === 'AbortError') throw e;
-    const err = new Error('Serverga ulanib bo\u2018lmadi');
+    const err = new Error('Serverga ulanib bo‘lmadi');
     err.kind = 'network';
     err.url = url;
     err.detail = e.message;

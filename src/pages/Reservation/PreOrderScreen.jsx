@@ -112,7 +112,7 @@ export function PreOrderScreen({
             <div className="resv-error-state__title">Menyu yuklanmadi</div>
             <div className="resv-error-state__text">
               {error?.kind === 'network'
-                ? 'Serverga ulanib bo\u2018lmadi. Internet aloqasini tekshiring.'
+                ? 'Serverga ulanib bo‘lmadi. Internet aloqasini tekshiring.'
                 : (error?.message || 'Server javob bermadi.')}
             </div>
             <button onClick={() => refetch()} className="resv-error-state__btn">

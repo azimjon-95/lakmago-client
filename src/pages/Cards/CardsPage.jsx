@@ -42,7 +42,7 @@ export function CardsPage() {
 
   const save = async () => {
     const digits = form.number.replace(/\D/g, '');
-    if (digits.length < 16) { setErr('Karta raqamini to\u2018liq kiriting'); return; }
+    if (digits.length < 16) { setErr('Karta raqamini to‘liq kiriting'); return; }
     setSaving(true); setErr(null);
     try {
       const list = await api.addCard({
@@ -199,7 +199,7 @@ export function CardsPage() {
                     Bekor
                   </button>
                   <button onClick={save} disabled={saving} className="btn-primary">
-                    {saving ? 'Saqlanmoqda...' : 'Qo\u2018shish'}
+                    {saving ? 'Saqlanmoqda...' : 'Qo‘shish'}
                   </button>
                 </div>
               </div>

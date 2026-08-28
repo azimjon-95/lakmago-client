@@ -28,7 +28,7 @@ export async function getCurrentPosition() {
 
   // Brauzer geolocation (fallback)
   if (!navigator.geolocation) {
-    throw new Error('Qurilma joylashuvni qo\u2018llab-quvvatlamaydi');
+    throw new Error('Qurilma joylashuvni qo‘llab-quvvatlamaydi');
   }
   // Aniqlik uchun bir necha o'lchov olamiz va eng aniqini tanlaymiz.
   // watchPosition GPS qulflanishini kutadi (getCurrentPosition ba'zan

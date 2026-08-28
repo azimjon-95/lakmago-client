@@ -249,7 +249,7 @@ export function HomePage() {
             <div className="home-error__title">Ma'lumot yuklanmadi</div>
             <div className="home-error__text">
               {restErrorObj?.kind === 'network'
-                ? 'Serverga ulanib bo\u2018lmadi. Internet aloqasini tekshiring.'
+                ? 'Serverga ulanib bo‘lmadi. Internet aloqasini tekshiring.'
                 : `Server javob bermadi${restErrorObj?.status ? ` (${restErrorObj.status})` : ''}.`}
             </div>
             <button onClick={() => refetchRest()} className="home-error__btn">Qayta urinish</button>

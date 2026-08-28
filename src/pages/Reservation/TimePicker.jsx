@@ -82,7 +82,7 @@ export function TimePicker({ value, slots, onChange, open, onOpen, onClose }) {
         <span className="resv-timefield__left">
           <Icon name="clock" size={17} color="var(--muted)" />
           <span className="resv-timefield__value">
-            {empty ? 'Bugunga bo\u2018sh vaqt yo\u2018q' : value}
+            {empty ? 'Bugunga bo‘sh vaqt yo‘q' : value}
           </span>
         </span>
         {!empty && <Icon name="chevronDown" size={17} color="var(--muted)" />}

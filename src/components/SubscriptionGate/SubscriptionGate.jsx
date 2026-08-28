@@ -92,7 +92,7 @@ export function SubscriptionGate({ children }) {
           <Icon name="send" size={18} color="var(--brand-text)" /> Kanalga obuna bo'lish
         </button>
         <button onClick={onCheck} disabled={checking} className="sub-gate__check">
-          {checking ? 'Tekshirilmoqda...' : '✅ Obuna bo\u2018ldim, tekshirish'}
+          {checking ? 'Tekshirilmoqda...' : '✅ Obuna bo‘ldim, tekshirish'}
         </button>
 
         {autoChecking && !checking && (
