@@ -124,13 +124,23 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
           </div>
           {dish.description && <p className="dish-modal__desc">{dish.description}</p>}
 
-          {/* Og'irlik va kaloriya — bor bo'lganlari ko'rsatiladi */}
-          {(dish.weight || dish.weightGram || dish.calories || dish.prepMinutes) && (
+          {/*
+            Og'irlik VA hajm — bor bo'lganlari ko'rsatiladi.
+            Ichimlikda `weight` yo'q, `volume` bor ("0.5 l"),
+            shuning uchun ikkalasi ham tekshiriladi.
+          */}
+          {(dish.weight || dish.weightGram || dish.volume || dish.calories || dish.prepMinutes) && (
             <div className="dish-modal__nutrition">
               {(dish.weight || dish.weightGram) && (
                 <span>
                   <Icon name="scale" size={15} color="var(--muted)" />
                   {dish.weight || `${dish.weightGram} ${t('gram')}`}
+                </span>
+              )}
+              {dish.volume && (
+                <span>
+                  <Icon name="scale" size={15} color="var(--muted)" />
+                  {dish.volume}
                 </span>
               )}
               {dish.calories > 0 && (

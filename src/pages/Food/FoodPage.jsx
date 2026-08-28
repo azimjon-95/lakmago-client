@@ -198,11 +198,14 @@ export function FoodPage() {
           </button>
         )}
 
-        {/* Og'irlik va kaloriya */}
-        {(dish.weight || dish.calories > 0 || dish.prepMinutes > 0) && (
+        {/* Og'irlik/hajm va kaloriya */}
+        {(dish.weight || dish.volume || dish.calories > 0 || dish.prepMinutes > 0) && (
           <div className="food-facts">
             {dish.weight && (
               <span><Icon name="scale" size={14} color="var(--muted)" /> {dish.weight}</span>
+            )}
+            {dish.volume && (
+              <span><Icon name="scale" size={14} color="var(--muted)" /> {dish.volume}</span>
             )}
             {dish.calories > 0 && (
               <span><Icon name="flame" size={14} color="var(--danger)" /> {dish.calories} ккал</span>
