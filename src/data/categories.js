@@ -41,3 +41,20 @@ export const CATEGORIES = [
 ];
 
 export const HOME_CATEGORIES = CATEGORIES;
+
+/**
+ * Fisher–Yates aralashtirish.
+ *
+ * Massivni O'RNIDA emas, YANGI nusxasida aralashtiradi —
+ * asl CATEGORIES tartibi doim saqlanadi. Shu ro'yxatdan
+ * boshqa joy (qidiruv filtri) ham foydalanadi va u sobit
+ * tartibda qolishi kerak, faqat bosh sahifa aralashadi.
+ */
+export function shuffled(list) {
+  const arr = [...list];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}

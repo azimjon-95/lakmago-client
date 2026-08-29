@@ -20,7 +20,7 @@ import { PullToRefresh } from '@/components/PullToRefresh';
 import { API_BASE, api } from '@/api';
 import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
 import { CategoryIcon } from '@/components/CategoryIcons/CategoryIcon';
-import { HOME_CATEGORIES as categories } from '@/data/categories';
+import { HOME_CATEGORIES, shuffled } from '@/data/categories';
 import { AddressSheet } from '@/components/AddressSheet';
 import './Home.css';
 
@@ -52,6 +52,24 @@ export function HomePage() {
   const addAddress = useUser((s) => s.addAddress);
   const setDefaultAddress = useUser((s) => s.setDefaultAddress);
   const [category, setCategory] = useState('all');
+
+  /*
+   * KATEGORIYALAR ARALASHTIRILADI — har kirganda boshqacha
+   * tartibda.
+   *
+   * `useMemo(() => ..., [])`: BIR MARTA hisoblanadi, komponent
+   * ekranga birinchi chiqqanda (ya'ni sahifa ochilganda/
+   * ilova qayta ishga tushganda). Keyingi qayta renderlarda
+   * (masalan foydalanuvchi bir kategoriyani bosganda,
+   * `category` holati o'zgarganda) QAYTA ARALASHMAYDI —
+   * aks holda foydalanuvchi bosgan tugma joyidan siljib,
+   * boshqasiga bosilib qolardi.
+   *
+   * Asl CATEGORIES tartibi buzilmaydi: shuffled() yangi
+   * massiv qaytaradi, qidiruv filtri esa hamon sobit
+   * tartibdagi ro'yxatdan foydalanadi.
+   */
+  const categories = useMemo(() => shuffled(HOME_CATEGORIES), []);
   const [modalDish, setModalDish] = useState(null);
   const [showAddressFlow, setShowAddressFlow] = useState(false);
   const [showAddressSheet, setShowAddressSheet] = useState(false);
