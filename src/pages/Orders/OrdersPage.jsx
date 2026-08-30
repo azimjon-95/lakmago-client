@@ -7,7 +7,7 @@ import { getSocket, joinUserRoom } from '@/lib/socket';
 import { useUser } from '@/store/user';
 import { formatSom, formatUzDate } from '@/lib/utils';
 import { useT } from '@/i18n';
-import { haptic, getTelegram } from '@/lib/telegram';
+import { haptic } from '@/lib/telegram';
 import './Orders.css';
 
 // Buyurtma holatlari — bosqichma-bosqich
@@ -24,9 +24,9 @@ const STATUS = {
   cancelled: { label: 'Bekor qilindi', icon: 'x', color: 'var(--danger)' },
 };
 
-// Faol = hali yetkazilmagan va bekor qilinmagan
-// To'lov kutilayotgan ham faol — mijoz uni ko'rishi va
-// to'lovni davom ettirishi kerak
+// Faol = hali yetkazilmagan va bekor qilinmagan.
+// 'awaiting_payment' bu yerga UMUMAN kirmaydi — u ro'yxatga
+// tushishdan oldin butunlay filtrlanadi (pastda, `visible`).
 const isActive = (s) => !['delivered', 'cancelled'].includes(s);
 
 function fmtDate(d) {
@@ -67,8 +67,37 @@ export function OrdersPage() {
     return () => socket.off('order:status', refresh);
   }, [userId, load]);
 
-  const active = orders.filter((o) => isActive(o.status));
-  const past = orders.filter((o) => !isActive(o.status));
+  /*
+   * ═══ BU SAHIFA — FAQAT KUZATUV ═══
+   *
+   * Buyurtmalar bo'limi endi sof TARIX/HOLAT ekrani: bekor
+   * qilish, o'chirish va to'lovni davom ettirish tugmalari
+   * YO'Q. Bu qaror ataylab:
+   *
+   *   - To'lov FAQAT Savat sahifasida boshlanadi. Bu yerda
+   *     "to'lovni davom ettirish" tugmasi bo'lishi ikki xil
+   *     to'lov yo'lini yaratardi va aynan shu tugma orqali
+   *     noto'g'ri provayder (Payme) chaqirilib, "payme hali
+   *     ulanmagan" xatosi chiqardi — bu yerda umuman yo'q edi.
+   *
+   *   - Karta bilan to'lanadigan buyurtma pul YECHILMAGUNCHA
+   *     bu ro'yxatda UMUMAN ko'rinmaydi. `awaiting_payment`
+   *     holati aynan shuni bildiradi: karta tanlangan, lekin
+   *     pul hali yechilmagan. Bunday buyurtma restoranga ham
+   *     ko'rinmaydi (server: restaurantPanel.js). Pul yechilgach
+   *     server holatni 'pending' ga o'tkazadi va shu payt
+   *     buyurtma HAM shu yerda, HAM restoranda paydo bo'ladi —
+   *     ikkalasi bir vaqtda, bitta haqiqat manbaidan (to'lov
+   *     webhook'i).
+   *
+   *   - Naqd buyurtma bu filtrga umuman tushmaydi: u
+   *     yaratilgandayoq 'pending' bilan boshlanadi (server:
+   *     misc.js), ya'ni darhol ko'rinadi va darhol restoranga
+   *     boradi — kartaga xos kutish bosqichi yo'q.
+   */
+  const visible = orders.filter((o) => o.status !== 'awaiting_payment');
+  const active = visible.filter((o) => isActive(o.status));
+  const past = visible.filter((o) => !isActive(o.status));
 
   const toggle = (id) => {
     haptic();
@@ -85,7 +114,7 @@ export function OrdersPage() {
     );
   }
 
-  if (orders.length === 0) {
+  if (visible.length === 0) {
     return (
       <div className="app-shell orders">
         <header className="orders-header">{t('navOrders')}</header>
@@ -119,7 +148,6 @@ export function OrdersPage() {
                 order={o}
                 open={openId === o._id}
                 onToggle={() => toggle(o._id)}
-                onChanged={load}
                 highlight
               />
             ))}
@@ -151,7 +179,7 @@ export function OrdersPage() {
 }
 
 // Bitta buyurtma kartasi — bosilsa tafsilot ochiladi
-function OrderCard({ order: o, open, onToggle, onRepeat, onChanged, highlight }) {
+function OrderCard({ order: o, open, onToggle, onRepeat, highlight }) {
   const st = STATUS[o.status] || STATUS.pending;
   const stepIndex = FLOW.indexOf(o.status);
   const itemCount = (o.items || []).reduce((s, i) => s + (i.quantity || 1), 0);
@@ -236,49 +264,15 @@ function OrderCard({ order: o, open, onToggle, onRepeat, onChanged, highlight })
             </div>
           )}
 
-          {/* Bekor qilish — faqat naqd va restoran qabul qilgunicha */}
-          {o.status === 'pending' && !o.isPaid && (
-            <div className="ord-card__actions">
-              <button
-                onClick={async () => {
-                  haptic();
-                  if (!window.confirm('Buyurtma bekor qilinsinmi?')) return;
-                  try {
-                    await api.cancelOrder(o._id);
-                    onChanged?.();
-                  } catch (e) {
-                    alert(e.message || 'Bekor qilib bo‘lmadi');
-                  }
-                }}
-                className="ord-btn ord-btn--danger"
-              >
-                Bekor qilish
-              </button>
-            </div>
-          )}
-
-          {/* To'lov tugallanmagan — davom ettirish */}
-          {o.status === 'awaiting_payment' && (
-            <div className="ord-card__actions">
-              <button
-                onClick={async () => {
-                  haptic();
-                  try {
-                    const provider = o.paymentMethod === 'click' ? 'click' : 'payme';
-                    const { url } = await api.getPaymentLink(o._id, provider);
-                    const tg = getTelegram();
-                    if (tg?.openLink) tg.openLink(url);
-                    else window.location.href = url;
-                  } catch (e) {
-                    alert(e.message || 'To‘lovni boshlab bo‘lmadi');
-                  }
-                }}
-                className="ord-btn ord-btn--primary"
-              >
-                To'lovni davom ettirish
-              </button>
-            </div>
-          )}
+          {/*
+            Bekor qilish va to'lov tugmalari ATAYLAB YO'Q.
+            Sabab yuqorida, sahifa boshidagi izohda ("BU SAHIFA
+            — FAQAT KUZATUV"). Bekor qilish kerak bo'lsa mijoz
+            restoran/qo'llab-quvvatlash bilan bog'lanadi —
+            buyurtma allaqachon oshxonaga ketgan bo'lishi
+            mumkin va bir tugma bosish bilan bekor qilinishi
+            xavfli.
+          */}
 
           {onRepeat && (
             <div className="ord-card__actions">
