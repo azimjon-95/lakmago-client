@@ -19,6 +19,16 @@ import { useDishes, useRestaurants } from '@/hooks/queries';
 import './Cart.css';
 
 
+/*
+ * To'lov provayderi -> ko'rsatiladigan nom.
+ *
+ * BITTA JOYDA: buyurtma tarixida ("Click orqali to'landi") va
+ * savatdagi tanlash tugmalarida BIR XIL nom ishlatiladi. Ilgari
+ * ikkalasi alohida, mos kelmasligi mumkin bo'lgan lug'at edi.
+ * Paynet qo'shilganda faqat SHU YERGA bitta qator qo'shiladi.
+ */
+const PROVIDER_LABEL = { payme: 'Payme', click: 'Click', paynet: 'Paynet' };
+
 export function CartPage() {
   const navigate = useNavigate();
   const t = useT();
@@ -124,24 +134,38 @@ export function CartPage() {
   // To'lov kartalari — server'dan yuklanadi
   const [cards, setCards] = useState([]);
   const [selectedCard, setSelectedCard] = useState(null);
-  // Qaysi to'lov tizimlari ulangan
-  const [payStatus, setPayStatus] = useState({ payme: false, click: false });
-  // Onlayn to'lov umuman mavjudmi
-  const onlineAvailable = payStatus.payme || payStatus.click;
 
-  // Karta tanlanganda qaysi tizim ishlatiladi
+  /*
+   * ═══ TO'LOV PROVAYDERLARI — DINAMIK RO'YXAT ═══
+   *
+   * ILGARI: faqat {payme, click} — ikkita nom KODGA QATTIQ
+   * YOZILGAN edi. Paynet qo'shilganda bu yerni ham, pastdagi
+   * tanlash tugmalarini ham qo'lda o'zgartirish kerak bo'lardi.
+   *
+   * ENDI: server /payments/status.available orqali QANDAY
+   * provayder ulangan bo'lsa, o'shani qaytaradi — registry
+   * pattern (server: services/providers/index.js). Yangi
+   * shlyuz (Paynet, keyinroq boshqasi) qo'shilsa, u FAQAT
+   * serverda konfiguratsiya qilinishi bilan mijozga avtomatik
+   * chiqadi — bu faylni o'zgartirish shart emas.
+   */
+  const [providers, setProviders] = useState([]);
+  const onlineAvailable = providers.length > 0;
+
+  // Karta tanlanganda: birinchi mavjud provayder tanlanadi.
+  // Faqat BITTA provayder bo'lsa mijoz ortiqcha tanlov
+  // ko'rmaydi — to'g'ridan-to'g'ri o'shanga o'tadi.
   const pickCardProvider = () => {
     haptic();
-    // Avval Payme, yo'q bo'lsa Click
-    setPaymentMethod(payStatus.payme ? 'payme' : 'click');
+    if (providers.length > 0) setPaymentMethod(providers[0].name);
   };
 
   // Naqdmi yoki karta orqalimi
-  const isCard = paymentMethod === 'payme' || paymentMethod === 'click';
+  const isCard = providers.some((p) => p.name === paymentMethod);
 
   useEffect(() => {
     api.getPaymentStatus()
-      .then((st) => setPayStatus(st || { payme: false, click: false }))
+      .then((st) => setProviders(Array.isArray(st?.available) ? st.available : []))
       .catch(() => {});
   }, []);
 
@@ -390,8 +414,9 @@ export function CartPage() {
     const addrLabel = isPickup
       ? ''
       : `${selectedAddress.title} — ${selectedAddress.address}`;
-    const PAY_LABEL = { cash: t('cash'), payme: 'Payme', click: 'Click' };
-    const paymentLabel = PAY_LABEL[paymentMethod] || t('cash');
+    const paymentLabel = paymentMethod === 'cash'
+      ? t('cash')
+      : (PROVIDER_LABEL[paymentMethod] || t('cash'));
     // Backendga yuboradi (async). Xato bo'lsa ham local rejim ishlaydi.
     placeOrder(groups, total, addrLabel, paymentLabel, paymentMethod, user.phone, bonusApplied, {
       fulfillment,
@@ -731,21 +756,25 @@ export function CartPage() {
           </p>
         )}
 
-        {/* Qaysi tizim orqali — ikkalasi ham ulangan bo'lsa */}
-        {isCard && payStatus.payme && payStatus.click && (
+        {/*
+          Qaysi tizim orqali — IKKITADAN KO'P provayder ulangan
+          bo'lsagina ko'rsatiladi. Bitta bo'lsa tanlov ma'nosiz
+          (u allaqachon avtomatik tanlangan, pickCardProvider),
+          shuning uchun mijozga ortiqcha qadam ko'rsatilmaydi —
+          xuddi kuchli e-commerce saytlarida bo'lgani kabi:
+          tanlov faqat haqiqatan variant bo'lganda chiqadi.
+        */}
+        {isCard && providers.length > 1 && (
           <div className="cart-providers">
-            <button
-              onClick={() => { haptic(); setPaymentMethod('payme'); }}
-              className={`cart-provider ${paymentMethod === 'payme' ? 'is-active' : ''}`}
-            >
-              Payme
-            </button>
-            <button
-              onClick={() => { haptic(); setPaymentMethod('click'); }}
-              className={`cart-provider ${paymentMethod === 'click' ? 'is-active' : ''}`}
-            >
-              Click
-            </button>
+            {providers.map((p) => (
+              <button
+                key={p.name}
+                onClick={() => { haptic(); setPaymentMethod(p.name); }}
+                className={`cart-provider ${paymentMethod === p.name ? 'is-active' : ''}`}
+              >
+                {PROVIDER_LABEL[p.name] || p.name}
+              </button>
+            ))}
           </div>
         )}
 

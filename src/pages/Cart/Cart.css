@@ -455,11 +455,18 @@
 
 /* To'lov tizimi tanlash — Payme / Click */
 .cart-providers {
-  display: flex; gap: 8px;
+  /*
+   * flex-wrap: 2 ta provayder bitta qatorda teng bo'ladi
+   * (flex:1), lekin 3+ (masalan Payme + Click + Paynet)
+   * qo'shilganda tugmalar torayib, "Paynet" kabi nom
+   * kesilib qolmasin deb ikkinchi qatorga tushadi.
+   */
+  display: flex; flex-wrap: wrap; gap: 8px;
   margin-top: 10px;
 }
 .cart-provider {
-  flex: 1;
+  flex: 1 1 calc(50% - 4px);
+  min-width: 100px;
   padding: 9px;
   border-radius: 11px;
   border: 1.5px solid var(--line);
