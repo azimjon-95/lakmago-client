@@ -953,3 +953,50 @@ margin-left: 16px;
   font-size: 12.5px; line-height: 1.45;
 }
 .cart-delivery-off svg { flex: none; margin-top: 1px; }
+
+/* ═══ Kutilayotgan to'lov eslatmasi ═══ */
+.cart-pending {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin: 12px 16px 0;
+  padding: 12px 14px;
+  background: rgba(255, 92, 0, 0.07);
+  border: 1px solid rgba(255, 92, 0, 0.25);
+  border-radius: 14px;
+}
+.cart-pending__text {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.cart-pending__text b {
+  font-size: 13px; font-weight: 700;
+  color: var(--ink);
+}
+.cart-pending__text span {
+  font-size: 12px; line-height: 1.4;
+  color: var(--muted);
+}
+.cart-pending__actions {
+  display: flex; flex-direction: column; gap: 6px;
+  flex: none;
+}
+.cart-pending__btn {
+  padding: 7px 12px;
+  border-radius: 9px;
+  font-size: 12px; font-weight: 600;
+  white-space: nowrap;
+}
+.cart-pending__btn--primary {
+  background: var(--brand);
+  color: #fff;
+}
+.cart-pending__btn--ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--line);
+}
+
+/* Savat bo'sh ekranida ham eslatma joyi bo'lsin */
+.cart-empty .cart-pending {
+  margin-top: 20px;
+  max-width: 340px;
+}

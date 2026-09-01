@@ -73,6 +73,23 @@ export const useOrders = create((set, get) => ({
     // Backendga yuboramiz (xato bo'lsa yuqoriга uzatiladi — mock yo'q)
     const res = await api.createOrder(payload);
     const groupId = res.groupId;
+
+    /*
+     * MUHIM: status qattiq yozilmaydi ('accepted' EMAS).
+     *
+     * ILGARI bu yerda har doim `status: 'accepted'` deb
+     * yozilardi - server buyurtmani 'awaiting_payment' bilan
+     * yaratgan bo'lsa ham (karta to'lovi hali amalga
+     * oshmagan). Natijada mijoz to'lovni hali boshlamasdan
+     * turib "Qabul qilindi" degan progressni ko'rardi.
+     *
+     * Endi serverning HAQIQIY statusi ishlatiladi. 'pending'
+     * (naqd, darhol restoranga ketadi) 'accepted' deb
+     * ko'rsatiladi - bu to'g'ri, chunki naqd buyurtma
+     * haqiqatan ham qabul qilingan. 'awaiting_payment' esa
+     * O'ZGARTIRILMAYDI - pastda activateOrder() shuni
+     * tekshiradi va faqat pul yechilgach chaqiriladi.
+     */
     const subOrders = res.orders.map((o, i) => {
       const g = groups[i];
       return {
@@ -82,7 +99,7 @@ export const useOrders = create((set, get) => ({
         items: g?.items || [],
         subtotal: o.subtotal,
         etaMinutes: o.etaMinutes ?? 30,
-        status: 'accepted',
+        status: o.status === 'pending' ? 'accepted' : o.status,
         courierName: o.courierName || courierNames[i % courierNames.length],
         rated: false,
       };
@@ -97,9 +114,31 @@ export const useOrders = create((set, get) => ({
       orderId: res.orders[0] ? String(res.orders[0]._id) : null,
       orderIds: res.orders.map((o) => String(o._id)),
     };
-    set({ activeOrder: order });
+
+    /*
+     * activeOrder FAQAT haqiqatan faol bo'lsa o'rnatiladi -
+     * ya'ni hech bo'lmasa bitta sub-buyurtma 'awaiting_payment'
+     * DAN BOSHQA holatda bo'lsa.
+     *
+     * Sof karta to'lovida (barcha sub-buyurtmalar
+     * awaiting_payment) - activeOrder BU YERDA
+     * o'rnatilmaydi. CartPage.jsx pul yechilganini
+     * tasdiqlagach activateOrder() ni chaqiradi.
+     */
+    const hasConfirmed = subOrders.some((s) => s.status !== 'awaiting_payment');
+    if (hasConfirmed) set({ activeOrder: order });
+
     return order;
   },
+
+  /**
+   * Karta to'lovi TASDIQLANGANDAN keyin chaqiriladi
+   * (CartPage.jsx, serverdan isPaid:true kelgach).
+   * placeOrder() qaytargan `order` obyektini oladi va uni
+   * activeOrder qiladi - bu yerda alohida server so'rovi
+   * qilinmaydi, chaqiruvchi allaqachon tekshirgan.
+   */
+  activateOrder: (order) => set({ activeOrder: order }),
 
   // Faol buyurtmani backenddan tiklash (sahifa yangilanганda)
   loadActive: async () => {

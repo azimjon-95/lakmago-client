@@ -16,6 +16,7 @@ import { useCartCleanup } from '@/hooks/useCartCleanup';
 import { api } from '@/api';
 import { haptic, getTelegram } from '@/lib/telegram';
 import { useDishes, useRestaurants } from '@/hooks/queries';
+import { savePendingPayment, getPendingPayment, clearPendingPayment } from '@/lib/pendingPayment';
 import './Cart.css';
 
 
@@ -83,6 +84,112 @@ export function CartPage() {
     // Ichki scroll konteyner bo'lsa uni ham
     document.querySelector('.cart-scroll')?.scrollTo({ top: 0 });
   }, []);
+
+  /*
+   * ═══ KUTILAYOTGAN TO'LOVNI TEKSHIRISH ═══
+   *
+   * null        — kutilayotgan to'lov yo'q, savat oddiy holatda
+   * 'checking'  — serverdan javob kutilmoqda
+   * { unpaid }  — tekshirildi, HALI TO'LANMAGAN (mijoz Click'dan
+   *               to'lamasdan qaytgan bo'lishi mumkin)
+   *
+   * Tekshirish IKKI holatda ishga tushadi: sahifa ochilganda
+   * (mount) VA mijoz Telegram WebApp'ga qaytganda
+   * (visibilitychange/focus) — aynan Click'dan qaytgan payt shu.
+   */
+  const [pendingCheck, setPendingCheck] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function check() {
+      const pending = getPendingPayment();
+      if (!pending) { if (!cancelled) setPendingCheck(null); return; }
+
+      if (!cancelled) setPendingCheck('checking');
+      try {
+        const order = await api.getOrder(pending.orderId);
+        if (cancelled) return;
+
+        if (order.status === 'cancelled') {
+          // Buyurtma bekor bo'lgan (masalan muddati o'tgan) —
+          // eslatma kerak emas, savat allaqachon saqlangan.
+          clearPendingPayment();
+          setPendingCheck(null);
+          return;
+        }
+
+        if (order.isPaid || order.status !== 'awaiting_payment') {
+          /*
+           * PUL YECHILDI — endi va FAQAT endi savat tozalanadi
+           * va buyurtma faol qilinadi. loadActive() serverdan
+           * HAQIQIY holatni oladi (Order.status), ya'ni
+           * "Qabul qilindi" endi rost gap — restoran buyurtmani
+           * chindan ham ko'rmoqda.
+           */
+          clearPendingPayment();
+          useCart.getState().clear();
+          await useOrders.getState().loadActive();
+          if (!cancelled) {
+            setPendingCheck(null);
+            navigate('/order/track');
+          }
+          return;
+        }
+
+        // Hali 'awaiting_payment' — mijoz to'lamagan yoki
+        // Click sahifasini yopib yuborgan. Savat TEGILMAYDI.
+        setPendingCheck({ unpaid: true, orderId: pending.orderId });
+      } catch {
+        // Server bilan bog'lanib bo'lmadi — keyingi tekshiruvda
+        // qayta urinamiz, hozircha jim turamiz (savat baribir
+        // tegilmagan, xavfli hech narsa yo'q).
+        if (!cancelled) setPendingCheck(null);
+      }
+    }
+
+    check();
+
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') check();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', check);
+
+    return () => {
+      cancelled = true;
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', check);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /** Eski to'lanmagan buyurtma uchun havolani qayta ochish. */
+  const retryPendingPayment = async () => {
+    if (!pendingCheck?.orderId) return;
+    haptic();
+    try {
+      const { url } = await api.getPaymentLink(pendingCheck.orderId, lastPaymentMethod);
+      const tg = getTelegram();
+      if (tg?.openLink) tg.openLink(url);
+      else window.location.href = url;
+    } catch (e) {
+      alert(e.message || 'To‘lov havolasini olib bo‘lmadi');
+    }
+  };
+
+  /*
+   * Eski to'lovdan voz kechish — savat allaqachon saqlangan,
+   * mijoz darhol yangi buyurtma bera oladi. Serverdagi eski
+   * 'awaiting_payment' yozuv shunchaki "osilib" qoladi — hech
+   * qachon hech kimga ko'rinmaydi va hech qanday pul harakati
+   * bo'lmagani uchun zarari yo'q.
+   */
+  const dismissPendingPayment = () => {
+    haptic();
+    clearPendingPayment();
+    setPendingCheck(null);
+  };
 
   // Guruhlar memolanadi — restaurantGroups() har chaqirilganda
   // YANGI massiv qaytaradi, memosiz pastdagi useMemo'lar
@@ -386,6 +493,17 @@ export function CartPage() {
         <div className="cart-empty__title">{t('cartEmpty')}</div>
         <p className="cart-empty__hint">{t('cartEmptyHint')}</p>
         <button onClick={() => navigate('/')} className="btn-primary">{t('allRestaurants')}</button>
+        {/*
+          Savat bo'sh bo'lsa ham (masalan mijoz qo'lda
+          tozalagan), eski to'lanmagan buyurtma bo'lishi mumkin —
+          bu ma'lumot yo'qolib ketmasligi kerak.
+        */}
+        {pendingCheck?.unpaid && (
+          <PendingPaymentNotice
+            onRetry={retryPendingPayment}
+            onDismiss={dismissPendingPayment}
+          />
+        )}
       </div>
     );
   }
@@ -454,8 +572,27 @@ export function CartPage() {
           return;
         }
 
-        // KARTA — buyurtma "to'lov kutilmoqda" holatida yaratildi,
-        // restoranga hali KO'RINMAYDI. Pul kelgach avtomatik chiqadi.
+        /*
+         * KARTA — buyurtma "to'lov kutilmoqda" holatida
+         * yaratildi, restoranga hali KO'RINMAYDI.
+         *
+         * ═══ SAVAT ENDI DARHOL TOZALANMAYDI ═══
+         *
+         * ILGARI: Click havolasi olinishi bilanoq savat
+         * tozalanardi va mijoz "Buyurtmalar" sahifasiga
+         * yo'naltirilardi — pul hali yechilmagan bo'lsa ham!
+         * Mijoz Click'dan to'lamasdan orqaga qaytsa: savati
+         * yo'q, buyurtma "qabul qilindi" bo'lib ko'rinardi
+         * (store/orders.js dagi eski xato bilan birga), holbuki
+         * na pul yechilgan, na buyurtma restoranga chiqqan edi.
+         *
+         * ENDI: savat SAQLANADI. orderId localStorage'ga
+         * yoziladi (lib/pendingPayment.js). Mijoz Click'dan
+         * qaytganda, CartPage qayta ochilganda serverdan
+         * HAQIQIY holat so'raladi (pastdagi useEffect) — faqat
+         * isPaid:true bo'lsagina savat tozalanadi va buyurtma
+         * faol qilinadi.
+         */
         const orderId = created?.orderId;
 
         if (!orderId) {
@@ -463,23 +600,28 @@ export function CartPage() {
           // Savat saqlanadi, mijoz qayta urinishi mumkin.
           setPaying(false);
           alert('Buyurtma yaratildi, lekin to‘lovni boshlab bo‘lmadi.\n'
-            + 'Buyurtmalar bo‘limidan to‘lovni davom ettiring.');
-          navigate('/orders');
+            + 'Sahifani yangilab qayta urinib ko‘ring.');
           return;
         }
 
         try {
           const { url } = await api.getPaymentLink(orderId, paymentMethod);
 
-          // Havola olindi — endi savatni tozalashimiz mumkin
-          useCart.getState().clear();
+          savePendingPayment(orderId);
           setPaying(false);
 
           const tg = getTelegram();
           if (tg?.openLink) tg.openLink(url);
           else window.location.href = url;
 
-          setTimeout(() => navigate('/orders'), 600);
+          /*
+           * NAVIGATE QILINMAYDI. Mijoz CartPage'da qoladi —
+           * Telegram `openLink` WebApp'ni yopmaydi, orqa fonda
+           * ochiq turadi. Click'dan "orqaga" qaytganda mijoz
+           * xuddi shu sahifani, xuddi shu savatni ko'radi.
+           * Sahifa pastdagi useEffect orqali to'lov holatini
+           * o'zi kuzatib boshlaydi (pollingCheck).
+           */
         } catch (e) {
           // To'lov havolasi olinmadi — savat SAQLANADI.
           // Buyurtma 'awaiting_payment' holatida qoladi va
@@ -530,6 +672,20 @@ export function CartPage() {
           <Icon name="trash" size={19} color="var(--muted)" />
         </button>
       </header>
+
+      {/*
+        Eski to'lanmagan buyurtma — mijoz Click'dan to'lamasdan
+        qaytgan bo'lishi mumkin. Savat SAQLANGAN (endi darhol
+        tozalanmaydi), lekin mijoz nima bo'lganini bilishi kerak:
+        yo eski to'lovni davom ettiradi, yo undan voz kechib
+        yangisini beradi.
+      */}
+      {pendingCheck?.unpaid && (
+        <PendingPaymentNotice
+          onRetry={retryPendingPayment}
+          onDismiss={dismissPendingPayment}
+        />
+      )}
 
       {removedNote && (
         <div className="cart-removed">
@@ -932,10 +1088,16 @@ export function CartPage() {
           </div>
         ))}
 
-        {/* To'lov tugmasi (soni + summa) */}
+        {/*
+          To'lov tugmasi (soni + summa). Eski to'lanmagan
+          buyurtma bo'lsa O'CHIRILADI — mijoz avval yuqoridagi
+          eslatmadan uni hal qilishi kerak (davom ettirish yoki
+          bekor qilish). Aks holda ikkita parallel buyurtma
+          paydo bo'lishi mumkin edi.
+        */}
         <button
           onClick={handlePlaceOrder}
-          disabled={paying || !pricing.canOrder}
+          disabled={paying || !pricing.canOrder || pendingCheck?.unpaid}
           className="cart-paybtn"
         >
           <span className="cart-paybtn__count">{itemCount}</span>
@@ -1056,6 +1218,35 @@ function CartUpsell({ groups }) {
             </button>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * "To'lov hali yakunlanmagan" eslatmasi.
+ *
+ * Mijoz Click sahifasidan to'lamasdan qaytganda ko'rinadi.
+ * Ikki chiqish yo'li: to'lovni DAVOM ETTIRISH (eski buyurtma
+ * uchun yangi havola) yoki undan VOZ KECHISH (savat saqlanadi,
+ * yangi buyurtma bera oladi — eski awaiting_payment yozuv
+ * serverda zararsiz osilib qoladi).
+ */
+function PendingPaymentNotice({ onRetry, onDismiss }) {
+  return (
+    <div className="cart-pending">
+      <Icon name="info" size={18} color="var(--brand)" />
+      <div className="cart-pending__text">
+        <b>To'lov yakunlanmagan</b>
+        <span>Avvalgi buyurtmangiz uchun pul hali yechilmadi</span>
+      </div>
+      <div className="cart-pending__actions">
+        <button onClick={onDismiss} className="cart-pending__btn cart-pending__btn--ghost">
+          Bekor qilish
+        </button>
+        <button onClick={onRetry} className="cart-pending__btn cart-pending__btn--primary">
+          Davom ettirish
+        </button>
       </div>
     </div>
   );

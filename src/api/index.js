@@ -148,6 +148,8 @@ export const api = {
   cancelOrder: (id) => apiFetch(`/orders/${id}/cancel`, { method: 'PATCH' }),
 
   getActiveOrders: (opts) => apiFetch('/orders/active', { method: 'GET', ...opts }),
+  // Bitta buyurtma — karta to'lovi tasdiqlanganini tekshirish uchun
+  getOrder: (id) => apiFetch(`/orders/${id}`, { method: 'GET' }),
 
   getOrderGroup: (groupId) => apiFetch(`/orders/group/${groupId}`, { method: 'GET' }),
 
