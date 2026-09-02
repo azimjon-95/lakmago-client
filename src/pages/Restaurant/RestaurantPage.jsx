@@ -45,10 +45,15 @@ export function RestaurantPage() {
 
   // Bo'sh ma'lumotlar ko'rsatilmasin — element umuman chizilmaydi
   // Oyna ichida ko'rsatishga biror narsa bormi
+  //
+  // `restaurant?.phone` ATAYLAB olib tashlandi: server endi bu
+  // maydonni umuman qaytarmaydi (controllers/catalog.js,
+  // xavfsizlik tuzatishi) — restoranning shaxsiy telefon
+  // raqami mijoz brauzeriga tushmasin uchun.
   const hasInfo = Boolean(
     restaurant?.openTime || restaurant?.closeTime || restaurant?.legalName ||
     restaurant?.legalAddress || restaurant?.inn || restaurant?.address ||
-    restaurant?.phone || restaurant?.minOrderAmount > 0 ||
+    restaurant?.minOrderAmount > 0 ||
     restaurant?.serviceFeePercent > 0 || restaurant?.deliveryFee > 0,
   );
 
