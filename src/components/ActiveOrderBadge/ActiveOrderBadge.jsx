@@ -1,20 +1,28 @@
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useOrders } from '@/store/orders';
 import { useT } from '@/i18n';
 import './ActiveOrderBadge.css';
 import { Icon } from '@/components/Icon';
 
-// Mijoz buyurtma bergач har sahifada chekkada ko'rinadigan kichik tugma.
-// Bosilsa — faol buyurtmalar sahifasiga o'tadi.
+/*
+ * Mijoz buyurtma bergач bosh sahifada chekkada ko'rinadigan
+ * kichik tugma. Bosilsa — faol buyurtmalar sahifasiga o'tadi.
+ *
+ * FAQAT BOSH SAHIFADA: qaysi sahifada ko'rinishini App.jsx
+ * (FloatingLayer) hal qiladi — bu yerda ikkinchi marta
+ * pathname tekshirilmaydi. Bitta haqiqat manbai bo'lsin deb
+ * ataylab shunday: ilgari bu yerda "faqat /order/track va
+ * /orders'da YASHIRIN" (qora ro'yxat) mantig'i bor edi va u
+ * qolgan HAMMA sahifada (restoran, savat, qidiruv, profil...)
+ * ko'rinib turardi — mijoz taom sahifasida ham, savatda ham
+ * bu bannerni ko'rardi.
+ */
 export function ActiveOrderBadge() {
   const navigate = useNavigate();
-  const location = useLocation();
   const activeOrder = useOrders((s) => s.activeOrder);
   const t = useT();
 
-  // Buyurtma yo'q yoki allaqachon kuzatuv sahifasidamiz — ko'rsatmaymiz
   if (!activeOrder) return null;
-  if (location.pathname === '/order/track' || location.pathname === '/orders') return null;
 
   // Umumiy holat: eng "orqada" turgan sub-buyurtma statusi
   const statusOrder = ['accepted', 'preparing', 'delivering', 'delivered'];

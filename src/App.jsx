@@ -39,20 +39,16 @@ const queryClient = new QueryClient({
   },
 });
 
-// Global suzuvchi elementlar (badge + chat) — ba'zi sahifalarda yashiriladi
+// Global suzuvchi elementlar (buyurtma nishoni + chat) — faqat
+// bosh sahifada ko'rinadi, ichki sahifalarda (restoran, savat,
+// bron, qidiruv va h.k.) umuman chiqmaydi.
 function FloatingLayer() {
   const location = useLocation();
-  /*
-   * Yordam xizmati FAQAT bosh sahifada ko'rinadi — ichki
-   * sahifalarda (restoran, savat, bron va h.k.) umuman
-   * chiqmaydi. Oq ro'yxat: faqat "/" ga teng bo'lsa ko'rinadi,
-   * boshqa har qanday sahifa avtomatik yashiradi.
-   */
-  const showChat = location.pathname === '/';
+  const isHome = location.pathname === '/';
   return (
     <>
-      <ActiveOrderBadge />
-      {showChat && <SupportChat />}
+      {isHome && <ActiveOrderBadge />}
+      {isHome && <SupportChat />}
     </>
   );
 }
