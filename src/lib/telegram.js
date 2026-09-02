@@ -66,13 +66,35 @@ export async function authenticateWithTelegram() {
     // eski Telegram versiyalarida bu API'lar mavjud emas.
     tg.ready();
 
-    if (typeof tg.expand === 'function') {
-      try { tg.expand(); } catch { /* qo'llab-quvvatlanmaydi */ }
-    }
+    /*
+     * expand()/requestFullscreen() FAQAT MOBILDA.
+     *
+     * Ilgari bu ikkalasi PLATFORMASIDAN QAT'IY NAZAR
+     * chaqirilardi — desktop Telegram'da (Windows/macOS
+     * dasturi) ilova butun oynani egallab, kichik popup emas,
+     * to'liq ekran bo'lib ochilardi. Telefonda bu TO'G'RI
+     * xulq (kontent uchun har bir piksel muhim), lekin
+     * desktop'da mijoz kompyuterida boshqa ishlar bilan bir
+     * qatorda ochib ko'rmoqchi bo'ladi — katta ekranni butunlay
+     * band qilish keraksiz.
+     *
+     * tg.platform orqali aniqlanadi: mobil ('android',
+     * 'android_x', 'ios') — kengaytiriladi. Qolgani (desktop:
+     * 'tdesktop', 'macos'; veb: 'weba', 'webk'; yoki
+     * 'unknown') — Telegram'ning o'z standart (ixcham) oyna
+     * o'lchami saqlanadi, hech narsa chaqirilmaydi.
+     */
+    const isMobilePlatform = ['android', 'android_x', 'ios'].includes(tg.platform);
 
-    // To'liq ekran rejimi (Bot API 8.0+)
-    if (typeof tg.requestFullscreen === 'function') {
-      try { tg.requestFullscreen(); } catch { /* qo'llab-quvvatlanmaydi */ }
+    if (isMobilePlatform) {
+      if (typeof tg.expand === 'function') {
+        try { tg.expand(); } catch { /* qo'llab-quvvatlanmaydi */ }
+      }
+
+      // To'liq ekran rejimi (Bot API 8.0+)
+      if (typeof tg.requestFullscreen === 'function') {
+        try { tg.requestFullscreen(); } catch { /* qo'llab-quvvatlanmaydi */ }
+      }
     }
 
     // Pastga swipe bilan yopilishni bloklaymiz (Bot API 7.7+).
