@@ -19,7 +19,15 @@ export function RestaurantInfoSheet({ restaurant, onClose }) {
   const hasFees = r.serviceFeePercent > 0 || r.deliveryFee > 0
     || r.minOrderAmount > 0 || r.deliveryMin > 0;
 
-  const hasLegal = Boolean(r.legalName || r.address || r.legalAddress || r.inn || r.phone);
+  /*
+   * `r.phone` ATAYLAB olib tashlandi — hozircha restoran
+   * telefon raqami mijozga umuman ko'rsatilmaydi. Bu tuzatish
+   * FRONTEND darajasida, server allaqachon bu maydonni
+   * qaytarmasa ham: agar eski API javobi keshda qolgan bo'lsa
+   * yoki server hali yangilanmagan bo'lsa ham, mijoz telefonni
+   * ko'rmasligi kafolatlanadi.
+   */
+  const hasLegal = Boolean(r.legalName || r.address || r.legalAddress || r.inn);
 
   return (
     <div className="rinfo-overlay" onClick={onClose}>
@@ -96,7 +104,7 @@ export function RestaurantInfoSheet({ restaurant, onClose }) {
                 {r.address && <Row label="Manzil" value={r.address} />}
                 {r.legalAddress && <Row label="Yuridik manzil" value={r.legalAddress} />}
                 {r.inn && <Row label="INN" value={r.inn} />}
-                {r.phone && <Row label="Telefon" value={r.phone} />}
+                {/* Telefon qatori HOZIRCHA olib tashlandi — yuqoridagi izohga qarang */}
               </div>
             </>
           )}
