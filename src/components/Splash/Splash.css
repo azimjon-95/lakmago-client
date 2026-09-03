@@ -120,20 +120,11 @@
 /* ============================================
    GIF versiyasi — keyingi ochilishlar
 
-   ILGARI object-fit: contain edi — GIF (360x267, deyarli
-   kvadrat) telefon ekraniga (juda tik, masalan 390x844) sig'dirilganda
-   tepa-pastda katta bo'sh joy qolardi. Bu joy konteynerning BIR
-   TEKIS foni bilan to'ldirilardi, lekin GIF ICHIDAGI fon aslida
-   yengil vertikal gradient (#032633 tepada -> #013442 pastda) —
-   bir tekis rang bilan gradient hech qachon aniq mos kelmaydi,
-   natijada GIF chekkasida ANIQ CHIZIQ ko'rinardi (piksel o'lchov
-   bilan tasdiqlangan, barcha 55 kadrda bir xil).
-
-   ENDI object-fit: cover. Barcha odatiy telefon ekranida BALANDLIK
-   cheklovchi o'lcham bo'lib qoladi (hisoblab tekshirildi) — kuryer
-   figura TEPADAN PASTGACHA to'liq saqlanadi, faqat yon tomonlardagi
-   BO'SH FON qismi kesiladi. Natijada letterbox umuman qolmaydi —
-   demak fon-rang moslashtirish muammosi ILDIZIDAN yo'qoladi.
+   Video uchun ishlatilgan xira-fon texnikasi bu yerda ortiqcha:
+   GIF foni allaqachon deyarli bir tekis rang (to'q ko'k-yashil),
+   shuning uchun tepa-pastdagi bo'shliq shunchaki O'SHA rang bilan
+   to'ldiriladi — hech qanday blur/qayta chizish kerak emas,
+   bitta <img> — eng tez yo'l.
    ============================================ */
 .splash--gif {
   position: fixed;
@@ -145,10 +136,7 @@
   align-items: center;
   justify-content: center;
 
-  /* Faqat GIF yuklanguncha ko'rinadi (juda qisqa vaqt) —
-     GIF fonining o'rtacha rangi, endi cover bilan chekka
-     deyarli hech qachon ko'rinmaydi */
-  background: #012e3b;
+  background: #002634;
 
   /* Yumshoq va toza radius */
   border-radius: 30px;
@@ -166,13 +154,7 @@
   width: 100%;
   height: 100%;
 
-  object-fit: cover;
-  /* Markazda kesilsa kuryer yuzi yoki "Lokma Go" yozuvining
-     bir qismi chekkadan chiqib ketardi (GIF markazi ekran
-     markazidan siljigan kompozitsiyaga ega — kuryer o'ngroqda).
-     35% — piksel darajasida tekshirilgan muvozanat: yuz, sumka
-     va yozuvning barchasi to'liq ko'rinadi. */
-  object-position: 35% center;
+  object-fit: contain;
 
   /* GIFning o'zini ham clip qilish */
   border-radius: inherit;
