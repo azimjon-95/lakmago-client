@@ -3,7 +3,7 @@ import { Icon } from '@/components/Icon';
 import { DishPhoto } from '@/components/DishPhoto';
 import { haptic } from '@/lib/telegram';
 import { formatSom, formatSomShort } from '@/lib/utils';
-import { useDineInMenu } from '@/hooks/queries';
+import { usePreOrderMenu } from '@/hooks/queries';
 import { CATEGORIES } from '@/data/categories';
 
 /**
@@ -26,7 +26,7 @@ export function PreOrderScreen({
    */
   const {
     data: dishes = [], isLoading, isError, error, refetch,
-  } = useDineInMenu(restaurant.id);
+  } = usePreOrderMenu(restaurant.id);
   const [selections, setSelections] = useState({});
   const [summaryOpen, setSummaryOpen] = useState(false);
 

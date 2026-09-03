@@ -45,11 +45,15 @@ export const useDishes = (restaurantId) =>
  * Restoranning o'z narxidagi menyu (yetkazish ustamasi va mijoz
  * xizmat haqisiz). Bron oldindan buyurtmasi shuni ishlatadi —
  * mehmon zalda o'tirib yeydi, kuryer kerak emas.
+ *
+ * DineInConfig (QR/Kiosk zal buyurtmasi)ga bog'liq emas — bron
+ * har doim ishlashi kerak, restoran QR/Kiosk funksiyasini
+ * yoqmagan bo'lsa ham.
  */
-export const useDineInMenu = (restaurantId) =>
+export const usePreOrderMenu = (restaurantId) =>
   useQuery({
-    queryKey: ['dinein-menu', restaurantId],
-    queryFn: ({ signal }) => api.getDineInMenu(restaurantId, { signal }),
+    queryKey: ['preorder-menu', restaurantId],
+    queryFn: ({ signal }) => api.getReservationMenu(restaurantId, { signal }),
     enabled: !!restaurantId,
   });
 

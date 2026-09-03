@@ -113,12 +113,18 @@ export const api = {
   getDishes: (restaurantId, opts) => apiFetch(`/restaurants/${restaurantId}/dishes`, opts),
 
   /**
-   * Restoranning O'Z narxidagi menyu — yetkazish ustamasi va
-   * mijoz xizmat haqi QO'LLANMAGAN. QR orqali zalda ishlatiladi,
-   * shuningdek bron oldindan buyurtmasi (PreOrderScreen) ham
-   * shuni ishlatadi: mehmon zalga kelib yeydi, yetkazish emas.
+   * Bron oldindan buyurtma ekrani (PreOrderScreen) uchun menyu —
+   * restoranning o'z narxida (yetkazish ustamasi va mijoz xizmat
+   * haqisiz), chunki mehmon zalga kelib yeydi, yetkazish emas.
+   *
+   * MUHIM: bu endpoint DineInConfig (QR/Kiosk zal buyurtmasi
+   * yoqilgan-yoqilmaganligi) bilan BOG'LIQ EMAS — bular ikkita
+   * mustaqil funksiya. Ilgari /dine-in/menu/:id ishlatilardi, u esa
+   * "Dine-in faol emas" deb rad etardi agar restoran QR/Kiosk
+   * funksiyasini yoqmagan bo'lsa — garchi bron oldindan
+   * buyurtmasining bunga hech qanday aloqasi yo'q edi.
    */
-  getDineInMenu: (restaurantId, opts) => apiFetch(`/dine-in/menu/${restaurantId}`, opts),
+  getReservationMenu: (restaurantId, opts) => apiFetch(`/reservations/menu/${restaurantId}`, opts),
 
   getDish: (id, opts) => apiFetch(`/dishes/${id}`, opts),
 
