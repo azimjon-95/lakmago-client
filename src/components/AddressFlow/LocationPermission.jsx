@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Icon } from '@/components/Icon';
 import { getCurrentPosition, reverseGeocode } from '@/lib/location';
 import { haptic } from '@/lib/telegram';
+import { useT } from '@/i18n';
 
 // 1-bosqich: joylashuvга ruxsat so'rash yoki qo'lda kiritish
 export function LocationPermission({ onDetected, onManual, onClose }) {
+  const t = useT();
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState(null);
 
@@ -26,7 +28,7 @@ export function LocationPermission({ onDetected, onManual, onClose }) {
   return (
     <div className="addrflow">
       {onClose && (
-        <button onClick={onClose} className="addrflow__back" aria-label="Yopish">
+        <button onClick={onClose} className="addrflow__back" aria-label={t('close')}>
           <Icon name="x" size={20} color="var(--muted)" />
         </button>
       )}
@@ -40,10 +42,9 @@ export function LocationPermission({ onDetected, onManual, onClose }) {
         </div>
       </div>
 
-      <h2 className="addrflow__title">Qayerga yetkazib berilsin?</h2>
+      <h2 className="addrflow__title">{t('whereToDeliverQuestion')}</h2>
       <p className="addrflow__text">
-        Yaqin atrofdagi eng yaxshi restoranlarni saralab olishimiz uchun
-        joylashuvingizdan foydalanishga ruxsat bering yoki manzilni qo'lda kiriting
+        {t('locationPermissionHint')}
       </p>
 
       {err && <div className="addrflow__error">{err}</div>}
@@ -51,13 +52,13 @@ export function LocationPermission({ onDetected, onManual, onClose }) {
       <div className="addrflow__actions">
         <button onClick={detect} disabled={loading} className="addrflow__btn-primary">
           {loading ? (
-            <><span className="spinner spinner--sm" /> Aniqlanmoqda...</>
+            <><span className="spinner spinner--sm" /> {t('detectingLocation')}</>
           ) : (
-            <><Icon name="navigation" size={18} color="var(--brand-text)" /> Joylashuvni avtomatik aniqlash</>
+            <><Icon name="navigation" size={18} color="var(--brand-text)" /> {t('autoDetectLocation')}</>
           )}
         </button>
         <button onClick={onManual} className="addrflow__btn-link">
-          Manzilni qo'lda ko'rsatish
+          {t('enterManually')}
         </button>
       </div>
     </div>

@@ -24,7 +24,7 @@ export function RestaurantCardSkeleton() {
 }
 
 // Gorizontal taom kartasi skeletoni (trend/chegirma)
-export function DishScrollСardSkeleton() {
+export function DishScrollCardSkeleton() {
   return (
     <div className="skel-dscard">
       <Skeleton w={150} h={112} r={14} />

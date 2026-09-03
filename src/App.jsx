@@ -31,9 +31,9 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 5 * 60_000,        // 5 daqiqa "yangi" — keraksiz refetch bo'lmaydi
       gcTime: 30 * 60_000,          // 30 daqiqa cache saqlanadi (tez qaytish)
-      refetchOnWindowFocus: false,   // fokusда qayta so'ramaydi
-      refetchOnReconnect: true,      // internet tiklanганда yangilaydi
-      retry: 2,                      // xatoда 2 marta qayta urinadi
+      refetchOnWindowFocus: false,   // fokusda qayta so'ramaydi
+      refetchOnReconnect: true,      // internet tiklanganda yangilaydi
+      retry: 2,                      // xatoda 2 marta qayta urinadi
       retryDelay: (n) => Math.min(1000 * 2 ** n, 8000),
     },
   },
@@ -54,12 +54,22 @@ function FloatingLayer() {
 }
 
 export default function App() {
-  // Ilova faqat Telegram ичида ishlaydi — brauzerда "Telegram'да oching" ekrani.
-  // (Hook'lardan oldin — Rules of Hooks buzilmaydi, chunki bu birinchi tekshiruv.)
-  if (!isTelegramEnv()) {
-    return <TelegramOnly />;
-  }
-  return <AppInner />;
+  /*
+   * I18nProvider ENDI TelegramOnly'ni HAM o'rab oladi.
+   *
+   * ILGARI: App() Telegram muhitidan tashqarida bo'lsa
+   * to'g'ridan-to'g'ri <TelegramOnly /> qaytarardi,
+   * I18nProvider esa faqat AppInner() ICHIDA edi. Natijada
+   * TelegramOnly useT() ni CHAQIRA OLMASDI (I18nProvider
+   * mount bo'lmagan bosqichda) - shuning uchun u butunlay
+   * qattiq yozilgan matn bilan qolgan edi, til hech qachon
+   * o'zgarmasdi.
+   */
+  return (
+    <I18nProvider>
+      {isTelegramEnv() ? <AppInner /> : <TelegramOnly />}
+    </I18nProvider>
+  );
 }
 
 function AppInner() {
@@ -106,35 +116,33 @@ function AppInner() {
   }, []);
 
   return (
-    <I18nProvider>
-      <QueryClientProvider client={queryClient}>
-        {showSplash && <Splash onDone={finishSplash} />}
-        <BrowserRouter>
-          <SubscriptionGate>
-          <ErrorBoundary>
-          <Suspense fallback={<div className="app-shell" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="spinner" /></div>}>
-            <StartParamHandler />
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/restaurant/:id" element={<RestaurantPage />} />
-              <Route path="/my-reservations" element={<MyReservationsPage />} />
-              <Route path="/favorites" element={<FavoritesPage />} />
-              <Route path="/cards" element={<CardsPage />} />
-              <Route path="/food/:id" element={<FoodPage />} />
-              <Route path="/restaurant/:id/reserve" element={<ReservationPage />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/order/track" element={<OrderTrackPage />} />
-              <Route path="/search" element={<SearchPage />} />
-              <Route path="/orders" element={<OrdersPage />} />
-                            <Route path="/profile" element={<ProfilePage />} />
-            </Routes>
-          </Suspense>
-          </ErrorBoundary>
-          </SubscriptionGate>
-          <FloatingLayer />
-        </BrowserRouter>
-      </QueryClientProvider>
-    </I18nProvider>
+    <QueryClientProvider client={queryClient}>
+      {showSplash && <Splash onDone={finishSplash} />}
+      <BrowserRouter>
+        <SubscriptionGate>
+        <ErrorBoundary>
+        <Suspense fallback={<div className="app-shell" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="spinner" /></div>}>
+          <StartParamHandler />
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/restaurant/:id" element={<RestaurantPage />} />
+            <Route path="/my-reservations" element={<MyReservationsPage />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
+            <Route path="/cards" element={<CardsPage />} />
+            <Route path="/food/:id" element={<FoodPage />} />
+            <Route path="/restaurant/:id/reserve" element={<ReservationPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/order/track" element={<OrderTrackPage />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/orders" element={<OrdersPage />} />
+                          <Route path="/profile" element={<ProfilePage />} />
+          </Routes>
+        </Suspense>
+        </ErrorBoundary>
+        </SubscriptionGate>
+        <FloatingLayer />
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 

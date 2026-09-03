@@ -112,7 +112,7 @@ export function SearchPage() {
         <button
           onClick={() => { haptic(); setShowFilter(true); }}
           className={`search-filter-btn ${activeCount ? 'is-active' : ''}`}
-          aria-label="Filtr"
+          aria-label={t('filterAriaLabel')}
         >
           <Icon name="filter" size={20} color={activeCount ? 'var(--brand-text)' : 'var(--ink)'} />
           {activeCount > 0 && <span className="search-filter-btn__badge">{activeCount}</span>}
@@ -140,21 +140,21 @@ export function SearchPage() {
             const meta = SPECIALS.find((x) => x.id === s);
             return (
               <button key={s} onClick={() => setSpecials((p) => p.filter((x) => x !== s))} className="search-chip">
-                {meta?.label} <Icon name="x" size={12} color="var(--brand-100)" />
+                {t(meta?.labelKey)} <Icon name="x" size={12} color="var(--brand-100)" />
               </button>
             );
           })}
           {maxTime && (
             <button onClick={() => setMaxTime(null)} className="search-chip">
-              {maxTime} daq <Icon name="x" size={12} color="var(--brand-100)" />
+              {maxTime} {t('minutesShort')} <Icon name="x" size={12} color="var(--brand-100)" />
             </button>
           )}
           {sort !== 'default' && (
             <button onClick={() => setSort('default')} className="search-chip">
-              {SORTS.find((s) => s.id === sort)?.label} <Icon name="x" size={12} color="var(--brand-100)" />
+              {t(SORTS.find((s) => s.id === sort)?.labelKey)} <Icon name="x" size={12} color="var(--brand-100)" />
             </button>
           )}
-          <button onClick={reset} className="search-chip search-chip--reset">Tozalash</button>
+          <button onClick={reset} className="search-chip search-chip--reset">{t('resetBtn')}</button>
         </div>
       )}
 
@@ -165,17 +165,17 @@ export function SearchPage() {
         ) : nothingFound ? (
           <div className="search-empty">
             <Icon name="search" size={44} color="var(--muted-2)" />
-            <div className="search-empty__title">Hech narsa topilmadi</div>
-            <p className="search-empty__hint">Boshqa so'z bilan qidiring yoki filtrlarni o'zgartiring</p>
+            <div className="search-empty__title">{t('searchEmptyTitle')}</div>
+            <p className="search-empty__hint">{t('searchEmptyHint')}</p>
             {activeCount > 0 && (
-              <button onClick={reset} className="search-empty__btn">Filtrlarni tozalash</button>
+              <button onClick={reset} className="search-empty__btn">{t('clearFiltersBtn')}</button>
             )}
           </div>
         ) : (
           <>
             {foundDishes.length > 0 && (
               <>
-                <h2 className="search-section-title">Taomlar</h2>
+                <h2 className="search-section-title">{t('dishes')}</h2>
                 <div className="search-dishes">
                   {foundDishes.map((d) => (
                     <DishGridCard key={d.id || d._id} dish={d} onClick={setModalDish} />

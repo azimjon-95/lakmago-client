@@ -2,13 +2,14 @@ import { Icon } from '@/components/Icon';
 import { CategoryIcon } from '@/components/CategoryIcons/CategoryIcon';
 import { haptic } from '@/lib/telegram';
 import { CATEGORIES as CATS } from '@/data/categories';
+import { useT } from '@/i18n';
 
 // Maxsus istaklar (Uzum uslubida)
 export const SPECIALS = [
-  { id: 'discount', label: 'Chegirmalar', icon: 'discount', color: 'var(--appetite)' },
-  { id: 'free', label: 'Bepul yetkazish', icon: 'bike', color: 'var(--success)' },
-  { id: 'top', label: 'Yuqori reyting', icon: 'star', color: 'var(--brand-100)' },
-  { id: 'fresh', label: 'Yangi', icon: 'flame', color: 'var(--brand)' },
+  { id: 'discount', labelKey: 'specialDiscount', icon: 'discount', color: 'var(--appetite)' },
+  { id: 'free', labelKey: 'specialFreeDelivery', icon: 'bike', color: 'var(--success)' },
+  { id: 'top', labelKey: 'specialTopRating', icon: 'star', color: 'var(--brand-100)' },
+  { id: 'fresh', labelKey: 'specialFresh', icon: 'flame', color: 'var(--brand)' },
 ];
 
 // Yetkazish vaqti
@@ -19,9 +20,9 @@ export { CATEGORIES } from '@/data/categories';
 
 // Saralash
 export const SORTS = [
-  { id: 'default', label: 'Odatiy tartib' },
-  { id: 'rating', label: 'Dastlab yuqori reytingdagilari' },
-  { id: 'fast', label: 'Eng tezkorlari' },
+  { id: 'default', labelKey: 'sortDefault' },
+  { id: 'rating', labelKey: 'sortRating' },
+  { id: 'fast', labelKey: 'sortFast' },
 ];
 
 export function FilterSheet({
@@ -31,6 +32,7 @@ export function FilterSheet({
   sort, setSort,
   onReset, onClose, resultCount,
 }) {
+  const t = useT();
   const toggleSpecial = (id) => {
     haptic();
     setSpecials((prev) => prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]);
@@ -46,8 +48,8 @@ export function FilterSheet({
         <div className="filter-sheet__grabber" />
 
         <div className="filter-sheet__header">
-          <h2 className="filter-sheet__title">Filtr</h2>
-          <button onClick={onClose} className="filter-sheet__close" aria-label="Yopish">
+          <h2 className="filter-sheet__title">{t('filterTitle')}</h2>
+          <button onClick={onClose} className="filter-sheet__close" aria-label={t('close')}>
             <Icon name="x" size={20} color="var(--muted)" />
           </button>
         </div>
@@ -55,7 +57,7 @@ export function FilterSheet({
         <div className="filter-sheet__body">
           {/* Maxsus istaklar */}
           <section className="filter-block">
-            <h3 className="filter-block__title">Maxsus istaklar</h3>
+            <h3 className="filter-block__title">{t('specialWishesTitle')}</h3>
             <div className="filter-specials">
               {SPECIALS.map((s) => (
                 <button
@@ -64,7 +66,7 @@ export function FilterSheet({
                   className={`filter-special ${specials.includes(s.id) ? 'is-active' : ''}`}
                 >
                   <Icon name={s.icon} size={17} color={s.color} />
-                  <span>{s.label}</span>
+                  <span>{t(s.labelKey)}</span>
                 </button>
               ))}
             </div>
@@ -72,7 +74,7 @@ export function FilterSheet({
 
           {/* Yetkazib berish vaqti */}
           <section className="filter-block">
-            <h3 className="filter-block__title">Yetkazib berish vaqti</h3>
+            <h3 className="filter-block__title">{t('deliveryTimeTitle')}</h3>
             <div className="filter-times">
               {TIMES.map((tm) => (
                 <button
@@ -88,7 +90,7 @@ export function FilterSheet({
 
           {/* Oshxonalar va kategoriyalar */}
           <section className="filter-block">
-            <h3 className="filter-block__title">Oshxonalar va kategoriyalar</h3>
+            <h3 className="filter-block__title">{t('cuisinesCategoriesTitle')}</h3>
             <div className="filter-cats">
               {CATS.map((c) => (
                 <button
@@ -105,7 +107,7 @@ export function FilterSheet({
 
           {/* Saralash */}
           <section className="filter-block">
-            <h3 className="filter-block__title">Saralash</h3>
+            <h3 className="filter-block__title">{t('sortTitle')}</h3>
             <div className="filter-sorts">
               {SORTS.map((s) => (
                 <button
@@ -113,7 +115,7 @@ export function FilterSheet({
                   onClick={() => { haptic(); setSort(s.id); }}
                   className={`filter-sort ${sort === s.id ? 'is-active' : ''}`}
                 >
-                  <span>{s.label}</span>
+                  <span>{t(s.labelKey)}</span>
                   {sort === s.id && <Icon name="check" size={18} color="var(--brand)" />}
                 </button>
               ))}
@@ -123,9 +125,9 @@ export function FilterSheet({
 
         {/* Pastki tugmalar */}
         <div className="filter-sheet__footer">
-          <button onClick={onReset} className="filter-reset">Tozalash</button>
+          <button onClick={onReset} className="filter-reset">{t('resetBtn')}</button>
           <button onClick={onClose} className="filter-apply">
-            Ko'rsatish{resultCount > 0 ? ` · ${resultCount}` : ''}
+            {t('showResultsBtn')}{resultCount > 0 ? ` · ${resultCount}` : ''}
           </button>
         </div>
       </div>

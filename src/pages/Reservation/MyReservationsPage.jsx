@@ -4,21 +4,23 @@ import { Icon } from '@/components/Icon';
 import { BottomNav } from '@/components/BottomNav';
 import { api } from '@/api';
 import { haptic } from '@/lib/telegram';
+import { useT } from '@/i18n';
 import './MyReservations.css';
 
-const STATUS = {
-  pending: { label: 'Tasdiq kutilmoqda', cls: 'is-pending' },
-  confirmed: { label: 'Tasdiqlandi', cls: 'is-ok' },
-  coming: { label: 'Boramiz', cls: 'is-ok' },
-  on_way: { label: "Yo'ldamiz", cls: 'is-ok' },
-  arrived: { label: 'Keldik', cls: 'is-ok' },
-  completed: { label: 'Yakunlandi', cls: 'is-done' },
-  rejected: { label: 'Rad etildi', cls: 'is-bad' },
-  cancelled: { label: 'Bekor qilindi', cls: 'is-done' },
-  not_coming: { label: 'Bora olmaymiz', cls: 'is-bad' },
+const STATUS_KEYS = {
+  pending: { key: 'statusPending', cls: 'is-pending' },
+  confirmed: { key: 'statusConfirmed', cls: 'is-ok' },
+  coming: { key: 'statusComing', cls: 'is-ok' },
+  on_way: { key: 'statusOnWay', cls: 'is-ok' },
+  arrived: { key: 'statusArrived', cls: 'is-ok' },
+  completed: { key: 'statusCompleted', cls: 'is-done' },
+  rejected: { key: 'statusRejected', cls: 'is-bad' },
+  cancelled: { key: 'statusCancelled', cls: 'is-done' },
+  not_coming: { key: 'statusNotComing', cls: 'is-bad' },
 };
 
 export function MyReservationsPage() {
+  const t = useT();
   const navigate = useNavigate();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +37,7 @@ export function MyReservationsPage() {
 
   const cancel = async (id) => {
     haptic();
-    if (!window.confirm('Bronni bekor qilasizmi?')) return;
+    if (!window.confirm(t('cancelBookingConfirm'))) return;
     setBusyId(id);
     try {
       await api.cancelReservation(id);
@@ -52,26 +54,27 @@ export function MyReservationsPage() {
   return (
     <div className="app-shell">
       <header className="myresv-header">
-        <button onClick={() => navigate(-1)} aria-label="Orqaga" className="myresv-header__btn">
+        <button onClick={() => navigate(-1)} aria-label={t('back')} className="myresv-header__btn">
           <Icon name="arrowLeft" size={22} color="var(--ink)" />
         </button>
-        <h1 className="myresv-header__title">Bronlarim</h1>
+        <h1 className="myresv-header__title">{t('myReservations')}</h1>
       </header>
 
       <div className="myresv-body">
         {loading ? (
-          <div className="myresv-empty">Yuklanmoqda...</div>
+          <div className="myresv-empty">{t('loading')}</div>
         ) : list.length === 0 ? (
           <div className="myresv-empty">
             <Icon name="calendarPlus" size={44} color="var(--muted-2)" />
-            <div className="myresv-empty__title">Bron yo'q</div>
+            <div className="myresv-empty__title">{t('noReservationsTitle')}</div>
             <p className="myresv-empty__hint">
-              Restoran sahifasidan stol bron qilishingiz mumkin
+              {t('noReservationsHint')}
             </p>
           </div>
         ) : (
           list.map((r) => {
-            const st = STATUS[r.status] || { label: r.status, cls: '' };
+            const stDef = STATUS_KEYS[r.status];
+            const st = stDef ? { label: t(stDef.key), cls: stDef.cls } : { label: r.status, cls: '' };
             return (
               <div key={r._id} className="myresv-card">
                 <div className="myresv-card__top">
@@ -83,11 +86,11 @@ export function MyReservationsPage() {
                   {r.date} · {r.time}
                   <span className="myresv-card__sep" />
                   <Icon name="users" size={14} color="var(--muted)" />
-                  {r.guests} kishi
+                  {r.guests} {t('guestsCount')}
                 </div>
-                {r.note && <div className="myresv-card__note">Izoh: {r.note}</div>}
+                {r.note && <div className="myresv-card__note">{t('noteLabel')}: {r.note}</div>}
                 {r.rejectReason && (
-                  <div className="myresv-card__reject">Sabab: {r.rejectReason}</div>
+                  <div className="myresv-card__reject">{t('reasonLabel')}: {r.rejectReason}</div>
                 )}
                 {canCancel(r.status) && (
                   <button
@@ -95,7 +98,7 @@ export function MyReservationsPage() {
                     disabled={busyId === r._id}
                     className="myresv-card__cancel"
                   >
-                    {busyId === r._id ? '...' : 'Bekor qilish'}
+                    {busyId === r._id ? '...' : t('cancelBooking')}
                   </button>
                 )}
               </div>

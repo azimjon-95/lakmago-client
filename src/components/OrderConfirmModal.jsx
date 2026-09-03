@@ -1,5 +1,6 @@
 import { Icon } from './Icon';
 import { formatSom } from '@/lib/utils';
+import { useT } from '@/i18n';
 import './OrderConfirmModal.css';
 
 /**
@@ -12,6 +13,7 @@ import './OrderConfirmModal.css';
  * yana bir marta tasdiqlaydi.
  */
 export function OrderConfirmModal({ groups, pricing, total, onClose, onConfirm, submitting }) {
+  const t = useT();
   return (
     <div className="ocm-overlay" onClick={onClose}>
       <div className="ocm-sheet" onClick={(e) => e.stopPropagation()}>
@@ -19,8 +21,8 @@ export function OrderConfirmModal({ groups, pricing, total, onClose, onConfirm, 
 
         <div className="ocm-head">
           <div className="ocm-head__icon"><Icon name="checks" size={22} color="var(--brand)" /></div>
-          <div className="ocm-head__title">Buyurtmani tekshiring</div>
-          <button onClick={onClose} className="ocm-close" aria-label="Yopish">
+          <div className="ocm-head__title">{t('checkOrderTitle')}</div>
+          <button onClick={onClose} className="ocm-close" aria-label={t('close')}>
             <Icon name="x" size={16} color="var(--muted)" />
           </button>
         </div>
@@ -50,18 +52,18 @@ export function OrderConfirmModal({ groups, pricing, total, onClose, onConfirm, 
           <div className="ocm-receipt__dashed" />
 
           <div className="ocm-receipt__row ocm-receipt__row--sum">
-            <span>Mahsulotlar</span>
+            <span>{t('productsLabel')}</span>
             <span>{formatSom(pricing.subtotal)}</span>
           </div>
           {pricing.deliveryFee > 0 && (
             <div className="ocm-receipt__row ocm-receipt__row--sum">
-              <span>Yetkazish</span>
+              <span>{t('delivery')}</span>
               <span>{formatSom(pricing.deliveryFee)}</span>
             </div>
           )}
           {pricing.serviceFee > 0 && (
             <div className="ocm-receipt__row ocm-receipt__row--sum">
-              <span>Xizmat haqi</span>
+              <span>{t('serviceFee')}</span>
               <span>{formatSom(pricing.serviceFee)}</span>
             </div>
           )}
@@ -69,14 +71,14 @@ export function OrderConfirmModal({ groups, pricing, total, onClose, onConfirm, 
               kelmasdi — mijoz chekni o'qib chalkashardi */}
           {pricing.pickupDiscount > 0 && (
             <div className="ocm-receipt__row ocm-receipt__row--sum">
-              <span>O'zi olib ketish chegirmasi</span>
+              <span>{t('pickupDiscountFull')}</span>
               <span>−{formatSom(pricing.pickupDiscount)}</span>
             </div>
           )}
 
           <div className="ocm-receipt__dashed" />
           <div className="ocm-receipt__row ocm-receipt__row--total">
-            <span>Jami</span>
+            <span>{t('total')}</span>
             <span>{formatSom(total)}</span>
           </div>
 
@@ -84,15 +86,15 @@ export function OrderConfirmModal({ groups, pricing, total, onClose, onConfirm, 
         </div>
 
         <p className="ocm-question">
-          Buyurtmani restoranga yuborishga tayyormisiz?
+          {t('readyToSendQuestion')}
         </p>
 
         <div className="ocm-actions">
           <button onClick={onClose} className="ocm-btn ocm-btn--ghost" disabled={submitting}>
-            Ortga
+            {t('backLabel')}
           </button>
           <button onClick={onConfirm} className="ocm-btn ocm-btn--primary" disabled={submitting}>
-            {submitting ? 'Yuborilmoqda...' : 'Ha, yuborish'}
+            {submitting ? t('sendingLabel') : t('yesSendLabel')}
           </button>
         </div>
       </div>

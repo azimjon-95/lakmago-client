@@ -2,9 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { Icon } from '@/components/Icon';
 import { searchAddress, getCurrentPosition, reverseGeocode } from '@/lib/location';
 import { haptic } from '@/lib/telegram';
+import { useT } from '@/i18n';
 
 // 2-bosqich: manzil qidirish (debounce + AbortController)
 export function AddressSearch({ onPick, onMap, onBack }) {
+  const t = useT();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -45,10 +47,10 @@ export function AddressSearch({ onPick, onMap, onBack }) {
   return (
     <div className="addrflow addrflow--search">
       <div className="addrflow__header">
-        <button onClick={onBack} className="addrflow__back-btn" aria-label="Orqaga">
+        <button onClick={onBack} className="addrflow__back-btn" aria-label={t('back')}>
           <Icon name="arrowLeft" size={22} color="var(--ink)" />
         </button>
-        <h3 className="addrflow__header-title">Qayerga yetkazib berilsin</h3>
+        <h3 className="addrflow__header-title">{t('whereToDeliverTitle')}</h3>
       </div>
 
       <div className="addr-search__field">
@@ -57,11 +59,11 @@ export function AddressSearch({ onPick, onMap, onBack }) {
           ref={inputRef}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ko'cha, uy raqami..."
+          placeholder={t('streetHousePlaceholder')}
           className="addr-search__input"
         />
         {query && (
-          <button onClick={() => setQuery('')} aria-label="Tozalash">
+          <button onClick={() => setQuery('')} aria-label={t('resetBtn')}>
             <Icon name="x" size={16} color="var(--muted)" />
           </button>
         )}
@@ -73,7 +75,7 @@ export function AddressSearch({ onPick, onMap, onBack }) {
           <div className="addr-search__current-icon">
             <Icon name="navigation" size={18} color="var(--brand)" />
           </div>
-          <span>{detecting ? 'Aniqlanmoqda...' : 'Joriy joylashuvim'}</span>
+          <span>{detecting ? t('detectingLocation') : t('myCurrentLocation')}</span>
         </button>
 
         {/*
@@ -84,15 +86,15 @@ export function AddressSearch({ onPick, onMap, onBack }) {
           <div className="addr-search__current-icon addr-search__current-icon--map">
             <Icon name="pin" size={18} color="var(--brand)" />
           </div>
-          <span>Karta orqali tanlash</span>
+          <span>{t('selectFromMap')}</span>
         </button>
       </div>
 
       {/* Natijalar */}
       <div className="addr-search__results">
-        {loading && <div className="addr-search__loading">Qidirilmoqda...</div>}
+        {loading && <div className="addr-search__loading">{t('searchingLabel')}</div>}
         {!loading && query.trim().length >= 3 && results.length === 0 && (
-          <div className="addr-search__empty">Manzil topilmadi</div>
+          <div className="addr-search__empty">{t('addressNotFound')}</div>
         )}
         {results.map((r, i) => (
           <button key={i} onClick={() => { haptic(); onPick(r); }} className="addr-result">

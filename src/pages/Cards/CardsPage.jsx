@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { api } from '@/api';
 import { haptic } from '@/lib/telegram';
+import { useT } from '@/i18n';
 import './Cards.css';
 
 const BRANDS = {
@@ -23,6 +24,7 @@ const fmtExpiry = (v) => {
 };
 
 export function CardsPage() {
+  const t = useT();
   const navigate = useNavigate();
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -63,7 +65,7 @@ export function CardsPage() {
 
   const remove = async (id) => {
     haptic();
-    if (!window.confirm("Kartani o'chirasizmi?")) return;
+    if (!window.confirm(t('deleteCardConfirm'))) return;
     try { setCards(await api.deleteCard(id)); } catch (e) { alert(e.message); }
   };
 
@@ -75,15 +77,15 @@ export function CardsPage() {
   return (
     <div className="app-shell cards">
       <header className="cards-header">
-        <button onClick={() => navigate(-1)} aria-label="Orqaga" className="cards-header__btn">
+        <button onClick={() => navigate(-1)} aria-label={t('back')} className="cards-header__btn">
           <Icon name="arrowLeft" size={22} color="var(--ink)" />
         </button>
-        <h1 className="cards-header__title">To'lov kartalari</h1>
+        <h1 className="cards-header__title">{t('paymentCardsTitle')}</h1>
       </header>
 
       <div className="cards-body">
         {loading ? (
-          <div className="cards-empty">Yuklanmoqda...</div>
+          <div className="cards-empty">{t('loading')}</div>
         ) : (
           <>
             {cards.map((c) => {
@@ -100,13 +102,13 @@ export function CardsPage() {
                     <div className="card-item__meta">
                       {c.bankName && <span>{b.label}</span>}
                       {c.expiry && <span>{c.expiry}</span>}
-                      {c.isDefault && <span className="card-item__default">Asosiy</span>}
+                      {c.isDefault && <span className="card-item__default">{t('defaultBadge')}</span>}
                     </div>
                   </div>
                   <div className="card-item__actions">
                     {!c.isDefault && (
                       <button onClick={() => makeDefault(c._id)} className="card-item__btn">
-                        Asosiy
+                        {t('defaultBadge')}
                       </button>
                     )}
                     <button onClick={() => remove(c._id)} className="card-item__btn card-item__btn--del">
@@ -120,16 +122,16 @@ export function CardsPage() {
             {cards.length === 0 && !adding && (
               <div className="cards-empty">
                 <Icon name="card" size={48} color="var(--muted-2)" />
-                <div className="cards-empty__title">Karta qo'shilmagan</div>
+                <div className="cards-empty__title">{t('noCardsTitle')}</div>
                 <p className="cards-empty__hint">
-                  Karta qo'shsangiz to'lovda tanlashingiz mumkin
+                  {t('noCardsHint')}
                 </p>
               </div>
             )}
 
             {adding ? (
               <div className="card-form">
-                <label className="card-form__label">Karta raqami</label>
+                <label className="card-form__label">{t('cardNumberLabel')}</label>
                 <input
                   value={form.number}
                   onChange={(e) => setForm({ ...form, number: fmtNumber(e.target.value) })}
@@ -140,7 +142,7 @@ export function CardsPage() {
 
                 <div className="card-form__row">
                   <div>
-                    <label className="card-form__label">Amal qilish muddati</label>
+                    <label className="card-form__label">{t('expiryLabel')}</label>
                     <input
                       value={form.expiry}
                       onChange={(e) => setForm({ ...form, expiry: fmtExpiry(e.target.value) })}
@@ -150,21 +152,21 @@ export function CardsPage() {
                     />
                   </div>
                   <div>
-                    <label className="card-form__label">Karta egasi</label>
+                    <label className="card-form__label">{t('cardHolderLabel')}</label>
                     <input
                       value={form.holder}
                       onChange={(e) => setForm({ ...form, holder: e.target.value })}
-                      placeholder="AZIZ KARIMOV"
+                      placeholder={t('cardHolderExample')}
                       className="input-field"
                     />
                   </div>
                 </div>
 
-                <label className="card-form__label">Bank nomi</label>
+                <label className="card-form__label">{t('bankNameLabel')}</label>
                 <input
                   value={form.bankName}
                   onChange={(e) => setForm({ ...form, bankName: e.target.value })}
-                  placeholder="Kapitalbank, Ipoteka Bank..."
+                  placeholder={t('bankNameExample')}
                   list="bank-list"
                   className="input-field"
                 />

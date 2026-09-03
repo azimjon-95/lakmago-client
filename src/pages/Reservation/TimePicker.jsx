@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { Icon } from '@/components/Icon';
 import { haptic } from '@/lib/telegram';
+import { useT } from '@/i18n';
 
 const ITEM_H = 44;
 
@@ -18,6 +19,7 @@ const ITEM_H = 44;
  * va kichikroq ko'rinadi (haqiqiy baraban taassuroti).
  */
 export function TimePicker({ value, slots, onChange, open, onOpen, onClose }) {
+  const t = useT();
   const scrollerRef = useRef(null);
   const settleTimer = useRef(null);
   const [centerIdx, setCenterIdx] = useState(() => Math.max(0, slots.indexOf(value)));
@@ -82,7 +84,7 @@ export function TimePicker({ value, slots, onChange, open, onOpen, onClose }) {
         <span className="resv-timefield__left">
           <Icon name="clock" size={17} color="var(--muted)" />
           <span className="resv-timefield__value">
-            {empty ? 'Bugunga bo‘sh vaqt yo‘q' : value}
+            {empty ? t('noAvailableTimeToday') : value}
           </span>
         </span>
         {!empty && <Icon name="chevronDown" size={17} color="var(--muted)" />}
@@ -93,8 +95,8 @@ export function TimePicker({ value, slots, onChange, open, onOpen, onClose }) {
           <div className="resv-sheet__box" onClick={(e) => e.stopPropagation()}>
             <div className="resv-sheet__grip" />
             <div className="resv-sheet__head">
-              <span>Vaqtni tanlang</span>
-              <button onClick={onClose} aria-label="Yopish">
+              <span>{t('selectTime')}</span>
+              <button onClick={onClose} aria-label={t('close')}>
                 <Icon name="x" size={18} color="var(--muted)" />
               </button>
             </div>
@@ -126,7 +128,7 @@ export function TimePicker({ value, slots, onChange, open, onOpen, onClose }) {
                 onClick={() => { haptic(); onClose(); }}
                 className="btn-primary btn-block"
               >
-                Tanlash · {slots[centerIdx] ?? value}
+                {t('select')} · {slots[centerIdx] ?? value}
               </button>
             </div>
           </div>

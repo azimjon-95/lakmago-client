@@ -82,26 +82,25 @@ export function SubscriptionGate({ children }) {
     <div className="sub-gate">
       <div className="sub-gate__card">
         <div className="sub-gate__icon"><Icon name="send" size={40} color="var(--brand)" /></div>
-        <h2 className="sub-gate__title">Kanalga obuna bo'ling</h2>
+        <h2 className="sub-gate__title">{t('subscribeChannelTitle')}</h2>
         <p className="sub-gate__text">
-          Yangi taomlar, chegirmalar va aksiyalardan xabardor bo'lish uchun
-          kanalimizga qo'shiling. Bu bir marta — keyin ilova doim ochiq.
+          {t('subscribeChannelHint')}
         </p>
 
         <button onClick={openChannel} className="sub-gate__subscribe">
-          <Icon name="send" size={18} color="var(--brand-text)" /> Kanalga obuna bo'lish
+          <Icon name="send" size={18} color="var(--brand-text)" /> {t('subscribeChannelBtn')}
         </button>
         <button onClick={onCheck} disabled={checking} className="sub-gate__check">
-          {checking ? 'Tekshirilmoqda...' : '✅ Obuna bo‘ldim, tekshirish'}
+          {checking ? t('checkingLabel') : t('subscribedCheckBtn')}
         </button>
 
         {autoChecking && !checking && (
           <p className="sub-gate__hint">
-            <span className="spinner spinner--sm" /> Obuna tekshirilmoqda...
+            <span className="spinner spinner--sm" /> {t('subscriptionChecking')}
           </p>
         )}
         {!autoChecking && !checking && (
-          <p className="sub-gate__hint">Obuna bo'lgach avtomatik ochiladi</p>
+          <p className="sub-gate__hint">{t('autoOpenHint')}</p>
         )}
       </div>
     </div>

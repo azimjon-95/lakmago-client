@@ -73,17 +73,17 @@ export function ProfilePage() {
         <div className="profile-hero__stats">
           <div className="profile-stat">
             <span className="profile-stat__value">{cardCount}</span>
-            <span className="profile-stat__label">Karta</span>
+            <span className="profile-stat__label">{t('card')}</span>
           </div>
           <span className="profile-stat__sep" />
           <div className="profile-stat">
             <span className="profile-stat__value">{user.addresses?.length || 0}</span>
-            <span className="profile-stat__label">Manzil</span>
+            <span className="profile-stat__label">{t('address')}</span>
           </div>
           <span className="profile-stat__sep" />
           <div className="profile-stat">
             <span className="profile-stat__value">{favCount}</span>
-            <span className="profile-stat__label">Sevimli</span>
+            <span className="profile-stat__label">{t('favorites')}</span>
           </div>
         </div>
       </div>
@@ -106,8 +106,8 @@ export function ProfilePage() {
           <button onClick={() => navigate('/favorites')} className="profile-row">
             <Icon name="heart" size={18} color="var(--brand)" />
             <div className="profile-row__body">
-              <div className="profile-row__value">Sevimlilar</div>
-              <div className="profile-row__label">Saqlangan taom va restoranlar</div>
+              <div className="profile-row__value">{t('favoritesTitle')}</div>
+              <div className="profile-row__label">{t('favoritesHint')}</div>
             </div>
             <Icon name="chevronRight" size={17} color="var(--muted)" />
           </button>
@@ -115,8 +115,8 @@ export function ProfilePage() {
           <button onClick={() => navigate('/my-reservations')} className="profile-row">
             <Icon name="calendarPlus" size={18} color="var(--brand)" />
             <div className="profile-row__body">
-              <div className="profile-row__value">Bronlarim</div>
-              <div className="profile-row__label">Stol bronlari tarixi</div>
+              <div className="profile-row__value">{t('myReservations')}</div>
+              <div className="profile-row__label">{t('myReservationsHint')}</div>
             </div>
             <Icon name="chevronRight" size={17} color="var(--muted)" />
           </button>
@@ -129,8 +129,8 @@ export function ProfilePage() {
         <div className="profile-list">
         {editingField === 'name' ? (
           <div className="profile-edit">
-            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Ism" className="input-field" style={{ marginBottom: 8 }} />
-            <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Familiya" className="input-field" style={{ marginBottom: 10 }} />
+            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder={t('firstNamePlaceholder')} className="input-field" style={{ marginBottom: 8 }} />
+            <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder={t('lastNamePlaceholder')} className="input-field" style={{ marginBottom: 10 }} />
             <div className="profile-edit__actions">
               <button onClick={() => setEditingField(null)} className="btn-secondary" style={{ flex: 1 }}>{t('cancel')}</button>
               <button onClick={saveName} className="btn-primary" style={{ flex: 1.5 }}>{t('save')}</button>
@@ -160,7 +160,7 @@ export function ProfilePage() {
             <Icon name="phone" size={18} color={user.phone ? 'var(--muted)' : 'var(--brand)'} />
             <div className="profile-row__body">
               <div className={`profile-row__value ${user.phone ? '' : 'profile-row__value--accent'}`}>{user.phone || t('empty')}</div>
-              <div className="profile-row__label">Telefon</div>
+              <div className="profile-row__label">{t('phoneLabel')}</div>
             </div>
             <Icon name="chevronRight" size={17} color="var(--muted)" />
           </button>
@@ -219,6 +219,7 @@ export function ProfilePage() {
 
 // Do'stlarni taklif qilish kartasi — havola, do'stlar soni, bonus balans
 function ReferralCard() {
+  const t = useT();
   const [info, setInfo] = useState(null);
   const [copied, setCopied] = useState(false);
 
@@ -229,7 +230,7 @@ function ReferralCard() {
   const share = () => {
     haptic();
     if (!info?.referralLink) return;
-    const text = `🍽 LokmaGo — mazali taomlar tez yetkazib beriladi!\n\nMening havolam orqali qo'shiling va bonus oling 👇`;
+    const text = t('referralShareText');
     const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(info.referralLink)}&text=${encodeURIComponent(text)}`;
     const tg = getTelegram();
     if (tg?.openTelegramLink) tg.openTelegramLink(shareUrl);
@@ -255,39 +256,40 @@ function ReferralCard() {
     <div className="referral-card">
       <div className="referral-card__head">
         <div className="referral-card__title">
-          <Icon name="users" size={18} color="var(--brand)" /> Do'stlarni taklif qiling
+          <Icon name="users" size={18} color="var(--brand)" /> {t('referralTitle')}
         </div>
         {info?.reward > 0 && (
-          <div className="referral-card__badge">+{som(info.reward)} so'm</div>
+          <div className="referral-card__badge">+{som(info.reward)} {t('som')}</div>
         )}
       </div>
 
       <p className="referral-card__desc">
-        Har bir do'stingiz kanalga obuna bo'lиб qo'shilса — ikkalangizga ham bonus!
+        {t('referralDesc')}
       </p>
 
       {/* Statistika */}
       <div className="referral-card__stats">
         <div className="referral-stat">
           <div className="referral-stat__value">{info?.referralCount ?? 0}</div>
-          <div className="referral-stat__label">Taklif qilingan</div>
+          <div className="referral-stat__label">{t('referralInvited')}</div>
         </div>
         <div className="referral-stat">
           <div className="referral-stat__value">{som(info?.bonusBalance)}</div>
-          <div className="referral-stat__label">Bonus (so'm)</div>
+          <div className="referral-stat__label">{t('referralBonusLabel')}</div>
         </div>
       </div>
 
       {/* Amallar */}
       <div className="referral-card__actions">
         <button onClick={share} className="referral-card__share">
-          <Icon name="send" size={16} color="var(--brand-text)" /> Do'stlarga yuborish
+          <Icon name="send" size={16} color="var(--brand-text)" /> {t('referralShareBtn')}
         </button>
         <button onClick={copy} className="referral-card__copy">
           <Icon name={copied ? 'check' : 'copy'} size={16} color="var(--ink)" />
         </button>
       </div>
     </div>
+
   );
 }
 
@@ -301,13 +303,15 @@ const CARD_STYLES = {
 };
 
 function CardsStrip({ cards, onManage }) {
+  const t = useT();
+
   if (!cards.length) {
     return (
       <button onClick={onManage} className="pcards-empty">
         <Icon name="card" size={20} color="var(--brand)" />
         <div className="pcards-empty__body">
-          <div className="pcards-empty__title">To'lov kartasi qo'shing</div>
-          <div className="pcards-empty__hint">To'lovda tezroq bo'ladi</div>
+          <div className="pcards-empty__title">{t('addCardTitle')}</div>
+          <div className="pcards-empty__hint">{t('addCardHint')}</div>
         </div>
         <Icon name="plus" size={18} color="var(--brand)" />
       </button>
@@ -324,12 +328,12 @@ function CardsStrip({ cards, onManage }) {
               <div className="pcard__shine" />
               <div className="pcard__top">
                 <span className="pcard__chip" />
-                {c.isDefault && <span className="pcard__badge">Asosiy</span>}
+                {c.isDefault && <span className="pcard__badge">{t('defaultBadge')}</span>}
               </div>
               <div className="pcard__num">•••• {c.last4}</div>
               <div className="pcard__bottom">
                 <span className="pcard__holder">
-                  {c.bankName || c.holder || 'KARTA EGASI'}
+                  {c.bankName || c.holder || t('cardHolderPlaceholder')}
                 </span>
                 <span className="pcard__brand">{st.label}</span>
               </div>
@@ -340,7 +344,7 @@ function CardsStrip({ cards, onManage }) {
         {/* Qo'shish kartasi */}
         <button onClick={onManage} className="pcard pcard--add">
           <Icon name="plus" size={24} color="var(--brand)" />
-          <span>Qo'shish</span>
+          <span>{t('add')}</span>
         </button>
       </div>
     </div>

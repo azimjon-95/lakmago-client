@@ -445,7 +445,7 @@ export function CartPage() {
   // Savatni tozalash (tasdiq bilan)
   const confirmClear = () => {
     haptic();
-    if (window.confirm('Savatni tozalaysizmi?')) {
+    if (window.confirm(t('clearCartConfirm'))) {
       useCart.getState().clear();
     }
   };
@@ -599,8 +599,7 @@ export function CartPage() {
           // Buyurtma ID kelmadi — to'lovni boshlab bo'lmaydi.
           // Savat saqlanadi, mijoz qayta urinishi mumkin.
           setPaying(false);
-          alert('Buyurtma yaratildi, lekin to‘lovni boshlab bo‘lmadi.\n'
-            + 'Sahifani yangilab qayta urinib ko‘ring.');
+          alert(t('orderCreatedPaymentFailed'));
           return;
         }
 
@@ -628,9 +627,8 @@ export function CartPage() {
           // restoranga ko'rinmaydi. Mijoz qayta urinishi mumkin.
           setPaying(false);
           alert(
-            (e.message || 'To‘lov tizimiga ulanib bo‘lmadi')
-            + '\n\nSavatingiz saqlandi. Qayta urinib ko‘ring yoki '
-            + 'naqd to‘lovni tanlang.',
+            (e.message && e.message !== 'STALE_CART_ID' ? e.message : t('paymentConnectionFailed'))
+            + '\n\n' + t('cartSavedRetryOrCash'),
           );
         }
       })
@@ -639,8 +637,8 @@ export function CartPage() {
         // taomlarini yo'qotmaydi va qayta urinishi mumkin.
         setPaying(false);
         alert(
-          (e?.message || 'Buyurtma yuborilmadi')
-          + '\n\nSavatingiz saqlandi. Qayta urinib ko‘ring.',
+          (e?.message === 'STALE_CART_ID' ? t('staleCartError') : (e?.message || t('orderNotSent')))
+          + '\n\n' + t('cartSavedRetry'),
         );
       });
   }
@@ -663,12 +661,12 @@ export function CartPage() {
             <div className="cart-header__sub">
               {etaText} · {groups.length === 1
                 ? groups[0].restaurant.name
-                : `${groups.length} ta muassasa`}
+                : `${groups.length} ${t('establishmentsCount')}`}
             </div>
           )}
         </div>
 
-        <button onClick={confirmClear} aria-label="Tozalash" className="cart-header__btn">
+        <button onClick={confirmClear} aria-label={t('clearCart')} className="cart-header__btn">
           <Icon name="trash" size={19} color="var(--muted)" />
         </button>
       </header>
@@ -748,7 +746,7 @@ export function CartPage() {
       ))}
 
       {/* Yetkazish turi — kuryer yoki o'zim olib ketaman */}
-      <div className="cart-section-label">Qanday olasiz</div>
+      <div className="cart-section-label">{t('howToReceive')}</div>
       <div className="cart-fulfillment">
         <button
           onClick={() => { if (deliveryOff) return; haptic(); setFulfillment('delivery'); }}
@@ -756,11 +754,11 @@ export function CartPage() {
           className={`cart-ftab ${fulfillment === 'delivery' ? 'is-active' : ''} ${deliveryOff ? 'is-disabled' : ''}`}
         >
           <Icon name="bike" size={19} color={fulfillment === 'delivery' ? 'var(--brand)' : 'var(--muted)'} />
-          <span className="cart-ftab__title">Yetkazib berish</span>
+          <span className="cart-ftab__title">{t('deliveryTabTitle')}</span>
           <span className="cart-ftab__sub">
             {deliveryOff
-              ? 'Mavjud emas'
-              : (pricing.deliveryFee === 0 ? 'Bepul' : formatSom(pricing.deliveryFee))}
+              ? t('notAvailable')
+              : (pricing.deliveryFee === 0 ? t('free') : formatSom(pricing.deliveryFee))}
           </span>
         </button>
         <button
@@ -768,7 +766,7 @@ export function CartPage() {
           className={`cart-ftab ${fulfillment === 'pickup' ? 'is-active' : ''}`}
         >
           <Icon name="bag" size={19} color={fulfillment === 'pickup' ? 'var(--brand)' : 'var(--muted)'} />
-          <span className="cart-ftab__title">O'zim olib ketaman</span>
+          <span className="cart-ftab__title">{t('pickupSelf')}</span>
         </button>
       </div>
 
@@ -778,28 +776,28 @@ export function CartPage() {
           <Icon name="info" size={16} color="var(--appetite)" />
           <span>
             {deliveryOff.length === 1
-              ? `${deliveryOff[0].name} yetkazib berish xizmatini ko'rsatmaydi.`
-              : 'Savatdagi ba‘zi muassasalar yetkazib berish xizmatini ko‘rsatmaydi.'}
-            {' '}Buyurtmani o'zingiz olib ketishingiz mumkin.
+              ? `${deliveryOff[0].name} ${t('restaurantNoDelivery')}`
+              : t('someRestaurantsNoDelivery')}
+            {' '}{t('canPickupInstead')}
           </span>
         </div>
       )}
 
       {/* Vaqt — hozir yoki belgilangan */}
-      <div className="cart-section-label">Qachon</div>
+      <div className="cart-section-label">{t('whenLabel')}</div>
       <div className="cart-timing">
         <div className="cart-timing__tabs">
           <button
             onClick={() => { haptic(); setTimingMode('asap'); }}
             className={`cart-ttab ${timingMode === 'asap' ? 'is-active' : ''}`}
           >
-            {isPickup ? 'Tayyor bo‘lishi bilan' : 'Imkon qadar tez'}
+            {isPickup ? t('readyWhenDone') : t('asapLabel')}
           </button>
           <button
             onClick={() => { haptic(); setTimingMode('scheduled'); }}
             className={`cart-ttab ${timingMode === 'scheduled' ? 'is-active' : ''}`}
           >
-            Vaqtga belgilash
+            {t('scheduleLabel')}
           </button>
         </div>
 
@@ -808,8 +806,8 @@ export function CartPage() {
             <Icon name="clock" size={15} color="var(--success)" />
             <span>
               {isPickup
-                ? `Taxminan ${readyTimeLabel} da tayyor bo'ladi`
-                : `Taxminan ${etaLabel} da yetkaziladi`}
+                ? t('readyAtApprox').replace('{time}', readyTimeLabel)
+                : t('deliveredAtApprox').replace('{time}', etaLabel)}
             </span>
           </div>
         ) : (
@@ -853,7 +851,7 @@ export function CartPage() {
         <div className="cart-pickup-info">
           <Icon name="pin" size={20} color="var(--brand)" />
           <div className="cart-pickup-info__body">
-            <div className="cart-pickup-info__title">Olib ketish manzili</div>
+            <div className="cart-pickup-info__title">{t('pickupAddressTitle')}</div>
             {groups.map((g) => (
               <div key={g.restaurant.id} className="cart-pickup-info__row">
                 <b>{g.restaurant.name}</b>
@@ -874,13 +872,13 @@ export function CartPage() {
           <div className={`cart-field__value ${user.phone ? '' : 'cart-field__value--accent'}`}>
             {user.phone || '+998 __ ___ __ __'}
           </div>
-          <div className="cart-field__label">Telefon</div>
+          <div className="cart-field__label">{t('phoneLabel')}</div>
         </div>
         <Icon name="chevronRight" size={18} color="var(--muted)" />
       </button>
 
       {/* To'lov */}
-      <div className="cart-section-label">To'lov</div>
+      <div className="cart-section-label">{t('paymentLabel')}</div>
       <div className="cart-payment">
         <div className="cart-payment__options">
           <button
@@ -900,7 +898,7 @@ export function CartPage() {
             }`}
           >
             <span className="pay-opt__emoji">💳</span>
-            <span>Karta orqali</span>
+            <span>{t('byCard')}</span>
             {isCard && <Icon name="circleCheck" size={15} color="var(--success)" />}
           </button>
         </div>
@@ -908,7 +906,7 @@ export function CartPage() {
         {/* Onlayn to'lov ulanmagan bo'lsa tushuntiramiz */}
         {!onlineAvailable && (
           <p className="cart-payment__note">
-            Karta orqali to'lov hozircha mavjud emas — kuryerga naqd to'laysiz
+            {t('cardPaymentUnavailable')}
           </p>
         )}
 
@@ -939,7 +937,7 @@ export function CartPage() {
           <div className="cart-cards">
             {cards.length === 0 ? (
               <button onClick={() => navigate('/cards')} className="cart-cards__add">
-                <Icon name="plus" size={16} color="var(--brand)" /> Karta qo'shish
+                <Icon name="plus" size={16} color="var(--brand)" /> {t('addCard')}
               </button>
             ) : (
               <>
@@ -953,14 +951,14 @@ export function CartPage() {
                     <span className="cart-card__num">
                       {c.bankName ? `${c.bankName} · ` : ''}•••• {c.last4}
                     </span>
-                    {c.isDefault && <span className="cart-card__tag">Asosiy</span>}
+                    {c.isDefault && <span className="cart-card__tag">{t('defaultBadge')}</span>}
                     {selectedCard?._id === c._id && (
                       <Icon name="circleCheck" size={15} color="var(--success)" />
                     )}
                   </button>
                 ))}
                 <button onClick={() => navigate('/cards')} className="cart-cards__manage">
-                  Kartalarni boshqarish
+                  {t('manageCards')}
                 </button>
               </>
             )}
@@ -971,14 +969,14 @@ export function CartPage() {
       {/* Qo'shimcha tavsiya — "Hech narsani unutmadingizmi?" */}
       <CartUpsell groups={groups} />
 
-      {/* Bonus bilan to'lash (referal bonusи bor bo'lsa) */}
+      {/* Bonus bilan to'lash (referal bonusi bor bo'lsa) */}
       {bonusBalance > 0 && (
         <button onClick={() => setUseBonus((v) => !v)} className={`cart-bonus ${useBonus ? 'is-active' : ''}`}>
           <div className="cart-bonus__left">
             <Icon name="gift" size={20} color={useBonus ? 'var(--success)' : 'var(--brand)'} />
             <div>
-              <div className="cart-bonus__title">Bonus bilan to'lash</div>
-              <div className="cart-bonus__balance">Mavjud: {formatSom(bonusBalance)}</div>
+              <div className="cart-bonus__title">{t('payWithBonus')}</div>
+              <div className="cart-bonus__balance">{t('availableAmount')}: {formatSom(bonusBalance)}</div>
             </div>
           </div>
           <div className={`cart-bonus__toggle ${useBonus ? 'is-on' : ''}`}>
@@ -988,15 +986,15 @@ export function CartPage() {
       )}
 
       {/* Hisob */}
-      <div className="cart-section-label">Hisob</div>
+      <div className="cart-section-label">{t('accountLabel')}</div>
       <div className="cart-summary">
-        <Row label="Mahsulotlar" value={formatSom(pricing.subtotal)} />
+        <Row label={t('productsLabel')} value={formatSom(pricing.subtotal)} />
         {!isPickup && (
           <Row
             label={
               pricing.perRestaurant?.[0]?.quote?.distanceKm
-                ? `Yetkazish · ${pricing.perRestaurant[0].quote.distanceKm} km`
-                : 'Yetkazish'
+                ? `${t('delivery')} · ${pricing.perRestaurant[0].quote.distanceKm} km`
+                : t('delivery')
             }
             value={
               quoteLoading ? '...'
@@ -1006,19 +1004,19 @@ export function CartPage() {
           />
         )}
         {pricing.serviceFee > 0 && (
-          <Row label="Xizmat haqi" value={formatSom(pricing.serviceFee)} />
+          <Row label={t('serviceFee')} value={formatSom(pricing.serviceFee)} />
         )}
         {/* Olib ketish chegirmasi — mijoz nima uchun arzonlaganini
             ko'rishi kerak, aks holda summa tushunarsiz o'zgaradi */}
         {pricing.pickupDiscount > 0 && (
           <div className="cart-summary__row cart-summary__row--bonus">
-            <span>🛍 O'zi olib ketish chegirmasi</span>
+            <span>{t('pickupDiscountLabel')}</span>
             <span>−{formatSom(pricing.pickupDiscount)}</span>
           </div>
         )}
         {bonusApplied > 0 && (
           <div className="cart-summary__row cart-summary__row--bonus">
-            <span>🎁 Bonus chegirmasi</span>
+            <span>{t('bonusDiscountLabel')}</span>
             <span>−{formatSom(bonusApplied)}</span>
           </div>
         )}
@@ -1040,10 +1038,10 @@ export function CartPage() {
           />
           <span className={pricing.deliveryFee === 0 ? 'is-free' : ''}>
             {isPickup
-              ? "O'zingiz olib ketasiz"
+              ? t('youWillPickup')
               : pricing.deliveryFee === 0
-                ? 'Bepul yetkazib berish'
-                : `Yetkazish · ${formatSom(pricing.deliveryFee)}`}
+                ? t('freeDelivery')
+                : `${t('delivery')} · ${formatSom(pricing.deliveryFee)}`}
           </span>
           <span className="cart-footer__eta">{etaText}</span>
         </div>
@@ -1051,7 +1049,7 @@ export function CartPage() {
         {/* Bepul yetkazishgacha qolgan summa */}
         {gapToFree > 0 && (
           <div className="cart-footer__gap">
-            Bepul yetkazishgacha <b>{formatSom(gapToFree)}</b> qoldi
+            {t('gapToFreeText')} <b>{formatSom(gapToFree)}</b> {t('gapToFreeSuffix')}
           </div>
         )}
 
@@ -1059,7 +1057,7 @@ export function CartPage() {
         {pricing.outOfRange?.map((r) => (
           <div key={`range-${r.restaurant.id}`} className="cart-footer__warn cart-footer__warn--closed">
             <Icon name="info" size={14} color="var(--danger)" />
-            <span>{r.quote.reason || `${r.restaurant.name} bu manzilga yetkazmaydi`}</span>
+            <span>{r.quote.reason || `${r.restaurant.name} ${t('noDeliveryToAddress')}`}</span>
           </div>
         ))}
 
@@ -1070,8 +1068,8 @@ export function CartPage() {
             <div key={`closed-${r.id || r._id}`} className="cart-footer__warn cart-footer__warn--closed">
               <Icon name="clock" size={14} color="var(--danger)" />
               <span>
-                <b>{r.name}</b> hozir yopiq
-                {r.openTime && ` · Ish vaqti ${r.openTime}–${r.closeTime}`}
+                <b>{r.name}</b> {t('restaurantClosedNow')}
+                {r.openTime && ` · ${t('workingHoursRange')} ${r.openTime}–${r.closeTime}`}
               </span>
             </div>
           );
@@ -1082,8 +1080,8 @@ export function CartPage() {
           <div key={b.restaurant.id || b.restaurant._id} className="cart-footer__warn">
             <Icon name="info" size={14} color="var(--info)" />
             <span>
-              <b>{b.restaurant.name}</b>: yana{' '}
-              <b>{formatSom(b.minCheck.missing)}</b>lik mahsulot qo'shing
+              <b>{b.restaurant.name}</b>: {t('addMoreProductsPrefix')}{' '}
+              <b>{formatSom(b.minCheck.missing)}</b>{t('addMoreProductsSuffix')}
             </span>
           </div>
         ))}
@@ -1127,7 +1125,7 @@ export function CartPage() {
       {showPhoneEdit && (
         <div onClick={() => setShowPhoneEdit(false)} className="sheet-overlay">
           <div onClick={(e) => e.stopPropagation()} className="sheet">
-            <div className="sheet__title">Telefon</div>
+            <div className="sheet__title">{t('phoneLabel')}</div>
             <input
               value={phoneDraft}
               onChange={(e) => setPhoneDraft(e.target.value)}
@@ -1170,6 +1168,7 @@ function Row({ label, value }) {
 // "Hech narsani unutmadingizmi?" — savatдаgi restoran menyusидан tavsiya.
 // Savatда bo'lmagan taomlarни ko'rsatadi (upsell).
 function CartUpsell({ groups }) {
+  const t = useT();
   const addItem = useCart((s) => s.addItem);
   const items = useCart((s) => s.items);
   const firstRestaurantId = groups[0]?.restaurant?.id;
@@ -1204,7 +1203,7 @@ function CartUpsell({ groups }) {
 
   return (
     <div className="cart-upsell">
-      <h2 className="cart-upsell__title">Hech narsani unutmadingizmi?</h2>
+      <h2 className="cart-upsell__title">{t('unforgettableTitle')}</h2>
       <div className="cart-upsell__row no-scrollbar">
         {suggestions.map((d) => (
           <div key={d.id || d._id} className="upsell-card">
@@ -1213,7 +1212,7 @@ function CartUpsell({ groups }) {
             </div>
             <div className="upsell-card__name">{d.name}</div>
             <div className="upsell-card__price">{formatSom(d.price)}</div>
-            <button onClick={() => add(d)} className="upsell-card__add" aria-label="Qo'shish">
+            <button onClick={() => add(d)} className="upsell-card__add" aria-label={t('add')}>
               <Icon name="plus" size={18} color="var(--brand)" />
             </button>
           </div>
@@ -1233,19 +1232,20 @@ function CartUpsell({ groups }) {
  * serverda zararsiz osilib qoladi).
  */
 function PendingPaymentNotice({ onRetry, onDismiss }) {
+  const t = useT();
   return (
     <div className="cart-pending">
       <Icon name="info" size={18} color="var(--brand)" />
       <div className="cart-pending__text">
-        <b>To'lov yakunlanmagan</b>
-        <span>Avvalgi buyurtmangiz uchun pul hali yechilmadi</span>
+        <b>{t('paymentNotCompleted')}</b>
+        <span>{t('previousOrderUnpaid')}</span>
       </div>
       <div className="cart-pending__actions">
         <button onClick={onDismiss} className="cart-pending__btn cart-pending__btn--ghost">
-          Bekor qilish
+          {t('cancel')}
         </button>
         <button onClick={onRetry} className="cart-pending__btn cart-pending__btn--primary">
-          Davom ettirish
+          {t('continueBtn')}
         </button>
       </div>
     </div>

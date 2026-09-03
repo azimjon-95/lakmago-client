@@ -6,9 +6,11 @@ import { RestaurantCard } from '@/components/RestaurantCard';
 import { DishGridCard } from '@/components/DishGridCard';
 import { useUser } from '@/store/user';
 import { useRestaurants, useAllDishes } from '@/hooks/queries';
+import { useT } from '@/i18n';
 import './Favorites.css';
 
 export function FavoritesPage() {
+  const t = useT();
   const navigate = useNavigate();
   // Ikkita alohida selector — obyekt yaratmaydi, barqaror havola
   const favRestIds = useUser((s) => s.user.favorites?.restaurants);
@@ -31,29 +33,29 @@ export function FavoritesPage() {
   return (
     <div className="app-shell fav">
       <header className="fav-header">
-        <button onClick={() => navigate(-1)} aria-label="Orqaga" className="fav-header__btn">
+        <button onClick={() => navigate(-1)} aria-label={t('back')} className="fav-header__btn">
           <Icon name="arrowLeft" size={22} color="var(--ink)" />
         </button>
-        <h1 className="fav-header__title">Sevimlilar</h1>
+        <h1 className="fav-header__title">{t('favoritesTitle')}</h1>
       </header>
 
       <div className="fav-body">
         {isEmpty ? (
           <div className="fav-empty">
             <Icon name="heart" size={52} color="var(--muted-2)" />
-            <div className="fav-empty__title">Sevimlilar bo'sh</div>
+            <div className="fav-empty__title">{t('favoritesEmpty')}</div>
             <p className="fav-empty__hint">
-              Restoran yoki taom sahifasida ♥ tugmasini bosing — shu yerda saqlanadi
+              {t('favoritesEmptyHint')}
             </p>
             <button onClick={() => navigate('/')} className="fav-empty__btn">
-              Restoranlarni ko'rish
+              {t('viewRestaurants')}
             </button>
           </div>
         ) : (
           <>
             {favDishes.length > 0 && (
               <>
-                <h2 className="fav-section">Taomlar</h2>
+                <h2 className="fav-section">{t('dishes')}</h2>
                 <div className="fav-dishes">
                   {favDishes.map((d) => (
                     <DishGridCard key={d.id || d._id} dish={d} />
@@ -64,7 +66,7 @@ export function FavoritesPage() {
 
             {favRestaurants.length > 0 && (
               <>
-                <h2 className="fav-section">Restoranlar</h2>
+                <h2 className="fav-section">{t('restaurants')}</h2>
                 <div className="fav-restaurants">
                   {favRestaurants.map((r) => (
                     <RestaurantCard key={r.id || r._id} restaurant={r} />

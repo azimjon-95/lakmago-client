@@ -14,7 +14,7 @@ function toSubOrder(o, i) {
     items: o.items?.map((it) => ({ dish: { name: it.name, ...it }, quantity: it.quantity, unitPrice: it.unitPrice })) || o.itemsRaw || [],
     subtotal: o.subtotal,
     etaMinutes: o.etaMinutes ?? 30,
-    status: o.status === 'pending' ? 'accepted' : o.status, // mijozга pending'ni accepted ko'rsatamiz
+    status: o.status === 'pending' ? 'accepted' : o.status, // mijozga pending'ni accepted ko'rsatamiz
     courierName: o.courierName || courierNames[i % courierNames.length],
     rated: !!o.rating,
   };
@@ -31,11 +31,11 @@ export const useOrders = create((set, get) => ({
     const isObjectId = (v) => typeof v === 'string' && /^[a-f\d]{24}$/i.test(v);
     const pickId = (obj) => String(obj?._id || obj?.id || '');
 
-    // Tekshiruv: savatда eski (mock) ID qolган bo'lsa — aniq xato beramiz
+    // Tekshiruv: savatda eski (mock) ID qolgan bo'lsa — aniq xato beramiz
     for (const g of groups) {
       const rid = pickId(g.restaurant);
       if (!isObjectId(rid)) {
-        throw new Error('Savatда eski ma‘lumot bor. Savatni tozalab, qaytadan tanlang.');
+        throw new Error('STALE_CART_ID');
       }
     }
 

@@ -1,18 +1,20 @@
 import { useState } from 'react';
 import { Icon } from '@/components/Icon';
 import { haptic } from '@/lib/telegram';
+import { useT } from '@/i18n';
 
 // Manzil turlari (Yandex Eda uslubида)
 const LABELS = [
-  { id: 'home', icon: 'house', title: 'Uy' },
-  { id: 'work', icon: 'briefcase', title: 'Ish' },
-  { id: 'other', icon: 'pin', title: 'Boshqa' },
+  { id: 'home', icon: 'house', labelKey: 'addrLabelHome' },
+  { id: 'work', icon: 'briefcase', labelKey: 'addrLabelWork' },
+  { id: 'other', icon: 'pin', labelKey: 'addrLabelOther' },
 ];
 
 // 3-bosqich: manzil tafsilotlari (kirish, qavat, xonadon, izoh)
 export function AddressDetails({ location, onSave, onBack }) {
+  const t = useT();
   const [labelId, setLabelId] = useState('home');
-  const [title, setTitle] = useState('Uy');
+  const [title, setTitle] = useState(t('addrLabelHome'));
   const [entrance, setEntrance] = useState('');
   const [floor, setFloor] = useState('');
   const [flat, setFlat] = useState('');
@@ -22,7 +24,7 @@ export function AddressDetails({ location, onSave, onBack }) {
     haptic();
     setLabelId(l.id);
     // "Boshqa" bo'lsa nomni foydalanuvchи yozadi
-    if (l.id !== 'other') setTitle(l.title);
+    if (l.id !== 'other') setTitle(t(l.labelKey));
     else setTitle('');
   };
 
@@ -50,15 +52,15 @@ export function AddressDetails({ location, onSave, onBack }) {
   return (
     <div className="addrflow addrflow--details">
       <div className="addrflow__header">
-        <button onClick={onBack} className="addrflow__back-btn" aria-label="Orqaga">
+        <button onClick={onBack} className="addrflow__back-btn" aria-label={t('back')}>
           <Icon name="arrowLeft" size={22} color="var(--ink)" />
         </button>
-        <h3 className="addrflow__header-title">Manzil tafsilotlari</h3>
+        <h3 className="addrflow__header-title">{t('addressDetailsTitle')}</h3>
       </div>
 
       <div className="addr-details__scroll">
         {/* Tanlangan manzil */}
-        <div className="addr-details__section-title">Manzil</div>
+        <div className="addr-details__section-title">{t('address')}</div>
         <div className="addr-details__picked">
           <div className="addr-details__picked-icon">
             <Icon name="pin" size={20} color="var(--brand)" />
@@ -77,49 +79,49 @@ export function AddressDetails({ location, onSave, onBack }) {
                 key={l.id}
                 onClick={() => pickLabel(l)}
                 className={`addr-label ${labelId === l.id ? 'is-active' : ''}`}
-                aria-label={l.title}
+                aria-label={t(l.labelKey)}
               >
                 <Icon name={l.icon} size={20} color={labelId === l.id ? 'var(--brand)' : 'var(--muted)'} />
               </button>
             ))}
           </div>
           <div className="addr-details__field addr-details__field--grow">
-            <label>Manzil nomi</label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Masalan: Uy" />
+            <label>{t('addressNameLabel')}</label>
+            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('addressNameExample')} />
           </div>
         </div>
 
         {/* Kirish / qavat / xonadon */}
         <div className="addr-details__grid3">
           <div className="addr-details__field">
-            <label>Kirish</label>
+            <label>{t('entranceLabel')}</label>
             <input value={entrance} onChange={(e) => setEntrance(e.target.value)} inputMode="numeric" placeholder="—" />
           </div>
           <div className="addr-details__field">
-            <label>Qavat</label>
+            <label>{t('floorLabel')}</label>
             <input value={floor} onChange={(e) => setFloor(e.target.value)} inputMode="numeric" placeholder="—" />
           </div>
           <div className="addr-details__field">
-            <label>Xonadon</label>
+            <label>{t('apartmentLabel')}</label>
             <input value={flat} onChange={(e) => setFlat(e.target.value)} inputMode="numeric" placeholder="—" />
           </div>
         </div>
 
         {/* Izoh */}
         <div className="addr-details__field">
-          <label>Qo'shimcha ma'lumot</label>
+          <label>{t('additionalInfoLabel')}</label>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             rows={2}
-            placeholder="Mo'ljal, domofon kodi, kirish qayerda..."
+            placeholder={t('additionalInfoPlaceholder')}
           />
-          <div className="addr-details__hint">Bu kuryerga sizni tezroq topishga yordam beradi</div>
+          <div className="addr-details__hint">{t('courierFindHint')}</div>
         </div>
       </div>
 
       <div className="addr-details__footer">
-        <button onClick={save} className="addrflow__btn-primary">Manzilni saqlash</button>
+        <button onClick={save} className="addrflow__btn-primary">{t('saveAddressBtn')}</button>
       </div>
     </div>
   );

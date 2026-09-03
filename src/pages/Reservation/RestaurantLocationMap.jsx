@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Icon } from '@/components/Icon';
 import { api } from '@/api';
 import { loadYmaps } from '@/lib/yandexMaps';
+import { useT } from '@/i18n';
 
 /**
  * Restoran joylashuvi — kichik preview, bosilsa katta xarita.
@@ -14,19 +15,21 @@ import { loadYmaps } from '@/lib/yandexMaps';
  * emas, shunchaki bo'lim ko'rinmaydi).
  */
 export function RestaurantLocationMap({ restaurant }) {
+  const t = useT();
   const [big, setBig] = useState(false);
 
   if (!restaurant?.lat || !restaurant?.lng) return null;
 
   return (
     <div className="resv-field">
-      <label className="resv-field__label">Manzil</label>
+      <label className="resv-field__label">{t('address')}</label>
       <MapBox
         lat={restaurant.lat}
         lng={restaurant.lng}
         name={restaurant.name}
         height={130}
         onExpand={() => setBig(true)}
+        t={t}
       />
 
       {big && (
@@ -36,7 +39,7 @@ export function RestaurantLocationMap({ restaurant }) {
             <button
               onClick={() => setBig(false)}
               className="resv-map-full__close"
-              aria-label="Yopish"
+              aria-label={t('close')}
             >
               <Icon name="x" size={20} color="var(--ink)" />
             </button>
@@ -48,6 +51,7 @@ export function RestaurantLocationMap({ restaurant }) {
               name={restaurant.name}
               height="100%"
               interactive
+              t={t}
             />
           </div>
         </div>
@@ -64,7 +68,7 @@ export function RestaurantLocationMap({ restaurant }) {
  * mijoz nuqta tanlamayapti, restoran qayerdaligini ko'rmoqda.
  * Fullscreen holatida esa zoom bilan aylanish mumkin.
  */
-function MapBox({ lat, lng, name, height, interactive = false, onExpand }) {
+function MapBox({ lat, lng, name, height, interactive = false, onExpand, t }) {
   const boxRef = useRef(null);
   const mapRef = useRef(null);
   const [status, setStatus] = useState('loading');   // loading | ready | error
@@ -136,10 +140,10 @@ function MapBox({ lat, lng, name, height, interactive = false, onExpand }) {
           type="button"
           onClick={onExpand}
           className="resv-map-preview__tap"
-          aria-label="Xaritani kattalashtirish"
+          aria-label={t('zoomMapLabel')}
         >
           {status === 'ready' && (
-            <span className="resv-map-preview__hint">Kattalashtirish</span>
+            <span className="resv-map-preview__hint">{t('zoomInHint')}</span>
           )}
         </button>
       )}

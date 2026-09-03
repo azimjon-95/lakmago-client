@@ -108,7 +108,7 @@ export function OrdersPage() {
     return (
       <div className="app-shell orders">
         <header className="orders-header">{t('navOrders')}</header>
-        <div className="orders-empty">Yuklanmoqda...</div>
+        <div className="orders-empty">{t('loading')}</div>
         <BottomNav />
       </div>
     );
@@ -120,10 +120,10 @@ export function OrdersPage() {
         <header className="orders-header">{t('navOrders')}</header>
         <div className="orders-empty">
           <Icon name="bag" size={56} color="var(--muted-2)" />
-          <div className="orders-empty__title">Buyurtmalar yo'q</div>
-          <p className="orders-empty__hint">Menyudan taom tanlang</p>
+          <div className="orders-empty__title">{t('ordersEmptyTitle')}</div>
+          <p className="orders-empty__hint">{t('ordersEmptyHint')}</p>
           <button onClick={() => navigate('/')} className="orders-empty__btn">
-            Barcha restoranlar
+            {t('allRestaurants')}
           </button>
         </div>
         <BottomNav />
@@ -231,25 +231,25 @@ function OrderCard({ order: o, open, onToggle, onRepeat, highlight }) {
 
           <div className="ord-sum">
             <div className="ord-sum__row">
-              <span>Taomlar</span><span>{formatSom(o.subtotal)}</span>
+              <span>{t('dishes')}</span><span>{formatSom(o.subtotal)}</span>
             </div>
             {o.deliveryFee > 0 && (
               <div className="ord-sum__row">
-                <span>Yetkazish</span><span>{formatSom(o.deliveryFee)}</span>
+                <span>{t('delivery')}</span><span>{formatSom(o.deliveryFee)}</span>
               </div>
             )}
             {o.serviceFee > 0 && (
               <div className="ord-sum__row">
-                <span>Xizmat haqi</span><span>{formatSom(o.serviceFee)}</span>
+                <span>{t('serviceFee')}</span><span>{formatSom(o.serviceFee)}</span>
               </div>
             )}
             {o.bonusUsed > 0 && (
               <div className="ord-sum__row ord-sum__row--bonus">
-                <span>Bonus</span><span>−{formatSom(o.bonusUsed)}</span>
+                <span>{t('bonus')}</span><span>−{formatSom(o.bonusUsed)}</span>
               </div>
             )}
             <div className="ord-sum__row ord-sum__row--total">
-              <span>Jami</span><span>{formatSom(o.total)}</span>
+              <span>{t('total')}</span><span>{formatSom(o.total)}</span>
             </div>
           </div>
 

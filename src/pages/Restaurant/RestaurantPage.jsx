@@ -188,11 +188,11 @@ export function RestaurantPage() {
     return (
       <div className="app-shell rest-error">
         <Icon name="info" size={48} color="var(--muted-2)" />
-        <div className="rest-error__title">Restoran ochilmadi</div>
+        <div className="rest-error__title">{t('restaurantClosedTitle')}</div>
         <p className="rest-error__text">
           {restError?.message?.includes('404') || restError?.status === 404
-            ? 'Bu muassasa mavjud emas yoki vaqtincha yopilgan'
-            : 'Ma‘lumot yuklanmadi. Internetni tekshiring.'}
+            ? t('restaurantNotFoundMsg')
+            : t('restaurantLoadFailedMsg')}
         </p>
         <div className="rest-error__actions">
           <button onClick={() => window.location.reload()} className="rest-error__btn rest-error__btn--primary">
@@ -270,8 +270,8 @@ export function RestaurantPage() {
               <span className="rest-stat__icon rest-stat__icon--free">
                 <Icon name="bike" size={20} color="var(--brand)" />
               </span>
-              <span className="rest-stat__value">Bepul</span>
-              <span className="rest-stat__label">yetkazish</span>
+              <span className="rest-stat__value">{t('free')}</span>
+              <span className="rest-stat__label">{t('deliveryLower')}</span>
             </div>
           )}
 
@@ -281,8 +281,8 @@ export function RestaurantPage() {
               <span className="rest-stat__icon rest-stat__icon--info">
                 <Icon name="info" size={20} color="var(--info)" />
               </span>
-              <span className="rest-stat__value">Shartlar</span>
-              <span className="rest-stat__label">va ish vaqti</span>
+              <span className="rest-stat__value">{t('termsLabel')}</span>
+              <span className="rest-stat__label">{t('workingHoursLabel')}</span>
             </button>
           )}
         </div>
@@ -299,7 +299,7 @@ export function RestaurantPage() {
       <div ref={tabsRef} className="rest-tabs no-scrollbar">
         {sections.map(([name]) => {
           const isTabActive = name === active;
-          const label = name === REVIEWS_TAB ? `Sharhlar (${restaurantReviews.length})` : name;
+          const label = name === REVIEWS_TAB ? `${t('reviewsLabel')} (${restaurantReviews.length})` : name;
           return (
             <button
               key={name}
@@ -319,7 +319,7 @@ export function RestaurantPage() {
           if (name === REVIEWS_TAB) {
             return (
               <div key={name} id={`sec-${name}`} className="rest-section rest-reviews">
-                <div className="rest-section__title">Mijozlar sharhlari</div>
+                <div className="rest-section__title">{t('customerReviewsTitle')}</div>
 
                 {restaurantReviews.length === 0 ? (
                   <div className="rest-reviews__empty">

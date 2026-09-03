@@ -10,6 +10,7 @@ import { formatSom } from '@/lib/utils';
 import { haptic, shareDish, copyDishLink } from '@/lib/telegram';
 import { useOpenStatus, useClosedAlert } from '@/hooks/useOpenStatus';
 import { ClosedAlert } from '@/components/ClosedAlert';
+import { useT } from '@/i18n';
 import './Food.css';
 
 /**
@@ -23,6 +24,7 @@ export function FoodPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const addItem = useCart((s) => s.addItem);
+  const t = useT();
 
   const [dish, setDish] = useState(null);
   const [restaurant, setRestaurant] = useState(null);
@@ -110,7 +112,7 @@ export function FoodPage() {
   if (loading) {
     return (
       <div className="app-shell food">
-        <div className="food-loading">Yuklanmoqda...</div>
+        <div className="food-loading">{t('loading')}</div>
       </div>
     );
   }
@@ -120,12 +122,12 @@ export function FoodPage() {
       <div className="app-shell food">
         <div className="food-empty">
           <Icon name="search" size={52} color="var(--muted-2)" />
-          <div className="food-empty__title">Taom topilmadi</div>
+          <div className="food-empty__title">{t('dishNotFound')}</div>
           <p className="food-empty__hint">
-            Bu taom o'chirilgan yoki havola noto'g'ri bo'lishi mumkin
+            {t('dishNotFoundHint')}
           </p>
           <button onClick={() => navigate('/')} className="food-empty__btn">
-            Bosh sahifaga
+            {t('goHome')}
           </button>
         </div>
       </div>
@@ -208,10 +210,10 @@ export function FoodPage() {
               <span><Icon name="scale" size={14} color="var(--muted)" /> {dish.volume}</span>
             )}
             {dish.calories > 0 && (
-              <span><Icon name="flame" size={14} color="var(--danger)" /> {dish.calories} ккал</span>
+              <span><Icon name="flame" size={14} color="var(--danger)" /> {dish.calories} {t('calories')}</span>
             )}
             {dish.prepMinutes > 0 && (
-              <span><Icon name="clock" size={14} color="var(--muted)" /> {dish.prepMinutes} daq</span>
+              <span><Icon name="clock" size={14} color="var(--muted)" /> {dish.prepMinutes} {t('min')}</span>
             )}
           </div>
         )}
@@ -219,9 +221,9 @@ export function FoodPage() {
         {/* Ozuqaviy tarkib */}
         {(dish.protein > 0 || dish.fat > 0 || dish.carbs > 0) && (
           <div className="food-nutri">
-            {dish.protein > 0 && <Nutri value={dish.protein} label="Oqsil" />}
-            {dish.fat > 0 && <Nutri value={dish.fat} label="Yog'" />}
-            {dish.carbs > 0 && <Nutri value={dish.carbs} label="Uglevod" />}
+            {dish.protein > 0 && <Nutri value={dish.protein} label={t('protein')} unit={t('gram')} />}
+            {dish.fat > 0 && <Nutri value={dish.fat} label={t('fat')} unit={t('gram')} />}
+            {dish.carbs > 0 && <Nutri value={dish.carbs} label={t('carbs')} unit={t('gram')} />}
           </div>
         )}
 
@@ -244,10 +246,10 @@ export function FoodPage() {
   );
 }
 
-function Nutri({ value, label }) {
+function Nutri({ value, label, unit }) {
   return (
     <div className="food-nutri__item">
-      <span className="food-nutri__value">{value} г</span>
+      <span className="food-nutri__value">{value} {unit}</span>
       <span className="food-nutri__label">{label}</span>
     </div>
   );

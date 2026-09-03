@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Icon } from './Icon';
+import { useT } from '@/i18n';
 import './cards/BannerSlider.css';
 
 export function BannerSlider({ banners, onAdClick }) {
+  const translate = useT();
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -51,12 +53,12 @@ export function BannerSlider({ banners, onAdClick }) {
             )}
             {b.title && <div className="banner-slide__title">{b.title}</div>}
             <div className="banner-slide__cta" style={{ background: b.ctaBg, color: b.ctaText }}>
-              {b.cta || "Ko'rish"}
+              {b.cta || translate('viewLabel')}
             </div>
           </div>
         )}
         {/* Reklama — kichik "Reklama" belgisi, pastki-o'ng burchakda */}
-        {b.isAd && <div className="banner-slide__ad-tag">Reklama</div>}
+        {b.isAd && <div className="banner-slide__ad-tag">{translate('adLabel')}</div>}
         {!b.imageUrl && <Icon name={b.icon} size={52} color={b.ctaBg} />}
       </div>
       <div className="banner-slider__dots">

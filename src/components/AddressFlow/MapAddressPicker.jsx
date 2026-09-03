@@ -4,6 +4,7 @@ import { api } from '@/api';
 import { getCurrentPosition, reverseGeocodeViaYandex } from '@/lib/location';
 import { loadYmaps } from '@/lib/yandexMaps';
 import { haptic } from '@/lib/telegram';
+import { useT } from '@/i18n';
 
 // Toshkent markazi — joylashuv aniqlanmagunicha shu ko'rsatiladi
 const DEFAULT_CENTER = [41.311081, 69.240562];
@@ -17,6 +18,7 @@ const DEFAULT_CENTER = [41.311081, 69.240562];
  * (Yandex Geocoder, kalit serverda qoladi) aniqlanadi.
  */
 export function MapAddressPicker({ onPick, onBack }) {
+  const t = useT();
   const boxRef = useRef(null);
   const mapRef = useRef(null);
   const debounceRef = useRef(null);
@@ -123,10 +125,10 @@ export function MapAddressPicker({ onPick, onBack }) {
   return (
     <div className="addrflow addrflow--map">
       <div className="addrflow__header">
-        <button onClick={onBack} className="addrflow__back-btn" aria-label="Orqaga">
+        <button onClick={onBack} className="addrflow__back-btn" aria-label={t('back')}>
           <Icon name="arrowLeft" size={22} color="var(--ink)" />
         </button>
-        <h3 className="addrflow__header-title">Kartadan tanlang</h3>
+        <h3 className="addrflow__header-title">{t('pickFromMapTitle')}</h3>
       </div>
 
       <div className="map-picker">
@@ -157,7 +159,7 @@ export function MapAddressPicker({ onPick, onBack }) {
               onClick={locateMe}
               disabled={locating}
               className="map-picker__locate"
-              aria-label="Joriy joylashuv"
+              aria-label={t('currentLocationAriaLabel')}
             >
               {locating ? <span className="spinner spinner--sm" /> : (
                 <Icon name="navigation" size={20} color="var(--brand)" />
@@ -170,14 +172,14 @@ export function MapAddressPicker({ onPick, onBack }) {
       <div className="map-picker__footer">
         <div className="map-picker__address">
           {resolving ? (
-            <span className="map-picker__address-loading">Manzil aniqlanmoqda...</span>
+            <span className="map-picker__address-loading">{t('addressDetecting')}</span>
           ) : address ? (
             <>
               <div className="map-picker__street">{address.street}</div>
               {address.city && <div className="map-picker__city">{address.city}</div>}
             </>
           ) : (
-            <span className="map-picker__address-loading">Kartani suring</span>
+            <span className="map-picker__address-loading">{t('moveMap')}</span>
           )}
         </div>
 
@@ -187,7 +189,7 @@ export function MapAddressPicker({ onPick, onBack }) {
           className="addrflow__btn-primary"
         >
           <Icon name="check" size={18} color="var(--brand-text)" />
-          Shu manzilni tanlash
+          {t('selectThisAddress')}
         </button>
       </div>
     </div>

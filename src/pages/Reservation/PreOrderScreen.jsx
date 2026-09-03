@@ -94,8 +94,7 @@ export function PreOrderScreen({
             {reservationInfo.dateLabel}, {reservationInfo.time}
           </div>
           <div className="resv-preorder-hint__text">
-            Kelishingizga tayyor bo&apos;lib tursin — hoziroq tanlang
-            yoki joyida buyurtma bering.
+            {t('preorderHintText')}
           </div>
         </div>
       </div>
@@ -104,23 +103,23 @@ export function PreOrderScreen({
         {isLoading ? (
           <div className="resv-error-state">
             <span className="spinner" style={{ margin: '0 auto 14px' }} />
-            <div className="resv-error-state__text">Menyu yuklanmoqda...</div>
+            <div className="resv-error-state__text">{t('menuLoading')}</div>
           </div>
         ) : isError ? (
           <div className="resv-error-state">
             <div className="resv-error-state__icon">📡</div>
-            <div className="resv-error-state__title">Menyu yuklanmadi</div>
+            <div className="resv-error-state__title">{t('menuLoadFailed')}</div>
             <div className="resv-error-state__text">
               {error?.kind === 'network'
-                ? 'Serverga ulanib bo‘lmadi. Internet aloqasini tekshiring.'
-                : (error?.message || 'Server javob bermadi.')}
+                ? t('networkErrorMsg')
+                : (error?.message || t('serverNoResponseFull'))}
             </div>
             <button onClick={() => refetch()} className="resv-error-state__btn">
-              Qayta urinish
+              {t('retry')}
             </button>
           </div>
         ) : sections.length === 0 ? (
-          <div className="resv-preorder-empty">Menyu hozircha bo&apos;sh</div>
+          <div className="resv-preorder-empty">{t('menuEmpty')}</div>
         ) : (
           sections.map(([name, list]) => (
           <section key={name}>
@@ -176,7 +175,7 @@ export function PreOrderScreen({
               aria-expanded={summaryOpen}
             >
               <span className="resv-basket__count">{count}</span>
-              <span className="resv-basket__label">Tanlangan taomlar</span>
+              <span className="resv-basket__label">{t('selectedDishesLabel')}</span>
               <span className="resv-basket__sum">{formatSom(total)}</span>
               <Icon name="chevronDown" size={16} color="var(--muted)"
                 style={{ transform: summaryOpen ? 'rotate(180deg)' : 'none', transition: 'transform .25s' }} />
@@ -194,7 +193,7 @@ export function PreOrderScreen({
                     <button
                       onClick={() => setQty(dishId(dish), 0)}
                       className="resv-basket__del"
-                      aria-label="O'chirish"
+                      aria-label={t('remove')}
                     >
                       <Icon name="trash" size={14} color="var(--danger)" />
                     </button>

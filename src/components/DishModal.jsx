@@ -105,7 +105,7 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
           <button
             onClick={() => { haptic(); toggleFavorite('dish', dishId); }}
             className="dish-modal__fav"
-            aria-label="Sevimlilarga"
+            aria-label={t('addToFavorites')}
           >
             <Icon
               name="heart"
@@ -163,20 +163,20 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
             <div className="dish-nutri">
               {dish.protein > 0 && (
                 <div className="dish-nutri__item">
-                  <span className="dish-nutri__value">{dish.protein} г</span>
-                  <span className="dish-nutri__label">Oqsil</span>
+                  <span className="dish-nutri__value">{dish.protein} {t('gram')}</span>
+                  <span className="dish-nutri__label">{t('protein')}</span>
                 </div>
               )}
               {dish.fat > 0 && (
                 <div className="dish-nutri__item">
-                  <span className="dish-nutri__value">{dish.fat} г</span>
-                  <span className="dish-nutri__label">Yog'</span>
+                  <span className="dish-nutri__value">{dish.fat} {t('gram')}</span>
+                  <span className="dish-nutri__label">{t('fat')}</span>
                 </div>
               )}
               {dish.carbs > 0 && (
                 <div className="dish-nutri__item">
-                  <span className="dish-nutri__value">{dish.carbs} г</span>
-                  <span className="dish-nutri__label">Uglevod</span>
+                  <span className="dish-nutri__value">{dish.carbs} {t('gram')}</span>
+                  <span className="dish-nutri__label">{t('carbs')}</span>
                 </div>
               )}
             </div>

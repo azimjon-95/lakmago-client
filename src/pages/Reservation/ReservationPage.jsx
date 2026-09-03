@@ -231,18 +231,18 @@ export function ReservationPage() {
 
         {/* Aloqa ma'lumotlari — restoran siz bilan bog'lanishi uchun */}
         <div className="resv-field">
-          <label className="resv-field__label">Ism va familiya *</label>
+          <label className="resv-field__label">{t('fullNameLabel')}</label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Masalan: Aziz Karimov"
+            placeholder={t('namePlaceholderExample')}
             autoComplete="name"
             className="input-field resv-input"
           />
         </div>
 
         <div className="resv-field">
-          <label className="resv-field__label">Telefon raqam *</label>
+          <label className="resv-field__label">{t('phoneNumberLabel')}</label>
           <input
             value={phone}
             onChange={(e) => setPhone(formatPhone(e.target.value))}
@@ -251,7 +251,7 @@ export function ReservationPage() {
             autoComplete="tel"
             className="input-field resv-input"
           />
-          <p className="resv-field__hint">Restoran bron bo'yicha shu raqamga qo'ng'iroq qiladi</p>
+          <p className="resv-field__hint">{t('reservationPhoneHint')}</p>
         </div>
 
         <RestaurantLocationMap restaurant={restaurant} />

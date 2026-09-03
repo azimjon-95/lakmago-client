@@ -1,5 +1,6 @@
 import { Icon } from './Icon';
 import { formatSomShort } from '@/lib/utils';
+import { useT } from '@/i18n';
 import './AdModal.css';
 
 /**
@@ -22,6 +23,7 @@ import './AdModal.css';
  * foydalanuvchi o'zi qidirib topgandek tabiiy o'tish.
  */
 export function AdModal({ ad, onClose, onOpenDish, onOpenRestaurant }) {
+  const t = useT();
   const linkedDish = ad.targetType === 'dish' && ad.dish;
   const customDish = ad.targetType === 'dish' && !ad.dish;
 
@@ -33,7 +35,7 @@ export function AdModal({ ad, onClose, onOpenDish, onOpenRestaurant }) {
   return (
     <div className="ad-modal-overlay" onClick={onClose}>
       <div className="ad-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="ad-modal__close" onClick={onClose} aria-label="Yopish">
+        <button className="ad-modal__close" onClick={onClose} aria-label={t('close')}>
           <Icon name="x" size={18} color="#fff" />
         </button>
 
@@ -43,12 +45,12 @@ export function AdModal({ ad, onClose, onOpenDish, onOpenRestaurant }) {
         />
 
         <div className="ad-modal__body">
-          <div className="ad-modal__tag">Reklama</div>
+          <div className="ad-modal__tag">{t('adLabel')}</div>
 
           <div className="ad-modal__title">{title}</div>
           {subtitle && <div className="ad-modal__sub">{subtitle}</div>}
           {linkedDish && ad.dish.price != null && (
-            <div className="ad-modal__price">{formatSomShort(ad.dish.price)} so'm</div>
+            <div className="ad-modal__price">{formatSomShort(ad.dish.price)} {t('som')}</div>
           )}
 
           {linkedDish ? (
@@ -56,14 +58,14 @@ export function AdModal({ ad, onClose, onOpenDish, onOpenRestaurant }) {
               className="ad-modal__cta"
               onClick={() => onOpenDish({ id: ad.dish.id, ...ad.dish, restaurantId: ad.restaurantId })}
             >
-              Taomni ko'rish
+              {t('viewDish')}
             </button>
           ) : (
             <button
               className="ad-modal__cta"
               onClick={() => onOpenRestaurant(ad.restaurantId)}
             >
-              Restoranga o'tish
+              {t('goToRestaurant')}
             </button>
           )}
         </div>

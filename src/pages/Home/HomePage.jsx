@@ -10,7 +10,7 @@ import { AdModal } from '@/components/AdModal';
 import { BottomNav } from '@/components/BottomNav';
 import { CartBar } from '@/components/CartBar';
 import { LangSwitch } from '@/components/LangSwitch/LangSwitch';
-import { RestaurantCardSkeleton, DishScrollСardSkeleton } from '@/components/Skeleton/Skeleton';
+import { RestaurantCardSkeleton, DishScrollCardSkeleton } from '@/components/Skeleton/Skeleton';
 import { useUser } from '@/store/user';
 import { useT } from '@/i18n';
 import { useOpenDishes, useClosedAlert } from '@/hooks/useOpenStatus';
@@ -224,7 +224,7 @@ export function HomePage() {
           <SectionHeader icon="flame" title={t('trendingDishes')} action={t('all')} />
           <div className="home-scroll-row no-scrollbar">
             {trendLoading
-              ? Array.from({ length: 4 }).map((_, i) => <DishScrollСardSkeleton key={i} />)
+              ? Array.from({ length: 4 }).map((_, i) => <DishScrollCardSkeleton key={i} />)
               : trending.map((d) => <DishScrollCard key={d.id || d._id} dish={d} onClick={openModal} />)}
           </div>
         </>
@@ -248,7 +248,7 @@ export function HomePage() {
           <h2 className="home-restaurants-title">{t('recommended')}</h2>
           <div className="home-dishes-row no-scrollbar">
             {allDishesLoading
-              ? Array.from({ length: 6 }).map((_, i) => <DishScrollСardSkeleton key={i} />)
+              ? Array.from({ length: 6 }).map((_, i) => <DishScrollCardSkeleton key={i} />)
               : recommended.map((d) => (
                   <DishGridCard key={d.id || d._id} dish={d} onClick={openModal} />
                 ))}
@@ -264,20 +264,20 @@ export function HomePage() {
         ) : restError ? (
           <div className="home-error">
             <div className="home-error__icon">📡</div>
-            <div className="home-error__title">Ma'lumot yuklanmadi</div>
+            <div className="home-error__title">{t('dataLoadFailed')}</div>
             <div className="home-error__text">
               {restErrorObj?.kind === 'network'
-                ? 'Serverga ulanib bo‘lmadi. Internet aloqasini tekshiring.'
-                : `Server javob bermadi${restErrorObj?.status ? ` (${restErrorObj.status})` : ''}.`}
+                ? t('networkErrorMsg')
+                : `${t('serverNoResponse')}${restErrorObj?.status ? ` (${restErrorObj.status})` : ''}.`}
             </div>
-            <button onClick={() => refetchRest()} className="home-error__btn">Qayta urinish</button>
+            <button onClick={() => refetchRest()} className="home-error__btn">{t('retry')}</button>
             <details className="home-error__details">
-              <summary>Texnik ma'lumot</summary>
+              <summary>{t('technicalInfo')}</summary>
               <div className="home-error__code">
                 <div>API: {API_BASE}</div>
-                {restErrorObj?.kind && <div>Tur: {restErrorObj.kind}</div>}
-                {restErrorObj?.status && <div>Kod: {restErrorObj.status}</div>}
-                {restErrorObj?.detail && <div>Tafsilot: {restErrorObj.detail}</div>}
+                {restErrorObj?.kind && <div>{t('debugType')}: {restErrorObj.kind}</div>}
+                {restErrorObj?.status && <div>{t('debugCode')}: {restErrorObj.status}</div>}
+                {restErrorObj?.detail && <div>{t('debugDetail')}: {restErrorObj.detail}</div>}
               </div>
             </details>
           </div>
