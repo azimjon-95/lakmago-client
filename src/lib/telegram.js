@@ -107,10 +107,6 @@ export async function authenticateWithTelegram() {
     const isMobilePlatform = ['android', 'android_x', 'ios'].includes(tg.platform);
 
     if (isMobilePlatform) {
-      if (typeof tg.expand === 'function') {
-        try { tg.expand(); } catch { /* qo'llab-quvvatlanmaydi */ }
-      }
-
       /*
        * To'liq ekran rejimi (Bot API 8.0+). `typeof` tekshiruvi
        * o'zi YETARLI EMAS — ba'zi Telegram versiyalarida metod
@@ -121,15 +117,9 @@ export async function authenticateWithTelegram() {
       const fsSupported = typeof tg.requestFullscreen === 'function'
         && (typeof tg.isVersionAtLeast !== 'function' || tg.isVersionAtLeast('8.0'));
 
-      if (fsSupported) {
-        try { tg.requestFullscreen(); } catch { /* qo'llab-quvvatlanmaydi */ }
-      }
-
-      /*
-       * VAQTINCHALIK DIAGNOSTIKA — fullscreen nega ishlamayotganini
-       * aniqlash uchun (ishlab chiquvchi so'ragan). Foydalanuvchi
-       * tasdiqlagach OLIB TASHLANADI.
-       */
+      // VAQTINCHALIK DIAGNOSTIKA — listenerlardan OLDIN yaratiladi,
+      // aks holda ular window.__lokmagoFsDebug'ga yozganda xato
+      // beradi (hali mavjud bo'lmasa). Tasdiqlangach OLIB TASHLANADI.
       try {
         window.__lokmagoFsDebug = {
           platform: tg.platform,
@@ -139,15 +129,39 @@ export async function authenticateWithTelegram() {
           fsSupported,
           isFullscreen: tg.isFullscreen,
         };
-        if (typeof tg.onEvent === 'function') {
+        if (fsSupported && typeof tg.onEvent === 'function') {
+          // MUHIM: bu listenerlar requestFullscreen() CHAQIRILISHIDAN
+          // OLDIN ro'yxatdan o'tkaziladi — aks holda tezkor
+          // (sinxron/darhol) xato "tutib olinmay" qolar edi.
           tg.onEvent('fullscreenFailed', (e) => {
             window.__lokmagoFsDebug.failedReason = e?.error || 'unknown';
           });
           tg.onEvent('fullscreenChanged', () => {
             window.__lokmagoFsDebug.isFullscreen = tg.isFullscreen;
+            window.__lokmagoFsDebug.changedFired = true;
           });
         }
       } catch { /* debug — asosiy oqimga ta'sir qilmasin */ }
+
+      if (typeof tg.expand === 'function') {
+        try { tg.expand(); } catch { /* qo'llab-quvvatlanmaydi */ }
+      }
+
+      /*
+       * expand() va requestFullscreen() bir xil tickda ketma-ket
+       * chaqirilsa, ba'zi Telegram klientlarida (ayniqsa iOS)
+       * viewport o'tishi hali tugamagan bo'lib, requestFullscreen()
+       * jimgina e'tiborsiz qoldirilishi haqida community xabarlari
+       * bor — hech qanday xato/hodisa bermaydi (aynan biz ko'rgan
+       * holat: fsSupported=true, lekin isFullscreen ham,
+       * failedReason ham o'zgarmaydi). requestAnimationFrame orqali
+       * bir kadr kutib, keyin chaqiramiz.
+       */
+      if (fsSupported) {
+        requestAnimationFrame(() => {
+          try { tg.requestFullscreen(); } catch { /* qo'llab-quvvatlanmaydi */ }
+        });
+      }
     }
 
     // Pastga swipe bilan yopilishni bloklaymiz (Bot API 7.7+).
