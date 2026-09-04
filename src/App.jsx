@@ -18,7 +18,7 @@ const SearchPage = lazy(() => import('@/pages/Search/SearchPage').then((m) => ({
 import { useUser } from '@/store/user';
 import { authenticateWithTelegram, getStartParam, isTelegramEnv } from '@/lib/telegram';
 import { TelegramOnly } from '@/components/TelegramOnly/TelegramOnly';
-import { api } from '@/api';
+import { api, getAuthToken } from '@/api';
 import { joinUserRoom } from '@/lib/socket';
 import { I18nProvider } from '@/i18n';
 import { ActiveOrderBadge } from '@/components/ActiveOrderBadge/ActiveOrderBadge';
@@ -64,15 +64,32 @@ export default function App() {
    * mount bo'lmagan bosqichda) - shuning uchun u butunlay
    * qattiq yozilgan matn bilan qolgan edi, til hech qachon
    * o'zgarmasdi.
+   *
+   * AUTH FUNDAMENTI (2-bosqich): brauzerda (Telegram tashqarisida)
+   * ilova endi ikki holatga ega:
+   *  - webLoggedIn=false — TelegramOnly (Login Widget bilan kirish
+   *    imkoniyati)
+   *  - webLoggedIn=true — AppInner, xuddi Mini App bilan bir xil
+   *    tajriba (faqat authMode='web', pastga qarang)
+   * Sahifa YANGILANGANDA ham holat saqlanadi — accessToken
+   * localStorage/sessionStorage'da bo'lsa (Login Widget orqali
+   * avval kirilgan bo'lsa), boshlang'ich holat darhol "kirilgan"
+   * deb hisoblanadi, foydalanuvchi qayta login qilishga majbur
+   * bo'lmaydi.
    */
+  const [webLoggedIn, setWebLoggedIn] = useState(() => !!getAuthToken());
+  const inTelegram = isTelegramEnv();
+
   return (
     <I18nProvider>
-      {isTelegramEnv() ? <AppInner /> : <TelegramOnly />}
+      {inTelegram || webLoggedIn
+        ? <AppInner authMode={inTelegram ? 'telegram' : 'web'} />
+        : <TelegramOnly onLoggedIn={() => setWebLoggedIn(true)} />}
     </I18nProvider>
   );
 }
 
-function AppInner() {
+function AppInner({ authMode = 'telegram' }) {
   const updateUser = useUser((s) => s.updateUser);
   const setAuthStatus = useUser((s) => s.setAuthStatus);
   const currentUser = useUser((s) => s.user);
@@ -87,29 +104,43 @@ function AppInner() {
 
   useEffect(() => {
     const loadAddresses = useUser.getState().loadAddresses;
-    authenticateWithTelegram()
-      .then((profile) => {
-        updateUser({
-          telegramId: profile.telegramId,
-          firstName: profile.firstName,
-          lastName: profile.lastName,
-          username: profile.username,
-          languageCode: profile.languageCode,
-          isPremium: profile.isPremium,
-          photoUrl: profile.photoUrl,
-          photoInitials: initialsOf(profile.firstName, profile.lastName),
-          phone: currentUser.phone ?? profile.phone ?? null,
-          addresses: currentUser.addresses.length ? currentUser.addresses : profile.addresses ?? [],
-          verified: true,
-        });
-        setAuthStatus('done');
-        // Serverdagi manzillar va shaxsiy socket xonasi
-        loadAddresses?.();
-        const uid = profile._id || profile.id;
-        if (uid) joinUserRoom(uid);
-      })
+
+    const applyProfile = (profile) => {
+      updateUser({
+        telegramId: profile.telegramId,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        username: profile.username,
+        languageCode: profile.languageCode,
+        isPremium: profile.isPremium,
+        photoUrl: profile.photoUrl,
+        photoInitials: initialsOf(profile.firstName, profile.lastName),
+        phone: currentUser.phone ?? profile.phone ?? null,
+        addresses: currentUser.addresses.length ? currentUser.addresses : profile.addresses ?? [],
+        verified: true,
+      });
+      setAuthStatus('done');
+      // Serverdagi manzillar va shaxsiy socket xonasi
+      loadAddresses?.();
+      const uid = profile._id || profile.id;
+      if (uid) joinUserRoom(uid);
+    };
+
+    /*
+     * authMode==='web': token Login Widget orqali ALLAQACHON
+     * olingan (TelegramOnly ekranida) — bu yerda faqat profilni
+     * o'qiymiz. authenticateWithTelegram() ISHLATILMAYDI, chunki u
+     * Telegram.WebApp.initData'ga tayanadi — brauzerda bu obyekt
+     * umuman mavjud emas.
+     */
+    const authPromise = authMode === 'web'
+      ? api.getMe().then((res) => res.user)
+      : authenticateWithTelegram();
+
+    authPromise
+      .then(applyProfile)
       .catch((err) => {
-        console.warn('Telegram auth muvaffaqiyatsiz, mehmon rejimida davom etiladi:', err);
+        console.warn('Auth muvaffaqiyatsiz, mehmon rejimida davom etiladi:', err);
         setAuthStatus('failed');
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps

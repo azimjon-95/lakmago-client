@@ -35,3 +35,26 @@
   text-decoration: underline;
 }
 .tg-only__link:active { color: var(--ink, var(--ink)); }
+
+.tg-only__widget {
+  display: flex; justify-content: center; min-height: 40px;
+  margin-bottom: 8px;
+}
+.tg-only__widget-loading {
+  font-size: 13px; color: var(--muted, var(--muted));
+  margin-bottom: 20px;
+}
+.tg-only__error {
+  font-size: 13px; color: var(--danger, #C0392B);
+  background: rgba(192, 57, 43, 0.08);
+  border-radius: 10px; padding: 10px 14px;
+  margin-bottom: 20px;
+}
+.tg-only__divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0;
+  color: var(--muted, var(--muted)); font-size: 12px;
+}
+.tg-only__divider::before, .tg-only__divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--line, #332A22);
+}

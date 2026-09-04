@@ -251,6 +251,13 @@ export const api = {
     body: JSON.stringify({ refreshToken: getRefreshToken() }),
   }),
 
+  // GET/PATCH /users/me — Auth fundamenti profil API'si. Web
+  // login (Login Widget) oqimida token allaqachon mavjud bo'lgach
+  // profilni shu orqali olamiz (Mini App'dagi kabi Telegram.WebApp
+  // obyekti mavjud emas, undan lokal o'qib bo'lmaydi).
+  getMe: () => apiFetch('/users/me', { method: 'GET' }),
+  updateMe: (patch) => apiFetch('/users/me', { method: 'PATCH', body: JSON.stringify(patch) }),
+
   // ===== Buyurtma =====
   createOrder: (payload) =>
     apiFetch('/orders', { method: 'POST', body: JSON.stringify(payload) }),
