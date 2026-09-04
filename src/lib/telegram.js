@@ -111,10 +111,43 @@ export async function authenticateWithTelegram() {
         try { tg.expand(); } catch { /* qo'llab-quvvatlanmaydi */ }
       }
 
-      // To'liq ekran rejimi (Bot API 8.0+)
-      if (typeof tg.requestFullscreen === 'function') {
+      /*
+       * To'liq ekran rejimi (Bot API 8.0+). `typeof` tekshiruvi
+       * o'zi YETARLI EMAS — ba'zi Telegram versiyalarida metod
+       * "stub" sifatida mavjud bo'lishi mumkin, lekin haqiqatda
+       * versiya yetarli emasligi sababli ishlamaydi. Rasmiy
+       * tavsiya: isVersionAtLeast('8.0') orqali tekshirish.
+       */
+      const fsSupported = typeof tg.requestFullscreen === 'function'
+        && (typeof tg.isVersionAtLeast !== 'function' || tg.isVersionAtLeast('8.0'));
+
+      if (fsSupported) {
         try { tg.requestFullscreen(); } catch { /* qo'llab-quvvatlanmaydi */ }
       }
+
+      /*
+       * VAQTINCHALIK DIAGNOSTIKA — fullscreen nega ishlamayotganini
+       * aniqlash uchun (ishlab chiquvchi so'ragan). Foydalanuvchi
+       * tasdiqlagach OLIB TASHLANADI.
+       */
+      try {
+        window.__lokmagoFsDebug = {
+          platform: tg.platform,
+          version: tg.version,
+          hasRequestFullscreen: typeof tg.requestFullscreen === 'function',
+          isVersionAtLeast8: typeof tg.isVersionAtLeast === 'function' ? tg.isVersionAtLeast('8.0') : 'n/a',
+          fsSupported,
+          isFullscreen: tg.isFullscreen,
+        };
+        if (typeof tg.onEvent === 'function') {
+          tg.onEvent('fullscreenFailed', (e) => {
+            window.__lokmagoFsDebug.failedReason = e?.error || 'unknown';
+          });
+          tg.onEvent('fullscreenChanged', () => {
+            window.__lokmagoFsDebug.isFullscreen = tg.isFullscreen;
+          });
+        }
+      } catch { /* debug — asosiy oqimga ta'sir qilmasin */ }
     }
 
     // Pastga swipe bilan yopilishni bloklaymiz (Bot API 7.7+).

@@ -89,6 +89,32 @@ export default function App() {
   );
 }
 
+/*
+ * VAQTINCHALIK — fullscreen nega ishlamayotganini aniqlash uchun
+ * (lib/telegram.js window.__lokmagoFsDebug ni to'ldiradi).
+ * Tasdiqlangach OLIB TASHLANADI. Faqat matn, hech qanday tarmoq
+ * so'rovi yubormaydi, ilovaning boshqa qismiga ta'sir qilmaydi.
+ */
+function FullscreenDebugOverlay() {
+  const [info, setInfo] = useState(null);
+  useEffect(() => {
+    const t = setInterval(() => {
+      if (window.__lokmagoFsDebug) { setInfo({ ...window.__lokmagoFsDebug }); }
+    }, 300);
+    return () => clearInterval(t);
+  }, []);
+  if (!info) return null;
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, right: 0, zIndex: 99999,
+      background: '#000', color: '#0f0', fontSize: 10, fontFamily: 'monospace',
+      padding: '4px 8px', wordBreak: 'break-all', lineHeight: 1.4,
+    }}>
+      {JSON.stringify(info)}
+    </div>
+  );
+}
+
 function AppInner({ authMode = 'telegram' }) {
   const updateUser = useUser((s) => s.updateUser);
   const setAuthStatus = useUser((s) => s.setAuthStatus);
@@ -148,6 +174,7 @@ function AppInner({ authMode = 'telegram' }) {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <FullscreenDebugOverlay />
       {showSplash && <Splash onDone={finishSplash} />}
       <BrowserRouter>
         <SubscriptionGate>
