@@ -128,6 +128,7 @@ export async function authenticateWithTelegram() {
           isVersionAtLeast8: typeof tg.isVersionAtLeast === 'function' ? tg.isVersionAtLeast('8.0') : 'n/a',
           fsSupported,
           isFullscreen: tg.isFullscreen,
+          attempts: 0,
         };
         if (fsSupported && typeof tg.onEvent === 'function') {
           // MUHIM: bu listenerlar requestFullscreen() CHAQIRILISHIDAN
@@ -143,24 +144,51 @@ export async function authenticateWithTelegram() {
         }
       } catch { /* debug — asosiy oqimga ta'sir qilmasin */ }
 
-      if (typeof tg.expand === 'function') {
-        try { tg.expand(); } catch { /* qo'llab-quvvatlanmaydi */ }
-      }
-
       /*
-       * expand() va requestFullscreen() bir xil tickda ketma-ket
-       * chaqirilsa, ba'zi Telegram klientlarida (ayniqsa iOS)
-       * viewport o'tishi hali tugamagan bo'lib, requestFullscreen()
-       * jimgina e'tiborsiz qoldirilishi haqida community xabarlari
-       * bor — hech qanday xato/hodisa bermaydi (aynan biz ko'rgan
-       * holat: fsSupported=true, lekin isFullscreen ham,
-       * failedReason ham o'zgarmaydi). requestAnimationFrame orqali
-       * bir kadr kutib, keyin chaqiramiz.
+       * NATIJA (real qurilmada tekshirilgach): requestAnimationFrame
+       * bilan bir kadr kutish YETARLI EMAS edi — diagnostika
+       * `fsSupported:true, isFullscreen:false` ko'rsatdi-yu, LEKIN
+       * `failedReason` HAM, `changedFired` HAM hech qachon
+       * o'rnatilmadi. Demak requestFullscreen() so'rovi native
+       * tomonga umuman yetib bormagan yoki iOS uni butunlay
+       * e'tiborsiz qoldirgan — bitta kadr kutish yetarli emas.
+       *
+       * Ikkinchi shubha: expand() va requestFullscreen() BIR-BIRIGA
+       * ZID buyruqlar — requestFullscreen() o'zi ham to'liq
+       * kengaytiradi, shuning uchun expand()ni undan OLDIN chaqirish
+       * shart emas va aynan shu ketma-ketlik iOS'da viewport
+       * o'tishini "band" qilib, keyingi so'rovni yutib yuborgan
+       * bo'lishi mumkin.
+       *
+       * Yechim: (1) fsSupported bo'lsa expand() UMUMAN chaqirilmaydi
+       * — faqat requestFullscreen(); (2) chaqiruv haqiqiy vaqt
+       * kechikishi (setTimeout, kadrga emas) bilan biroz kechiktiriladi;
+       * (3) agar 1200ms ichida hech qanday hodisa (na muvaffaqiyat,
+       * na xato) kelmasa — bu safar expand() bilan birga QAYTA
+       * urinib ko'riladi (ba'zi qurilmalarda ikkinchi urinish
+       * ishlaganligi haqida community xabarlari bor).
        */
+      const tryRequestFullscreen = (withExpandFallback) => {
+        if (withExpandFallback && typeof tg.expand === 'function') {
+          try { tg.expand(); } catch { /* qo'llab-quvvatlanmaydi */ }
+        }
+        try {
+          window.__lokmagoFsDebug.attempts += 1;
+          tg.requestFullscreen();
+        } catch { /* qo'llab-quvvatlanmaydi */ }
+      };
+
       if (fsSupported) {
-        requestAnimationFrame(() => {
-          try { tg.requestFullscreen(); } catch { /* qo'llab-quvvatlanmaydi */ }
-        });
+        setTimeout(() => tryRequestFullscreen(false), 150);
+        setTimeout(() => {
+          const dbg = window.__lokmagoFsDebug;
+          if (dbg && !dbg.changedFired && !dbg.failedReason) {
+            tryRequestFullscreen(true);
+          }
+        }, 1200);
+      } else if (typeof tg.expand === 'function') {
+        // Fullscreen qo'llab-quvvatlanmasa — eski xulq: shunchaki expand().
+        try { tg.expand(); } catch { /* qo'llab-quvvatlanmaydi */ }
       }
     }
 
