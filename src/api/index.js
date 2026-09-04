@@ -3,11 +3,28 @@
 
 export const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
 
-// JWT token (Telegram login orqali olinadi).
-// sessionStorage'da ham saqlanadi — sahifa yangilanganda yo'qolmaydi.
+/*
+ * ===== AUTH TOKENLARI =====
+ *
+ * accessToken — qisqa muddatli (server: 1 soat), HAR SO'ROVDA
+ * Authorization header'da yuboriladi. sessionStorage'da (sahifa
+ * yangilanganda saqlanadi, tab/brauzer yopilganda yo'qoladi —
+ * ESKI xatti-harakat, o'zgartirilmadi).
+ *
+ * refreshToken — uzoq muddatli (server: 30 kun), FAQAT accessToken
+ * muddati tugaganda (401 kelganda) ishlatiladi. localStorage'da —
+ * accessToken'dan farqli, chunki uning butun maqsadi FOYDALANUVCHINI
+ * TAB/BRAUZER YOPILGANDAN KEYIN HAM ESLAB QOLISH (sessionStorage'ga
+ * qo'ysak, refresh token'ning uzoq-muddatliligi ma'nosiz qolardi).
+ */
 const TOKEN_KEY = 'lokmago_token';
+const REFRESH_TOKEN_KEY = 'lokmago_refresh_token';
+
 let authToken = (typeof sessionStorage !== 'undefined')
   ? sessionStorage.getItem(TOKEN_KEY)
+  : null;
+let refreshTokenValue = (typeof localStorage !== 'undefined')
+  ? localStorage.getItem(REFRESH_TOKEN_KEY)
   : null;
 
 export function setAuthToken(token) {
@@ -20,6 +37,24 @@ export function setAuthToken(token) {
 
 export function getAuthToken() {
   return authToken;
+}
+
+export function setRefreshToken(token) {
+  refreshTokenValue = token || null;
+  try {
+    if (token) localStorage.setItem(REFRESH_TOKEN_KEY, token);
+    else localStorage.removeItem(REFRESH_TOKEN_KEY);
+  } catch { /* localStorage bloklangan bo'lishi mumkin */ }
+}
+
+export function getRefreshToken() {
+  return refreshTokenValue;
+}
+
+// Logout yoki "sessiya butunlay yaroqsiz" holatida — ikkalasini ham tozalaydi
+export function clearAuthTokens() {
+  setAuthToken(null);
+  setRefreshToken(null);
 }
 
 // MongoDB `_id` ni `id` ga ham nusxalaymиz (rekursiv).
@@ -42,7 +77,7 @@ function normalizeIds(data) {
 }
 
 // Umumiy fetch — AbortController (signal) qo'llab-quvvatlaydi, JWT qo'shadi.
-async function apiFetch(path, { signal, ...options } = {}) {
+async function doFetch(path, { signal, ...options } = {}) {
   const url = `${API_BASE}${path}`;
   let res;
   try {
@@ -64,6 +99,56 @@ async function apiFetch(path, { signal, ...options } = {}) {
     err.detail = e.message;
     throw err;
   }
+  return res;
+}
+
+/*
+ * Bir vaqtda bir nechta so'rov 401 qaytarsa (masalan sahifa
+ * ochilganda 5 ta parallel so'rov), HAR BIRI ALOHIDA
+ * /auth/refresh chaqirmasin — bitta "inflight" promise'ni
+ * hammasi kutadi (deduplication).
+ */
+let refreshPromise = null;
+
+async function refreshAccessToken() {
+  if (!refreshPromise) {
+    refreshPromise = (async () => {
+      if (!refreshTokenValue) return false;
+      try {
+        const res = await fetch(`${API_BASE}/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken: refreshTokenValue }),
+        });
+        if (!res.ok) { clearAuthTokens(); return false; }
+        const data = await res.json();
+        setAuthToken(data.accessToken);
+        setRefreshToken(data.refreshToken);
+        return true;
+      } catch {
+        return false; // tarmoq xatosi — tokenlarni SAQLAB QOLAMIZ, keyingi urinishda qayta sinaladi
+      }
+    })().finally(() => { refreshPromise = null; });
+  }
+  return refreshPromise;
+}
+
+async function apiFetch(path, opts = {}) {
+  let res = await doFetch(path, opts);
+
+  /*
+   * 401 kelsa — accessToken muddati tugagan bo'lishi mumkin.
+   * /auth/* so'rovlarining o'zini qayta urinmaymiz (cheksiz
+   * rekursiya: refresh so'rovi 401 qaytarsa, uni refresh
+   * qilishga urinish ma'nosiz).
+   */
+  if (res.status === 401 && !path.startsWith('/auth/') && refreshTokenValue) {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) {
+      res = await doFetch(path, opts); // bir marta qayta urinish
+    }
+  }
+
   if (!res.ok) {
     /*
      * Serverning haqiqiy sababi ({ error: '...' }) o'qib
@@ -80,7 +165,7 @@ async function apiFetch(path, { signal, ...options } = {}) {
     const err = new Error(serverMessage || `Server xatosi (${res.status})`);
     err.status = res.status;
     err.kind = 'http';
-    err.url = url;
+    err.url = `${API_BASE}${path}`;
     throw err;
   }
   if (res.status === 204) return null;
@@ -139,11 +224,32 @@ export const api = {
   },
 
   // ===== Auth =====
+  // Eslatma: haqiqiy login oqimi src/lib/telegram.js da (Telegram
+  // WebApp obyektidan initData olish alohida logika talab qiladi),
+  // shu funksiya hozircha ISHLATILMAYDI — kelajakda shu yerga
+  // ko'chirish mumkin bo'lishi uchun saqlanmoqda.
   loginTelegram: (initData, startParam) =>
     apiFetch('/auth/telegram', {
       method: 'POST',
       body: JSON.stringify({ initData, startParam }),
     }),
+
+  // Access token muddati tugaganda apiFetch o'zi avtomatik
+  // chaqiradi (yuqoridagi refreshAccessToken) — bu funksiya
+  // qo'lda refresh qilish kerak bo'lgan kam uchraydigan holatlar
+  // uchun (masalan ilova fon-oldinga qaytganda tekshirish)
+  refreshSession: () => apiFetch('/auth/refresh', {
+    method: 'POST',
+    body: JSON.stringify({ refreshToken: getRefreshToken() }),
+  }),
+
+  // Joriy qurilmadagi sessiyani serverda bekor qiladi (Session.revokedAt)
+  // — mahalliy tokenlarni tozalash CHAQIRUVCHI tomonda (masalan
+  // ProfilePage) clearAuthTokens() orqali alohida qilinadi.
+  logoutSession: () => apiFetch('/auth/logout', {
+    method: 'POST',
+    body: JSON.stringify({ refreshToken: getRefreshToken() }),
+  }),
 
   // ===== Buyurtma =====
   createOrder: (payload) =>

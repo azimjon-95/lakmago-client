@@ -55,6 +55,26 @@ export function haptic() {
 
 const API_BASE = import.meta.env.VITE_API_URL ?? null;
 
+/*
+ * Session.deviceId uchun — shu qurilma/brauzerni boshqalardan
+ * ajratib turadi (masalan "boshqa qurilmalarda chiqish" funksiyasi
+ * kelajakda kerak bo'lsa). Bir marta generatsiya qilinadi va
+ * localStorage'da qoladi — sessionStorage emas, chunki tab
+ * yopilganda ham SHU QURILMA ekanligi o'zgarmasligi kerak.
+ */
+function getDeviceId() {
+  try {
+    let id = localStorage.getItem('lokmago_device_id');
+    if (!id) {
+      id = crypto.randomUUID ? crypto.randomUUID() : `dev_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      localStorage.setItem('lokmago_device_id', id);
+    }
+    return id;
+  } catch {
+    return ''; // localStorage bloklangan — server deviceId'siz ham ishlaydi (ixtiyoriy maydon)
+  }
+}
+
 // Fon rejimida ishlaydigan auth: Telegram.WebApp.ready() chaqiradi, initData'ni
 // backendga yuboradi. Bosh sahifa BU JARAYONNI KUTMAYDI — darhol ochiladi.
 // Backend ulanmagan bo'lsa (.env sozlanmagan) — mahalliy simulyatsiya bilan ishlaydi.
@@ -165,16 +185,28 @@ export async function authenticateWithTelegram() {
   const res = await fetch(`${API_BASE}/auth/telegram`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ initData, startParam: tg?.initDataUnsafe?.start_param || '' })
+    body: JSON.stringify({
+      initData,
+      startParam: tg?.initDataUnsafe?.start_param || '',
+      platform: 'telegram',
+      deviceId: getDeviceId(),
+    })
   });
   if (!res.ok) throw new Error(`Auth xatosi: ${res.status}`);
   const data = await res.json();
-  // Tokenni API klientiga beramiz — himoyalangan so'rovlar ishlashi uchun.
-  // (Avval faqat sessionStorage'ga yozilardi, API undan xabarsiz edi → 401)
-  if (data.token) {
-    const { setAuthToken } = await import('@/api');
-    setAuthToken(data.token);
-  }
+  /*
+   * Tokenlarni API klientiga beramiz — himoyalangan so'rovlar
+   * ishlashi uchun. accessToken (qisqa muddatli) + refreshToken
+   * (uzoq muddatli, muddati tugaganda apiFetch o'zi avtomatik
+   * yangilaydi) — Auth fundamenti. Eski `token` (uzoq muddatli,
+   * 30 kun) ham qaytariladi va SAQLANADI — agar biror sabab bilan
+   * accessToken/refreshToken kelmasa (masalan eski server versiyasi
+   * bilan ishlab turgan holatda), ilova baribir ishlayveradi.
+   */
+  const { setAuthToken, setRefreshToken } = await import('@/api');
+  if (data.accessToken) setAuthToken(data.accessToken);
+  else if (data.token) setAuthToken(data.token);
+  if (data.refreshToken) setRefreshToken(data.refreshToken);
   return {
     telegramId: data.user.telegramId,
     firstName: data.user.firstName,
