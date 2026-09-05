@@ -30,6 +30,58 @@ import './Cart.css';
  */
 const PROVIDER_LABEL = { payme: 'Payme', click: 'Click', paynet: 'Paynet' };
 
+/*
+ * To'lov sahifasini ochish — ZAXIRA YO'L BILAN.
+ *
+ * MUAMMO (real qurilmada aniqlangan): "Ha, yuborish" bosilganda
+ * buyurtma YARATILARDI va to'lov havolasi OLINARDI (server xatosi
+ * yo'q — hech qanday ogohlantirish chiqmasdi), lekin Click sahifasi
+ * OCHILMASDI. Tugma shunchaki oddiy holatiga qaytardi.
+ *
+ * SABAB: tg.openLink() foydalanuvchi bosishidan KEYIN, `await`
+ * tugagach chaqiriladi — ya'ni brauzer nuqtai nazaridan bu endi
+ * "foydalanuvchi harakati" (user gesture) doirasida emas. iOS
+ * WKWebView bunday chaqiruvlarni jimgina bloklaydi: xato ham
+ * bermaydi, hodisa ham yubormaydi.
+ *
+ * YECHIM: openLink chaqiriladi, so'ng 1 soniya kutiladi. Agar
+ * ilova hamon ko'rinib tursa (ya'ni hech qayerga o'tilmagan),
+ * o'sha oynaning o'zini to'lov manziliga yo'naltiramiz —
+ * location.href user gesture talab qilmaydi, u har doim ishlaydi.
+ *
+ * Savat yo'qolmaydi: u localStorage'da saqlanadi va orderId
+ * savePendingPayment() orqali yozib qo'yilgan, shuning uchun
+ * Click'dan qaytgach holat avtomatik tekshiriladi.
+ */
+function openPaymentUrl(url) {
+  const tg = getTelegram();
+  if (!tg?.openLink) {
+    window.location.href = url;
+    return;
+  }
+
+  let left = false;
+  const onHide = () => {
+    if (document.visibilityState === 'hidden') left = true;
+  };
+  document.addEventListener('visibilitychange', onHide);
+
+  try {
+    tg.openLink(url);
+  } catch {
+    // openLink qo'llab-quvvatlanmaydi — zaxira quyida ishlaydi
+  }
+
+  setTimeout(() => {
+    document.removeEventListener('visibilitychange', onHide);
+    if (!left && document.visibilityState === 'visible') {
+      window.location.href = url;
+    }
+  }, 1000);
+}
+
+
+
 export function CartPage() {
   const navigate = useNavigate();
   const t = useT();
@@ -170,9 +222,7 @@ export function CartPage() {
     haptic();
     try {
       const { url } = await api.getPaymentLink(pendingCheck.orderId, lastPaymentMethod);
-      const tg = getTelegram();
-      if (tg?.openLink) tg.openLink(url);
-      else window.location.href = url;
+      openPaymentUrl(url);
     } catch (e) {
       alert(e.message || 'To‘lov havolasini olib bo‘lmadi');
     }
@@ -609,9 +659,7 @@ export function CartPage() {
           savePendingPayment(orderId);
           setPaying(false);
 
-          const tg = getTelegram();
-          if (tg?.openLink) tg.openLink(url);
-          else window.location.href = url;
+          openPaymentUrl(url);
 
           /*
            * NAVIGATE QILINMAYDI. Mijoz CartPage'da qoladi —
