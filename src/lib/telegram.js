@@ -48,11 +48,15 @@ export function getTelegram() {
  *   to'q rang berilsa  -> OQ soat/antenna
  *   och rang berilsa   -> QORA soat/antenna
  *
- * Ilovada ikki xil fon bor va ular ketma-ket almashadi:
- *   Splash — to'q ko'k (#002634) -> oq soat kerak
- *   Asosiy sahifa — oq          -> qora soat kerak
- * Shuning uchun rang EKRANGA QARAB o'zgarishi shart, bir marta
- * o'rnatib qo'yish yetarli emas.
+ * REAL QURILMADA ANIQLANDI: bu nazariya iOS'da ISHLAMADI.
+ * setHeaderColor('#FFFFFF') berilganda ham Telegram status bar
+ * ikonlarini OQ holicha qoldirdi — oq fon ustida ular butunlay
+ * ko'rinmay ketdi (soat ham, antenna ham, batareya ham).
+ *
+ * Shuning uchun ranglarni Telegram tanlashiga TOPSHIRMAYMIZ.
+ * Tepadagi status bar chizig'i HAR DOIM to'q (#002634 — splash
+ * bilan bir xil) bo'ladi, oq ikonlar unda aniq ko'rinadi va
+ * splashdan asosiy sahifaga o'tish ham silliq chiqadi.
  *
  * @param {string} color - '#RRGGBB'
  */
@@ -186,9 +190,14 @@ export async function authenticateWithTelegram() {
      * Telegram qora soat/antenna chizadi — bizga kerakli natija.
      */
     const applyColors = () => {
+      /*
+       * Tepa (status bar) — TO'Q. Telegram fullscreen'da ikonlarni
+       * oq chizadi va uni oq fonga o'zgartirib bo'lmadi, shuning
+       * uchun fonni ikonga moslaymiz, aksincha emas.
+       * Pastki panel va umumiy fon — oq (ilova mavzusi).
+       */
+      setTelegramSurfaceColor('#002634');
       try {
-        tg.setHeaderColor?.('#FFFFFF');
-        tg.setBackgroundColor?.('#FFFFFF');
         tg.setBottomBarColor?.('#FFFFFF');
       } catch {
         // eski Telegram versiyalarida bo'lmasligi mumkin

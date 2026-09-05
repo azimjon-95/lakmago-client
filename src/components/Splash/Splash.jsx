@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api';
-import { setTelegramSurfaceColor } from '@/lib/telegram';
 import './Splash.css';
 
 /**
@@ -25,21 +24,12 @@ export function Splash({ onDone }) {
   const qc = useQueryClient();
 
   /*
-   * Status bar rangi splash davomida TO'Q, splash tugagach OQ.
-   *
-   * To'liq ekran rejimida Telegram header'i shaffof — soat va
-   * antenna to'g'ridan-to'g'ri ilova foni ustida turadi. Splash
-   * foni to'q ko'k (#002634), asosiy sahifa esa oq. Bitta rang
-   * ikkalasiga ham to'g'ri kelmaydi: oq bersak splashda soat
-   * ko'rinmaydi, to'q bersak asosiy sahifada ko'rinmaydi.
-   *
-   * cleanup (splash yopilganda) oq rangga qaytaradi — shu bilan
-   * o'tish avtomatik va bitta joyda boshqariladi.
+   * Status bar chizig'i splash davomida ham, keyin ham TO'Q
+   * qoladi — shuning uchun bu yerda hech narsa almashtirilmaydi
+   * (ilgari cleanup oq rangga qaytarardi, natijada asosiy
+   * sahifada oq ikonlar oq fonda yo'qolib ketardi).
+   * Rang telegram.js da bir marta o'rnatiladi.
    */
-  useEffect(() => {
-    setTelegramSurfaceColor('#002634');
-    return () => setTelegramSurfaceColor('#FFFFFF');
-  }, []);
   const videoRef = useRef(null);
   const [leaving, setLeaving] = useState(false);
   const prefetched = useRef(false);
