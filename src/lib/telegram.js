@@ -140,20 +140,28 @@ export async function authenticateWithTelegram() {
       try { tg.disableVerticalSwipes(); } catch { /* qo'llab-quvvatlanmaydi */ }
     }
 
-    // Yorug' mavzu — Telegram header va fon ranglari.
-    // MUHIM: bu Telegram'ning O'Z native UI elementlarini
-    // (status bar orqasidagi hudud, header) boshqaradi — CSS
-    // o'zgaruvchilaridan MUSTAQIL. Ilova mavzusi (--canvas)
-    // oq bo'lgach bu ham yangilanishi shart edi — aks holda
-    // Telegram'ning o'zi hamon eski to'q rangni ko'rsatib,
-    // status bar atrofida qora chiziq qolib ketardi.
-    try {
-      tg.setHeaderColor?.('#FFFFFF');
-      tg.setBackgroundColor?.('#FFFFFF');
-      tg.setBottomBarColor?.('#FFFFFF');
-    } catch {
-      // eski Telegram versiyalarida bo'lmasligi mumkin
-    }
+    /*
+     * Yorug' mavzu — Telegram header va fon ranglari.
+     * MUHIM: bu Telegram'ning O'Z native UI elementlarini
+     * (status bar orqasidagi hudud, header) boshqaradi — CSS
+     * o'zgaruvchilaridan MUSTAQIL.
+     *
+     * TO'LIQ EKRANDA bu ayniqsa muhim: rasmiy hujjat aytadi —
+     * fullscreen'da header shaffof bo'ladi, va Telegram AYNAN SHU
+     * rangdan status bar (soat, antenna, batareya) va boshqaruv
+     * tugmalari uchun KONTRAST rang tanlaydi. Oq bergani uchun
+     * Telegram qora soat/antenna chizadi — bizga kerakli natija.
+     */
+    const applyColors = () => {
+      try {
+        tg.setHeaderColor?.('#FFFFFF');
+        tg.setBackgroundColor?.('#FFFFFF');
+        tg.setBottomBarColor?.('#FFFFFF');
+      } catch {
+        // eski Telegram versiyalarida bo'lmasligi mumkin
+      }
+    };
+    applyColors();
     // Viewport balandligини CSS o'zgaruvchisига yozamiz — har xil telefonда
     // (notch, klaviatura, kengaytirish) layout to'g'ri moslashadi.
     const syncViewport = () => {
@@ -175,8 +183,10 @@ export async function authenticateWithTelegram() {
     syncViewport();
     if (typeof tg.onEvent === 'function') {
       tg.onEvent('viewportChanged', syncViewport);
-      // To'liq ekranga o'tganda balandlik va yuqori bo'shliq o'zgaradi
-      tg.onEvent('fullscreenChanged', syncViewport);
+      // To'liq ekranga o'tganda balandlik va yuqori bo'shliq o'zgaradi.
+      // Ranglar ham QAYTA berilishi kerak — rejim almashganda Telegram
+      // status bar kontrastini qaytadan hisoblaydi.
+      tg.onEvent('fullscreenChanged', () => { syncViewport(); applyColors(); });
       tg.onEvent('safeAreaChanged', syncViewport);
       tg.onEvent('contentSafeAreaChanged', syncViewport);
     }
