@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { DishPhoto } from '@/components/DishPhoto';
@@ -55,29 +55,54 @@ const PROVIDER_LABEL = { payme: 'Payme', click: 'Click', paynet: 'Paynet' };
  */
 function openPaymentUrl(url) {
   const tg = getTelegram();
-  if (!tg?.openLink) {
-    window.location.href = url;
-    return;
-  }
 
+  /*
+   * Muvaffaqiyat = sahifa ko'rinmay qoldi (mijoz boshqa oynaga
+   * o'tdi). Buni visibilitychange orqali aniqlaymiz.
+   */
   let left = false;
-  const onHide = () => {
-    if (document.visibilityState === 'hidden') left = true;
-  };
+  const onHide = () => { if (document.visibilityState === 'hidden') left = true; };
   document.addEventListener('visibilitychange', onHide);
 
-  try {
-    tg.openLink(url);
-  } catch {
-    // openLink qo'llab-quvvatlanmaydi — zaxira quyida ishlaydi
-  }
+  const stillHere = () => !left && document.visibilityState === 'visible';
+
+  // 1-USUL: Telegram ichki brauzeri. ENG YAXSHISI — o'z
+  // yopish/orqaga tugmasi bor, Mini App orqa fonda saqlanadi.
+  try { tg?.openLink?.(url); } catch { /* pastdagi usullar ishlaydi */ }
 
   setTimeout(() => {
-    document.removeEventListener('visibilitychange', onHide);
-    if (!left && document.visibilityState === 'visible') {
+    if (!stillHere()) { document.removeEventListener('visibilitychange', onHide); return; }
+
+    /*
+     * 2-USUL: yangi oyna. openLink ishlamadi (iOS WKWebView
+     * user gesture'dan tashqaridagi chaqiruvni jimgina
+     * bloklaydi). window.open Mini App'ni JOYIDA qoldiradi,
+     * shuning uchun mijoz Click'dan qaytganda savati va
+     * sahifasi saqlanib turadi.
+     */
+    let opened = null;
+    try { opened = window.open(url, '_blank'); } catch { /* bloklangan */ }
+
+    setTimeout(() => {
+      document.removeEventListener('visibilitychange', onHide);
+      if (!stillHere() || opened) return;
+
+      /*
+       * 3-USUL — ENG OXIRGI CHORA: oynaning o'zini yo'naltirish.
+       *
+       * KAMCHILIGI: Mini App Click sahifasi bilan ALMASHADI va
+       * mijozda "orqaga" tugmasi qolmaydi — u faqat butun
+       * ilovani yopishi mumkin. Aynan shu holat kuzatilgan edi.
+       *
+       * Shuning uchun bu faqat birinchi ikki usul ishlamagandagina
+       * qo'llanadi. Qaytish esa Click tomonidagi return_url
+       * orqali ta'minlanadi (server: CLICK_RETURN_URL), u mijozni
+       * lokma.uz ga qaytaradi va kutilayotgan to'lov yozuvi
+       * (localStorage) tufayli savat joyida turadi.
+       */
       window.location.href = url;
-    }
-  }, 1000);
+    }, 400);
+  }, 900);
 }
 
 
@@ -637,8 +662,33 @@ export function CartPage() {
     setShowConfirm(true);
   }
 
+  /*
+   * ═══ TAKRORIY YUBORISHDAN QULF ═══
+   * React holati darhol yangilanmaydi — tez ikki marta bosilsa
+   * `paying` hali false bo'lib turib, ikkita buyurtma
+   * yaratilishi mumkin edi. ref sinxron o'zgaradi, shuning
+   * uchun ikkinchi bosish shu yerda to'xtaydi.
+   */
+  const submitLock = useRef(false);
+
   function confirmAndSubmit() {
-    setShowConfirm(false);
+    if (submitLock.current) return;
+    submitLock.current = true;
+
+    /*
+     * MODAL ENDI DARHOL YOPILMAYDI.
+     *
+     * ILGARI: setShowConfirm(false) birinchi qator edi. Modal
+     * ko'zdan yo'qolardi, uning `submitting` holati esa hech
+     * qachon ko'rinmasdi. Mijoz uchun manzara shunday edi:
+     * "Ha, yuborish" bosdim -> oyna yopildi -> bir necha soniya
+     * HECH NARSA -> keyin birdan Click sahifasi. "Bosildimi
+     * yoki yo'qmi?" degan shubha aynan shundan edi.
+     *
+     * ENDI: modal ochiq qoladi, tugma "Yuborilmoqda..." ga
+     * o'tadi va bloklanadi. Mijoz jarayonni ko'rib turadi.
+     * Modal faqat natija ma'lum bo'lgandan keyin yopiladi.
+     */
     setPaying(true);
     setLastPaymentMethod(paymentMethod);
     const addrLabel = isPickup
@@ -680,6 +730,8 @@ export function CartPage() {
         if (paymentMethod === 'cash') {
           useCart.getState().clear();
           setPaying(false);
+          setShowConfirm(false);
+          submitLock.current = false;
           navigate('/orders');
           return;
         }
@@ -711,6 +763,8 @@ export function CartPage() {
           // Buyurtma ID kelmadi — to'lovni boshlab bo'lmaydi.
           // Savat saqlanadi, mijoz qayta urinishi mumkin.
           setPaying(false);
+          setShowConfirm(false);
+          submitLock.current = false;
           alert(t('orderCreatedPaymentFailed'));
           return;
         }
@@ -719,9 +773,17 @@ export function CartPage() {
           const { url } = await api.getPaymentLink(orderId, paymentMethod);
 
           savePendingPayment(orderId, paymentMethod);
-          setPaying(false);
 
+          /*
+           * Tartib MUHIM: avval havola ochiladi, keyin holat
+           * tozalanadi. Aks holda tugma bir lahzaga oddiy
+           * holatiga qaytib, "hech narsa bo'lmadi" taassuroti
+           * berardi.
+           */
           openPaymentUrl(url);
+          setPaying(false);
+          setShowConfirm(false);
+          submitLock.current = false;
 
           /*
            * NAVIGATE QILINMAYDI. Mijoz CartPage'da qoladi —
@@ -736,6 +798,8 @@ export function CartPage() {
           // Buyurtma 'awaiting_payment' holatida qoladi va
           // restoranga ko'rinmaydi. Mijoz qayta urinishi mumkin.
           setPaying(false);
+          setShowConfirm(false);
+          submitLock.current = false;
           alert(
             (e.message && e.message !== 'STALE_CART_ID' ? e.message : t('paymentConnectionFailed'))
             + '\n\n' + t('cartSavedRetryOrCash'),
@@ -746,6 +810,8 @@ export function CartPage() {
         // Buyurtma YARATILMADI — savat saqlanadi, mijoz
         // taomlarini yo'qotmaydi va qayta urinishi mumkin.
         setPaying(false);
+        setShowConfirm(false);
+        submitLock.current = false;
         alert(
           (e?.message === 'STALE_CART_ID' ? t('staleCartError') : (e?.message || t('orderNotSent')))
           + '\n\n' + t('cartSavedRetry'),
@@ -1215,8 +1281,8 @@ export function CartPage() {
         */}
         <button
           onClick={handlePlaceOrder}
+          className={`cart-paybtn${paying ? ' is-loading' : ''}`}
           disabled={paying || !pricing.canOrder || pendingCheck?.unpaid}
-          className="cart-paybtn"
         >
           <span className="cart-paybtn__count">{itemCount}</span>
           <span className="cart-paybtn__label">{paying ? t('loading') : t('payTotal')}</span>
