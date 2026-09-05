@@ -62,34 +62,6 @@
         apply();
 
         /*
-         * .in-telegram klassi — CSS shu orqali body-scroll'ni
-         * o'chirib, aylanishni .app-shell ichiga ko'chiradi
-         * (batafsil izoh theme.css da). Faqat mobil Telegram
-         * uchun, brauzerda odatiy xulq saqlanadi.
-         */
-        if (['android', 'android_x', 'ios'].indexOf(tg.platform) !== -1) {
-          document.documentElement.classList.add('in-telegram');
-
-          /*
-           * iOS uchun eng muhim qism: konteyner scrollTop = 0 da
-           * turса, tepaga tortish gestasi WebView'dan CHIQIB
-           * Telegram oynasiga o'tadi va ilova yopiladi. 1 piksel
-           * pastda ushlab tursak, iOS konteynerni "eng tepada
-           * emas" deb hisoblaydi va gestani bizga qoldiradi.
-           *
-           * scroll hodisasi ko'pirmaydi (bubble bo'lmaydi), shuning
-           * uchun capture rejimida tinglaymiz — shunda qaysi
-           * sahifa ochiq bo'lishidan qat'i nazar ishlaydi.
-           */
-          document.addEventListener('scroll', function (e) {
-            var el = e.target;
-            if (el && el.classList && el.classList.contains('app-shell') && el.scrollTop === 0) {
-              el.scrollTop = 1;
-            }
-          }, true);
-        }
-
-        /*
          * Takrorlash: Telegram ochilish animatsiyasi davomida o'z
          * sozlamalarini o'rnatadi va bizning erta chaqiruvimizni
          * ustidan yozib yuborishi mumkin. Bir necha marta qayta
