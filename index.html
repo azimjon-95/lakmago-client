@@ -22,7 +22,110 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!--
+      ?59 — CDN/WKWebView keshini chetlab o'tish uchun. Query satri
+      faylni o'zgartirmaydi (telegram.org baribir eng so'nggi
+      versiyani beradi), lekin eski keshlangan nusxa qaytishining
+      oldini oladi.
+    -->
+    <script src="https://telegram.org/js/telegram-web-app.js?59"></script>
+    <!--
+      ============================================================
+      TO'LIQ EKRAN (fullscreen) — NIMA UCHUN AYNAN SHU YERDA
+      ============================================================
+      Avval bu mantiq React ichida (lib/telegram.js -> App.jsx
+      useEffect) turardi va ISHLAMASDI: diagnostika iOS'da
+      requestFullscreen() ikki marta chaqirilganda ham na
+      `fullscreenChanged`, na `fullscreenFailed` hodisasi
+      kelmasligini ko'rsatdi — ya'ni Telegram so'rovni jimgina
+      tashlab yuborgan.
+
+      Sabab ARXITEKTURAVIY edi: useEffect faqat React bundle
+      yuklanib, parse bo'lib, butun daraxt render bo'lgandan keyin
+      ishlaydi — bu mobil tarmoqda bir necha yuz millisekund.
+      Telegram esa bottom-sheet o'lchamini ochilish paytida hal
+      qiladi; kechikkan so'rov e'tiborsiz qoladi.
+
+      Endi so'rov SDK yuklangandan KEYINGI ZAHOTI, React bundle
+      hatto yuklab olinmasidan oldin yuboriladi. Bu Telegram
+      hujjatlarida tavsiya etilgan yondashuv: ready() va oyna
+      rejimini boshqaruvchi chaqiruvlar imkon qadar erta bo'lishi
+      kerak.
+
+      Qo'shimcha ishonchlilik: so'rov SDK metodi VA bridge orqali
+      to'g'ridan-to'g'ri yuboriladi, hamda javob kelmasa 400ms
+      oraliq bilan bir necha marta takrorlanadi (klient hali
+      tayyor bo'lmagan holat uchun). Muvaffaqiyat, xato yoki
+      limitga yetilganda to'xtaydi va zaxira sifatida expand()
+      chaqiriladi.
+    -->
+    <script>
+      (function () {
+        var tg = window.Telegram && window.Telegram.WebApp;
+        if (!tg) return;
+
+        try { tg.ready(); } catch (e) {}
+
+        // Faqat mobil — desktop/vebda Telegram o'z oyna o'lchamini boshqaradi.
+        if (['android', 'android_x', 'ios'].indexOf(tg.platform) === -1) return;
+
+        var state = { supported: false, tries: 0, failed: null };
+        window.__lokmagoFs = state;
+
+        state.supported = typeof tg.requestFullscreen === 'function'
+          && (typeof tg.isVersionAtLeast !== 'function' || tg.isVersionAtLeast('8.0'));
+
+        var expand = function () { try { tg.expand(); } catch (e) {} };
+
+        // Bot API 8.0 dan eski klient — faqat kengaytirish mumkin.
+        if (!state.supported) { expand(); return; }
+
+        // Telegram bridge — SDK ichida ham aynan shu transportlar
+        // ishlatiladi. SDK chaqiruvni yutib yuborsa ham, bu yetkazadi.
+        var post = function (type) {
+          try {
+            if (window.TelegramWebviewProxy && window.TelegramWebviewProxy.postEvent) {
+              window.TelegramWebviewProxy.postEvent(type, '{}');
+            } else if (window.external && window.external.notify) {
+              window.external.notify(JSON.stringify({ eventType: type, eventData: {} }));
+            } else if (window.parent && window.parent !== window) {
+              window.parent.postMessage(JSON.stringify({ eventType: type, eventData: {} }), '*');
+            }
+          } catch (e) {}
+        };
+
+        var request = function () {
+          state.tries++;
+          try { tg.requestFullscreen(); } catch (e) {}
+          post('web_app_request_fullscreen');
+        };
+
+        try {
+          tg.onEvent('fullscreenFailed', function (e) {
+            state.failed = (e && e.error) || 'unknown';
+            expand(); // to'liq ekran imkonsiz — hech bo'lmasa kengaytiramiz
+          });
+        } catch (e) {}
+
+        request();
+
+        /*
+         * Takroriy urinish. Telegram javob bermasligining eng
+         * ehtimolli sababi — klient tomonining hali tayyor
+         * emasligi, shuning uchun bir necha marta so'raymiz.
+         * To'xtash sharti: fullscreen'ga o'tildi / xato keldi /
+         * urinishlar tugadi.
+         */
+        var timer = setInterval(function () {
+          if (tg.isFullscreen || state.failed || state.tries >= 6) {
+            clearInterval(timer);
+            if (!tg.isFullscreen) expand(); // zaxira
+            return;
+          }
+          request();
+        }, 400);
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   </head>
