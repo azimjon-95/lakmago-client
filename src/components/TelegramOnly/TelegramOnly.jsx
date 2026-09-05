@@ -22,7 +22,10 @@ export function TelegramOnly({ onLoggedIn }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const botUsername = import.meta.env.VITE_BOT_USERNAME ?? 'LokmaGoBot';
+  // `??` emas, `||` — bo'sh satr ham zaxira qiymatga o'tsin
+  // (qarang: src/lib/telegramWebAuth.js dagi batafsil izoh).
+  const botUsername = (import.meta.env.VITE_BOT_USERNAME || 'lokmaGobot')
+    .trim().replace(/^@/, '');
   const webappName = import.meta.env.VITE_WEBAPP_NAME ?? 'app';
   const startLink = `https://t.me/${botUsername}?start=web`;
   const appLink = webappName

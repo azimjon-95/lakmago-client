@@ -108,86 +108,86 @@ export async function authenticateWithTelegram() {
 
     if (isMobilePlatform) {
       /*
-       * To'liq ekran rejimi (Bot API 8.0+). `typeof` tekshiruvi
-       * o'zi YETARLI EMAS — ba'zi Telegram versiyalarida metod
-       * "stub" sifatida mavjud bo'lishi mumkin, lekin haqiqatda
-       * versiya yetarli emasligi sababli ishlamaydi. Rasmiy
-       * tavsiya: isVersionAtLeast('8.0') orqali tekshirish.
+       * To'liq ekran rejimi (Bot API 8.0+).
+       *
+       * TARIX / NIMA UCHUN BUNDAY MURAKKAB:
+       * Real iOS qurilmada (Telegram 9.6, Bot API 8.0+ to'liq
+       * qo'llab-quvvatlanadi) diagnostika shuni ko'rsatdi:
+       *   fsSupported=true, hasRequestFullscreen=true,
+       *   isVersionAtLeast8=true — LEKIN tg.requestFullscreen()
+       *   ikki marta chaqirilgandan keyin ham isFullscreen=false
+       *   qoldi va na `fullscreenChanged`, na `fullscreenFailed`
+       *   hodisasi UMUMAN kelmadi.
+       *
+       * Hech qanday hodisa kelmasligi — so'rov native klientga
+       * yetib bormaganini bildiradi. Ya'ni muammo Telegram
+       * klientida emas, telegram-web-app.js SDK qatlamida:
+       * SDK ichki holatiga qarab chaqiruvni jimgina "yutib"
+       * yuborgan (masalan o'zining isFullscreen bayrog'i yoki
+       * hali initsializatsiya tugamaganligi sababli).
+       *
+       * YECHIM: SDK'ni CHETLAB O'TIB, `web_app_request_fullscreen`
+       * hodisasini Telegram bridge'iga TO'G'RIDAN-TO'G'RI yuboramiz.
+       * Bu SDK ichida ham aynan shu tarzda amalga oshiriladi, lekin
+       * hech qanday shartsiz — shuning uchun "yutib yuborish"
+       * imkoniyati yo'q.
        */
       const fsSupported = typeof tg.requestFullscreen === 'function'
         && (typeof tg.isVersionAtLeast !== 'function' || tg.isVersionAtLeast('8.0'));
 
-      // VAQTINCHALIK DIAGNOSTIKA — listenerlardan OLDIN yaratiladi,
-      // aks holda ular window.__lokmagoFsDebug'ga yozganda xato
-      // beradi (hali mavjud bo'lmasa). Tasdiqlangach OLIB TASHLANADI.
-      try {
-        window.__lokmagoFsDebug = {
-          platform: tg.platform,
-          version: tg.version,
-          hasRequestFullscreen: typeof tg.requestFullscreen === 'function',
-          isVersionAtLeast8: typeof tg.isVersionAtLeast === 'function' ? tg.isVersionAtLeast('8.0') : 'n/a',
-          fsSupported,
-          isFullscreen: tg.isFullscreen,
-          attempts: 0,
-        };
-        if (fsSupported && typeof tg.onEvent === 'function') {
-          // MUHIM: bu listenerlar requestFullscreen() CHAQIRILISHIDAN
-          // OLDIN ro'yxatdan o'tkaziladi — aks holda tezkor
-          // (sinxron/darhol) xato "tutib olinmay" qolar edi.
-          tg.onEvent('fullscreenFailed', (e) => {
-            window.__lokmagoFsDebug.failedReason = e?.error || 'unknown';
-          });
-          tg.onEvent('fullscreenChanged', () => {
-            window.__lokmagoFsDebug.isFullscreen = tg.isFullscreen;
-            window.__lokmagoFsDebug.changedFired = true;
-          });
-        }
-      } catch { /* debug — asosiy oqimga ta'sir qilmasin */ }
+      /*
+       * Telegram bridge — platformaga qarab uchta xil transport:
+       *  - iOS/Android native WebView: window.TelegramWebviewProxy
+       *  - Windows Phone (eskirgan): window.external.notify
+       *  - iframe (veb versiyalari): parent oynaga postMessage
+       * Bu ro'yxat telegram-web-app.js ning o'z mantig'i bilan bir xil.
+       */
+      const postToBridge = (eventType, eventData = {}) => {
+        try {
+          if (window.TelegramWebviewProxy?.postEvent) {
+            window.TelegramWebviewProxy.postEvent(eventType, JSON.stringify(eventData));
+            return true;
+          }
+          if (window.external?.notify) {
+            window.external.notify(JSON.stringify({ eventType, eventData }));
+            return true;
+          }
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage(JSON.stringify({ eventType, eventData }), '*');
+            return true;
+          }
+        } catch { /* bridge mavjud emas — jim o'tamiz */ }
+        return false;
+      };
 
       /*
-       * NATIJA (real qurilmada tekshirilgach): requestAnimationFrame
-       * bilan bir kadr kutish YETARLI EMAS edi — diagnostika
-       * `fsSupported:true, isFullscreen:false` ko'rsatdi-yu, LEKIN
-       * `failedReason` HAM, `changedFired` HAM hech qachon
-       * o'rnatilmadi. Demak requestFullscreen() so'rovi native
-       * tomonga umuman yetib bormagan yoki iOS uni butunlay
-       * e'tiborsiz qoldirgan — bitta kadr kutish yetarli emas.
-       *
-       * Ikkinchi shubha: expand() va requestFullscreen() BIR-BIRIGA
-       * ZID buyruqlar — requestFullscreen() o'zi ham to'liq
-       * kengaytiradi, shuning uchun expand()ni undan OLDIN chaqirish
-       * shart emas va aynan shu ketma-ketlik iOS'da viewport
-       * o'tishini "band" qilib, keyingi so'rovni yutib yuborgan
-       * bo'lishi mumkin.
-       *
-       * Yechim: (1) fsSupported bo'lsa expand() UMUMAN chaqirilmaydi
-       * — faqat requestFullscreen(); (2) chaqiruv haqiqiy vaqt
-       * kechikishi (setTimeout, kadrga emas) bilan biroz kechiktiriladi;
-       * (3) agar 1200ms ichida hech qanday hodisa (na muvaffaqiyat,
-       * na xato) kelmasa — bu safar expand() bilan birga QAYTA
-       * urinib ko'riladi (ba'zi qurilmalarda ikkinchi urinish
-       * ishlaganligi haqida community xabarlari bor).
+       * Bitta urinish = SDK metodi + to'g'ridan-to'g'ri bridge.
+       * Ikkalasi ham chaqiriladi: agar SDK ishlasa — ajoyib;
+       * ishlamasa — bridge baribir so'rovni yetkazadi. Takroriy
+       * so'rov Telegram tomonidan zararsiz e'tiborsiz qoldiriladi.
        */
-      const tryRequestFullscreen = (withExpandFallback) => {
-        if (withExpandFallback && typeof tg.expand === 'function') {
-          try { tg.expand(); } catch { /* qo'llab-quvvatlanmaydi */ }
-        }
-        try {
-          window.__lokmagoFsDebug.attempts += 1;
-          tg.requestFullscreen();
-        } catch { /* qo'llab-quvvatlanmaydi */ }
+      const requestFullscreen = () => {
+        try { tg.requestFullscreen?.(); } catch { /* SDK rad etdi */ }
+        postToBridge('web_app_request_fullscreen');
       };
 
       if (fsSupported) {
-        setTimeout(() => tryRequestFullscreen(false), 150);
+        /*
+         * MUHIM: expand() BU YERDA CHAQIRILMAYDI.
+         * expand() va requestFullscreen() bir-biriga zid buyruqlar —
+         * requestFullscreen() o'zi ham ilovani to'liq ochadi, lekin
+         * expand() undan oldin viewport animatsiyasini boshlab
+         * yuborsa, iOS keyingi so'rovni tashlab yuborishi mumkin.
+         */
+        // ready() dan keyin bridge to'liq tayyor bo'lishi uchun qisqa pauza.
+        setTimeout(requestFullscreen, 100);
+
+        // Zaxira urinish — agar birinchisi natija bermagan bo'lsa.
         setTimeout(() => {
-          const dbg = window.__lokmagoFsDebug;
-          if (dbg && !dbg.changedFired && !dbg.failedReason) {
-            tryRequestFullscreen(true);
-          }
-        }, 1200);
+          if (!tg.isFullscreen) requestFullscreen();
+        }, 900);
       } else if (typeof tg.expand === 'function') {
-        // Fullscreen qo'llab-quvvatlanmasa — eski xulq: shunchaki expand().
+        // Bot API 8.0 dan eski klientlar — faqat kengaytirish mumkin.
         try { tg.expand(); } catch { /* qo'llab-quvvatlanmaydi */ }
       }
     }

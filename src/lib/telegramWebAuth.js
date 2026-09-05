@@ -11,10 +11,27 @@
 
 import { API_BASE } from '@/api';
 
-const cleanName = (v, fallback = '') =>
-  String(v ?? fallback).trim().replace(/^@/, '').replace(/^\/+|\/+$/g, '');
+/*
+ * MUHIM — `??` BU YERDA YETARLI EMAS EDI.
+ * `??` faqat null/undefined'da zaxira qiymatga o'tadi. Vercel'da
+ * env o'zgaruvchi YARATILGAN, lekin qiymati BO'SH qoldirilsa,
+ * import.meta.env.VITE_BOT_USERNAME === '' bo'ladi — `??` buni
+ * "qiymat bor" deb hisoblaydi va vidjetga bo'sh username uzatiladi.
+ * Telegram esa bunga aynan "Username invalid" deb javob beradi.
+ * Shuning uchun bo'sh/probel qiymat ham zaxiraga o'tishi shart.
+ */
+const cleanName = (v, fallback = '') => {
+  const cleaned = String(v ?? '').trim().replace(/^@/, '').replace(/^\/+|\/+$/g, '');
+  return cleaned || fallback;
+};
 
-const BOT_USERNAME = cleanName(import.meta.env.VITE_BOT_USERNAME, 'LokmaGoBot');
+/*
+ * DIQQAT — bot username'i "lokma" (o harfi bilan), "lakma" EMAS.
+ * Loyihada bu ikkalasi bir necha marta chalkashgan: domen
+ * (lakma.uz / lokma.uz) va deploy hujjatidagi "lakmagobot" ham
+ * xato edi. Haqiqiy bot: @lokmaGobot
+ */
+const BOT_USERNAME = cleanName(import.meta.env.VITE_BOT_USERNAME, 'lokmaGobot');
 
 function getDeviceId() {
   try {
