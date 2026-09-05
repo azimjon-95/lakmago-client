@@ -23,6 +23,58 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!--
+      ============================================================
+      ERTA SOZLAMALAR — pastga surib yopilishni bloklash + ranglar
+      ============================================================
+      DIQQAT: bu yerda FULLSCREEN so'ralmaydi. To'liq ekran
+      BotFather'dagi "Mode: Fullscreen" sozlamasi orqali
+      ta'minlanadi va u ishlaydi — bu yerga qo'shish shart emas
+      (avval urinib ko'rilgan, faqat zarar keltirgan).
+
+      NIMA UCHUN <head> DA:
+      disableVerticalSwipes() ilgari faqat React yuklangandan
+      keyin (authenticateWithTelegram ichida) chaqirilardi. Bu
+      juda kech — foydalanuvchi ilova ochilishi bilanoq pastga
+      surib ulgurar va Telegram uni yopib yuborardi. Endi u SDK
+      yuklangan zahoti, React bundle hatto so'ralmasidan oldin
+      ishlaydi.
+
+      ready() BU YERDA CHAQIRILMAYDI — u Telegram'ning yuklash
+      ekranini erta olib tashlaydi. Uni React o'z vaqtida
+      chaqiradi (lib/telegram.js).
+    -->
+    <script>
+      (function () {
+        var tg = window.Telegram && window.Telegram.WebApp;
+        if (!tg) return;
+
+        var apply = function () {
+          // Pastga/tepaga surib yopish yoki kichraytirishni bloklaymiz
+          // (Bot API 7.7+). Ilovadan chiqish faqat Закрыть tugmasi orqali.
+          try { tg.disableVerticalSwipes && tg.disableVerticalSwipes(); } catch (e) {}
+
+          // Status bar foni oq -> Telegram ikonlarni to'q chizishi kerak
+          try { tg.setHeaderColor && tg.setHeaderColor('#FFFFFF'); } catch (e) {}
+          try { tg.setBackgroundColor && tg.setBackgroundColor('#FFFFFF'); } catch (e) {}
+        };
+
+        apply();
+
+        /*
+         * Takrorlash: Telegram ochilish animatsiyasi davomida o'z
+         * sozlamalarini o'rnatadi va bizning erta chaqiruvimizni
+         * ustidan yozib yuborishi mumkin. Bir necha marta qayta
+         * beramiz — chaqiruvlar zararsiz (idempotent).
+         */
+        setTimeout(apply, 200);
+        setTimeout(apply, 800);
+        setTimeout(apply, 2000);
+
+        // Ilova fon rejimidan qaytganda ham tiklanadi
+        try { tg.onEvent && tg.onEvent('activated', apply); } catch (e) {}
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   </head>
