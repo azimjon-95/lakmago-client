@@ -23,12 +23,12 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <!--
-      ?59 — CDN/WKWebView keshini chetlab o'tish uchun. Query satri
-      faylni o'zgartirmaydi (telegram.org baribir eng so'nggi
-      versiyani beradi), lekin eski keshlangan nusxa qaytishining
-      oldini oladi.
+      ?63 — rasmiy hujjatda ko'rsatilgan joriy versiya
+      (core.telegram.org/bots/webapps). Query satri keshni ham
+      chetlab o'tadi. Hujjat talabi: bu skript <head> ichida,
+      BOSHQA HAR QANDAY SKRIPTDAN OLDIN turishi kerak.
     -->
-    <script src="https://telegram.org/js/telegram-web-app.js?59"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js?63"></script>
     <!--
       ============================================================
       TO'LIQ EKRAN (fullscreen) — NIMA UCHUN AYNAN SHU YERDA
@@ -64,10 +64,31 @@
         var tg = window.Telegram && window.Telegram.WebApp;
         if (!tg) return;
 
-        try { tg.ready(); } catch (e) {}
+        /*
+         * DIQQAT — ready() ATAYLAB ENG BOSHIDA CHAQIRILMAYDI.
+         * Rasmiy hujjat: "Once this method is called, the loading
+         * placeholder is hidden and the Mini App is shown" va uni
+         * "asosiy interfeys elementlari yuklangach" chaqirish
+         * tavsiya etiladi. Uni <head> da, DOM hali bo'sh paytda
+         * chaqirsak, Telegram yuklash ekranini erta olib tashlaydi
+         * va oyna o'tish animatsiyasi bilan bir vaqtga tushadi —
+         * aynan shu paytda kelgan fullscreen so'rovi tushib
+         * qolishi mumkin. Shuning uchun tartib teskari: avval
+         * rejimni so'raymiz, ready() esa React tomonidan
+         * (lib/telegram.js) chaqiriladi.
+         */
 
         // Faqat mobil — desktop/vebda Telegram o'z oyna o'lchamini boshqaradi.
         if (['android', 'android_x', 'ios'].indexOf(tg.platform) === -1) return;
+
+        /*
+         * Hujjat aynan shuni tavsiya qiladi: to'liq ekranda header
+         * shaffof bo'ladi, shuning uchun setHeaderColor bilan rang
+         * berish kerak — Telegram shu rangdan status bar va
+         * boshqaruv elementlari uchun kontrast rang tanlaydi.
+         * So'rovdan OLDIN o'rnatamiz.
+         */
+        try { tg.setHeaderColor && tg.setHeaderColor('#FFFFFF'); } catch (e) {}
 
         var state = { supported: false, tries: 0, failed: null };
         window.__lokmagoFs = state;
@@ -117,7 +138,7 @@
          * urinishlar tugadi.
          */
         var timer = setInterval(function () {
-          if (tg.isFullscreen || state.failed || state.tries >= 6) {
+          if (tg.isFullscreen || state.failed || state.tries >= 12) {
             clearInterval(timer);
             if (!tg.isFullscreen) expand(); // zaxira
             return;
