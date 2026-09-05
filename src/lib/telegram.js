@@ -37,6 +37,39 @@ export function getTelegram() {
   return window.Telegram?.WebApp;
 }
 
+/*
+ * Telegram'ning NATIVE tepa qismini (status bar orqasidagi hudud)
+ * joriy ekran foniga moslash.
+ *
+ * NIMA UCHUN KERAK: to'liq ekran rejimida (Mode: Fullscreen)
+ * Telegram header'i shaffof bo'ladi va rasmiy hujjatga ko'ra
+ * Telegram AYNAN SHU rangdan status bar (soat, antenna,
+ * batareya) uchun KONTRAST rang tanlaydi:
+ *   to'q rang berilsa  -> OQ soat/antenna
+ *   och rang berilsa   -> QORA soat/antenna
+ *
+ * Ilovada ikki xil fon bor va ular ketma-ket almashadi:
+ *   Splash — to'q ko'k (#002634) -> oq soat kerak
+ *   Asosiy sahifa — oq          -> qora soat kerak
+ * Shuning uchun rang EKRANGA QARAB o'zgarishi shart, bir marta
+ * o'rnatib qo'yish yetarli emas.
+ *
+ * @param {string} color - '#RRGGBB'
+ */
+export function setTelegramSurfaceColor(color) {
+  const tg = getTelegram();
+  if (!tg) return;
+  try {
+    tg.setHeaderColor?.(color);
+    tg.setBackgroundColor?.(color);
+  } catch { /* eski Telegram versiyalarida bo'lmasligi mumkin */ }
+
+  // CSS tomoni: status bar ostidagi qatlam ham shu rangda bo'lsin
+  try {
+    document.documentElement.style.setProperty('--tg-surface-top', color);
+  } catch { /* SSR/DOM yo'q */ }
+}
+
 export function haptic() {
   getTelegram()?.HapticFeedback?.impactOccurred('light');
 }

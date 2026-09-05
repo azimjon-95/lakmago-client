@@ -165,7 +165,7 @@ ul { list-style: none; }
   left: 0;
   right: 0;
   height: calc(env(safe-area-inset-top, 0px) + var(--tg-content-top, 0px));
-  background: var(--canvas);
+  background: var(--tg-surface-top, var(--canvas));
   pointer-events: none;
   z-index: 100;
 }
