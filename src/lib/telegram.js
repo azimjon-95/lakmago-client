@@ -108,20 +108,29 @@ export async function authenticateWithTelegram() {
 
     if (isMobilePlatform) {
       /*
-       * To'liq ekran so'rovi ENDI BU YERDA EMAS — u index.html dagi
-       * inline skriptda, Telegram SDK yuklangandan keyingi zahoti
-       * yuboriladi (batafsil izoh o'sha yerda).
+       * DIQQAT — BU BLOK ATAYLAB SODDA VA SINXRON.
        *
-       * Sabab: bu funksiya React bundle yuklanib, App daraxti
-       * render bo'lgandan keyin ishlaydi — Telegram uchun bu juda
-       * kech, so'rov e'tiborsiz qolar edi.
+       * Bu aynan 38ae3fd commitidagi, ISHLAGANI TASDIQLANGAN
+       * ketma-ketlik: ready() -> expand() -> requestFullscreen(),
+       * hammasi bitta tickda, hech qanday kechikishsiz.
        *
-       * Bu yerda faqat ZAXIRA: agar inline skript negadir
-       * ishlamagan bo'lsa (window.__lokmagoFs yo'q — masalan
-       * index.html eski keshdan kelgan), eski xulqni saqlaymiz.
+       * Keyinchalik bu joyga bir necha "yaxshilash" kiritilgan edi:
+       * requestAnimationFrame kechikishi, setTimeout, expand() ni
+       * olib tashlash, takroriy urinishlar, index.html ga ko'chirish.
+       * HECH BIRI YORDAM BERMADI va har biri ishlagan koddan
+       * uzoqlashtirdi.
+       *
+       * Shuning uchun: KECHIKISH QO'SHMANG, expand() ni OLIB
+       * TASHLAMANG, tartibni O'ZGARTIRMANG. Agar kelajakda bu yerni
+       * o'zgartirish kerak bo'lsa — avval real qurilmada tekshiring.
        */
-      if (!window.__lokmagoFs && typeof tg.expand === 'function') {
+      if (typeof tg.expand === 'function') {
         try { tg.expand(); } catch { /* qo'llab-quvvatlanmaydi */ }
+      }
+
+      // To'liq ekran rejimi (Bot API 8.0+)
+      if (typeof tg.requestFullscreen === 'function') {
+        try { tg.requestFullscreen(); } catch { /* qo'llab-quvvatlanmaydi */ }
       }
     }
 
