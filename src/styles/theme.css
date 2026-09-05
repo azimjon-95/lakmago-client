@@ -142,6 +142,43 @@ ul { list-style: none; }
 }
 
 /*
+ * ===================================================================
+ * PASTGA SURIB YOPILISHNI BLOKLASH (faqat Telegram mobil)
+ * ===================================================================
+ * disableVerticalSwipes() chaqirilgan bo'lsa ham iOS'da ilova
+ * pastga surilganda yopilib ketardi. Sabab: sahifa BODY darajasida
+ * aylanadi. Body eng tepada turganda (scrollTop = 0) foydalanuvchi
+ * pastga tortsa, iOS bu gestani WebView'ga emas, USTIDAGI Telegram
+ * oynasiga uzatadi — va u ilovani yopadi. Telegram'ning o'z
+ * sozlamasi bu darajada yordam bermaydi.
+ *
+ * Yechim — gestani Telegram'ga umuman yetkazmaslik:
+ *   1. body aylanmaydigan qilinadi (overflow: hidden)
+ *   2. aylanish .app-shell ichiga ko'chiriladi (o'z konteyneri)
+ *   3. overscroll-behavior: contain — chetdan oshgan gesta
+ *      tashqariga "o'tib ketmaydi"
+ *   4. JS scrollTop ni hech qachon 0 da qoldirmaydi (index.html) —
+ *      iOS uchun konteyner "eng tepada emas", demak gesta uniki
+ *
+ * DIQQAT: faqat .in-telegram ostida ishlaydi. Brauzerda odatiy
+ * body-scroll saqlanadi — u yerda bunday muammo yo'q.
+ * .app-shell har sahifada alohida render bo'ladi, lekin bir vaqtda
+ * faqat bittasi mavjud, shuning uchun konflikt yo'q.
+ */
+.in-telegram,
+.in-telegram body {
+  height: 100%;
+  overflow: hidden;
+}
+
+.in-telegram .app-shell {
+  height: var(--tg-viewport-height, 100dvh);
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/*
  * TO'LIQ EKRAN — TEPADAGI OQ QATLAM
  *
  * BotFather'da Mode: Fullscreen yoqilgach ilova butun ekranni,
