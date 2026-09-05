@@ -190,13 +190,9 @@ export async function authenticateWithTelegram() {
      * Telegram qora soat/antenna chizadi — bizga kerakli natija.
      */
     const applyColors = () => {
-      /*
-       * Tepa (status bar) — TO'Q. Telegram fullscreen'da ikonlarni
-       * oq chizadi va uni oq fonga o'zgartirib bo'lmadi, shuning
-       * uchun fonni ikonga moslaymiz, aksincha emas.
-       * Pastki panel va umumiy fon — oq (ilova mavzusi).
-       */
-      setTelegramSurfaceColor('#002634');
+      // Tepa chizig'i OQ, status bar ikonlari TO'Q bo'lishi kerak.
+      // Telegram kontrastni header rangidan hisoblaydi.
+      setTelegramSurfaceColor('#FFFFFF');
       try {
         tg.setBottomBarColor?.('#FFFFFF');
       } catch {
@@ -204,6 +200,28 @@ export async function authenticateWithTelegram() {
       }
     };
     applyColors();
+
+    /*
+     * RANGNI QAYTA BERISH — nima uchun kerak.
+     *
+     * BotFather'da Mode: Fullscreen yoqilgani uchun ilova
+     * to'liq ekranda OCHILADI — ya'ni `fullscreenChanged`
+     * hodisasi UMUMAN kelmaydi (rejim allaqachon o'rnatilgan).
+     * Demak applyColors() faqat bir marta, React mount
+     * bo'lganda ishlaydi.
+     *
+     * Ehtimol shu sabab ilgari ishlamagan: Telegram ochilish
+     * paytida status bar uslubini O'ZI belgilaydi va bizning
+     * chaqiruvimiz undan OLDIN kelib, keyin ustidan yozib
+     * yuborilgan. Shuning uchun rangni bir necha marta,
+     * ochilish tugagach ham qayta beramiz.
+     */
+    setTimeout(applyColors, 300);
+    setTimeout(applyColors, 1200);
+    if (typeof tg.onEvent === 'function') {
+      // Ilova fon rejimidan qaytganda ham status bar tiklanishi kerak
+      try { tg.onEvent('activated', applyColors); } catch { /* eski versiya */ }
+    }
     // Viewport balandligини CSS o'zgaruvchisига yozamiz — har xil telefonда
     // (notch, klaviatura, kengaytirish) layout to'g'ri moslashadi.
     const syncViewport = () => {
