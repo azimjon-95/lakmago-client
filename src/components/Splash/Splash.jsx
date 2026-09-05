@@ -22,6 +22,14 @@ const FIRST_OPEN_KEY = 'lokmago_first_open_done';
 
 export function Splash({ onDone }) {
   const qc = useQueryClient();
+
+  /*
+   * Status bar chizig'i splash davomida ham, keyin ham TO'Q
+   * qoladi — shuning uchun bu yerda hech narsa almashtirilmaydi
+   * (ilgari cleanup oq rangga qaytarardi, natijada asosiy
+   * sahifada oq ikonlar oq fonda yo'qolib ketardi).
+   * Rang telegram.js da bir marta o'rnatiladi.
+   */
   const videoRef = useRef(null);
   const [leaving, setLeaving] = useState(false);
   const prefetched = useRef(false);

@@ -175,6 +175,25 @@ export const useUser = create(
   },
 
   setAuthStatus: (authStatus) => set({ authStatus }),
+
+  /*
+   * logout() — Auth fundamenti (2-bosqich): serverdagi Session'ni
+   * bekor qiladi (Session.revokedAt), mahalliy tokenlarni va
+   * foydalanuvchi holatini tozalaydi. Client UI'da hozircha
+   * "Chiqish" tugmasi yo'q (Telegram Mini App'da odatiy holat —
+   * Telegram o'zi identifikatsiyani boshqaradi), lekin brauzer
+   * (Login Widget) orqali kirgan foydalanuvchi uchun kelajakda
+   * kerak bo'ladi — shu funksiya tayyor.
+   */
+  logout: async () => {
+    try {
+      const { api, clearAuthTokens } = await import('@/api');
+      await api.logoutSession().catch(() => {}); // server bilan bog'lanmasa ham lokal tozalash davom etadi
+      clearAuthTokens();
+    } finally {
+      set({ user: getInitialUser(), authStatus: 'pending' });
+    }
+  },
   setLastPaymentMethod: (lastPaymentMethod) => set({ lastPaymentMethod })
     }),
     {
@@ -204,3 +223,13 @@ export const useUser = create(
     },
   ),
 );
+
+/*
+ * Auth fundamenti (2-bosqich) spetsifikatsiyasidagi nomlar bilan
+ * — authStatus'dan hisoblangan, reaktiv selektor hook'lar.
+ * Mavjud authStatus/setAuthStatus pattern ATAYLAB o'zgartirilmadi
+ * (App.jsx va boshqa joylarda ishlatiladi) — bu FAQAT qulay
+ * nomlangan qo'shimcha ustiga qurilgan qatlam.
+ */
+export const useIsAuthenticated = () => useUser((s) => s.authStatus === 'done');
+export const useIsAuthLoading = () => useUser((s) => s.authStatus === 'pending');
