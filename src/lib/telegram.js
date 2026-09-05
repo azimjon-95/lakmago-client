@@ -37,43 +37,6 @@ export function getTelegram() {
   return window.Telegram?.WebApp;
 }
 
-/*
- * Telegram'ning NATIVE tepa qismini (status bar orqasidagi hudud)
- * joriy ekran foniga moslash.
- *
- * NIMA UCHUN KERAK: to'liq ekran rejimida (Mode: Fullscreen)
- * Telegram header'i shaffof bo'ladi va rasmiy hujjatga ko'ra
- * Telegram AYNAN SHU rangdan status bar (soat, antenna,
- * batareya) uchun KONTRAST rang tanlaydi:
- *   to'q rang berilsa  -> OQ soat/antenna
- *   och rang berilsa   -> QORA soat/antenna
- *
- * REAL QURILMADA ANIQLANDI: bu nazariya iOS'da ISHLAMADI.
- * setHeaderColor('#FFFFFF') berilganda ham Telegram status bar
- * ikonlarini OQ holicha qoldirdi — oq fon ustida ular butunlay
- * ko'rinmay ketdi (soat ham, antenna ham, batareya ham).
- *
- * Shuning uchun ranglarni Telegram tanlashiga TOPSHIRMAYMIZ.
- * Tepadagi status bar chizig'i HAR DOIM to'q (#002634 — splash
- * bilan bir xil) bo'ladi, oq ikonlar unda aniq ko'rinadi va
- * splashdan asosiy sahifaga o'tish ham silliq chiqadi.
- *
- * @param {string} color - '#RRGGBB'
- */
-export function setTelegramSurfaceColor(color) {
-  const tg = getTelegram();
-  if (!tg) return;
-  try {
-    tg.setHeaderColor?.(color);
-    tg.setBackgroundColor?.(color);
-  } catch { /* eski Telegram versiyalarida bo'lmasligi mumkin */ }
-
-  // CSS tomoni: status bar ostidagi qatlam ham shu rangda bo'lsin
-  try {
-    document.documentElement.style.setProperty('--tg-surface-top', color);
-  } catch { /* SSR/DOM yo'q */ }
-}
-
 export function haptic() {
   getTelegram()?.HapticFeedback?.impactOccurred('light');
 }
@@ -91,26 +54,6 @@ export function haptic() {
 
 
 const API_BASE = import.meta.env.VITE_API_URL ?? null;
-
-/*
- * Session.deviceId uchun — shu qurilma/brauzerni boshqalardan
- * ajratib turadi (masalan "boshqa qurilmalarda chiqish" funksiyasi
- * kelajakda kerak bo'lsa). Bir marta generatsiya qilinadi va
- * localStorage'da qoladi — sessionStorage emas, chunki tab
- * yopilganda ham SHU QURILMA ekanligi o'zgarmasligi kerak.
- */
-function getDeviceId() {
-  try {
-    let id = localStorage.getItem('lokmago_device_id');
-    if (!id) {
-      id = crypto.randomUUID ? crypto.randomUUID() : `dev_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-      localStorage.setItem('lokmago_device_id', id);
-    }
-    return id;
-  } catch {
-    return ''; // localStorage bloklangan — server deviceId'siz ham ishlaydi (ixtiyoriy maydon)
-  }
-}
 
 // Fon rejimida ishlaydigan auth: Telegram.WebApp.ready() chaqiradi, initData'ni
 // backendga yuboradi. Bosh sahifa BU JARAYONNI KUTMAYDI — darhol ochiladi.
@@ -144,23 +87,6 @@ export async function authenticateWithTelegram() {
     const isMobilePlatform = ['android', 'android_x', 'ios'].includes(tg.platform);
 
     if (isMobilePlatform) {
-      /*
-       * DIQQAT — BU BLOK ATAYLAB SODDA VA SINXRON.
-       *
-       * Bu aynan 38ae3fd commitidagi, ISHLAGANI TASDIQLANGAN
-       * ketma-ketlik: ready() -> expand() -> requestFullscreen(),
-       * hammasi bitta tickda, hech qanday kechikishsiz.
-       *
-       * Keyinchalik bu joyga bir necha "yaxshilash" kiritilgan edi:
-       * requestAnimationFrame kechikishi, setTimeout, expand() ni
-       * olib tashlash, takroriy urinishlar, index.html ga ko'chirish.
-       * HECH BIRI YORDAM BERMADI va har biri ishlagan koddan
-       * uzoqlashtirdi.
-       *
-       * Shuning uchun: KECHIKISH QO'SHMANG, expand() ni OLIB
-       * TASHLAMANG, tartibni O'ZGARTIRMANG. Agar kelajakda bu yerni
-       * o'zgartirish kerak bo'lsa — avval real qurilmada tekshiring.
-       */
       if (typeof tg.expand === 'function') {
         try { tg.expand(); } catch { /* qo'llab-quvvatlanmaydi */ }
       }
@@ -177,50 +103,19 @@ export async function authenticateWithTelegram() {
       try { tg.disableVerticalSwipes(); } catch { /* qo'llab-quvvatlanmaydi */ }
     }
 
-    /*
-     * Yorug' mavzu — Telegram header va fon ranglari.
-     * MUHIM: bu Telegram'ning O'Z native UI elementlarini
-     * (status bar orqasidagi hudud, header) boshqaradi — CSS
-     * o'zgaruvchilaridan MUSTAQIL.
-     *
-     * TO'LIQ EKRANDA bu ayniqsa muhim: rasmiy hujjat aytadi —
-     * fullscreen'da header shaffof bo'ladi, va Telegram AYNAN SHU
-     * rangdan status bar (soat, antenna, batareya) va boshqaruv
-     * tugmalari uchun KONTRAST rang tanlaydi. Oq bergani uchun
-     * Telegram qora soat/antenna chizadi — bizga kerakli natija.
-     */
-    const applyColors = () => {
-      // Tepa chizig'i OQ, status bar ikonlari TO'Q bo'lishi kerak.
-      // Telegram kontrastni header rangidan hisoblaydi.
-      setTelegramSurfaceColor('#FFFFFF');
-      try {
-        tg.setBottomBarColor?.('#FFFFFF');
-      } catch {
-        // eski Telegram versiyalarida bo'lmasligi mumkin
-      }
-    };
-    applyColors();
-
-    /*
-     * RANGNI QAYTA BERISH — nima uchun kerak.
-     *
-     * BotFather'da Mode: Fullscreen yoqilgani uchun ilova
-     * to'liq ekranda OCHILADI — ya'ni `fullscreenChanged`
-     * hodisasi UMUMAN kelmaydi (rejim allaqachon o'rnatilgan).
-     * Demak applyColors() faqat bir marta, React mount
-     * bo'lganda ishlaydi.
-     *
-     * Ehtimol shu sabab ilgari ishlamagan: Telegram ochilish
-     * paytida status bar uslubini O'ZI belgilaydi va bizning
-     * chaqiruvimiz undan OLDIN kelib, keyin ustidan yozib
-     * yuborilgan. Shuning uchun rangni bir necha marta,
-     * ochilish tugagach ham qayta beramiz.
-     */
-    setTimeout(applyColors, 300);
-    setTimeout(applyColors, 1200);
-    if (typeof tg.onEvent === 'function') {
-      // Ilova fon rejimidan qaytganda ham status bar tiklanishi kerak
-      try { tg.onEvent('activated', applyColors); } catch { /* eski versiya */ }
+    // Yorug' mavzu — Telegram header va fon ranglari.
+    // MUHIM: bu Telegram'ning O'Z native UI elementlarini
+    // (status bar orqasidagi hudud, header) boshqaradi — CSS
+    // o'zgaruvchilaridan MUSTAQIL. Ilova mavzusi (--canvas)
+    // oq bo'lgach bu ham yangilanishi shart edi — aks holda
+    // Telegram'ning o'zi hamon eski to'q rangni ko'rsatib,
+    // status bar atrofida qora chiziq qolib ketardi.
+    try {
+      tg.setHeaderColor?.('#FFFFFF');
+      tg.setBackgroundColor?.('#FFFFFF');
+      tg.setBottomBarColor?.('#FFFFFF');
+    } catch {
+      // eski Telegram versiyalarida bo'lmasligi mumkin
     }
     // Viewport balandligини CSS o'zgaruvchisига yozamiz — har xil telefonда
     // (notch, klaviatura, kengaytirish) layout to'g'ri moslashadi.
@@ -243,10 +138,8 @@ export async function authenticateWithTelegram() {
     syncViewport();
     if (typeof tg.onEvent === 'function') {
       tg.onEvent('viewportChanged', syncViewport);
-      // To'liq ekranga o'tganda balandlik va yuqori bo'shliq o'zgaradi.
-      // Ranglar ham QAYTA berilishi kerak — rejim almashganda Telegram
-      // status bar kontrastini qaytadan hisoblaydi.
-      tg.onEvent('fullscreenChanged', () => { syncViewport(); applyColors(); });
+      // To'liq ekranga o'tganda balandlik va yuqori bo'shliq o'zgaradi
+      tg.onEvent('fullscreenChanged', syncViewport);
       tg.onEvent('safeAreaChanged', syncViewport);
       tg.onEvent('contentSafeAreaChanged', syncViewport);
     }
@@ -272,28 +165,16 @@ export async function authenticateWithTelegram() {
   const res = await fetch(`${API_BASE}/auth/telegram`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      initData,
-      startParam: tg?.initDataUnsafe?.start_param || '',
-      platform: 'telegram',
-      deviceId: getDeviceId(),
-    })
+    body: JSON.stringify({ initData, startParam: tg?.initDataUnsafe?.start_param || '' })
   });
   if (!res.ok) throw new Error(`Auth xatosi: ${res.status}`);
   const data = await res.json();
-  /*
-   * Tokenlarni API klientiga beramiz — himoyalangan so'rovlar
-   * ishlashi uchun. accessToken (qisqa muddatli) + refreshToken
-   * (uzoq muddatli, muddati tugaganda apiFetch o'zi avtomatik
-   * yangilaydi) — Auth fundamenti. Eski `token` (uzoq muddatli,
-   * 30 kun) ham qaytariladi va SAQLANADI — agar biror sabab bilan
-   * accessToken/refreshToken kelmasa (masalan eski server versiyasi
-   * bilan ishlab turgan holatda), ilova baribir ishlayveradi.
-   */
-  const { setAuthToken, setRefreshToken } = await import('@/api');
-  if (data.accessToken) setAuthToken(data.accessToken);
-  else if (data.token) setAuthToken(data.token);
-  if (data.refreshToken) setRefreshToken(data.refreshToken);
+  // Tokenni API klientiga beramiz — himoyalangan so'rovlar ishlashi uchun.
+  // (Avval faqat sessionStorage'ga yozilardi, API undan xabarsiz edi → 401)
+  if (data.token) {
+    const { setAuthToken } = await import('@/api');
+    setAuthToken(data.token);
+  }
   return {
     telegramId: data.user.telegramId,
     firstName: data.user.firstName,

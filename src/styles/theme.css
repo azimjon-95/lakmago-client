@@ -141,35 +141,6 @@ ul { list-style: none; }
   padding-top: calc(env(safe-area-inset-top, 0px) + var(--tg-content-top, 0px));
 }
 
-/*
- * TO'LIQ EKRAN — TEPADAGI OQ QATLAM
- *
- * BotFather'da Mode: Fullscreen yoqilgach ilova butun ekranni,
- * shu jumladan status bar (soat, antenna, batareya) ostidagi
- * hududni ham egallaydi. Bu shuni anglatadiki, sahifa
- * aylantirilganda rasmlar va kartalar soat ostidan o'tib ketadi
- * — soat va antenna o'qib bo'lmaydigan holga keladi (och
- * rasmda oq matn, to'q rasmda qora matn).
- *
- * Yechim: status bar hududini doimiy oq qatlam bilan yopamiz.
- * Kontent uning ostida aylanadi, lekin ko'rinmaydi — soat va
- * antenna esa har doim toza oq fonda qoladi.
- *
- * pointer-events: none — qatlam bosishlarni ushlab qolmasin
- * (Telegram'ning o'z tugmalari shu hududda turadi).
- */
-.app-shell::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: calc(env(safe-area-inset-top, 0px) + var(--tg-content-top, 0px));
-  background: var(--tg-surface-top, var(--canvas));
-  pointer-events: none;
-  z-index: 100;
-}
-
 /* Umumiy yordamchi klasslar */
 .container-p { padding-left: 16px; padding-right: 16px; }
 .text-muted { color: var(--muted); }

@@ -16,7 +16,7 @@ import { useCartCleanup } from '@/hooks/useCartCleanup';
 import { api } from '@/api';
 import { haptic, getTelegram } from '@/lib/telegram';
 import { useDishes, useRestaurants } from '@/hooks/queries';
-import { savePendingPayment, getPendingPayments, clearPendingPayment } from '@/lib/pendingPayment';
+import { savePendingPayment, getPendingPayment, clearPendingPayment } from '@/lib/pendingPayment';
 import './Cart.css';
 
 
@@ -29,58 +29,6 @@ import './Cart.css';
  * Paynet qo'shilganda faqat SHU YERGA bitta qator qo'shiladi.
  */
 const PROVIDER_LABEL = { payme: 'Payme', click: 'Click', paynet: 'Paynet' };
-
-/*
- * To'lov sahifasini ochish — ZAXIRA YO'L BILAN.
- *
- * MUAMMO (real qurilmada aniqlangan): "Ha, yuborish" bosilganda
- * buyurtma YARATILARDI va to'lov havolasi OLINARDI (server xatosi
- * yo'q — hech qanday ogohlantirish chiqmasdi), lekin Click sahifasi
- * OCHILMASDI. Tugma shunchaki oddiy holatiga qaytardi.
- *
- * SABAB: tg.openLink() foydalanuvchi bosishidan KEYIN, `await`
- * tugagach chaqiriladi — ya'ni brauzer nuqtai nazaridan bu endi
- * "foydalanuvchi harakati" (user gesture) doirasida emas. iOS
- * WKWebView bunday chaqiruvlarni jimgina bloklaydi: xato ham
- * bermaydi, hodisa ham yubormaydi.
- *
- * YECHIM: openLink chaqiriladi, so'ng 1 soniya kutiladi. Agar
- * ilova hamon ko'rinib tursa (ya'ni hech qayerga o'tilmagan),
- * o'sha oynaning o'zini to'lov manziliga yo'naltiramiz —
- * location.href user gesture talab qilmaydi, u har doim ishlaydi.
- *
- * Savat yo'qolmaydi: u localStorage'da saqlanadi va orderId
- * savePendingPayment() orqali yozib qo'yilgan, shuning uchun
- * Click'dan qaytgach holat avtomatik tekshiriladi.
- */
-function openPaymentUrl(url) {
-  const tg = getTelegram();
-  if (!tg?.openLink) {
-    window.location.href = url;
-    return;
-  }
-
-  let left = false;
-  const onHide = () => {
-    if (document.visibilityState === 'hidden') left = true;
-  };
-  document.addEventListener('visibilitychange', onHide);
-
-  try {
-    tg.openLink(url);
-  } catch {
-    // openLink qo'llab-quvvatlanmaydi — zaxira quyida ishlaydi
-  }
-
-  setTimeout(() => {
-    document.removeEventListener('visibilitychange', onHide);
-    if (!left && document.visibilityState === 'visible') {
-      window.location.href = url;
-    }
-  }, 1000);
-}
-
-
 
 export function CartPage() {
   const navigate = useNavigate();
@@ -154,58 +102,30 @@ export function CartPage() {
   useEffect(() => {
     let cancelled = false;
 
-    /*
-     * BARCHA kutilayotgan to'lovlar tekshiriladi, bittasi emas.
-     *
-     * Mijoz to'lovni boshlab, to'lamasdan qaytib, yana boshlashi
-     * mumkin — o'shanda ikkita 'awaiting_payment' buyurtma bo'ladi.
-     * Ilgari faqat oxirgisi saqlanardi va birinchisi "ko'rinmas"
-     * bo'lib qolardi: mijoz o'sha eski havola orqali to'lasa,
-     * ilova buni sezmasdi va savat tozalanmasdi.
-     *
-     * Endi: agar ULARDAN BIRORTASI to'langan bo'lsa, savat
-     * tozalanadi va kuzatuv sahifasiga o'tiladi.
-     */
     async function check() {
-      const pendings = getPendingPayments();
-      if (!pendings.length) { if (!cancelled) setPendingCheck(null); return; }
+      const pending = getPendingPayment();
+      if (!pending) { if (!cancelled) setPendingCheck(null); return; }
 
       if (!cancelled) setPendingCheck('checking');
       try {
-        const orders = await Promise.all(
-          pendings.map((p) =>
-            api.getOrder(p.orderId)
-              .then((o) => ({ pending: p, order: o }))
-              .catch(() => null)),
-        );
+        const order = await api.getOrder(pending.orderId);
         if (cancelled) return;
 
-        const known = orders.filter(Boolean);
-        if (!known.length) {
-          // Hech biriga javob kelmadi — tarmoq muammosi.
-          // Yozuvlar SAQLANADI, keyingi tekshiruvda qayta urinamiz.
+        if (order.status === 'cancelled') {
+          // Buyurtma bekor bo'lgan (masalan muddati o'tgan) —
+          // eslatma kerak emas, savat allaqachon saqlangan.
+          clearPendingPayment();
           setPendingCheck(null);
           return;
         }
 
-        // Bekor bo'lganlarni ro'yxatdan chiqaramiz
-        known
-          .filter(({ order }) => order.status === 'cancelled')
-          .forEach(({ pending }) => clearPendingPayment(pending.orderId));
-
-        const paid = known.find(({ order }) =>
-          order.isPaid || (order.status !== 'awaiting_payment' && order.status !== 'cancelled'));
-
-        if (paid) {
+        if (order.isPaid || order.status !== 'awaiting_payment') {
           /*
            * PUL YECHILDI — endi va FAQAT endi savat tozalanadi
            * va buyurtma faol qilinadi. loadActive() serverdan
            * HAQIQIY holatni oladi (Order.status), ya'ni
            * "Qabul qilindi" endi rost gap — restoran buyurtmani
            * chindan ham ko'rmoqda.
-           *
-           * Qolgan to'lanmagan yozuvlar ham tozalanadi: savat
-           * allaqachon bo'shagani uchun ular endi ma'nosiz.
            */
           clearPendingPayment();
           useCart.getState().clear();
@@ -217,15 +137,13 @@ export function CartPage() {
           return;
         }
 
-        // Hali hech biri to'lanmagan — mijoz to'lamagan yoki
+        // Hali 'awaiting_payment' — mijoz to'lamagan yoki
         // Click sahifasini yopib yuborgan. Savat TEGILMAYDI.
-        const waiting = known.find(({ order }) => order.status === 'awaiting_payment');
-        setPendingCheck(waiting
-          ? { unpaid: true, orderId: waiting.pending.orderId, provider: waiting.pending.provider }
-          : null);
+        setPendingCheck({ unpaid: true, orderId: pending.orderId });
       } catch {
-        // Kutilmagan xato — keyingi tekshiruvda qayta urinamiz,
-        // hozircha jim turamiz (savat baribir tegilmagan).
+        // Server bilan bog'lanib bo'lmadi — keyingi tekshiruvda
+        // qayta urinamiz, hozircha jim turamiz (savat baribir
+        // tegilmagan, xavfli hech narsa yo'q).
         if (!cancelled) setPendingCheck(null);
       }
     }
@@ -251,15 +169,10 @@ export function CartPage() {
     if (!pendingCheck?.orderId) return;
     haptic();
     try {
-      /*
-       * Provayder AYNAN to'lov boshlangandagisi bo'lishi shart.
-       * Ilgari bu yerda lastPaymentMethod ishlatilardi — mijoz
-       * shu orada "Naqd" ga o'tgan bo'lsa, server provider=cash
-       * uchun 400 qaytarardi.
-       */
-      const provider = pendingCheck.provider || lastPaymentMethod;
-      const { url } = await api.getPaymentLink(pendingCheck.orderId, provider);
-      openPaymentUrl(url);
+      const { url } = await api.getPaymentLink(pendingCheck.orderId, lastPaymentMethod);
+      const tg = getTelegram();
+      if (tg?.openLink) tg.openLink(url);
+      else window.location.href = url;
     } catch (e) {
       alert(e.message || 'To‘lov havolasini olib bo‘lmadi');
     }
@@ -274,7 +187,7 @@ export function CartPage() {
    */
   const dismissPendingPayment = () => {
     haptic();
-    clearPendingPayment(pendingCheck?.orderId);
+    clearPendingPayment();
     setPendingCheck(null);
   };
 
@@ -357,35 +270,10 @@ export function CartPage() {
   // Naqdmi yoki karta orqalimi
   const isCard = providers.some((p) => p.name === paymentMethod);
 
-  /*
-   * ILGARI xato jimgina yutilardi (.catch(() => {})). Natijada
-   * so'rov yiqilsa `providers` bo'sh qolib, "Karta orqali"
-   * tugmasi UMUMAN KO'RINMASDI — mijoz karta bilan to'lay
-   * olmasdi va sababini ham bilmasdi.
-   *
-   * Endi bir marta qayta urinamiz (tarmoq uzilishi ko'pincha
-   * bir martalik), keyin ham bo'lmasa holatni belgilab qo'yamiz —
-   * mijozga "to'lov tizimiga ulanib bo'lmadi" deb ko'rsatiladi.
-   */
-  const [providersFailed, setProvidersFailed] = useState(false);
-
   useEffect(() => {
-    let cancelled = false;
-
-    const load = (retry = true) => api.getPaymentStatus()
-      .then((st) => {
-        if (cancelled) return;
-        setProviders(Array.isArray(st?.available) ? st.available : []);
-        setProvidersFailed(false);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        if (retry) { setTimeout(() => load(false), 2000); return; }
-        setProvidersFailed(true);
-      });
-
-    load();
-    return () => { cancelled = true; };
+    api.getPaymentStatus()
+      .then((st) => setProviders(Array.isArray(st?.available) ? st.available : []))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -718,10 +606,12 @@ export function CartPage() {
         try {
           const { url } = await api.getPaymentLink(orderId, paymentMethod);
 
-          savePendingPayment(orderId, paymentMethod);
+          savePendingPayment(orderId);
           setPaying(false);
 
-          openPaymentUrl(url);
+          const tg = getTelegram();
+          if (tg?.openLink) tg.openLink(url);
+          else window.location.href = url;
 
           /*
            * NAVIGATE QILINMAYDI. Mijoz CartPage'da qoladi —
@@ -1013,20 +903,10 @@ export function CartPage() {
           </button>
         </div>
 
-        {/*
-          Onlayn to'lov mavjud emasligini tushuntiramiz.
-
-          IKKI XIL SABAB, IKKI XIL XABAR:
-          • providersFailed — serverga ulanib bo'lmadi. Karta
-            aslida ishlayotgan bo'lishi mumkin, shunchaki
-            ro'yxatni ololmadik. Mijozga "ulanib bo'lmadi" deb
-            aytish to'g'ri (ilgari bu holat "karta mavjud emas"
-            deb ko'rsatilardi — chalg'ituvchi edi).
-          • aks holda — hech qanday shlyuz ulanmagan, naqd qoladi.
-        */}
+        {/* Onlayn to'lov ulanmagan bo'lsa tushuntiramiz */}
         {!onlineAvailable && (
           <p className="cart-payment__note">
-            {providersFailed ? t('paymentConnectionFailed') : t('cardPaymentUnavailable')}
+            {t('cardPaymentUnavailable')}
           </p>
         )}
 

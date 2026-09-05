@@ -123,10 +123,6 @@ export const translations = {
     telegramOnlyLine2: "Quyidagi tugmani bosing — Telegram'da avtomatik ochiladi.",
     openInTelegram: "Telegram'da ochish",
     openDirectly: "To'g'ridan ilovani ochish",
-    telegramLoginPrompt: "Telegram orqali kiring — parol yoki ro'yxatdan o'tish shart emas.",
-    orLabel: 'yoki',
-    telegramLoginPrompt: 'Telegram orqali kiring — parol yoki ro\'yxatdan o\'tish shart emas.',
-    orLabel: 'yoki',
 
     // Do'stlarni taklif qilish kartasi
     referralTitle: "Do'stlarni taklif qiling",
@@ -467,8 +463,6 @@ export const translations = {
     telegramOnlyLine2: "Қуйидаги тугмани босинг — Telegram'да автоматик очилади.",
     openInTelegram: "Telegram'да очиш",
     openDirectly: "Тўғридан иловани очиш",
-    telegramLoginPrompt: 'Telegram орқали киринг — парол ёки рўйхатдан ўтиш шарт эмас.',
-    orLabel: 'ёки',
 
     referralTitle: 'Дўстларни таклиф қилинг',
     referralDesc: 'Ҳар бир дўстингиз каналга обуна бўлиб қўшилса — иккалангизга ҳам бонус!',
@@ -791,8 +785,6 @@ export const translations = {
     telegramOnlyLine2: 'Нажмите кнопку ниже — Telegram откроется автоматически.',
     openInTelegram: 'Открыть в Telegram',
     openDirectly: 'Открыть напрямую',
-    telegramLoginPrompt: 'Войдите через Telegram — пароль или регистрация не нужны.',
-    orLabel: 'или',
 
     referralTitle: 'Пригласите друзей',
     referralDesc: 'Когда друг подпишется на канал и присоединится — бонус получите оба!',
