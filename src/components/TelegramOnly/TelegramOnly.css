@@ -71,18 +71,64 @@
 .tg-only__auth {
   position: relative;
   min-height: 48px;
+  min-width: 220px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+/*
+ * ═══ BREND TUGMASI + SHAFFOF VIDJET ═══
+ *
+ * Telegram tugmasi cross-origin iframe ichida — rangini CSS bilan
+ * o'zgartirib BO'LMAYDI. Standart ko'k tugma ilovaning to'q sariq
+ * uslubiga umuman mos kelmasdi.
+ *
+ * Yechim: ko'rinadigan brend tugmasi pastda, haqiqiy Telegram
+ * iframe'i esa ustida SHAFFOF holda turadi. Mijoz bizning
+ * tugmani ko'radi, bosganda bosish iframe'ga tushadi va Telegram
+ * o'z oqimini boshlaydi. Hech qanday xatti-harakat taqlid
+ * qilinmaydi — bosish haqiqiy Telegram tugmasiga boradi.
+ */
+.tg-only__fakebtn {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border-radius: 12px;
+  background: linear-gradient(160deg, var(--brand) 0%, var(--brand-600) 100%);
+  color: var(--brand-text);
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px -6px rgba(255, 92, 0, 0.5);
+  transition: transform 160ms ease, filter 160ms ease;
+}
+
+/* Barmoq iframe ustida, shuning uchun :active bizga yetmaydi —
+   :hover bilan yengil javob beramiz (desktop), mobil uchun esa
+   iframe'ning o'z bosilish effekti ishlaydi. */
+.tg-only__auth:hover .tg-only__fakebtn { filter: brightness(1.04); }
+.tg-only__auth:active .tg-only__fakebtn {
+  transform: scale(0.97);
+  transition-duration: 0ms;
+}
+
 .tg-only__widget {
+  position: relative;
+  z-index: 2;
   display: flex;
   justify-content: center;
   min-height: 48px;
 }
+/* Brend tugmasi tayyor bo'lgach vidjet ko'rinmas bo'ladi —
+   lekin BOSILADIGAN holicha qoladi (display: none EMAS). */
+.tg-only__widget[data-masked='true'] { opacity: 0; }
+
 .tg-only__widget iframe {
-  /* Telegram iframe'i o'z o'lchamini beradi — markazlash uchun */
   margin: 0 auto !important;
 }
 

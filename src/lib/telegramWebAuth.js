@@ -66,6 +66,7 @@ function getDeviceId() {
  *   serverga so'rov ketdi. Aynan shu paytdan "kirilmoqda" ko'rsatiladi.
  */
 export function renderTelegramLoginWidget(container, onSuccess, onError, hooks = {}) {
+  const lang = hooks.lang;
   if (!container) return () => {};
 
   // Har bir Login Widget callback'i global window darajasida
@@ -115,6 +116,13 @@ export function renderTelegramLoginWidget(container, onSuccess, onError, hooks =
   script.setAttribute('data-radius', '12');
   script.setAttribute('data-onauth', `${callbackName}(user)`);
   script.setAttribute('data-request-access', 'write');
+  /*
+   * Tugma matni ilova tiliga moslashadi. Berilmasa Telegram
+   * brauzer tilini oladi va o'zbek mijozga ruscha "Войти через
+   * Telegram" ko'rsatiladi — ilovaning qolgan qismi o'zbekcha
+   * bo'lgani uchun bu g'alati ko'rinardi.
+   */
+  if (lang) script.setAttribute('data-lang', lang === 'ru' ? 'ru' : 'uz');
 
   /*
    * VIDJET TAYYORLIGINI KUZATISH.

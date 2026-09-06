@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/Icon';
-import { useT } from '@/i18n';
+import { useT, useI18n } from '@/i18n';
 import { renderTelegramLoginWidget } from '@/lib/telegramWebAuth';
 import './TelegramOnly.css';
 
@@ -23,8 +23,25 @@ import './TelegramOnly.css';
  */
 export function TelegramOnly({ onLoggedIn }) {
   const t = useT();
+  const { lang } = useI18n();
   const widgetRef = useRef(null);
   const [error, setError] = useState(null);
+
+  /*
+   * Vidjet iframe'ining O'LCHAMI.
+   *
+   * Telegram tugmasi cross-origin iframe ichida — uning rangini
+   * yoki shaklini CSS bilan o'zgartirib bo'lmaydi. Shuning uchun
+   * ostiga O'ZIMIZNING brend tugmamizni qo'yamiz, iframe esa
+   * ustida shaffof holda turadi: mijoz bizning tugmani ko'radi,
+   * bosganda esa bosish haqiqiy Telegram tugmasiga tushadi.
+   *
+   * Buning ishlashi uchun ikkalasi AYNAN bir o'lchamda bo'lishi
+   * shart — shuning uchun iframe chizilgach o'lchamini o'lchab,
+   * brend tugmasiga beramiz. Til yoki shrift o'zgarsa ham
+   * mos kelib turadi.
+   */
+  const [box, setBox] = useState(null);
 
   /*
    * IKKI XIL HOLAT — ILGARI BITTASI BILAN BOSHQARILARDI.
@@ -50,7 +67,12 @@ export function TelegramOnly({ onLoggedIn }) {
         setError(e.message === 'WIDGET_LOAD_FAILED' ? t('widgetLoadFailed') : e.message);
       },
       {
-        onWidgetReady: () => setWidgetReady(true),
+        lang,
+        onWidgetReady: () => {
+          setWidgetReady(true);
+          const frame = widgetRef.current?.querySelector('iframe');
+          if (frame) setBox({ w: frame.offsetWidth, h: frame.offsetHeight });
+        },
         onAuthStart: () => { setError(null); setAuthing(true); },
       },
     );
@@ -68,9 +90,24 @@ export function TelegramOnly({ onLoggedIn }) {
         <h1 className="tg-only__title">LokmaGo</h1>
         <p className="tg-only__text">{t('telegramLoginPrompt')}</p>
 
-        <div className="tg-only__auth">
-          {/* Vidjet har doim DOMda — Telegram scripti unga yozadi */}
-          <div ref={widgetRef} className="tg-only__widget" />
+        <div
+          className="tg-only__auth"
+          style={box ? { width: box.w, height: box.h } : undefined}
+        >
+          {/*
+            Ko'rinadigan brend tugmasi. Bosishni O'ZI qabul
+            qilmaydi — ustidagi shaffof Telegram iframe'i qabul
+            qiladi (izohga qarang). Shuning uchun aria-hidden.
+          */}
+          {widgetReady && !authing && (
+            <div className="tg-only__fakebtn" aria-hidden="true">
+              <Icon name="send" size={18} color="var(--brand-text)" />
+              <span>{t('loginWithTelegram')}</span>
+            </div>
+          )}
+
+          {/* Haqiqiy vidjet — ustida, shaffof */}
+          <div ref={widgetRef} className="tg-only__widget" data-masked={widgetReady && !authing} />
 
           {/* Vidjet chizilgunicha — o'lchamdosh skelet, sakrash bo'lmasin */}
           {!widgetReady && !error && <div className="tg-only__skeleton" aria-hidden="true" />}
