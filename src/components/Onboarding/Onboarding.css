@@ -1,0 +1,149 @@
+/*
+ * Birinchi kirishdagi sozlash ekrani.
+ *
+ * Uslub kirish ekrani (TelegramOnly) bilan ataylab bir xil —
+ * mijoz uchun bu bitta uzluksiz jarayondek his qilinadi, ikkita
+ * begona ekran emas.
+ */
+.onb {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 18px;
+  background: var(--surface);
+  background-image:
+    radial-gradient(120% 70% at 50% -10%, var(--brand-50) 0%, transparent 60%);
+  overflow-y: auto;
+}
+
+.onb__card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--canvas);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 30px 24px 24px;
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.04),
+    0 12px 32px -8px rgba(16, 24, 40, 0.10);
+  animation: onb-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes onb-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.onb__badge {
+  width: 60px; height: 60px;
+  margin: 0 auto 16px;
+  border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, var(--brand) 0%, var(--brand-600) 100%);
+  box-shadow: 0 8px 18px -6px rgba(255, 92, 0, 0.45);
+}
+
+.onb__title {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: var(--ink);
+  text-align: center;
+}
+
+.onb__text {
+  margin: 0 0 22px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+  text-align: center;
+}
+
+.onb__field { display: block; margin-bottom: 14px; }
+
+.onb__label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.onb__input {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 13px;
+  background: var(--canvas);
+  font-size: 15.5px;   /* 16px dan kichik bo'lsa iOS sahifani kattalashtiradi */
+  color: var(--ink);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+.onb__input::placeholder { color: var(--muted); opacity: 0.7; }
+.onb__input:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-tint);
+}
+
+.onb__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+/*
+ * "O'tkazib yuborish" — ikkilamchi harakat. Ko'rinadi, lekin
+ * diqqatni tortmaydi: fon yo'q, matn xira. Mijoz asosiy yo'lni
+ * (ism kiritish) tanlashi uchun.
+ */
+.onb__skip {
+  flex: none;
+  padding: 13px 4px;
+  background: none;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  transition: color 150ms ease;
+}
+.onb__skip:active { color: var(--ink); }
+
+.onb__submit {
+  flex: 1;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--brand);
+  color: var(--brand-text);
+  font-size: 15.5px;
+  font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: transform 160ms ease, filter 160ms ease, opacity 160ms ease;
+}
+.onb__submit:active:not(:disabled) {
+  transform: scale(0.97);
+  filter: brightness(0.92);
+  transition-duration: 0ms;
+}
+
+/*
+ * Ikkala maydon ham to'ldirilmaguncha o'chirilgan holat.
+ * Ataylab SEZILARLI: mijoz nima kutilayotganini ko'rib turadi.
+ */
+.onb__submit:disabled {
+  background: var(--surface-2);
+  color: var(--muted);
+  cursor: default;
+}
+
+/* AddressFlow to'liq ekranni egallaydi — ustidan chiqishi uchun */
+.onb-portal { position: relative; z-index: 9000; }
+
+@media (prefers-reduced-motion: reduce) {
+  .onb__card { animation: none; }
+  .onb__submit:active:not(:disabled) { transform: none; }
+}

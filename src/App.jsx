@@ -25,6 +25,7 @@ import { ActiveOrderBadge } from '@/components/ActiveOrderBadge/ActiveOrderBadge
 import { SupportChat } from '@/components/SupportChat/SupportChat';
 import { SubscriptionGate } from '@/components/SubscriptionGate/SubscriptionGate';
 import { Splash } from '@/components/Splash/Splash';
+import { Onboarding, needsOnboarding } from '@/components/Onboarding/Onboarding';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -93,9 +94,23 @@ function AppInner({ authMode = 'telegram' }) {
   const updateUser = useUser((s) => s.updateUser);
   const setAuthStatus = useUser((s) => s.setAuthStatus);
   const currentUser = useUser((s) => s.user);
+  const authStatus = useUser((s) => s.authStatus);
 
   // Splash faqat sessiya boshида bir marta (qayta yuklaшда emas)
   const [showSplash, setShowSplash] = useState(() => !sessionStorage.getItem('lokmago_splash_seen'));
+
+  /*
+   * Birinchi kirishdagi sozlash (ism/familiya + manzil).
+   *
+   * Splash tugagandan KEYIN va auth hal bo'lgach ko'rsatiladi.
+   * Shart Onboarding modulida — u yerda batafsil izohlangan:
+   * saqlangan manzili yo'q mijozga bir marta ko'rsatiladi.
+   */
+  const [onbDone, setOnbDone] = useState(false);
+  const showOnboarding = !showSplash
+    && authStatus === 'done'
+    && !onbDone
+    && needsOnboarding(currentUser);
 
   const finishSplash = () => {
     sessionStorage.setItem('lokmago_splash_seen', '1');
@@ -149,6 +164,7 @@ function AppInner({ authMode = 'telegram' }) {
   return (
     <QueryClientProvider client={queryClient}>
       {showSplash && <Splash onDone={finishSplash} />}
+      {showOnboarding && <Onboarding onDone={() => setOnbDone(true)} />}
       <BrowserRouter>
         <SubscriptionGate>
         <ErrorBoundary>
