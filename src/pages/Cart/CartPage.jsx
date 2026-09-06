@@ -365,6 +365,7 @@ export function CartPage() {
    * chiqadi — bu faylni o'zgartirish shart emas.
    */
   const [providers, setProviders] = useState([]);
+  const [providersLoaded, setProvidersLoaded] = useState(false);
   const onlineAvailable = providers.length > 0;
 
   // Karta tanlanganda: birinchi mavjud provayder tanlanadi.
@@ -377,6 +378,47 @@ export function CartPage() {
 
   // Naqdmi yoki karta orqalimi
   const isCard = providers.some((p) => p.name === paymentMethod);
+
+  /*
+   * ═══ TANLANGAN PROVAYDERNI HAQIQAT BILAN SOLISHTIRISH ═══
+   *
+   * MUAMMO (real qurilmada kuzatilgan): mijoz "Karta orqali"
+   * tanlagan bo'lsa ham serverdan "payme hali ulanmagan" xatosi
+   * kelardi, garchi Click ulangan bo'lsa ham.
+   *
+   * SABAB: paymentMethod boshlang'ich qiymati saqlangan
+   * lastPaymentMethod dan olinadi (store'dagi eski standart —
+   * 'payme'). U MAVJUD provayderlar bilan hech qachon
+   * solishtirilmasdi. Natijada:
+   *   • /payments/status faqat Click qaytaradi
+   *   • paymentMethod esa 'payme' bo'lib qolaveradi
+   *   • mijoz "Karta orqali" bosganda providers hali yuklanmagan
+   *     bo'lsa, pickCardProvider hech narsa o'zgartirmaydi
+   *   • buyurtma 'payme' bilan yuboriladi -> 503
+   *
+   * YECHIM: provayderlar ro'yxati kelishi bilan tanlovni
+   * tekshiramiz. Saqlangan provayder endi mavjud bo'lmasa —
+   * birinchi ishlaydiganiga o'tkazamiz, umuman bo'lmasa naqdga.
+   * Shu bilan eski saqlangan qiymat hech qachon serverga
+   * yetib bormaydi.
+   */
+  useEffect(() => {
+    if (!providers.length) return;
+    if (paymentMethod === 'cash') return;
+    if (providers.some((p) => p.name === paymentMethod)) return;
+    setPaymentMethod(providers[0].name);
+  }, [providers, paymentMethod]);
+
+  /*
+   * Provayderlar yuklandi, lekin BIRORTASI ham ulanmagan —
+   * karta tanlab qo'yilgan bo'lsa naqdga qaytaramiz. Aks holda
+   * mijoz o'chirilgan tugma bilan qamalib qolardi.
+   */
+  useEffect(() => {
+    if (providersLoaded && !providers.length && paymentMethod !== 'cash') {
+      setPaymentMethod('cash');
+    }
+  }, [providersLoaded, providers.length, paymentMethod]);
 
   /*
    * ILGARI xato jimgina yutilardi (.catch(() => {})). Natijada
@@ -398,11 +440,13 @@ export function CartPage() {
         if (cancelled) return;
         setProviders(Array.isArray(st?.available) ? st.available : []);
         setProvidersFailed(false);
+        setProvidersLoaded(true);
       })
       .catch(() => {
         if (cancelled) return;
         if (retry) { setTimeout(() => load(false), 2000); return; }
         setProvidersFailed(true);
+        setProvidersLoaded(true);
       });
 
     load();
@@ -670,6 +714,25 @@ export function CartPage() {
 
   function confirmAndSubmit() {
     if (submitLock.current) return;
+
+    /*
+     * OXIRGI HIMOYA: yuborish oldidan provayder yana bir bor
+     * tekshiriladi. Yuqoridagi useEffect odatda buni allaqachon
+     * hal qilgan bo'ladi, lekin poyga holati bo'lishi mumkin —
+     * mijoz ro'yxat yuklanib bo'lgunicha tugmani bosib ulgursa.
+     * Bu tekshiruvsiz serverga ulanmagan shlyuz nomi ketib,
+     * mijoz "... hali ulanmagan" xatosini olardi.
+     */
+    if (paymentMethod !== 'cash' && !providers.some((p) => p.name === paymentMethod)) {
+      if (providers.length) {
+        setPaymentMethod(providers[0].name);
+        return; // keyingi bosishda to'g'ri provayder bilan ketadi
+      }
+      setPaymentMethod('cash');
+      alert(t('cardPaymentUnavailable'));
+      return;
+    }
+
     submitLock.current = true;
 
     /*

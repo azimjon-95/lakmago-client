@@ -67,7 +67,20 @@ export const useUser = create(
     (set, get) => ({
   user: getInitialUser(),
   authStatus: 'pending',
-  lastPaymentMethod: 'payme',
+  /*
+   * Oxirgi tanlangan to'lov usuli.
+   *
+   * Standart 'cash' — ILGARI 'payme' edi va bu XATOGA olib
+   * kelardi: qiymat localStorage'da saqlanadi, shuning uchun
+   * Payme umuman ulanmagan bo'lsa ham savat sahifasi uni
+   * boshlang'ich tanlov qilib olardi va buyurtma "payme hali
+   * ulanmagan" xatosi bilan qaytardi.
+   *
+   * 'cash' har doim mavjud, shuning uchun xavfsiz standart.
+   * Haqiqiy tanlov baribir /payments/status ro'yxatiga qarab
+   * moslashtiriladi (CartPage'dagi useEffect).
+   */
+  lastPaymentMethod: 'cash',
 
   setUser: (user) => set({ user }),
 
