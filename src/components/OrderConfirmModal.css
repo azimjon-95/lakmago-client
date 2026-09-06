@@ -185,3 +185,11 @@
   .ocm-btn:active:not(:disabled) { transform: none; }
   .ocm-btn--primary:disabled { animation: none; opacity: 0.75; }
 }
+
+
+/* To'lovga o'tish oynasi — chek yo'q, shuning uchun ixcham */
+.ocm-sheet--compact { padding-bottom: 18px; }
+.ocm-sheet--compact .ocm-question {
+  text-align: left;
+  line-height: 1.45;
+}

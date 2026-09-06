@@ -53,56 +53,38 @@ const PROVIDER_LABEL = { payme: 'Payme', click: 'Click', paynet: 'Paynet' };
  * savePendingPayment() orqali yozib qo'yilgan, shuning uchun
  * Click'dan qaytgach holat avtomatik tekshiriladi.
  */
+/*
+ * To'lov sahifasini ochish.
+ *
+ * ═══ BU FUNKSIYA FAQAT FOYDALANUVCHI BOSISHI ICHIDA CHAQIRILADI ═══
+ *
+ * Sabab: iOS WKWebView `openLink` kabi chaqiruvlarni faqat
+ * foydalanuvchi harakati (tap) doirasida bajaradi. Ilgari u
+ * `await api.getPaymentLink()` tugagach chaqirilardi — bosish
+ * konteksti allaqachon yopilgan bo'lardi va iOS chaqiruvni
+ * JIMGINA bloklardi. Shuning uchun zaxira sifatida
+ * `location.href` ishlatilardi, u esa Mini App'ning O'ZINI
+ * Click sahifasiga almashtirib yuborardi:
+ *   • orqaga qaytish tugmasi yo'qolardi
+ *   • Click sahifasi to'liq ekranga chizilib, sarlavhasi
+ *     Telegram tugmalari ostiga kirib ketardi
+ *
+ * ENDI: havola oldindan olinadi, mijozga tugma ko'rsatiladi va
+ * u BOSGANDA shu funksiya ishlaydi. Chaqiruv haqiqiy bosish
+ * ichida bo'lgani uchun `openLink` ishonchli ishlaydi —
+ * Telegram Click'ni O'Z ichki brauzerida ochadi: to'g'ri
+ * joylashuv, o'z sarlavhasi va orqaga/yopish tugmasi bilan.
+ */
 function openPaymentUrl(url) {
   const tg = getTelegram();
-
-  /*
-   * Muvaffaqiyat = sahifa ko'rinmay qoldi (mijoz boshqa oynaga
-   * o'tdi). Buni visibilitychange orqali aniqlaymiz.
-   */
-  let left = false;
-  const onHide = () => { if (document.visibilityState === 'hidden') left = true; };
-  document.addEventListener('visibilitychange', onHide);
-
-  const stillHere = () => !left && document.visibilityState === 'visible';
-
-  // 1-USUL: Telegram ichki brauzeri. ENG YAXSHISI — o'z
-  // yopish/orqaga tugmasi bor, Mini App orqa fonda saqlanadi.
-  try { tg?.openLink?.(url); } catch { /* pastdagi usullar ishlaydi */ }
-
-  setTimeout(() => {
-    if (!stillHere()) { document.removeEventListener('visibilitychange', onHide); return; }
-
-    /*
-     * 2-USUL: yangi oyna. openLink ishlamadi (iOS WKWebView
-     * user gesture'dan tashqaridagi chaqiruvni jimgina
-     * bloklaydi). window.open Mini App'ni JOYIDA qoldiradi,
-     * shuning uchun mijoz Click'dan qaytganda savati va
-     * sahifasi saqlanib turadi.
-     */
-    let opened = null;
-    try { opened = window.open(url, '_blank'); } catch { /* bloklangan */ }
-
-    setTimeout(() => {
-      document.removeEventListener('visibilitychange', onHide);
-      if (!stillHere() || opened) return;
-
-      /*
-       * 3-USUL — ENG OXIRGI CHORA: oynaning o'zini yo'naltirish.
-       *
-       * KAMCHILIGI: Mini App Click sahifasi bilan ALMASHADI va
-       * mijozda "orqaga" tugmasi qolmaydi — u faqat butun
-       * ilovani yopishi mumkin. Aynan shu holat kuzatilgan edi.
-       *
-       * Shuning uchun bu faqat birinchi ikki usul ishlamagandagina
-       * qo'llanadi. Qaytish esa Click tomonidagi return_url
-       * orqali ta'minlanadi (server: CLICK_RETURN_URL), u mijozni
-       * lokma.uz ga qaytaradi va kutilayotgan to'lov yozuvi
-       * (localStorage) tufayli savat joyida turadi.
-       */
-      window.location.href = url;
-    }, 400);
-  }, 900);
+  try {
+    if (tg?.openLink) { tg.openLink(url); return; }
+  } catch { /* pastdagi zaxira ishlaydi */ }
+  // Telegram tashqarisida (oddiy brauzer) — yangi oyna
+  try {
+    if (window.open(url, '_blank')) return;
+  } catch { /* bloklangan */ }
+  window.location.href = url;
 }
 
 
@@ -273,8 +255,9 @@ export function CartPage() {
 
   /** Eski to'lanmagan buyurtma uchun havolani qayta ochish. */
   const retryPendingPayment = async () => {
-    if (!pendingCheck?.orderId) return;
+    if (!pendingCheck?.orderId || retrying) return;
     haptic();
+    setRetrying(true);
     try {
       /*
        * Provayder AYNAN to'lov boshlangandagisi bo'lishi shart.
@@ -284,9 +267,12 @@ export function CartPage() {
        */
       const provider = pendingCheck.provider || lastPaymentMethod;
       const { url } = await api.getPaymentLink(pendingCheck.orderId, provider);
-      openPaymentUrl(url);
+      // To'g'ridan-to'g'ri ochilmaydi — mijoz o'zi bosadi
+      setPayUrl(url);
     } catch (e) {
       alert(e.message || 'To‘lov havolasini olib bo‘lmadi');
+    } finally {
+      setRetrying(false);
     }
   };
 
@@ -327,6 +313,16 @@ export function CartPage() {
   }, [groups, allRestaurants]);
 
   const [paying, setPaying] = useState(false);
+
+  /*
+   * Tayyor to'lov havolasi. Mavjud bo'lsa "To'lovga o'tish"
+   * oynasi ko'rsatiladi — havola mijozning o'z bosishi bilan
+   * ochilishi uchun (izohga qarang: openPaymentUrl).
+   */
+  const [payUrl, setPayUrl] = useState(null);
+
+  // "Davom ettirish" bosilganda havola olinmoqda
+  const [retrying, setRetrying] = useState(false);
   const [showAddressSheet, setShowAddressSheet] = useState(false);
   const [showAddressFlow, setShowAddressFlow] = useState(false);
 
@@ -638,6 +634,7 @@ export function CartPage() {
         {pendingCheck?.unpaid && (
           <PendingPaymentNotice
             onRetry={retryPendingPayment}
+            retrying={retrying}
             onDismiss={dismissPendingPayment}
           />
         )}
@@ -780,7 +777,7 @@ export function CartPage() {
            * holatiga qaytib, "hech narsa bo'lmadi" taassuroti
            * berardi.
            */
-          openPaymentUrl(url);
+          setPayUrl(url);
           setPaying(false);
           setShowConfirm(false);
           submitLock.current = false;
@@ -857,6 +854,7 @@ export function CartPage() {
       {pendingCheck?.unpaid && (
         <PendingPaymentNotice
           onRetry={retryPendingPayment}
+          retrying={retrying}
           onDismiss={dismissPendingPayment}
         />
       )}
@@ -1328,6 +1326,14 @@ export function CartPage() {
       )}
 
       {/* SO'NGGI TEKSHIRUV — chek ko'rinishida, ongli tasdiqlash */}
+      {payUrl && (
+        <PaymentRedirectSheet
+          url={payUrl}
+          provider={pendingCheck?.provider || paymentMethod}
+          onClose={() => setPayUrl(null)}
+        />
+      )}
+
       {showConfirm && (
         <OrderConfirmModal
           groups={groups}
@@ -1417,7 +1423,52 @@ function CartUpsell({ groups }) {
  * yangi buyurtma bera oladi — eski awaiting_payment yozuv
  * serverda zararsiz osilib qoladi).
  */
-function PendingPaymentNotice({ onRetry, onDismiss }) {
+/*
+ * TO'LOVGA O'TISH OYNASI.
+ *
+ * Havola allaqachon tayyor. Bu oynaning yagona vazifasi —
+ * ochishni MIJOZNING O'Z BOSISHIGA bog'lash, chunki iOS
+ * `openLink` ni faqat bosish konteksti ichida bajaradi
+ * (batafsil: openPaymentUrl izohi).
+ *
+ * Qo'shimcha foydasi: mijoz nima bo'layotganini biladi va
+ * Click'dan qaytganda shu oyna joyida turadi — savati ham,
+ * buyurtmasi ham yo'qolmaydi.
+ */
+function PaymentRedirectSheet({ url, provider, onClose }) {
+  const t = useT();
+  const label = PROVIDER_LABEL[provider] || 'Click';
+  return (
+    <div className="ocm-overlay" onClick={onClose}>
+      <div className="ocm-sheet ocm-sheet--compact" onClick={(e) => e.stopPropagation()}>
+        <div className="ocm-handle" />
+        <div className="ocm-head">
+          <div className="ocm-head__icon"><Icon name="card" size={22} color="var(--brand)" /></div>
+          <div className="ocm-head__title">{label}</div>
+          <button onClick={onClose} className="ocm-close" aria-label={t('close')}>
+            <Icon name="x" size={16} color="var(--muted)" />
+          </button>
+        </div>
+
+        <p className="ocm-question">{t('paymentReadyHint')}</p>
+
+        <div className="ocm-actions">
+          <button onClick={onClose} className="ocm-btn ocm-btn--ghost">
+            {t('backLabel')}
+          </button>
+          <button
+            onClick={() => { haptic(); openPaymentUrl(url); }}
+            className="ocm-btn ocm-btn--primary"
+          >
+            {t('goToPayment')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PendingPaymentNotice({ onRetry, onDismiss, retrying }) {
   const t = useT();
   return (
     <div className="cart-pending">
@@ -1430,8 +1481,12 @@ function PendingPaymentNotice({ onRetry, onDismiss }) {
         <button onClick={onDismiss} className="cart-pending__btn cart-pending__btn--ghost">
           {t('cancel')}
         </button>
-        <button onClick={onRetry} className="cart-pending__btn cart-pending__btn--primary">
-          {t('continueBtn')}
+        <button
+          onClick={onRetry}
+          disabled={retrying}
+          className={`cart-pending__btn cart-pending__btn--primary${retrying ? ' is-loading' : ''}`}
+        >
+          {retrying ? t('loading') : t('continueBtn')}
         </button>
       </div>
     </div>
