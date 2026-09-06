@@ -110,6 +110,29 @@ async function doFetch(path, { signal, ...options } = {}) {
  */
 let refreshPromise = null;
 
+/*
+ * Saqlangan refresh token bormi.
+ *
+ * NIMA UCHUN KERAK: accessToken sessionStorage'da — brauzer yoki
+ * tab yopilganda O'CHADI. refreshToken esa localStorage'da qoladi.
+ * Ilova ochilganda "kirganmi?" degan savolga faqat accessToken
+ * bo'yicha javob berilsa, allaqachon ro'yxatdan o'tgan mijozga
+ * HAR SAFAR kirish ekrani ko'rsatilardi.
+ */
+export function hasRefreshToken() {
+  return Boolean(refreshTokenValue);
+}
+
+/*
+ * Ilova ochilishida sessiyani jimgina tiklash. Muvaffaqiyatli
+ * bo'lsa mijoz kirish ekranini umuman ko'rmaydi.
+ */
+export async function restoreSession() {
+  if (authToken) return true;
+  if (!refreshTokenValue) return false;
+  return refreshAccessToken();
+}
+
 async function refreshAccessToken() {
   if (!refreshPromise) {
     refreshPromise = (async () => {

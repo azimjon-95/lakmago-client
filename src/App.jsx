@@ -18,7 +18,7 @@ const SearchPage = lazy(() => import('@/pages/Search/SearchPage').then((m) => ({
 import { useUser } from '@/store/user';
 import { authenticateWithTelegram, getStartParam, isTelegramEnv } from '@/lib/telegram';
 import { TelegramOnly } from '@/components/TelegramOnly/TelegramOnly';
-import { api, getAuthToken } from '@/api';
+import { api, getAuthToken, hasRefreshToken, restoreSession } from '@/api';
 import { joinUserRoom } from '@/lib/socket';
 import { I18nProvider } from '@/i18n';
 import { ActiveOrderBadge } from '@/components/ActiveOrderBadge/ActiveOrderBadge';
@@ -81,11 +81,45 @@ export default function App() {
   const [webLoggedIn, setWebLoggedIn] = useState(() => !!getAuthToken());
   const inTelegram = isTelegramEnv();
 
+  /*
+   * ═══ SESSIYANI TIKLASH ═══
+   *
+   * MUAMMO: accessToken sessionStorage'da saqlanadi — brauzer yoki
+   * tab yopilganda O'CHADI. Shu sababli allaqachon ro'yxatdan
+   * o'tgan mijoz lokma.uz ga qayta kirganda kirish ekranini
+   * KO'RARDI, garchi refreshToken localStorage'da saqlanib
+   * turgan bo'lsa ham. (Tugmani bosgach tanirdi — chunki
+   * Telegram uni qayta tasdiqlardi. Ya'ni ortiqcha qadam edi.)
+   *
+   * YECHIM: ochilishda accessToken yo'q, lekin refreshToken bor
+   * bo'lsa — jimgina yangilaymiz. Muvaffaqiyatli bo'lsa mijoz
+   * kirish ekranini umuman ko'rmaydi.
+   *
+   * Tiklash tugagunicha HECH NARSA ko'rsatilmaydi: kirish
+   * ekranini bir lahzaga chiqarib, keyin yo'qotish mijozni
+   * chalg'itardi.
+   */
+  const [restoring, setRestoring] = useState(
+    () => !inTelegram && !getAuthToken() && hasRefreshToken(),
+  );
+
+  useEffect(() => {
+    if (!restoring) return;
+    let cancelled = false;
+    restoreSession()
+      .then((ok) => { if (!cancelled && ok) setWebLoggedIn(true); })
+      .catch(() => { /* tiklab bo'lmadi — kirish ekrani ko'rsatiladi */ })
+      .finally(() => { if (!cancelled) setRestoring(false); });
+    return () => { cancelled = true; };
+  }, [restoring]);
+
   return (
     <I18nProvider>
-      {inTelegram || webLoggedIn
-        ? <AppInner authMode={inTelegram ? 'telegram' : 'web'} />
-        : <TelegramOnly onLoggedIn={() => setWebLoggedIn(true)} />}
+      {restoring ? null : (
+        inTelegram || webLoggedIn
+          ? <AppInner authMode={inTelegram ? 'telegram' : 'web'} />
+          : <TelegramOnly onLoggedIn={() => setWebLoggedIn(true)} />
+      )}
     </I18nProvider>
   );
 }
