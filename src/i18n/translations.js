@@ -125,8 +125,9 @@ export const translations = {
     openDirectly: "To'g'ridan ilovani ochish",
     telegramLoginPrompt: "Telegram orqali kiring — parol yoki ro'yxatdan o'tish shart emas.",
     orLabel: 'yoki',
-    telegramLoginPrompt: 'Telegram orqali kiring — parol yoki ro\'yxatdan o\'tish shart emas.',
-    orLabel: 'yoki',
+    signingIn: 'Kirilmoqda…',
+    widgetLoadFailed: "Telegram kirish oynasini yuklab bo'lmadi. Internetni tekshirib, sahifani yangilang.",
+    telegramLoginNote: "Kirgach savatingiz, manzillaringiz va buyurtmalaringiz Telegram ilovasidagi bilan bir xil bo'ladi.",
 
     // Do'stlarni taklif qilish kartasi
     referralTitle: "Do'stlarni taklif qiling",
@@ -470,6 +471,9 @@ export const translations = {
     openInTelegram: "Telegram'да очиш",
     openDirectly: "Тўғридан иловани очиш",
     telegramLoginPrompt: 'Telegram орқали киринг — парол ёки рўйхатдан ўтиш шарт эмас.',
+    signingIn: 'Кирилмоқда…',
+    widgetLoadFailed: 'Telegram кириш ойнасини юклаб бўлмади. Интернетни текшириб, саҳифани янгиланг.',
+    telegramLoginNote: 'Киргач саватингиз, манзилларингиз ва буюртмаларингиз Telegram иловасидаги билан бир хил бўлади.',
     orLabel: 'ёки',
 
     referralTitle: 'Дўстларни таклиф қилинг',
@@ -796,6 +800,9 @@ export const translations = {
     openInTelegram: 'Открыть в Telegram',
     openDirectly: 'Открыть напрямую',
     telegramLoginPrompt: 'Войдите через Telegram — пароль или регистрация не нужны.',
+    signingIn: 'Выполняется вход…',
+    widgetLoadFailed: 'Не удалось загрузить окно входа Telegram. Проверьте интернет и обновите страницу.',
+    telegramLoginNote: 'После входа корзина, адреса и заказы будут теми же, что и в приложении Telegram.',
     orLabel: 'или',
 
     referralTitle: 'Пригласите друзей',

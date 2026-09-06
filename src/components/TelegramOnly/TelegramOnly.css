@@ -1,60 +1,157 @@
+/*
+ * Brauzerdagi kirish ekrani.
+ *
+ * Maqsad: mijozning birinchi ko'rgan ekrani — ishonch uyg'otishi
+ * va bitta aniq harakatni taklif qilishi kerak. Shuning uchun
+ * ekranda YAGONA tugma bor. Ilgari uchta variant turardi va
+ * ikkitasi mijozni saytdan olib chiqib ketardi.
+ */
 .tg-only {
-  position: fixed; inset: 0; z-index: 99999;
-  background: var(--canvas, #FFFFFF);
-  display: flex; align-items: center; justify-content: center;
-  padding: 24px;
-}
-.tg-only__card {
-  max-width: 360px; width: 100%; text-align: center;
-  background: var(--surface, #FFFFFF);
-  border: 1px solid var(--line, #332A22);
-  border-radius: 24px;
-  padding: 40px 28px;
-}
-.tg-only__logo {
-  width: 88px; height: 88px; margin: 0 auto 20px;
-  border-radius: 24px;
-  background: linear-gradient(135deg, var(--brand), var(--brand-100));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 44px;
-}
-.tg-only__title { font-size: 26px; font-weight: 800; color: var(--ink, var(--ink)); margin: 0 0 12px; }
-.tg-only__text { font-size: 15px; color: var(--muted, var(--muted)); line-height: 1.6; margin-bottom: 28px; }
-.tg-only__btn {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  background: var(--brand); color: var(--brand-text);
-  text-decoration: none; font-weight: 700; font-size: 16px;
-  padding: 15px; border-radius: 14px;
-}
-.tg-only__btn:active { transform: scale(0.98); }
-.tg-only__hint { font-size: 13px; color: var(--muted, var(--muted)); margin-top: 16px; }
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 18px;
+  background: var(--surface);
 
-.tg-only__link {
-  display: inline-block; margin-top: 16px;
-  color: var(--muted, var(--muted)); font-size: 13px;
-  text-decoration: underline;
+  /* Yumshoq brend nuri — yassi oq fon "tugallanmagan" ko'rinardi */
+  background-image:
+    radial-gradient(120% 70% at 50% -10%, var(--brand-50) 0%, transparent 60%);
 }
-.tg-only__link:active { color: var(--ink, var(--ink)); }
+
+.tg-only__card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--canvas);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 36px 26px 28px;
+  text-align: center;
+
+  /* Ikki qatlamli soya — kartani "ko'tarilgandek" ko'rsatadi */
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.04),
+    0 12px 32px -8px rgba(16, 24, 40, 0.10);
+
+  animation: tg-only-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes tg-only-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.99); }
+  to   { opacity: 1; transform: none; }
+}
+
+.tg-only__logo {
+  width: 76px; height: 76px;
+  margin: 0 auto 18px;
+  border-radius: 22px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, var(--brand) 0%, var(--brand-600) 100%);
+  box-shadow: 0 8px 20px -6px rgba(255, 92, 0, 0.45);
+}
+
+.tg-only__title {
+  font-size: 27px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+
+.tg-only__text {
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 0 auto 24px;
+  max-width: 290px;
+}
+
+/* Vidjet joylashadigan hudud — balandligi oldindan band qilingan,
+   shuning uchun vidjet chizilganda sahifa SAKRAMAYDI. */
+.tg-only__auth {
+  position: relative;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .tg-only__widget {
-  display: flex; justify-content: center; min-height: 40px;
-  margin-bottom: 8px;
+  display: flex;
+  justify-content: center;
+  min-height: 48px;
 }
-.tg-only__widget-loading {
-  font-size: 13px; color: var(--muted, var(--muted));
-  margin-bottom: 20px;
+.tg-only__widget iframe {
+  /* Telegram iframe'i o'z o'lchamini beradi — markazlash uchun */
+  margin: 0 auto !important;
 }
+
+/* Skelet — vidjet kelguncha o'sha o'lchamdagi "joy egallovchi" */
+.tg-only__skeleton {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    var(--line) 37%,
+    var(--surface-2) 63%
+  );
+  background-size: 400% 100%;
+  animation: tg-only-shimmer 1.3s ease-in-out infinite;
+}
+@keyframes tg-only-shimmer {
+  from { background-position: 100% 50%; }
+  to   { background-position: 0 50%; }
+}
+
+/* Server javobi kutilayotgan payt — vidjet ustini yopadi */
+.tg-only__status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border-radius: 12px;
+  background: var(--canvas);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.tg-only__spinner {
+  width: 17px; height: 17px;
+  border: 2px solid var(--line);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: tg-only-spin 700ms linear infinite;
+}
+@keyframes tg-only-spin { to { transform: rotate(360deg); } }
+
 .tg-only__error {
-  font-size: 13px; color: var(--danger, #C0392B);
-  background: rgba(192, 57, 43, 0.08);
-  border-radius: 10px; padding: 10px 14px;
-  margin-bottom: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  text-align: left;
+  margin-top: 16px;
+  padding: 11px 13px;
+  border-radius: 13px;
+  background: var(--danger-tint, #FEF2F2);
+  color: var(--danger, #DC2626);
+  font-size: 13.5px;
+  line-height: 1.45;
 }
-.tg-only__divider {
-  display: flex; align-items: center; gap: 12px;
-  margin: 20px 0;
-  color: var(--muted, var(--muted)); font-size: 12px;
+
+.tg-only__note {
+  margin: 22px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
 }
-.tg-only__divider::before, .tg-only__divider::after {
-  content: ''; flex: 1; height: 1px; background: var(--line, #332A22);
+
+@media (prefers-reduced-motion: reduce) {
+  .tg-only__card,
+  .tg-only__skeleton,
+  .tg-only__spinner { animation: none; }
 }

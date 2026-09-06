@@ -54,7 +54,18 @@ function getDeviceId() {
  * @param {(error: Error) => void} onError
  * @returns {() => void} cleanup — komponent unmount bo'lganda chaqirish kerak
  */
-export function renderTelegramLoginWidget(container, onSuccess, onError) {
+/**
+ * Telegram Login Widget'ni konteynerga chizadi.
+ *
+ * @param {HTMLElement} container
+ * @param {(profile) => void} onSuccess - kirish yakunlandi
+ * @param {(err) => void} onError
+ * @param {object} [hooks]
+ * @param {() => void} [hooks.onWidgetReady] - vidjet ekranda paydo bo'ldi
+ * @param {() => void} [hooks.onAuthStart]   - mijoz Telegram'da tasdiqladi,
+ *   serverga so'rov ketdi. Aynan shu paytdan "kirilmoqda" ko'rsatiladi.
+ */
+export function renderTelegramLoginWidget(container, onSuccess, onError, hooks = {}) {
   if (!container) return () => {};
 
   // Har bir Login Widget callback'i global window darajasida
@@ -63,6 +74,7 @@ export function renderTelegramLoginWidget(container, onSuccess, onError) {
   const callbackName = `__lokmagoTelegramAuth_${Date.now()}`;
 
   window[callbackName] = async (tgData) => {
+    hooks.onAuthStart?.();
     try {
       const res = await fetch(`${API_BASE}/auth/telegram-web`, {
         method: 'POST',
@@ -103,9 +115,39 @@ export function renderTelegramLoginWidget(container, onSuccess, onError) {
   script.setAttribute('data-radius', '12');
   script.setAttribute('data-onauth', `${callbackName}(user)`);
   script.setAttribute('data-request-access', 'write');
+
+  /*
+   * VIDJET TAYYORLIGINI KUZATISH.
+   *
+   * ILGARI: komponent mount bo'lishi bilan "Yuklanmoqda..."
+   * yozuvi chiqarilardi va u FAQAT kirish tugagach o'chardi.
+   * Vidjet chizilgani hech kim tekshirmasdi, shuning uchun
+   * yozuv vidjet allaqachon ekranda turganda ham qolib
+   * ketardi — mijoz uchun ilova doim "yuklanayotgandek"
+   * ko'rinardi.
+   *
+   * ENDI: Telegram scripti konteynerga <iframe> qo'shishini
+   * kuzatamiz va u paydo bo'lishi bilan yozuvni olib tashlaymiz.
+   */
+  const observer = new MutationObserver(() => {
+    if (container.querySelector('iframe')) {
+      hooks.onWidgetReady?.();
+      observer.disconnect();
+    }
+  });
+  observer.observe(container, { childList: true, subtree: true });
+
+  // Skript umuman yuklanmasa (tarmoq, bloklovchi kengaytma) —
+  // mijoz cheksiz kutib qolmasin.
+  script.onerror = () => {
+    observer.disconnect();
+    onError?.(new Error('WIDGET_LOAD_FAILED'));
+  };
+
   container.appendChild(script);
 
   return () => {
+    observer.disconnect();
     delete window[callbackName];
     container.innerHTML = '';
   };
