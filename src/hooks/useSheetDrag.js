@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 /*
  * ═══════════════════════════════════════════════════════════
@@ -12,28 +12,24 @@ import { useCallback, useRef, useState } from 'react';
  * Oynaga shunchaki tegish yoki ichidagi ro'yxatni aylantirish
  * uni YOPMASLIGI kerak. Shuning uchun uchta shart:
  *
- *   1. Harakat PASTGA bo'lishi kerak (dy > 0)
- *   2. Ichki aylanadigan blok TEPADA turishi kerak — aks holda
- *      mijoz ro'yxatni aylantiryapti, oynani tortmayapti
+ *   1. Harakat PASTGA bo'lishi kerak
+ *   2. Aylanadigan blok TEPADA turishi kerak — aks holda mijoz
+ *      ro'yxatni aylantiryapti, oynani tortmayapti
  *   3. Gorizontal siljish bo'lsa aralashmaymiz (karusellar)
  *
  * ─── YOPILISH QARORI ───
  * Ikki mezondan biri yetarli:
  *   • uzoq tortildi (balandlikning ~30% dan ko'p), YOKI
- *   • tez tortildi (tezlik yuqori) — "otib yuborish" harakati
+ *   • tez tortildi — "otib yuborish" harakati
  *
  * Ikkinchisi muhim: tajribali foydalanuvchi oynani qisqa,
  * lekin tez harakat bilan yopadi. Faqat masofaga qarasak,
- * bunday harakat ishlamay, ilova "og'ir" his qilinardi.
+ * bunday harakat ishlamay ilova "og'ir" his qilinardi.
  */
 
-// Yopish uchun kerakli masofa — panel balandligiga nisbatan
-const CLOSE_RATIO = 0.3;
-// Yoki shu tezlikdan yuqori (px/ms)
-const CLOSE_VELOCITY = 0.55;
-// Qaytish animatsiyasi
+const CLOSE_RATIO = 0.3;          // panel balandligiga nisbatan
+const CLOSE_VELOCITY = 0.55;      // px/ms
 const SPRING = 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)';
-// Yopilish animatsiyasi — biroz tezroq, kutish hissi bo'lmasin
 const EXIT = 'transform 220ms cubic-bezier(0.4, 0, 1, 1), opacity 220ms ease';
 
 export function useSheetDrag(onClose) {
@@ -42,103 +38,151 @@ export function useSheetDrag(onClose) {
   const [dy, setDy] = useState(0);
   const [closing, setClosing] = useState(false);
 
+  // Eng so'nggi qiymatlar — listener'lar qayta biriktirilmasligi uchun
+  const state = useRef({ dy: 0, closing: false, onClose });
+  state.current = { dy, closing, onClose };
+
   /*
-   * Barmoq ostidagi element aylanadigan blok ichidami va u
-   * tepada turibdimi. Agar ro'yxat o'rtasida bo'lsa, mijoz
-   * aylantiryapti — oynaga tegmaymiz.
+   * ═══ ORQA FON AYLANMASIN ═══
+   *
+   * Oyna ochiq turganda ortidagi sahifa aylanardi: mijoz oyna
+   * ichida aylantirmoqchi bo'ladi, u tugagach harakat ostidagi
+   * sahifaga o'tib ketardi. Oyna yopilgach mijoz butunlay
+   * boshqa joyda turardi.
+   *
+   * Avvalgi qiymat aniq tiklanadi — boshqa joyda o'rnatilgan
+   * uslub buzilmasligi uchun.
    */
-  const scrollAtTop = (target) => {
+  useEffect(() => {
+    const html = document.documentElement;
+    const prevHtml = html.style.overflow;
+    const prevBody = document.body.style.overflow;
+    html.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      html.style.overflow = prevHtml;
+      document.body.style.overflow = prevBody;
+    };
+  }, []);
+
+  /*
+   * Barmoq ostidagi aylanadigan blok tepadami.
+   *
+   * DIQQAT: panelning O'ZI ham tekshiriladi. Ko'p oynalarda
+   * aynan panel aylanadigan konteyner bo'ladi (max-height +
+   * overflow-y). Uni tekshirmasak, mijoz ro'yxat o'rtasida
+   * turib pastga tortganda oyna yopilib ketardi.
+   */
+  const scrollAtTop = useCallback((target) => {
+    const panel = panelRef.current;
     let el = target;
-    while (el && el !== panelRef.current) {
+    while (el) {
       if (el.scrollHeight > el.clientHeight) {
         const oy = getComputedStyle(el).overflowY;
         if (oy === 'auto' || oy === 'scroll') return el.scrollTop <= 0;
       }
+      if (el === panel) break;
       el = el.parentElement;
     }
     return true;
-  };
+  }, []);
 
-  const onTouchStart = useCallback((e) => {
-    if (closing || e.touches.length !== 1) return;
-    const t = e.touches[0];
-    start.current = {
-      x: t.clientX,
-      y: t.clientY,
-      time: Date.now(),
-      // Boshlanish paytidagi holat eslab qolinadi: keyin
-      // aylantirish boshlansa ham qaror o'zgarmaydi
-      allowed: scrollAtTop(e.target),
-      decided: false,
-      dragging: false,
-    };
-  }, [closing]);
-
-  const onTouchMove = useCallback((e) => {
-    const s = start.current;
-    if (!s || !s.allowed || closing) return;
-
-    const t = e.touches[0];
-    const deltaY = t.clientY - s.y;
-    const deltaX = t.clientX - s.x;
-
-    /*
-     * Yo'nalish BIR MARTA hal qilinadi, keyin o'zgarmaydi.
-     * Aks holda diagonal harakatda oyna "sakrab" turardi.
-     */
-    if (!s.decided) {
-      if (Math.abs(deltaY) < 6 && Math.abs(deltaX) < 6) return;
-      s.decided = true;
-      s.dragging = deltaY > 0 && Math.abs(deltaY) > Math.abs(deltaX);
-    }
-    if (!s.dragging) return;
-
-    if (e.cancelable) e.preventDefault();
-
-    /*
-     * Qarshilik: tepaga tortishga yo'l qo'ymaymiz, pastga esa
-     * to'liq ergashamiz. Bu oynaning "og'irligi" hissini beradi.
-     */
-    setDy(Math.max(0, deltaY));
-  }, [closing]);
-
-  const onTouchEnd = useCallback(() => {
-    const s = start.current;
-    start.current = null;
-    if (!s || !s.dragging || closing) { setDy(0); return; }
-
+  /*
+   * ═══ NIMA UCHUN NATIV LISTENER, React onTouchMove EMAS ═══
+   *
+   * React touchmove'ni ko'p brauzerlarda PASSIV rejimda
+   * biriktiradi. Passiv listener ichida `e.preventDefault()`
+   * E'TIBORSIZ qoldiriladi.
+   *
+   * Natijada oyna barmoq ortidan surilar, LEKIN ayni paytda
+   * sahifa ham aylanardi — ikkalasi bir vaqtda harakatlanib,
+   * tortish "sirpanchiq" his qilinardi.
+   *
+   * touchstart/touchend passiv qolaveradi: ular preventDefault
+   * chaqirmaydi va passiv holat tezroq ishlaydi.
+   */
+  useEffect(() => {
     const panel = panelRef.current;
-    const height = panel?.offsetHeight || 400;
-    const elapsed = Math.max(1, Date.now() - s.time);
-    const velocity = dy / elapsed;
+    if (!panel) return undefined;
 
-    if (dy > height * CLOSE_RATIO || velocity > CLOSE_VELOCITY) {
-      // Yopamiz: avval pastga surib yuboramiz, keyin onClose
-      setClosing(true);
-      setDy(height);
-      // Animatsiya tugagach — sakrash bo'lmasin
-      setTimeout(() => onClose?.(), 200);
-    } else {
-      setDy(0);
-    }
-  }, [dy, closing, onClose]);
+    const onStart = (e) => {
+      if (state.current.closing || e.touches.length !== 1) return;
+      const t = e.touches[0];
+      start.current = {
+        x: t.clientX,
+        y: t.clientY,
+        time: Date.now(),
+        allowed: scrollAtTop(e.target),
+        decided: false,
+        dragging: false,
+      };
+    };
+
+    const onMove = (e) => {
+      const s = start.current;
+      if (!s || !s.allowed || state.current.closing) return;
+      if (e.touches.length !== 1) return;
+
+      const t = e.touches[0];
+      const deltaY = t.clientY - s.y;
+      const deltaX = t.clientX - s.x;
+
+      /*
+       * Yo'nalish BIR MARTA hal qilinadi va keyin o'zgarmaydi.
+       * Aks holda diagonal harakatda oyna "sakrab" turardi.
+       */
+      if (!s.decided) {
+        if (Math.abs(deltaY) < 6 && Math.abs(deltaX) < 6) return;
+        s.decided = true;
+        s.dragging = deltaY > 0 && Math.abs(deltaY) > Math.abs(deltaX);
+      }
+      if (!s.dragging) return;
+
+      if (e.cancelable) e.preventDefault();
+      // Tepaga tortishga yo'l qo'ymaymiz, pastga to'liq ergashamiz
+      setDy(Math.max(0, deltaY));
+    };
+
+    const onEnd = () => {
+      const s = start.current;
+      start.current = null;
+      const cur = state.current;
+      if (!s || !s.dragging || cur.closing) { setDy(0); return; }
+
+      const height = panel.offsetHeight || 400;
+      const elapsed = Math.max(1, Date.now() - s.time);
+      const velocity = cur.dy / elapsed;
+
+      if (cur.dy > height * CLOSE_RATIO || velocity > CLOSE_VELOCITY) {
+        setClosing(true);
+        setDy(height);
+        // Animatsiya tugagach yopamiz — sakrash bo'lmasin
+        setTimeout(() => cur.onClose?.(), 200);
+      } else {
+        setDy(0);
+      }
+    };
+
+    panel.addEventListener('touchstart', onStart, { passive: true });
+    panel.addEventListener('touchmove', onMove, { passive: false });
+    panel.addEventListener('touchend', onEnd, { passive: true });
+    panel.addEventListener('touchcancel', onEnd, { passive: true });
+
+    return () => {
+      panel.removeEventListener('touchstart', onStart);
+      panel.removeEventListener('touchmove', onMove);
+      panel.removeEventListener('touchend', onEnd);
+      panel.removeEventListener('touchcancel', onEnd);
+    };
+  }, [scrollAtTop]);
 
   return {
     panelRef,
-    /*
-     * Panelga o'rnatiladigan xossalar.
-     * touchAction: 'pan-y' — vertikal harakatni biz olamiz,
-     * lekin brauzerning o'z aylantirishi ham ishlashda davom
-     * etadi (ro'yxat o'rtasida bo'lsak).
-     */
     dragProps: {
       ref: panelRef,
-      onTouchStart,
-      onTouchMove,
-      onTouchEnd,
-      onTouchCancel: onTouchEnd,
       style: {
         transform: dy ? `translateY(${dy}px)` : undefined,
+        // Tortish davomida animatsiya YO'Q — barmoqqa aniq ergashsin
         transition: start.current ? 'none' : (closing ? EXIT : SPRING),
         opacity: closing ? 0.6 : undefined,
         touchAction: 'pan-y',
