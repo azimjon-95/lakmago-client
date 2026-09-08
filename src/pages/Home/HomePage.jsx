@@ -108,36 +108,29 @@ export function HomePage() {
    * ═══ KATEGORIYA BO'YICHA RESTORANLAR ═══
    *
    * MUAMMO: ilgari faqat `r.category === category` tekshirilardi,
-   * ya'ni restoranning O'Z turi. Natijada "Issiq taomlar"
-   * tanlanganda menyusida 19 ta issiq taom bor restoran ham
-   * ro'yxatdan CHIQIB KETARDI — chunki uning o'z turi, masalan,
-   * "Milliy taom" edi. Mijoz uchun bu mantiqsiz: u taom
-   * qidiryapti, restoranning qanday belgilangani uni
-   * qiziqtirmaydi.
+   * ya'ni restoranning O'Z turi. Natijada menyusida 19 ta issiq
+   * taom bor restoran "Issiq taomlar" filtrida CHIQMASDI —
+   * uning o'z turi boshqacha belgilangan edi.
    *
-   * ENDI ikki shartdan biri yetarli:
-   *   • restoranning o'z turi mos keladi, YOKI
-   *   • menyusida shu kategoriyadagi ochiq taom bor
+   * `dishCategories` — server tayyorlab beradigan ro'yxat:
+   * restoran menyusida qaysi kategoriyalarda taom bori.
    *
-   * Restoran turi baribir hisobga olinadi — masalan menyusi
-   * hali to'ldirilmagan yangi choyxona "Choyxona" filtrida
+   * NIMA UCHUN SERVERDAN: avval buni mijozda, /dishes/all
+   * asosida hisoblashga urinildi. Lekin u endpoint
+   * SAHIFALANGAN (20 ta) — restoranning taomlari o'sha
+   * ro'yxatga tushmasa filtr baribir ishlamasdi.
+   *
+   * Restoran turi ham hisobga olinadi: menyusi hali
+   * to'ldirilmagan yangi choyxona "Choyxona" filtrida
    * ko'rinib turadi.
    */
   const filtered = useMemo(() => {
     if (category === 'all') return restaurants;
-
-    // Shu kategoriyada taomi bor restoranlar — bir marta yig'iladi
-    const withDish = new Set(
-      allDishes
-        .filter((d) => d.category === category)
-        .map((d) => String(d.restaurantId || '')),
-    );
-
-    return restaurants.filter((r) => {
-      if (r.category === category) return true;
-      return withDish.has(String(r._id || r.id || ''));
-    });
-  }, [restaurants, allDishes, category]);
+    return restaurants.filter((r) => (
+      r.category === category
+      || (Array.isArray(r.dishCategories) && r.dishCategories.includes(category))
+    ));
+  }, [restaurants, category]);
 
   // Taomlar ham shu kategoriya bo'yicha. Taomda kategoriya bo'lmasa —
   // restorani mos kelsa ham ko'rsatamiz (eski ma'lumot uchun).

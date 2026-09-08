@@ -29,7 +29,18 @@ export function RestaurantInfoSheet({ restaurant, onClose }) {
    * yoki server hali yangilanmagan bo'lsa ham, mijoz telefonni
    * ko'rmasligi kafolatlanadi.
    */
-  const hasLegal = Boolean(r.legalName || r.address || r.legalAddress || r.inn);
+  /*
+   * MIJOZGA FAQAT MANZIL KO'RSATILADI.
+   *
+   * Yuridik nom, yuridik manzil va INN OLIB TASHLANDI. Ular
+   * mijoz uchun foydasiz: u ovqat buyurtma qilyapti, hujjat
+   * tekshirmayapti. Bundan tashqari uzun yuridik nomlar
+   * ("... mas'uliyati cheklangan jamiyati") oynani buzardi.
+   *
+   * Ma'lumotlar bazada va admin panelda saqlanib qoladi —
+   * shartnoma va hisob-kitob uchun ular kerak.
+   */
+  const hasLegal = Boolean(r.address);
 
   return (
     <div className="rinfo-overlay" onClick={onClose}>
@@ -100,10 +111,7 @@ export function RestaurantInfoSheet({ restaurant, onClose }) {
             <>
               <h4 className="rinfo-title rinfo-title--left rinfo-title--mt">{t('establishmentTitle')}</h4>
               <div className="rinfo-rows">
-                {r.legalName && <Row label={t('nameLabel')} value={r.legalName} />}
                 {r.address && <Row label={t('address')} value={r.address} />}
-                {r.legalAddress && <Row label={t('legalAddressLabel')} value={r.legalAddress} />}
-                {r.inn && <Row label="INN" value={r.inn} />}
                 {/* Telefon qatori HOZIRCHA olib tashlandi — yuqoridagi izohga qarang */}
               </div>
             </>

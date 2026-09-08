@@ -50,14 +50,38 @@
 
 /* Xizmat haqi jadvali */
 .rinfo-rows { display: flex; flex-direction: column; }
+/*
+ * QATOR JOYLASHUVI — UZUN QIYMATLAR UCHUN.
+ *
+ * MUAMMO: `white-space: nowrap` va qattiq yonma-yon joylashuv
+ * tufayli uzun qiymat (masalan to'liq yuridik manzil) qatordan
+ * CHIQIB KETARDI — oyna gorizontal siljib, matn kesilib qolardi.
+ *
+ * YECHIM: qiymat o'ralishi mumkin va sig'masa PASTGA tushadi.
+ * flex-wrap qatorni ikkiga bo'ladi: yorliq tepada, qiymat
+ * ostida. Qisqa qiymatlar esa avvalgidek yonma-yon qoladi.
+ */
 .rinfo-row {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 14px; padding: 14px 0;
+  display: flex; align-items: baseline; justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 14px; padding: 14px 0;
   border-bottom: 1px solid var(--line);
 }
 .rinfo-row:last-child { border-bottom: none; }
-.rinfo-row__label { font-size: 14.5px; color: var(--ink); }
-.rinfo-row__value { font-size: 14.5px; font-weight: 700; color: var(--brand-100); white-space: nowrap; }
+.rinfo-row__label {
+  font-size: 14.5px; color: var(--ink);
+  flex: none;
+}
+.rinfo-row__value {
+  font-size: 14.5px; font-weight: 700; color: var(--brand-100);
+  /* Qisqa bo'lsa o'ngda, uzun bo'lsa butun kenglikni oladi */
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: right;
+  /* nowrap OLIB TASHLANDI — matn o'ralsin */
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
 .rinfo-row__value--free { color: var(--success); }
 .rinfo-row__note { color: var(--muted); }
 
