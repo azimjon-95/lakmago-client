@@ -17,7 +17,9 @@ export const CATEGORIES = [
   { id: 'choyxona', label: 'Choyxona', art: 'choyxona', img: '/categories/choyxona.png' },
 
   { id: 'zavtroki', label: 'Nonushta', art: 'milliy' },
-  { id: 'obed', label: 'Tushlik', art: 'milliy' },
+  // Ko'rinish nomi o'zgardi, `id` ATAYLAB 'obed' qoldi —
+  // bazadagi mavjud taomlar shu qiymat bilan bog'langan
+  { id: 'obed', label: 'Issiq taomlar', art: 'milliy' },
 
   // Yangi rasm
   { id: 'fastfood', label: 'Fast food', art: 'fastfood', img: '/categories/fastfood.png' },
