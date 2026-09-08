@@ -39,7 +39,19 @@ export const CATEGORIES = [
 
   // Shu rasm Ichimlik kategoriyasiga ham ishlatiladi
   { id: 'salqin', label: 'Ichimlik', art: 'ichimlik', img: '/categories/ichimlik.png' },
-  { id: 'gazak', label: 'Gazaklar', art: 'milliy', img: '/categories/gazaklar.png' },
+  /*
+   * DIQQAT — `id` BAZADAGI QIYMAT BILAN BIR XIL BO'LISHI SHART.
+   *
+   * Ilgari bu yerda `gazak` turardi, lekin Dish modelida
+   * bunday qiymat YO'Q. Ya'ni birorta taom ham `gazak`
+   * kategoriyasida saqlanmagan va bu chip HAR DOIM bo'sh
+   * natija berardi.
+   *
+   * Bazada mavjud, lekin mijozga ko'rsatilmayotgan qiymat esa
+   * `magazin_oziq` edi (do'kon mahsulotlari). Endi shu qiymat
+   * ishlatiladi va rasm o'sha holicha qoldi.
+   */
+  { id: 'magazin_oziq', label: 'Gazaklar', art: 'milliy', img: '/categories/gazaklar.png' },
 ];
 
 export const HOME_CATEGORIES = CATEGORIES;

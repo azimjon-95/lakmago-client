@@ -18,7 +18,7 @@ export function RestaurantInfoSheet({ restaurant, onClose }) {
   const r = restaurant || {};
   const { isOpen, hoursLabel, nextOpen } = useOpenStatus(r);
 
-  const hasFees = r.serviceFeePercent > 0 || r.deliveryFee > 0
+  const hasFees = r.deliveryFee > 0
     || r.minOrderAmount > 0 || r.deliveryMin > 0;
 
   /*
@@ -71,13 +71,13 @@ export function RestaurantInfoSheet({ restaurant, onClose }) {
                 {t('serviceFeeAndDeliveryTitle')}
               </h4>
               <div className="rinfo-rows">
-                <Row
-                  label={t('serviceFee')}
-                  value={r.serviceFeePercent > 0
-                    ? `${r.serviceFeePercent}%${r.serviceFeeMin > 0 && r.serviceFeeMax > 0 ? ' *' : ''}`
-                    : t('free')}
-                  free={!(r.serviceFeePercent > 0)}
-                />
+                {/*
+                  "Xizmat haqi" qatori OLIB TASHLANDI.
+                  Mijoz uchun bu chalkash edi: u savatda baribir
+                  yakuniy summani ko'radi, bu yerda esa foiz
+                  ko'rsatilib, "yana qancha qo'shiladi?" degan
+                  savol tug'ilardi. Hisob-kitobda o'zgarish yo'q.
+                */}
                 <Row
                   label={t('deliveryTabTitle')}
                   value={r.deliveryFee > 0 ? formatSom(r.deliveryFee) : t('free')}
@@ -92,11 +92,11 @@ export function RestaurantInfoSheet({ restaurant, onClose }) {
                 )}
               </div>
 
-              {r.serviceFeePercent > 0 && r.serviceFeeMin > 0 && r.serviceFeeMax > 0 && (
-                <p className="rinfo-note">
-                  * {t('serviceFeeNotePrefix')} {r.serviceFeePercent}% {t('serviceFeeNoteMid')} {formatSom(r.serviceFeeMin)} {t('serviceFeeNoteMid2')} {formatSom(r.serviceFeeMax)} {t('serviceFeeNoteSuffix')}
-                </p>
-              )}
+              {/*
+                Xizmat haqi izohi ham olib tashlandi — u yuqoridagi
+                "*" belgisiga havola qilardi, o'sha qator esa endi
+                yo'q. Izohsiz yulduzcha mijozni chalg'itardi.
+              */}
             </>
           )}
 

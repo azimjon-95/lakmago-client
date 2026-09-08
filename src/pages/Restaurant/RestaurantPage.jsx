@@ -9,7 +9,7 @@ import { RestaurantBanner } from '@/components/DishPhoto';
 import { RestaurantInfoSheet } from '@/components/RestaurantInfoSheet';
 import { useT } from '@/i18n';
 import { useUser } from '@/store/user';
-import { haptic } from '@/lib/telegram';
+import { haptic, getTelegram } from '@/lib/telegram';
 import { useClosedAlert, useOpenStatus } from '@/hooks/useOpenStatus';
 import { ClosedAlert } from '@/components/ClosedAlert';
 import { useRestaurant, useDishes } from '@/hooks/queries';
@@ -56,6 +56,43 @@ export function RestaurantPage() {
     restaurant?.minOrderAmount > 0 ||
     restaurant?.serviceFeePercent > 0 || restaurant?.deliveryFee > 0,
   );
+
+  /*
+   * ═══ RESTORANGACHA YO'NALISH ═══
+   *
+   * Koordinatalar bo'lmasa tugma UMUMAN ko'rsatilmaydi. Sabab:
+   * koordinatasiz Yandex faqat qidiruv oynasini ochardi va
+   * mijozda "bosdim, hech narsa bo'lmadi" degan taassurot
+   * qolardi. Ishlamaydigan tugmadan ko'ra yo'q tugma yaxshi.
+   */
+  const hasCoords = Number.isFinite(restaurant?.lat) && Number.isFinite(restaurant?.lng);
+
+  const openRoute = () => {
+    if (!hasCoords) return;
+    haptic();
+
+    const dest = `${restaurant.lat},${restaurant.lng}`;
+
+    /*
+     * `rtext=~` — boshlanish nuqtasi BO'SH qoldiriladi.
+     *
+     * Mijozning joylashuvini o'zimiz so'rab, uzatishimiz ham
+     * mumkin edi, lekin bu yomonroq: brauzer ruxsat so'raydi,
+     * mijoz kutadi, rad etsa esa umuman ishlamaydi. Bo'sh
+     * qoldirilsa Yandex O'ZI joriy joylashuvni oladi — u
+     * allaqachon ruxsatga ega va aniqroq ishlaydi.
+     *
+     * `rtt=auto` — avtomobil yo'nalishi (kuryer emas, mijoz
+     * o'zi borishi uchun).
+     */
+    const url = `https://yandex.uz/maps/?rtext=~${dest}&rtt=auto&z=16`;
+
+    const tg = getTelegram();
+    try {
+      if (tg?.openLink) { tg.openLink(url); return; }
+    } catch { /* zaxira quyida */ }
+    window.open(url, '_blank', 'noopener');
+  };
 
   // Taomlarga restoran meta'sini biriktiramiz (savatга to'g'ri o'tishi uchun)
   const restaurantDishes = useMemo(
@@ -273,6 +310,23 @@ export function RestaurantPage() {
               <span className="rest-stat__value">{t('free')}</span>
               <span className="rest-stat__label">{t('deliveryLower')}</span>
             </div>
+          )}
+
+          {/*
+            ═══ YO'NALISH ═══
+            Faqat restoran koordinatalari bo'lsa ko'rinadi.
+            Koordinatasiz Yandex faqat qidiruv oynasini ochardi
+            va mijoz "nega ishlamadi?" deb o'ylardi — tugma
+            umuman bo'lmagani afzal.
+          */}
+          {hasCoords && (
+            <button onClick={openRoute} className="rest-stat">
+              <span className="rest-stat__icon rest-stat__icon--route">
+                <Icon name="navigation" size={20} color="var(--brand)" />
+              </span>
+              <span className="rest-stat__value">{t('routeLabel')}</span>
+              <span className="rest-stat__label">{t('routeSubLabel')}</span>
+            </button>
           )}
 
           {/* Ish tartibi — faqat ma'lumot kiritilgan bo'lsa */}

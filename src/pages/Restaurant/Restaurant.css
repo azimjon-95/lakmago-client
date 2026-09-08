@@ -185,6 +185,25 @@
 }
 .rest-stat__label { font-size: 11.5px; color: var(--muted); }
 
+/*
+ * Yo'nalish tugmasi — brend fonda, boshqalardan ajralib tursin.
+ *
+ * Qolgan kartalar ma'lumot beradi, bu esa HARAKATGA chorlaydi
+ * (xaritani ochadi). Bir xil kulrang fonda bo'lsa, uni bosish
+ * mumkinligi bilinmasdi.
+ */
+.rest-stat__icon--route {
+  background: var(--brand-tint);
+}
+.rest-stat:active .rest-stat__icon--route {
+  background: var(--brand-50);
+  transform: scale(0.94);
+}
+.rest-stat__icon--route,
+.rest-stat:active .rest-stat__icon--route {
+  transition: transform 140ms ease, background 140ms ease;
+}
+
 .rest-service-link {
   display: flex; align-items: center; justify-content: center; gap: 6px;
   width: 100%; padding: 9px;
