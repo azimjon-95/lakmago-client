@@ -1,3 +1,25 @@
+
+/*
+ * ═══ YUQORI BO'SHLIQ — YAGONA MANBA ═══
+ *
+ * `env(safe-area-inset-top)` iOS'da to'g'ri ishlaydi, Android
+ * WebView'da esa ko'pincha 0 qaytaradi. Telegram beradigan
+ * `--tg-safe-top` (tg.safeAreaInset) esa ikkala platformada
+ * ham to'g'ri.
+ *
+ * max() ikkalasining kattarog'ini oladi — qaysi biri
+ * ishlasa o'sha ishlaydi, ikkitasi qo'shilib ketmaydi.
+ *
+ * Bu o'zgaruvchi barcha joyda ishlatiladi, shuning uchun
+ * kelajakda tuzatish ham bitta joyda bo'ladi.
+ */
+:root {
+  --tg-top-offset: calc(
+    max(env(safe-area-inset-top, 0px), var(--tg-safe-top, 0px))
+    + var(--tg-content-top, 0px)
+  );
+}
+
 /* ============================================
    LokmaGo — Dizayn tokenlari (dark, ishtaha ochuvchi)
 
@@ -138,7 +160,7 @@ ul { list-style: none; }
   flex-direction: column;
   /* Yuqori bo'shliq: iPhone notch + Telegram tugmalari (to'liq ekranda).
      --tg-content-top ni telegram.js o'rnatadi. */
-  padding-top: calc(env(safe-area-inset-top, 0px) + var(--tg-content-top, 0px));
+  padding-top: var(--tg-top-offset);
 }
 
 /*
@@ -164,7 +186,7 @@ ul { list-style: none; }
   top: 0;
   left: 0;
   right: 0;
-  height: calc(env(safe-area-inset-top, 0px) + var(--tg-content-top, 0px));
+  height: var(--tg-top-offset);
   background: var(--tg-surface-top, var(--canvas));
   pointer-events: none;
   z-index: 100;
@@ -206,7 +228,7 @@ ul { list-style: none; }
   position: sticky;
   /* To'liq ekranda Telegram tugmalari (Закрыть, ⌄, ⋯) ostiga yopishadi —
      aks holda sarlavha ular bilan ustma-ust tushadi */
-  top: calc(env(safe-area-inset-top, 0px) + var(--tg-content-top, 0px));
+  top: var(--tg-top-offset);
   z-index: 10;
   display: flex;
   align-items: center;

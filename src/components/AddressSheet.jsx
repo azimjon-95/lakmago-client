@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSheetDrag } from '@/hooks/useSheetDrag';
 import { Icon } from './Icon';
 import { useT } from '@/i18n';
 import './cards/AddressSheet.css';
@@ -14,9 +15,16 @@ export function AddressSheet({ addresses, selectedId, onSelect, onAdd, onClose }
     setAdding(false); setTitle('Uy'); setText('');
   }
 
+  // Pastga tortib yopish — telefon ilovalaridagi odatiy xulq
+  const { dragProps, overlayStyle } = useSheetDrag(onClose);
+
   return (
-    <div onClick={onClose} className="sheet-overlay" style={{ zIndex: 100 }}>
-      <div onClick={(e) => e.stopPropagation()} className="addr-sheet">
+    <div onClick={onClose} className="sheet-overlay" style={{ zIndex: 100, ...overlayStyle }}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="addr-sheet"
+        {...dragProps}
+      >
         <div className="addr-sheet__head">
           <div className="addr-sheet__title">{t('myAddresses')}</div>
           <button onClick={onClose} aria-label={t('close')}><Icon name="x" size={20} color="var(--muted)" /></button>

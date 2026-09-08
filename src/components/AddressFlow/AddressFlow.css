@@ -16,7 +16,7 @@
    olinmasa sarlavha soat/tugmalar bilan ustma-ust tushadi. */
 .addrflow__header {
   display: flex; align-items: center; gap: 12px;
-  padding: calc(14px + env(safe-area-inset-top, 0px) + var(--tg-content-top, 0px)) 16px 14px;
+  padding: calc(14px + var(--tg-top-offset)) 16px 14px;
   border-bottom: 1px solid var(--line);
   flex: none;
 }
@@ -28,7 +28,7 @@
 .addrflow__back-btn:active { background: var(--surface-2); }
 .addrflow__back {
   position: absolute; right: 14px;
-  top: calc(14px + env(safe-area-inset-top, 0px) + var(--tg-content-top, 0px));
+  top: calc(14px + var(--tg-top-offset));
 }
 .addrflow__header-title { font-size: 17px; font-weight: 700; color: var(--ink); margin: 0; }
 

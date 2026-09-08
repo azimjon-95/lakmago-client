@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useSheetDrag } from '@/hooks/useSheetDrag';
 import { Icon } from './Icon';
 import { DishPhoto } from './DishPhoto';
 import { formatSom, formatSomShort } from '@/lib/utils';
@@ -89,9 +90,12 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
     onClose();
   }
 
+  // Pastga tortib yopish
+  const { dragProps, overlayStyle } = useSheetDrag(onClose);
+
   return (
-    <div className="dish-modal-overlay" onClick={onClose}>
-      <div className="dish-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="dish-modal-overlay" onClick={onClose} style={overlayStyle}>
+      <div className="dish-modal" onClick={(e) => e.stopPropagation()} {...dragProps}>
         <div className="dish-modal__grabber" />
         <div className="dish-modal__photo">
           <DishPhoto dish={dish} fill fit="contain" radius={0} iconSize={72} />

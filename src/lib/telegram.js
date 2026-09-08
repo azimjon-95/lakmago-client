@@ -239,6 +239,26 @@ export async function authenticateWithTelegram() {
       if (!top && tg.isFullscreen) top = 56;
 
       root.style.setProperty('--tg-content-top', `${top}px`);
+
+      /*
+       * ═══ TIZIM BO'SHLIG'I (status bar / notch) ═══
+       *
+       * MUAMMO: Android'da orqaga va yurakcha tugmalari Telegram'ning
+       * o'z tugmalari ostiga kirib ketardi. iOS'da esa hammasi
+       * joyida edi.
+       *
+       * SABAB: CSS'da `env(safe-area-inset-top)` ishlatilardi. iOS
+       * WebView bu qiymatni to'g'ri beradi, Android WebView esa
+       * ko'pincha 0 qaytaradi — status bar ostida bo'lsa ham.
+       * Natijada Android'da yuqori bo'shliq umuman qo'shilmasdi.
+       *
+       * YECHIM: Telegram O'ZI beradigan qiymatni ishlatamiz
+       * (tg.safeAreaInset). U platformadan qat'i nazar to'g'ri.
+       * CSS'da esa ikkalasining KATTAROG'I olinadi — qaysi biri
+       * ishlasa o'sha ishlaydi.
+       */
+      const sysTop = tg.safeAreaInset?.top ?? 0;
+      root.style.setProperty('--tg-safe-top', `${sysTop}px`);
     };
     syncViewport();
     if (typeof tg.onEvent === 'function') {

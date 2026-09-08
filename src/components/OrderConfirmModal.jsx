@@ -1,4 +1,5 @@
 import { Icon } from './Icon';
+import { useSheetDrag } from '@/hooks/useSheetDrag';
 import { formatSom } from '@/lib/utils';
 import { useT } from '@/i18n';
 import './OrderConfirmModal.css';
@@ -14,9 +15,12 @@ import './OrderConfirmModal.css';
  */
 export function OrderConfirmModal({ groups, pricing, total, onClose, onConfirm, submitting }) {
   const t = useT();
+  // Pastga tortib yopish
+  const { dragProps, overlayStyle } = useSheetDrag(onClose);
+
   return (
-    <div className="ocm-overlay" onClick={onClose}>
-      <div className="ocm-sheet" onClick={(e) => e.stopPropagation()}>
+    <div className="ocm-overlay" onClick={onClose} style={overlayStyle}>
+      <div className="ocm-sheet" onClick={(e) => e.stopPropagation()} {...dragProps}>
         <div className="ocm-handle" />
 
         <div className="ocm-head">

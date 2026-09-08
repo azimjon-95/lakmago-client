@@ -1,4 +1,5 @@
 import { Icon } from './Icon';
+import { useSheetDrag } from '@/hooks/useSheetDrag';
 import { formatSom } from '@/lib/utils';
 import { useOpenStatus } from '@/hooks/useOpenStatus';
 import { useT } from '@/i18n';
@@ -42,9 +43,12 @@ export function RestaurantInfoSheet({ restaurant, onClose }) {
    */
   const hasLegal = Boolean(r.address);
 
+  // Pastga tortib yopish
+  const { dragProps, overlayStyle } = useSheetDrag(onClose);
+
   return (
-    <div className="rinfo-overlay" onClick={onClose}>
-      <div className="rinfo-sheet" onClick={(e) => e.stopPropagation()}>
+    <div className="rinfo-overlay" onClick={onClose} style={overlayStyle}>
+      <div className="rinfo-sheet" onClick={(e) => e.stopPropagation()} {...dragProps}>
         <div className="rinfo-sheet__grabber" />
         <button onClick={onClose} className="rinfo-sheet__close" aria-label={t('close')}>
           <Icon name="x" size={18} color="var(--muted)" />
