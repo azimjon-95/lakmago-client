@@ -104,11 +104,40 @@ export function HomePage() {
     setAdModal(slide.adData);
   }, []);
 
-  // Kategoriya tanlanganda restoranlar VA taomlar birga filtrlanadi
-  const filtered = useMemo(
-    () => (category === 'all' ? restaurants : restaurants.filter((r) => r.category === category)),
-    [restaurants, category],
-  );
+  /*
+   * ═══ KATEGORIYA BO'YICHA RESTORANLAR ═══
+   *
+   * MUAMMO: ilgari faqat `r.category === category` tekshirilardi,
+   * ya'ni restoranning O'Z turi. Natijada "Issiq taomlar"
+   * tanlanganda menyusida 19 ta issiq taom bor restoran ham
+   * ro'yxatdan CHIQIB KETARDI — chunki uning o'z turi, masalan,
+   * "Milliy taom" edi. Mijoz uchun bu mantiqsiz: u taom
+   * qidiryapti, restoranning qanday belgilangani uni
+   * qiziqtirmaydi.
+   *
+   * ENDI ikki shartdan biri yetarli:
+   *   • restoranning o'z turi mos keladi, YOKI
+   *   • menyusida shu kategoriyadagi ochiq taom bor
+   *
+   * Restoran turi baribir hisobga olinadi — masalan menyusi
+   * hali to'ldirilmagan yangi choyxona "Choyxona" filtrida
+   * ko'rinib turadi.
+   */
+  const filtered = useMemo(() => {
+    if (category === 'all') return restaurants;
+
+    // Shu kategoriyada taomi bor restoranlar — bir marta yig'iladi
+    const withDish = new Set(
+      allDishes
+        .filter((d) => d.category === category)
+        .map((d) => String(d.restaurantId || '')),
+    );
+
+    return restaurants.filter((r) => {
+      if (r.category === category) return true;
+      return withDish.has(String(r._id || r.id || ''));
+    });
+  }, [restaurants, allDishes, category]);
 
   // Taomlar ham shu kategoriya bo'yicha. Taomda kategoriya bo'lmasa —
   // restorani mos kelsa ham ko'rsatamiz (eski ma'lumot uchun).
