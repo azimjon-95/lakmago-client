@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { lockScroll, unlockScroll } from '@/lib/scrollLock';
 
 /*
  * ═══════════════════════════════════════════════════════════
@@ -42,26 +43,17 @@ export function useSheetDrag(onClose) {
   const state = useRef({ dy: 0, closing: false, onClose });
   state.current = { dy, closing, onClose };
 
-  /*
+/*
    * ═══ ORQA FON AYLANMASIN ═══
    *
-   * Oyna ochiq turganda ortidagi sahifa aylanardi: mijoz oyna
-   * ichida aylantirmoqchi bo'ladi, u tugagach harakat ostidagi
-   * sahifaga o'tib ketardi. Oyna yopilgach mijoz butunlay
-   * boshqa joyda turardi.
-   *
-   * Avvalgi qiymat aniq tiklanadi — boshqa joyda o'rnatilgan
-   * uslub buzilmasligi uchun.
+   * Hisoblagichli yagona qulf (scrollLock) — bir nechta sheet
+   * yoki useLockScroll bilan birga ochilganda ham overflow
+   * qolib ketmaydi.
    */
   useEffect(() => {
-    const html = document.documentElement;
-    const prevHtml = html.style.overflow;
-    const prevBody = document.body.style.overflow;
-    html.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
+    lockScroll();
     return () => {
-      html.style.overflow = prevHtml;
-      document.body.style.overflow = prevBody;
+      unlockScroll();
     };
   }, []);
 

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Icon } from '@/components/Icon';
+import { lockScroll, unlockScroll } from '@/lib/scrollLock';
 import './ClosedAlert.css';
 
 /**
@@ -11,9 +12,10 @@ export function ClosedAlert({ info, onClose }) {
   // Avval info bo'lmasa ham ishlab, sahifani qotirib qo'yardi.
   useEffect(() => {
     if (!info) return undefined;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = prev; };
+    lockScroll();
+    return () => {
+      unlockScroll();
+    };
   }, [info]);
 
   if (!info) return null;
