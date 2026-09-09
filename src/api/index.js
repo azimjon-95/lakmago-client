@@ -212,7 +212,7 @@ export const api = {
   clickAd: (id) => apiFetch(`/ads/${id}/click`, { method: 'POST' }),
 
   getRestaurants: async (opts) => {
-    const res = await apiFetch('/restaurants', opts);
+    const res = await apiFetch('/restaurants?limit=50', opts);
     return Array.isArray(res) ? res : (res.items ?? []);
   },
 
@@ -242,7 +242,7 @@ export const api = {
 
   // Barcha restoranlar taomlarи aralash (bosh sahifа)
   getAllDishes: async (opts) => {
-    const res = await apiFetch('/dishes/all', opts);
+    const res = await apiFetch('/dishes/all?limit=50', opts);
     return Array.isArray(res) ? res : (res.items ?? []);
   },
 

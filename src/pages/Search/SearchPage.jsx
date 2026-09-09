@@ -11,6 +11,7 @@ import { RestaurantCardSkeleton } from '@/components/Skeleton/Skeleton';
 import { useRestaurants, useAllDishes } from '@/hooks/queries';
 import { haptic } from '@/lib/telegram';
 import { useT } from '@/i18n';
+import { restaurantMatchesCategory, dishMatchesCategory } from '@/data/categories';
 import { FilterSheet, CATEGORIES, SPECIALS, SORTS } from './FilterSheet';
 import './Search.css';
 
@@ -52,9 +53,13 @@ export function SearchPage() {
         (r.name || '').toLowerCase().includes(debounced) ||
         (r.cuisine || '').toLowerCase().includes(debounced));
     }
+
     if (categories.length) {
-      list = list.filter((r) => categories.includes(r.category));
+      list = list.filter((r) =>
+        categories.some((id) => restaurantMatchesCategory(r, id)),
+      );
     }
+
     if (maxTime) {
       list = list.filter((r) => (r.deliveryMin ?? 30) <= maxTime);
     }
@@ -71,11 +76,18 @@ export function SearchPage() {
 
   // Taomlarni qidirish (faqat matn bo'yicha)
   const foundDishes = useMemo(() => {
-    if (!debounced) return [];
-    return dishes
-      .filter((d) => (d.name || '').toLowerCase().includes(debounced))
-      .slice(0, 12);
-  }, [dishes, debounced]);
+    if (!debounced && !categories.length) return [];
+    let list = dishes;
+    if (debounced) {
+      list = list.filter((d) => (d.name || '').toLowerCase().includes(debounced));
+    }
+    if (categories.length) {
+      list = list.filter((d) =>
+        categories.some((id) => dishMatchesCategory(d, id)),
+      );
+    }
+    return list.slice(0, 12);
+  }, [dishes, debounced, categories]);
 
   const reset = () => {
     haptic();

@@ -20,7 +20,13 @@ import { PullToRefresh } from '@/components/PullToRefresh';
 import { API_BASE, api } from '@/api';
 import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
 import { CategoryIcon } from '@/components/CategoryIcons/CategoryIcon';
-import { HOME_CATEGORIES, shuffled } from '@/data/categories';
+import {
+  HOME_CATEGORIES,
+  shuffled,
+  dishMatchesCategory,
+  restaurantMatchesCategory,
+  filterByCategory,
+} from '@/data/categories';
 import { AddressSheet } from '@/components/AddressSheet';
 import './Home.css';
 
@@ -124,13 +130,15 @@ export function HomePage() {
    * to'ldirilmagan yangi choyxona "Choyxona" filtrida
    * ko'rinib turadi.
    */
-  const filtered = useMemo(() => {
-    if (category === 'all') return restaurants;
-    return restaurants.filter((r) => (
-      r.category === category
-      || (Array.isArray(r.dishCategories) && r.dishCategories.includes(category))
-    ));
-  }, [restaurants, category]);
+  const filtered = useMemo(
+    () => filterByCategory(restaurants, category, restaurantMatchesCategory),
+    [restaurants, category],
+  );
+
+  const filteredTrending = useMemo(
+    () => filterByCategory(trending, category, dishMatchesCategory),
+    [trending, category],
+  );
 
   // Taomlar ham shu kategoriya bo'yicha. Taomda kategoriya bo'lmasa —
   // restorani mos kelsa ham ko'rsatamiz (eski ma'lumot uchun).
@@ -142,10 +150,10 @@ export function HomePage() {
   const openDishes = useOpenDishes(allDishes);
   const { closedInfo, showClosed, hideClosed } = useClosedAlert();
 
-  const filteredDishes = useMemo(() => {
-    if (category === 'all') return openDishes;
-    return openDishes.filter((d) => d.category === category);
-  }, [openDishes, category]);
+  const filteredDishes = useMemo(
+    () => filterByCategory(openDishes, category, dishMatchesCategory),
+    [openDishes, category],
+  );
 
   // Har ochilganda tartib o'zgaradi — sahifa qayta render bo'lganda
   // emas, faqat ilova ochilganda (seed sessiyada saqlanadi)
@@ -195,7 +203,10 @@ export function HomePage() {
 
   const openModal = useCallback((d) => setModalDish(d), []);
   const closeModal = useCallback(() => setModalDish(null), []);
-  const shuffledRestaurants = [...filtered].sort(() => Math.random() - 0.5);
+const shuffledRestaurants = useMemo(
+    () => shuffle(filtered, shuffleSeed + 1),
+    [filtered, shuffleSeed, shuffle],
+  );
 
   return (
     <div className="app-shell home">
@@ -241,13 +252,15 @@ export function HomePage() {
       </div>
 
       {/* Trend taomlar */}
-      {(trendLoading || trending.length > 0) && (
+   {(trendLoading || filteredTrending.length > 0) && (
         <>
           <SectionHeader icon="flame" title={t('trendingDishes')} action={t('all')} />
           <div className="home-scroll-row no-scrollbar">
             {trendLoading
               ? Array.from({ length: 4 }).map((_, i) => <DishScrollCardSkeleton key={i} />)
-              : trending.map((d) => <DishScrollCard key={d.id || d._id} dish={d} onClick={openModal} />)}
+              : filteredTrending.map((d) => (
+                      <DishScrollCard key={d.id || d._id} dish={d} onClick={openModal} />
+              ))}
           </div>
         </>
       )}
