@@ -179,22 +179,56 @@ export function HomePage() {
     return a;
   }, []);
 
-  // Chegirmadagilar — eski narxi bor va u hozirgisidan katta.
-  // Barcha restoranlardan yig'iladi, kategoriya tanlansa filtrlanadi.
+  /*
+   * Bir kafedan to'planmasin — restoran bo'yicha guruhlab,
+   * har biridan navbatma-navbat (round-robin) olamiz.
+   * filteredDishes allaqachon: OCHIQ + kategoriya.
+   */
+  const pickMixed = useCallback((pool, seed, limit = 20) => {
+    if (!pool.length) return [];
+    const byRest = new Map();
+    for (const d of pool) {
+      const key = String(d.restaurantId || d.restaurantName || d.id || Math.random());
+      if (!byRest.has(key)) byRest.set(key, []);
+      byRest.get(key).push(d);
+    }
+    const buckets = [...byRest.values()].map((list, i) =>
+      shuffle(list, seed + i * 17),
+    );
+    const order = shuffle(
+      buckets.map((_, i) => i),
+      seed + 99,
+    );
+    const queues = order.map((i) => [...buckets[i]]);
+    const out = [];
+    let guard = 0;
+    while (out.length < limit && queues.some((q) => q.length) && guard < limit * 5) {
+      guard += 1;
+      for (const q of queues) {
+        if (out.length >= limit) break;
+        if (q.length) out.push(q.shift());
+      }
+    }
+    return out;
+  }, [shuffle]);
+
+  // Chegirma — ochiq + kategoriya + turli restoranlardan
   const discountedShown = useMemo(() => {
     const pool = filteredDishes.filter(
       (d) => Number(d.oldPrice) > Number(d.price),
     );
-    return shuffle(pool, shuffleSeed).slice(0, 20);
-  }, [filteredDishes, shuffleSeed, shuffle]);
+    return pickMixed(pool, shuffleSeed, 20);
+  }, [filteredDishes, shuffleSeed, pickMixed]);
 
-  // Tavsiya — chegirmasi yo'q taomlar (bitta narxli)
+  // Tavsiya qilamiz — ochiq + kategoriya + turli restoranlardan
   const recommended = useMemo(() => {
     const pool = filteredDishes.filter(
       (d) => !(Number(d.oldPrice) > Number(d.price)),
     );
-    return shuffle(pool, shuffleSeed).slice(0, 20);
-  }, [filteredDishes, shuffleSeed, shuffle]);
+    return pickMixed(pool, shuffleSeed + 7, 20);
+  }, [filteredDishes, shuffleSeed, pickMixed]);
+
+  // Tavsiya — chegirmasi yo'q taomlar (bitta narxli)
 
   const defaultAddress = useMemo(
     () => user.addresses.find((a) => a.id === user.defaultAddressId) ?? user.addresses[0],
