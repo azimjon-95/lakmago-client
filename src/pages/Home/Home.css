@@ -60,7 +60,7 @@ margin-left: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
-
+  overflow: hidden;
   border: 1px solid var(--accent-2);
 
   /* Yumshoq 3D / floating effekt */
