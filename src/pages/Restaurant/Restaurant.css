@@ -105,6 +105,53 @@
 .rest-row .dscard__name { font-size: 12.5px; }
 .rest-row .dscard__price-main { font-size: 13.5px; }
 
+/*
+ * ═══ TARMOQ KO'RINISHI ═══
+ *
+ * Kategoriya ikkita yoki undan kam bo'lganda ishlatiladi
+ * (RestaurantPage.jsx dagi `gridLayout` izohiga qarang).
+ *
+ * Gorizontal surish o'rniga kartalar ustma-ust joylashadi va
+ * sahifani to'ldiradi. Ikki ustun — telefonda karta juda
+ * kichrayib ketmasligi va rasm ko'rinarli qolishi uchun.
+ *
+ * DIQQAT: bu klasslar FAQAT restoran sahifasida ishlatiladi.
+ * `.rest-row` va boshqa mavjud qoidalarga tegilmagan, shuning
+ * uchun kategoriyasi ko'p restoranlarda hech narsa o'zgarmaydi.
+ */
+.rest-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 0 16px 16px;
+}
+
+/* Tarmoqda karta ustunni to'liq egallaydi — qatordagidek
+   qat'iy 136px emas */
+.rest-grid .dscard {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Kengroq karta — matn ham kattaroq bo'lsin */
+.rest-grid .dscard__name { font-size: 13.5px; }
+.rest-grid .dscard__price-main { font-size: 15px; }
+
+/* Tarmoq uchun skelet */
+.rest-grid__sk {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 14px;
+  background: var(--canvas);
+  animation: sk-pulse 1.4s ease-in-out infinite;
+}
+
+/* Keng ekranda uch ustun — planshet va kompyuterda
+   ikki ustun juda cho'zilib ketardi */
+@media (min-width: 560px) {
+  .rest-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
 /* Yuklanayotgan holat — karta o'lchamida */
 .rest-row__sk {
   flex: none;

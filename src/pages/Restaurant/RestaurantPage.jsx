@@ -173,6 +173,24 @@ export function RestaurantPage() {
   // o'tkazib yubormasligi uchun qisqa muddat to'xtatiladi
   const lockRef = useRef(0);
 
+  /*
+   * ═══ MENYU KO'RINISHI: QATOR YOKI TARMOQ ═══
+   *
+   * Kategoriyalar KO'P bo'lsa — har biri gorizontal qatorda.
+   * Aks holda bitta kategoriya butun ekranni egallab, mijoz
+   * qolganini topish uchun uzoq surishga majbur bo'lardi.
+   *
+   * Kategoriya IKKITA yoki undan kam bo'lsa — bu muammo yo'q.
+   * O'shanda gorizontal surish faqat xalaqit beradi: mijoz
+   * ekranda 2-3 ta taomni ko'radi, qolganini ko'rish uchun
+   * yon tomonga surishi kerak, garchi sahifada bo'sh joy
+   * bo'lsa ham. Tarmoq ko'rinishida hammasi ko'rinib turadi.
+   *
+   * Sharhlar bo'limi kategoriya sanalmaydi — u menyu emas.
+   */
+  const dishSections = sections.filter(([name]) => name !== REVIEWS_TAB).length;
+  const gridLayout = dishSections > 0 && dishSections <= 2;
+
   function scrollTo(name) {
     setActive(name);
     lockRef.current = Date.now() + 700;
@@ -427,9 +445,11 @@ export function RestaurantPage() {
                   Vertikal ro'yxatda bitta kategoriya butun ekranni
                   egallab, qolganini topish uchun uzoq surish
                   kerak edi. */}
-              <div className="rest-row no-scrollbar">
+              <div className={gridLayout ? 'rest-grid' : 'rest-row no-scrollbar'}>
                 {dishesLoading
-                  ? Array.from({ length: 3 }).map((_, i) => <div key={i} className="rest-row__sk" />)
+                  ? Array.from({ length: gridLayout ? 6 : 3 }).map((_, i) => (
+                      <div key={i} className={gridLayout ? 'rest-grid__sk' : 'rest-row__sk'} />
+                    ))
                   : list.map((d) => <DishScrollCard
                       key={d.id || d._id}
                       dish={d}
