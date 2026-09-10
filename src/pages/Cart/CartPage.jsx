@@ -663,6 +663,26 @@ export function CartPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAddress?.lat, selectedAddress?.lng, isPickup, groups.length]);
 
+  /*
+   * ═══ TAKRORIY YUBORISHDAN QULF ═══
+   * React holati darhol yangilanmaydi — tez ikki marta bosilsa
+   * `paying` hali false bo'lib turib, ikkita buyurtma
+   * yaratilishi mumkin edi. ref sinxron o'zgaradi, shuning
+   * uchun ikkinchi bosish shu yerda to'xtaydi.
+   *
+   * DIQQAT — JOYLASHUVI MUHIM.
+   * Bu qator pastdagi `if (items.length === 0) return` dan
+   * KEYIN turgan edi va aynan shu React #300 xatosini
+   * keltirib chiqargan: savat bo'shaganda komponent oldinroq
+   * qaytadi, hook esa chaqirilmaydi. React chaqirilgan
+   * hooklar sonini har renderda solishtiradi va farq
+   * bo'lsa butun daraxtni yiqitadi.
+   *
+   * Qoida: BARCHA hooklar har qanday shartli return'dan
+   * OLDIN chaqirilishi shart.
+   */
+  const submitLock = useRef(false);
+
   if (items.length === 0) {
     return (
       <div className="app-shell cart-empty">
@@ -702,15 +722,6 @@ export function CartPage() {
      */
     setShowConfirm(true);
   }
-
-  /*
-   * ═══ TAKRORIY YUBORISHDAN QULF ═══
-   * React holati darhol yangilanmaydi — tez ikki marta bosilsa
-   * `paying` hali false bo'lib turib, ikkita buyurtma
-   * yaratilishi mumkin edi. ref sinxron o'zgaradi, shuning
-   * uchun ikkinchi bosish shu yerda to'xtaydi.
-   */
-  const submitLock = useRef(false);
 
   function confirmAndSubmit() {
     if (submitLock.current) return;
