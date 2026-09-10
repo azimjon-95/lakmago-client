@@ -3,3 +3,22 @@ dist/
 .env
 *.log
 package-lock.json
+
+# ═══ Capacitor — Android ═══
+# Loyiha fayllari SAQLANADI (android/app/src, build.gradle va h.k.),
+# faqat yig'ish jarayonida yaratiladigan chiqindilar chiqarib
+# tashlanadi — ular bir necha yuz MB bo'lishi mumkin va boshqa
+# kompyuterda qayta yaratiladi.
+android/.gradle/
+android/app/build/
+android/build/
+android/capacitor-cordova-android-plugins/build/
+android/local.properties
+*.keystore
+*.jks
+
+# ═══ Capacitor — iOS ═══
+ios/App/Pods/
+ios/App/build/
+ios/App/DerivedData/
+ios/.build/
