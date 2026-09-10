@@ -113,6 +113,24 @@ margin-left: 13px;
 }
 .home-section-header__action { font-size: 13px; color: var(--brand-600); }
 
+/*
+ * ═══ BOSILADIGAN "BARCHASI" TUGMASI ═══
+ *
+ * `.home-section-header__action--btn` FAQAT onAction berilganda
+ * qo'llanadi (HomePage.jsx dagi SectionHeader'ga qarang). Asosiy
+ * `.home-section-header__action` qoidasi yuqorida — bu yerda
+ * unga QO'SHIMCHA qilinadi (button-reset + bosilish holati),
+ * mavjud matn ko'rinishiga tegilmagan.
+ */
+.home-section-header__action--btn {
+  display: flex; align-items: center; gap: 2px;
+  font-weight: 600;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: opacity 120ms ease;
+}
+.home-section-header__action--btn:active { opacity: 0.55; }
+
 /* Gorizontal taom qatori */
 .home-scroll-row {
   display: flex; gap: 10px;

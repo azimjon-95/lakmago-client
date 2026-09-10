@@ -40,13 +40,29 @@ import './Home.css';
  * endi barcha bo'limlar (shu jumladan chegirmadagi taomlar)
  * bir xil, sodda sarlavha uslubida.
  */
-const SectionHeader = memo(function SectionHeader({ icon, title, action }) {
+/*
+ * `onAction` ixtiyoriy — berilmasa xulq ILGARIGIDEK (oddiy matn,
+ * bosilmaydi). Faqat `onAction` berilganda tugmaga aylanadi.
+ * Shu sababli "Trend taomlar" bo'limi (onAction bermaydi) hech
+ * qanday o'zgarishsiz qoladi — faqat "Super Chegirmalar" va
+ * "Tavsiya qilamiz" bosiladigan bo'ladi.
+ */
+const SectionHeader = memo(function SectionHeader({ icon, title, action, onAction }) {
   return (
     <div className="home-section-header">
       <div className="home-section-header__title">
         {icon && <Icon name={icon} size={17} color="var(--appetite)" />} {title}
       </div>
-      {action && <div className="home-section-header__action">{action}</div>}
+      {action && (
+        onAction ? (
+          <button type="button" onClick={onAction} className="home-section-header__action home-section-header__action--btn">
+            {action}
+            <Icon name="chevronRight" size={14} color="var(--brand-600)" />
+          </button>
+        ) : (
+          <div className="home-section-header__action">{action}</div>
+        )
+      )}
     </div>
   );
 });
@@ -302,7 +318,12 @@ const shuffledRestaurants = useMemo(
       {/* Chegirmadagi taomlar */}
       {discountedShown.length > 0 && (
         <>
-          <SectionHeader icon="discount" title={t('discountedDishes')} />
+          <SectionHeader
+            icon="discount"
+            title={t('discountedDishes')}
+            action={t('all')}
+            onAction={() => navigate('/discover/discount')}
+          />
           <div className="home-dishes-row no-scrollbar">
             {discountedShown.map((d) => (
               <DishGridCard key={d.id || d._id} dish={d} onClick={openModal} />
@@ -314,7 +335,11 @@ const shuffledRestaurants = useMemo(
       {/* Tavsiya qilamiz — har kirganda tartib o'zgaradi */}
       {(allDishesLoading || recommended.length > 0) && (
         <>
-          <h2 className="home-restaurants-title">{t('recommended')}</h2>
+          <SectionHeader
+            title={t('recommended')}
+            action={t('all')}
+            onAction={() => navigate('/discover/recommended')}
+          />
           <div className="home-dishes-row no-scrollbar">
             {allDishesLoading
               ? Array.from({ length: 6 }).map((_, i) => <DishScrollCardSkeleton key={i} />)

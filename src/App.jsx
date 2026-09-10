@@ -15,6 +15,7 @@ const MyReservationsPage = lazy(() => import('@/pages/Reservation/MyReservations
 const ReservationPage = lazy(() => import('@/pages/Reservation/ReservationPage').then((m) => ({ default: m.ReservationPage })));
 const ProfilePage = lazy(() => import('@/pages/Profile/ProfilePage').then((m) => ({ default: m.ProfilePage })));
 const SearchPage = lazy(() => import('@/pages/Search/SearchPage').then((m) => ({ default: m.SearchPage })));
+const DiscoverDishesPage = lazy(() => import('@/pages/Discover/DiscoverDishesPage').then((m) => ({ default: m.DiscoverDishesPage })));
 import { useUser } from '@/store/user';
 import { authenticateWithTelegram, getStartParam, isTelegramEnv } from '@/lib/telegram';
 import { TelegramOnly } from '@/components/TelegramOnly/TelegramOnly';
@@ -215,6 +216,7 @@ function AppInner({ authMode = 'telegram' }) {
             <Route path="/cart" element={<CartPage />} />
             <Route path="/order/track" element={<OrderTrackPage />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/discover/:type" element={<DiscoverDishesPage />} />
             <Route path="/orders" element={<OrdersPage />} />
                           <Route path="/profile" element={<ProfilePage />} />
           </Routes>

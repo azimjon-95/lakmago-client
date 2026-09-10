@@ -246,6 +246,22 @@ export const api = {
     return Array.isArray(res) ? res : (res.items ?? []);
   },
 
+  /*
+   * "Barchasi" sahifasi uchun — sahifalab (cursor) yuklaydigan
+   * to'liq ro'yxat. getAllDishes'dan FARQI: xom { items, nextCursor,
+   * hasMore } qaytaradi (massivga siqilmaydi), shunda "Yana
+   * ko'rsatish" tugmasi ishlay oladi. Mavjud getAllDishes'ga
+   * TEGILMADI — Splash va HomePage undan o'zgarishsiz foydalanadi.
+   */
+  getDishesFeed: async ({ discounted, category, cursor, limit = 24, signal } = {}) => {
+    const params = new URLSearchParams({ limit: String(limit) });
+    if (discounted === true) params.set('discounted', '1');
+    else if (discounted === false) params.set('discounted', '0');
+    if (category && category !== 'all') params.set('category', category);
+    if (cursor) params.set('cursor', cursor);
+    return apiFetch(`/dishes/all?${params.toString()}`, { signal });
+  },
+
   // ===== Auth =====
   // Eslatma: haqiqiy login oqimi src/lib/telegram.js da (Telegram
   // WebApp obyektidan initData olish alohida logika talab qiladi),

@@ -1,0 +1,145 @@
+/*
+ * ═══════════════════════════════════════════════════════════
+ * DiscoverDishesPage — TO'LIQ IZOLYATSIYA
+ * ═══════════════════════════════════════════════════════════
+ * Barcha klasslar `.discover` prefiksi bilan. Faqat
+ * DiscoverDishesPage.jsx shu faylni import qiladi — boshqa
+ * hech qanday sahifa bu qoidalarga tegishli emas.
+ */
+
+.discover {
+  padding-bottom: 90px; /* CartBar + BottomNav uchun joy */
+}
+
+/* ═══ SARLAVHA ═══ */
+.discover-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 8px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.discover-header__back {
+  flex: none;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.discover-header__back:active { background: var(--surface-2); }
+.discover-header__title {
+  flex: 1;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  /* Uzun sarlavha ikki tugma orasida siqilib qolmasin */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 4px;
+}
+/* Orqaga tugmasi bilan bir xil kenglik — sarlavha aniq markazda
+   turishi uchun (aks holda faqat chap tomonda tugma borligi
+   sababli matn o'ngga siljib ko'rinardi) */
+.discover-header__spacer { flex: none; width: 36px; }
+
+/* ═══ KATEGORIYA CHIPLARI ═══ */
+.discover-cats {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  scroll-padding-inline: 16px;
+}
+.discover-cat {
+  flex: none;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+.discover-cat:active { transform: scale(0.97); }
+.discover-cat.is-active {
+  background: var(--brand-400);
+  border-color: var(--brand-400);
+  color: var(--brand-text);
+}
+
+/* ═══ GRID — KARTALAR USTMA-UST QATOR BO'LIB TO'LDIRADI ═══ */
+.discover-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 4px 16px 20px;
+}
+/* Keng ekranda uch ustun — planshet/kompyuterda ikkitasi
+   cho'zilib ketmasin */
+@media (min-width: 560px) {
+  .discover-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* DishGridCard sig'imga moslashsin — kartaning o'zidagi
+   qat'iy kenglik (agar bo'lsa) shu yerda bekor qilinadi */
+.discover-grid .dgcard { width: 100%; }
+
+/* Yuklanish skeleti — karta o'lchamiga mos, yengil miltillash */
+.discover-sk {
+  aspect-ratio: 3 / 4;
+  border-radius: 14px;
+  background: var(--canvas);
+  animation: discover-sk-pulse 1.4s ease-in-out infinite;
+}
+@keyframes discover-sk-pulse { 50% { opacity: 0.55; } }
+
+/* ═══ "YANA KO'RSATISH" ═══ */
+.discover-more {
+  display: block;
+  margin: 4px auto 24px;
+  padding: 12px 28px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.discover-more:active:not(:disabled) { transform: scale(0.97); background: var(--surface-2); }
+.discover-more:disabled { color: var(--muted); }
+
+/* ═══ BO'SH / XATO HOLAT ═══ */
+.discover-empty {
+  text-align: center;
+  margin: 12px 16px;
+  padding: 40px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+.discover-empty__icon { font-size: 40px; margin-bottom: 10px; }
+.discover-empty p { font-size: 14px; color: var(--muted); line-height: 1.5; margin-bottom: 16px; }
+.discover-retry {
+  background: var(--brand-400);
+  color: var(--brand-text);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 11px 24px;
+  border-radius: 12px;
+}
+.discover-retry:active { transform: scale(0.98); }
+
+@media (prefers-reduced-motion: reduce) {
+  .discover-sk { animation: none; opacity: 0.7; }
+}
