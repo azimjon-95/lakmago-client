@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 
 import { Icon } from './Icon';
+import { RestaurantBannerFallback } from './RestaurantBannerFallback';
 
 // Har bir "photo" kaliti uchun realistik rang sxemasi. Backend integratsiyasida bu komponent
 // ichida <img src={dish.imageUrl}> bilan almashtiriladi; hozircha restoran/taom yuklagan
@@ -86,6 +87,9 @@ export function DishPhoto({ dish, height = 96, radius = 12, iconSize = 34, fill 
 // Restoran banneri: real rasm (Cloudinary) bo'lsa uni ko'rsatadi, bo'lmasa universal banner
 export function RestaurantBanner({ restaurant, height = 150 }) {
   const [index, setIndex] = useState(0);
+  // Haqiqiy rasm yuklanganmi — yuklanguncha (yoki umuman bo'lmasa)
+  // RestaurantBannerFallback ko'rinadi.
+  const [imgLoaded, setImgLoaded] = useState(false);
   const images = restaurant.images || [];
 
   // Haqiqiy rasm (http) bo'lsa — uni ko'rsatamiz
@@ -103,26 +107,46 @@ export function RestaurantBanner({ restaurant, height = 150 }) {
       : realUrl;
     return (
       <div style={{ height, position: 'relative', flex: 'none', overflow: 'hidden', background: 'var(--surface-2)' }}>
-        <img src={optimized} alt={restaurant.name || ''} loading="lazy" decoding="async"
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.35), transparent 45%)' }} />
+        {/*
+          Rasm yuklanguncha fallback ko'rinadi — sahifa ochilgan
+          zahoti bo'sh joy emas, to'liq banner ko'rinadi. Rasm
+          kelgach ustiga yumshoq eriydi, fallback esa olib
+          tashlanadi.
+        */}
+        {!imgLoaded && <RestaurantBannerFallback name={restaurant.name} />}
+        <img
+          src={optimized}
+          alt={restaurant.name || ''}
+          loading="lazy"
+          decoding="async"
+          onLoad={() => setImgLoaded(true)}
+          style={{
+            position: 'absolute', inset: 0,
+            width: '100%', height: '100%', objectFit: 'cover',
+            opacity: imgLoaded ? 1 : 0,
+            transition: 'opacity 320ms ease',
+          }}
+        />
+        {imgLoaded && (
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.35), transparent 45%)' }} />
+        )}
       </div>
     );
   }
 
-  // Rasm yo'q — restoran ikoni bilan chiroyli gradient.
-  // images ichida yaroqsiz qiymat bo'lsa ham shu holat ishlaydi.
+  /*
+   * Rasm YO'Q — to'liq zaxira ko'rinish. Ilgari bu yerda shunchaki
+   * xira ikonka turardi (opacity 0.35) — bo'sh, "sozlanmagan"
+   * taassurot berardi. Endi RestaurantCard bilan bir xil
+   * (qog'oz fon, diagonal nom, yulduzchalar) ko'rsatiladi.
+   *
+   * images ichida yaroqsiz qiymat bo'lsa ham shu holat ishlaydi.
+   */
   const hasValidImage = images.some((u) => typeof u === 'string' && u.startsWith('http'));
   if (!hasValidImage) {
     return (
-      <div style={{
-        height,
-        background: 'linear-gradient(135deg, var(--brand-tint) 0%, #2A1D0E 100%)',
-        position: 'relative',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        flex: 'none',
-      }}>
-        <Icon name={restaurant.icon} size={64} color="var(--brand)" style={{ opacity: 0.35 }} />
+      <div style={{ height, position: 'relative', flex: 'none', overflow: 'hidden' }}>
+        <RestaurantBannerFallback name={restaurant.name} />
       </div>
     );
   }

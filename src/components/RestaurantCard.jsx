@@ -2,6 +2,7 @@ import { memo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from './Icon';
 import { PHOTO_STYLES } from './DishPhoto';
+import { RestaurantBannerFallback } from './RestaurantBannerFallback';
 import { formatSomShort } from '@/lib/utils';
 import { useT } from '@/i18n';
 import { isOpenNow, workHoursLabel } from '@/lib/workHours';
@@ -33,23 +34,18 @@ export const RestaurantCard = memo(function RestaurantCard({ restaurant: r }) {
   /*
    * ═══ RASM YUKLANMAGUNCHA / UMUMAN BO'LMAGANDA ═══
    *
-   * ILGARI: rasm bo'lmasa yoki hali yuklanmagan bo'lsa banner
-   * rangli fon ustida faqat ikonka bilan ko'rinardi — bo'sh va
-   * "tugallanmagan" taassurot berardi.
-   *
-   * ENDI ikki alohida holat farqlanadi:
-   *   • rasm YO'Q — restoran nomi banner ichida chiqadi
-   *   • rasm BOR, lekin hali yuklanmoqda — "porlash" (shimmer)
-   *     animatsiyasi, rasm kelgach yumshoq eriydi (fade-in)
+   * Ikkala holatda ham (rasm yo'q, YOKI bor-u hali yuklanmagan)
+   * bir xil RestaurantBannerFallback ko'rsatiladi — qog'oz fon,
+   * diagonal nom, yulduzchalar. Rasm kelgach ustiga yumshoq
+   * eriydi (fade-in), fallback esa DOM'dan olib tashlanadi.
    *
    * `imgLoaded` faqat HAQIQIY <img> yuklangandan keyin true
    * bo'ladi — brauzer keshidan darhol kelsa ham onLoad baribir
-   * ishlaydi, shuning uchun keshlangan rasmlarda animatsiya
+   * ishlaydi, shuning uchun keshlangan rasmlarda fallback
    * "yopishib qolmaydi".
    */
   const [imgLoaded, setImgLoaded] = useState(false);
-  const showShimmer = Boolean(optimizedImg) && !imgLoaded;
-  const showNamePlaceholder = !optimizedImg;
+  const showFallback = !imgLoaded;
 
   return (
     <button
@@ -70,16 +66,8 @@ export const RestaurantCard = memo(function RestaurantCard({ restaurant: r }) {
           />
         )}
 
-        {/* Porlash — rasm bor, lekin hali yuklanmagan */}
-        {showShimmer && <div className="rcard__shimmer" aria-hidden="true" />}
-
-        {/* Rasm umuman yo'q — restoran nomi banner ichida */}
-        {showNamePlaceholder && (
-          <div className="rcard__banner-fallback">
-            {style && <div className="rcard__banner-glow" />}
-            <span className="rcard__banner-fallback__name">{r.name}</span>
-          </div>
-        )}
+        {/* Rasm yo'q yoki hali yuklanmagan — umumiy zaxira ko'rinish */}
+        {showFallback && <RestaurantBannerFallback name={r.name} />}
         {r.discount && <div className="rcard__tag rcard__tag--discount">−{r.discount}%</div>}
         {r.isFresh && !r.discount && <div className="rcard__tag rcard__tag--new">{t('fresh')}</div>}
         {/* Yetkazish vaqti — banner burchagida (Uzum uslubi) */}

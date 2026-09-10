@@ -1,0 +1,105 @@
+/*
+ * ═══════════════════════════════════════════════════════════
+ * RestaurantBannerFallback — TO'LIQ IZOLYATSIYA
+ * ═══════════════════════════════════════════════════════════
+ * Barcha klasslar `.rbfb` prefiksi bilan. Boshqa hech qanday
+ * komponent yoki sahifa bu fayldan foydalanmaydi va bu yerdagi
+ * qoidalar boshqa joyga tarqalmaydi.
+ */
+
+.rbfb {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  /*
+   * Och jigarrang qog'oz fon. Uchta yumshoq radial dog' +
+   * diagonal gradient — tekis rangdan ko'ra "qog'oz" hissi
+   * beradi, murakkab tekstura fayliga muhtoj emas.
+   */
+  background:
+    radial-gradient(circle at 18% 25%, rgba(255, 255, 255, 0.12), transparent 45%),
+    radial-gradient(circle at 82% 75%, rgba(120, 70, 20, 0.10), transparent 50%),
+    radial-gradient(circle at 50% 105%, rgba(80, 45, 10, 0.14), transparent 60%),
+    linear-gradient(135deg, #F3E8D2 0%, #EAD9BC 45%, #F1E4CC 100%);
+}
+
+/*
+ * Diagonal takrorlanuvchi nom.
+ *
+ * `inset: -35% -25%` + `rotate(-16deg)` — burchakdan keyin
+ * ham to'rtburchakning har bir chekkasi qoplanishi uchun
+ * konteyner ota elementdan KATTAROQ va MARKAZDAN chiqarib
+ * qo'yilgan. Aks holda burchaklarda oq bo'shliq qolardi.
+ */
+.rbfb__watermark {
+  position: absolute;
+  inset: -35% -25%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(10px, 4vw, 18px);
+  transform: rotate(-16deg);
+  pointer-events: none;
+}
+
+.rbfb__row {
+  white-space: nowrap;
+  font-size: clamp(11px, 3.4vw, 15px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: rgba(69, 33, 5, 0.16);
+}
+
+/* Eng tepa va eng pastki qator xiraroq — markazga chuqurlik
+   hissi beradi, tekis "devor qog'ozi"dan farqli */
+.rbfb__row:first-child,
+.rbfb__row:last-child {
+  color: rgba(69, 33, 5, 0.09);
+}
+
+.rbfb__sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/*
+ * Yulduzcha — rasm yoki shriftga muhtoj emas, `clip-path` bilan
+ * to'g'ridan-to'g'ri chiziladi (besh uchli yulduz shakli).
+ */
+.rbfb__spark {
+  position: absolute;
+  display: block;
+  background: radial-gradient(circle, #FFF7E0 0%, #F3C56A 55%, transparent 75%);
+  clip-path: polygon(
+    50% 0%, 61% 35%, 98% 35%, 68% 57%,
+    79% 91%, 50% 70%, 21% 91%, 32% 57%,
+    2% 35%, 39% 35%
+  );
+  filter: drop-shadow(0 0 3px rgba(255, 224, 130, 0.55));
+  opacity: 0;
+  animation-name: rbfb-spark;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+/*
+ * Bitta keyframe uchta narsani birga qiladi: paydo bo'lish
+ * (opacity), suzib chiqish (translateY) va yengil aylanish
+ * (rotate) — "real uchib yuradigan" hissi shundan kelib
+ * chiqadi, statik miltillashdan farqli.
+ */
+@keyframes rbfb-spark {
+  0%   { opacity: 0;   transform: translateY(6px)   scale(0.4)  rotate(0deg); }
+  30%  { opacity: 1;   transform: translateY(-2px)  scale(1)    rotate(20deg); }
+  65%  { opacity: 0.7; transform: translateY(-8px)  scale(0.85) rotate(50deg); }
+  100% { opacity: 0;   transform: translateY(-14px) scale(0.4)  rotate(90deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rbfb__spark {
+    animation: none;
+    opacity: 0.45;
+    transform: none;
+  }
+}
