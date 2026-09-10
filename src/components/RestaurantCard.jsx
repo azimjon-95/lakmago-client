@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from './Icon';
 import { PHOTO_STYLES } from './DishPhoto';
@@ -30,6 +30,27 @@ export const RestaurantCard = memo(function RestaurantCard({ restaurant: r }) {
     ? realImg.replace('/upload/', '/upload/f_auto,q_auto,w_500,c_fill/')
     : realImg;
 
+  /*
+   * ═══ RASM YUKLANMAGUNCHA / UMUMAN BO'LMAGANDA ═══
+   *
+   * ILGARI: rasm bo'lmasa yoki hali yuklanmagan bo'lsa banner
+   * rangli fon ustida faqat ikonka bilan ko'rinardi — bo'sh va
+   * "tugallanmagan" taassurot berardi.
+   *
+   * ENDI ikki alohida holat farqlanadi:
+   *   • rasm YO'Q — restoran nomi banner ichida chiqadi
+   *   • rasm BOR, lekin hali yuklanmoqda — "porlash" (shimmer)
+   *     animatsiyasi, rasm kelgach yumshoq eriydi (fade-in)
+   *
+   * `imgLoaded` faqat HAQIQIY <img> yuklangandan keyin true
+   * bo'ladi — brauzer keshidan darhol kelsa ham onLoad baribir
+   * ishlaydi, shuning uchun keshlangan rasmlarda animatsiya
+   * "yopishib qolmaydi".
+   */
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const showShimmer = Boolean(optimizedImg) && !imgLoaded;
+  const showNamePlaceholder = !optimizedImg;
+
   return (
     <button
       onClick={() => navigate(`/restaurant/${rid}`)}
@@ -38,14 +59,26 @@ export const RestaurantCard = memo(function RestaurantCard({ restaurant: r }) {
       className="rcard"
     >
       <div className="rcard__banner" style={{ background: style ? style.grad : r.tint }}>
-        {optimizedImg ? (
-          <img src={optimizedImg} alt={r.name} loading="lazy" decoding="async"
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-        ) : (
-          <>
+        {optimizedImg && (
+          <img
+            src={optimizedImg}
+            alt={r.name}
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setImgLoaded(true)}
+            className={`rcard__img${imgLoaded ? ' is-loaded' : ''}`}
+          />
+        )}
+
+        {/* Porlash — rasm bor, lekin hali yuklanmagan */}
+        {showShimmer && <div className="rcard__shimmer" aria-hidden="true" />}
+
+        {/* Rasm umuman yo'q — restoran nomi banner ichida */}
+        {showNamePlaceholder && (
+          <div className="rcard__banner-fallback">
             {style && <div className="rcard__banner-glow" />}
-            <Icon name={r.icon} size={46} color={style ? style.iconColor : 'var(--brand)'} strokeWidth={style ? 1.4 : 2} className="rcard__icon" />
-          </>
+            <span className="rcard__banner-fallback__name">{r.name}</span>
+          </div>
         )}
         {r.discount && <div className="rcard__tag rcard__tag--discount">−{r.discount}%</div>}
         {r.isFresh && !r.discount && <div className="rcard__tag rcard__tag--new">{t('fresh')}</div>}
