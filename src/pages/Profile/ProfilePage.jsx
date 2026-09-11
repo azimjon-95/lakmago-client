@@ -259,7 +259,7 @@ function ReferralCard() {
           <Icon name="users" size={18} color="var(--brand)" /> {t('referralTitle')}
         </div>
         {info?.reward > 0 && (
-          <div className="referral-card__badge">+{som(info.reward)} {t('som')}</div>
+          <div className="referral-card__badge">+{som(info.reward)} {t('ball')}</div>
         )}
       </div>
 
@@ -274,7 +274,14 @@ function ReferralCard() {
           <div className="referral-stat__label">{t('referralInvited')}</div>
         </div>
         <div className="referral-stat">
-          <div className="referral-stat__value">{som(info?.bonusBalance)}</div>
+          {/*
+            `referralPoints` — YANGI maydon, `bonusBalance` EMAS.
+            Taklif mukofoti endi ball (pul emas) va alohida
+            maydonda saqlanadi — bonusBalance buyurtmada
+            ishlatiladigan HAQIQIY pul, ular aralashmasligi kerak
+            (server: models/User.js, services/referral.js).
+          */}
+          <div className="referral-stat__value">{som(info?.referralPoints)}</div>
           <div className="referral-stat__label">{t('referralBonusLabel')}</div>
         </div>
       </div>
