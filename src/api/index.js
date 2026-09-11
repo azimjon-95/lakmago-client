@@ -336,11 +336,15 @@ export const api = {
   getPaymentLink: (orderId, provider) =>
     apiFetch(`/payments/link/${orderId}?provider=${provider}`, { method: 'GET' }),
 
-  // ===== To'lov kartalari =====
-  getCards: () => apiFetch('/cards', { method: 'GET' }),
-  addCard: (data) => apiFetch('/cards', { method: 'POST', body: JSON.stringify(data) }),
-  deleteCard: (id) => apiFetch(`/cards/${id}`, { method: 'DELETE' }),
-  setDefaultCard: (id) => apiFetch(`/cards/${id}/default`, { method: 'PATCH' }),
+  /*
+   * ═══ "TO'LOV KARTALARI" API'SI OLIB TASHLANDI ═══
+   * Tekshirib chiqilganda: saqlangan kartani tanlash haqiqiy
+   * to'lovga (Click/Paynet) hech qanday ta'sir qilmasdi — mijoz
+   * baribir Click/Paynet sahifasida kartani qayta tanlardi.
+   * Backend'dagi haqiqiy Click karta-token API'si
+   * (services/clickCardToken.js) tegilmadi — kerak bo'lsa
+   * kelajakda to'g'ri ulash mumkin.
+   */
 
   // ===== Qo'llab-quvvatlash chati =====
   getSupportChat: () => apiFetch('/support/chat', { method: 'GET' }),

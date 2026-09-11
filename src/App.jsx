@@ -9,7 +9,6 @@ const CartPage = lazy(() => import('@/pages/Cart/CartPage').then((m) => ({ defau
 const OrderTrackPage = lazy(() => import('@/pages/OrderTrack/OrderTrackPage').then((m) => ({ default: m.OrderTrackPage })));
 const OrdersPage = lazy(() => import('@/pages/Orders/OrdersPage').then((m) => ({ default: m.OrdersPage })));
 const FoodPage = lazy(() => import('@/pages/Food/FoodPage').then((m) => ({ default: m.FoodPage })));
-const CardsPage = lazy(() => import('@/pages/Cards/CardsPage').then((m) => ({ default: m.CardsPage })));
 const FavoritesPage = lazy(() => import('@/pages/Favorites/FavoritesPage').then((m) => ({ default: m.FavoritesPage })));
 const MyReservationsPage = lazy(() => import('@/pages/Reservation/MyReservationsPage').then((m) => ({ default: m.MyReservationsPage })));
 const ReservationPage = lazy(() => import('@/pages/Reservation/ReservationPage').then((m) => ({ default: m.ReservationPage })));
@@ -210,7 +209,6 @@ function AppInner({ authMode = 'telegram' }) {
             <Route path="/restaurant/:id" element={<RestaurantPage />} />
             <Route path="/my-reservations" element={<MyReservationsPage />} />
             <Route path="/favorites" element={<FavoritesPage />} />
-            <Route path="/cards" element={<CardsPage />} />
             <Route path="/food/:id" element={<FoodPage />} />
             <Route path="/restaurant/:id/reserve" element={<ReservationPage />} />
             <Route path="/cart" element={<CartPage />} />

@@ -11,14 +11,9 @@ import './Profile.css';
 
 export function ProfilePage() {
   const navigate = useNavigate();
-  const [cards, setCards] = useState([]);
-  const cardCount = cards.length;
   const favCount = useUser((st) =>
     (st.user.favorites?.restaurants?.length || 0) + (st.user.favorites?.dishes?.length || 0));
 
-  useEffect(() => {
-    api.getCards().then((l) => setCards(Array.isArray(l) ? l : [])).catch(() => {});
-  }, []);
   const t = useT();
   const user = useUser((s) => s.user);
   const updateUser = useUser((s) => s.updateUser);
@@ -72,11 +67,6 @@ export function ProfilePage() {
         {/* Tez statistika */}
         <div className="profile-hero__stats">
           <div className="profile-stat">
-            <span className="profile-stat__value">{cardCount}</span>
-            <span className="profile-stat__label">{t('card')}</span>
-          </div>
-          <span className="profile-stat__sep" />
-          <div className="profile-stat">
             <span className="profile-stat__value">{user.addresses?.length || 0}</span>
             <span className="profile-stat__label">{t('address')}</span>
           </div>
@@ -87,9 +77,6 @@ export function ProfilePage() {
           </div>
         </div>
       </div>
-
-      {/* Kartalar slaydi */}
-      <CardsStrip cards={cards} onManage={() => navigate('/cards')} />
 
       {/* Do'stlarni taklif qilish (referral) */}
       <ReferralCard />
@@ -301,59 +288,3 @@ function ReferralCard() {
 }
 
 // Plastik kartalar slaydi — yonma-yon suriladi
-const CARD_STYLES = {
-  uzcard: { grad: 'linear-gradient(135deg, #0A5C8F 0%, #00A3E0 100%)', label: 'UzCard' },
-  humo: { grad: 'linear-gradient(135deg, #005E58 0%, #00B2A9 100%)', label: 'Humo' },
-  visa: { grad: 'linear-gradient(135deg, #12175E 0%, #2A3BA8 100%)', label: 'VISA' },
-  mastercard: { grad: 'linear-gradient(135deg, #7A0D12 0%, #EB4B2A 100%)', label: 'Mastercard' },
-  card: { grad: 'linear-gradient(135deg, var(--brand) 0%, var(--brand-600) 100%)', label: 'Karta' },
-};
-
-function CardsStrip({ cards, onManage }) {
-  const t = useT();
-
-  if (!cards.length) {
-    return (
-      <button onClick={onManage} className="pcards-empty">
-        <Icon name="card" size={20} color="var(--brand)" />
-        <div className="pcards-empty__body">
-          <div className="pcards-empty__title">{t('addCardTitle')}</div>
-          <div className="pcards-empty__hint">{t('addCardHint')}</div>
-        </div>
-        <Icon name="plus" size={18} color="var(--brand)" />
-      </button>
-    );
-  }
-
-  return (
-    <div className="pcards">
-      <div className="pcards__row no-scrollbar">
-        {cards.map((c) => {
-          const st = CARD_STYLES[c.brand] || CARD_STYLES.card;
-          return (
-            <div key={c._id} className="pcard" style={{ background: st.grad }}>
-              <div className="pcard__shine" />
-              <div className="pcard__top">
-                <span className="pcard__chip" />
-                {c.isDefault && <span className="pcard__badge">{t('defaultBadge')}</span>}
-              </div>
-              <div className="pcard__num">•••• {c.last4}</div>
-              <div className="pcard__bottom">
-                <span className="pcard__holder">
-                  {c.bankName || c.holder || t('cardHolderPlaceholder')}
-                </span>
-                <span className="pcard__brand">{st.label}</span>
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Qo'shish kartasi */}
-        <button onClick={onManage} className="pcard pcard--add">
-          <Icon name="plus" size={24} color="var(--brand)" />
-          <span>{t('add')}</span>
-        </button>
-      </div>
-    </div>
-  );
-}
