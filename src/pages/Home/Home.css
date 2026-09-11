@@ -224,6 +224,17 @@ margin-left: 13px;
   box-shadow: 0 2px 8px rgba(15, 75, 130, 0.25);
 }
 
+/* Restoran hozir yopiq — karta ko'rinadi, lekin xira va belgili */
+.dgcard__closed {
+  position: absolute; left: 6px; bottom: 6px;
+  background: rgba(17, 24, 39, 0.78); color: #fff;
+  font-size: 10.5px; font-weight: 600;
+  padding: 3px 8px; border-radius: 20px;
+  pointer-events: none;
+}
+.dgcard.is-closed .dgcard__photo > :first-child { filter: grayscale(0.6); opacity: 0.7; }
+.dgcard.is-closed .dgcard__add { background: var(--muted-2); box-shadow: none; }
+
 /* Data yuklanmaganда xato holati */
 .home-error {
   text-align: center;

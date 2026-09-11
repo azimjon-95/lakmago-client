@@ -1,3 +1,4 @@
+import { setAuthToken, setRefreshToken } from '@/api';
 // Telegram Mini App — global tip deklaratsiyasi va auto-auth mantiqi.
 // TZ: WebApp ochilganda Telegram.WebApp.ready() chaqiriladi, initData va
 // initDataUnsafe.user o'qiladi, backendga yuboriladi (POST /api/auth/telegram).
@@ -310,7 +311,6 @@ export async function authenticateWithTelegram() {
    * accessToken/refreshToken kelmasa (masalan eski server versiyasi
    * bilan ishlab turgan holatda), ilova baribir ishlayveradi.
    */
-  const { setAuthToken, setRefreshToken } = await import('@/api');
   if (data.accessToken) setAuthToken(data.accessToken);
   else if (data.token) setAuthToken(data.token);
   if (data.refreshToken) setRefreshToken(data.refreshToken);

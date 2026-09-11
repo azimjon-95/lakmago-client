@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { api, clearAuthTokens } from '@/api';
 
 
 function initialsOf(first, last) {
@@ -121,7 +122,6 @@ export const useUser = create(
 
     // Serverga saqlaymiz — boshqa qurilmada ham ko'rinadi
     try {
-      const { api } = await import('@/api');
       const res = await api.createAddress({
         title: address.title,
         address: address.address,
@@ -152,7 +152,6 @@ export const useUser = create(
   // Serverdan manzillarni yuklash (ilova ochilganda)
   loadAddresses: async () => {
     try {
-      const { api } = await import('@/api');
       const res = await api.getAddresses();
       if (res?.addresses) {
         set((state) => ({
@@ -168,7 +167,6 @@ export const useUser = create(
 
   removeAddress: async (id) => {
     try {
-      const { api } = await import('@/api');
       await api.deleteAddress(id);
     } catch { /* offline */ }
     set((state) => {
@@ -182,7 +180,6 @@ export const useUser = create(
   setDefaultAddress: async (id) => {
     set((state) => ({ user: { ...state.user, defaultAddressId: id } }));
     try {
-      const { api } = await import('@/api');
       await api.setDefaultAddress(id);
     } catch { /* offline */ }
   },
@@ -200,7 +197,6 @@ export const useUser = create(
    */
   logout: async () => {
     try {
-      const { api, clearAuthTokens } = await import('@/api');
       await api.logoutSession().catch(() => {}); // server bilan bog'lanmasa ham lokal tozalash davom etadi
       clearAuthTokens();
     } finally {

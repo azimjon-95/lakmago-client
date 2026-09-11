@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useSyncExternalStore } from 'react';
+import { useState, useEffect, useCallback, useMemo, useSyncExternalStore } from 'react';
 import { isOpenNow, workHoursLabel, nextOpenLabel } from '@/lib/workHours';
 import { api } from '@/api';
 
@@ -138,13 +138,47 @@ export function useOpenDishes(dishes) {
   useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
   const now = serverNow();
-  return (dishes || []).filter((d) => {
-    // Ish vaqti ko'rsatilmagan bo'lsa — doim ochiq
-    const open = d.restaurantOpenTime || d.restaurant?.openTime;
-    const close = d.restaurantCloseTime || d.restaurant?.closeTime;
-    if (!open || !close) return true;
-    return isOpenNow({ openTime: open, closeTime: close }, now);
-  });
+  return (dishes || []).filter((d) => isDishOpen(d, now));
+}
+
+/**
+ * Taomning restorani hozir ochiqmi.
+ * Ish vaqti ko'rsatilmagan bo'lsa — doim ochiq.
+ */
+export function isDishOpen(dish, now = serverNow()) {
+  const open = dish?.restaurantOpenTime || dish?.restaurant?.openTime;
+  const close = dish?.restaurantCloseTime || dish?.restaurant?.closeTime;
+  if (!open || !close) return true;
+  return isOpenNow({ openTime: open, closeTime: close }, now);
+}
+
+/**
+ * Taomlarni OCHIQ va YOPIQ restoranlarnikiga ajratadi.
+ *
+ * useOpenDishes'dan FARQI: yopiq restoran taomlari tashlab
+ * yuborilmaydi. Mijoz kategoriya tanlaganda bor taomlarning
+ * HAMMASINI ko'rishi kerak — yopiq restoran taomi ro'yxat
+ * oxirida, "Hozir yopiq" belgisi bilan chiqadi, savatga
+ * qo'shishga urinilsa ClosedAlert ko'rsatiladi.
+ *
+ * Daqiqa o'tganda avtomatik qayta hisoblanadi; natija daqiqa
+ * ichida barqaror (memo) — kartalar keraksiz qayta chizilmaydi.
+ */
+export function useOpenPartition(dishes) {
+  const minute = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+
+  return useMemo(() => {
+    const now = serverNow();
+    const open = [];
+    const closed = [];
+    for (const d of dishes || []) {
+      (isDishOpen(d, now) ? open : closed).push(d);
+    }
+    const closedIds = new Set(closed.map((d) => String(d.id || d._id)));
+    return { open, closed, closedIds };
+    // `minute` — daqiqa almashganda qayta hisoblash uchun
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dishes, minute]);
 }
 
 /**

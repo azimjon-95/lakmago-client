@@ -13,9 +13,10 @@ import { LangSwitch } from '@/components/LangSwitch/LangSwitch';
 import { RestaurantCardSkeleton, DishScrollCardSkeleton } from '@/components/Skeleton/Skeleton';
 import { useUser } from '@/store/user';
 import { useT } from '@/i18n';
-import { useOpenDishes, useClosedAlert } from '@/hooks/useOpenStatus';
+import { useOpenPartition, useClosedAlert } from '@/hooks/useOpenStatus';
 import { ClosedAlert } from '@/components/ClosedAlert';
-import { useRestaurants, useTrendingDishes, useBannersQuery, useAllDishes, useBannerAds } from '@/hooks/queries';
+import { useRestaurants, useTrendingDishes, useBannersQuery, useAllDishes, useBannerAds, useDishFeed } from '@/hooks/queries';
+import { isDiscountedDish } from '@/lib/discount';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { API_BASE, api } from '@/api';
 import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
@@ -27,10 +28,72 @@ import {
   restaurantMatchesCategory,
   filterByCategory,
 } from '@/data/categories';
+
 import { AddressSheet } from '@/components/AddressSheet';
 import './Home.css';
 
 // Kategoriyalar markaziy ro'yxatdan (src/data/categories.js)
+
+const ROW_LIMIT = 20;
+
+/** Barqaror aralashtirish: seed bir xil bo'lsa natija ham bir xil. */
+function seededShuffle(arr, seed) {
+  const a = [...arr];
+  let s = Math.floor(seed * 10000);
+  for (let i = a.length - 1; i > 0; i--) {
+    s = (s * 9301 + 49297) % 233280;
+    const j = Math.floor((s / 233280) * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/**
+ * Bir kafedan to'planmasin — restoran bo'yicha guruhlab, har
+ * biridan navbatma-navbat (round-robin) olamiz.
+ */
+function pickMixed(pool, seed, limit = ROW_LIMIT) {
+  if (!pool.length || limit <= 0) return [];
+  const byRest = new Map();
+  pool.forEach((d, idx) => {
+    const key = String(d.restaurantId || d.restaurantName || d.id || d._id || `i${idx}`);
+    if (!byRest.has(key)) byRest.set(key, []);
+    byRest.get(key).push(d);
+  });
+  const buckets = [...byRest.values()].map((list, i) => seededShuffle(list, seed + i * 17));
+  const queues = seededShuffle(buckets.map((_, i) => i), seed + 99).map((i) => [...buckets[i]]);
+  const out = [];
+  while (out.length < limit && queues.some((q) => q.length)) {
+    for (const q of queues) {
+      if (out.length >= limit) break;
+      if (q.length) out.push(q.shift());
+    }
+  }
+  return out;
+}
+
+/** Id bo'yicha takrorlarni olib tashlaydi (birinchisi qoladi). */
+function uniqueById(list) {
+  const seen = new Set();
+  return list.filter((d) => {
+    const id = String(d.id || d._id);
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
+}
+
+/**
+ * Qator uchun tanlov: avval OCHIQ restoranlar taomlari (aralash),
+ * joy qolsa — YOPIQ restoranlarniki (oxirida, «Hozir yopiq» belgisi
+ * bilan). Shunday qilib kategoriyadagi bor taom hech qachon
+ * «yo'qolib» qolmaydi, lekin buyurtma berib bo'ladiganlari doim
+ * birinchi turadi.
+ */
+function pickOpenFirst({ open, closed }, seed) {
+  const first = pickMixed(open, seed, ROW_LIMIT);
+  return first.concat(pickMixed(closed, seed + 3, ROW_LIMIT - first.length));
+}
 
 /*
  * Bo'lim sarlavhasi — oddiy, toza matn. Avval oranjevа SVG
@@ -99,16 +162,33 @@ export function HomePage() {
   // Real data — TanStack Query (cache + background refetch)
   const { data: restaurants = [], isLoading: restLoading, isError: restError, error: restErrorObj, refetch: refetchRest } = useRestaurants();
   const { data: trending = [], isLoading: trendLoading, refetch: refetchTrending } = useTrendingDishes();
-  const { data: allDishes = [], isLoading: allDishesLoading, refetch: refetchAllDishes } = useAllDishes();
+  // Reklama bosilganda taomni to'liq ma'lumoti bilan topish uchun
+  // (Splash oldindan yuklagan kesh — qo'shimcha so'rov yo'q)
+  const { data: allDishes = [] } = useAllDishes();
   const { data: banners = [], refetch: refetchBanners } = useBannersQuery();
   const { data: bannerAds = [], refetch: refetchAds } = useBannerAds();
+
+  /*
+   * ═══ «SUPER CHEGIRMALAR» VA «TAVSIYA QILAMIZ» — SERVERDAN ═══
+   *
+   * Tanlangan kategoriya SERVERGA yuboriladi (/dishes/all?category=)
+   * — «Barchasi» sahifasi bilan aynan bir manba. Avval eng yangi
+   * 50 taom mijozda filtrlanardi va kategoriya taomlari o'sha
+   * 50 talikka tushmasa qatorlar butunlay yo'qolardi.
+   */
+  const {
+    data: discountFeed = [], isLoading: discountLoading, refetch: refetchDiscount,
+  } = useDishFeed({ discounted: true, category });
+  const {
+    data: regularFeed = [], isLoading: regularLoading, refetch: refetchRegular,
+  } = useDishFeed({ discounted: false, category });
 
   // Bosh sahifani pastga tortib yangilash — barcha ma'lumotlarni
   // qayta so'raydi (sahifa qayta yuklanmaydi, faqat ma'lumot
   // yangilanadi — zamonaviy ilovalar shunday ishlaydi)
   const handlePullRefresh = useCallback(() => Promise.all([
-    refetchRest(), refetchTrending(), refetchAllDishes(), refetchBanners(), refetchAds(),
-  ]), [refetchRest, refetchTrending, refetchAllDishes, refetchBanners, refetchAds]);
+    refetchRest(), refetchTrending(), refetchDiscount(), refetchRegular(), refetchBanners(), refetchAds(),
+  ]), [refetchRest, refetchTrending, refetchDiscount, refetchRegular, refetchBanners, refetchAds]);
 
   // Reklamalar (restoran/taom) oddiy bannerlar bilan BITTA
   // karuselda aralashadi — foydalanuvchi uchun farqi yo'q, faqat
@@ -156,95 +236,70 @@ export function HomePage() {
     [trending, category],
   );
 
-  // Taomlar ham shu kategoriya bo'yicha. Taomda kategoriya bo'lmasa —
-  // restorani mos kelsa ham ko'rsatamiz (eski ma'lumot uchun).
-  // Taomlar FAQAT o'z kategoriyasi bo'yicha filtrlanadi.
-  // Avval restoran kategoriyasi ham hisobga olinardi — natijada
-  // "Salatlar" tanlansa salat restoranining hamma taomlari chiqardi.
-  // Yopiq restoran taomlari ro'yxatdan chiqadi.
-  // Ish vaqti boshlanganda avtomatik qaytadi — refresh kerak emas.
-  const openDishes = useOpenDishes(allDishes);
   const { closedInfo, showClosed, hideClosed } = useClosedAlert();
 
-  const filteredDishes = useMemo(
-    () => filterByCategory(openDishes, category, dishMatchesCategory),
-    [openDishes, category],
-  );
+  /*
+   * Ikkala tasma birlashtirilib, chegirma YAGONA qoida bo'yicha
+   * (oldPrice > price — kartadagi «−N%» belgisi bilan bir xil)
+   * qayta ajratiladi. Bu himoya qatlami:
+   *   • chegirmali taom HECH QACHON «Tavsiya qilamiz» ga tushmaydi;
+   *   • server hali yangilanmagan bo'lsa ham (eski isDiscounted
+   *     bayrog'i) bosh sahifa to'g'ri ishlaydi.
+   * Kategoriya ham mijozda qayta tekshiriladi — server kategoriya
+   * parametrini e'tiborsiz qoldirsa ham noto'g'ri taom chiqmaydi.
+   */
+  const { discountPool, regularPool } = useMemo(() => {
+    const merged = uniqueById([...discountFeed, ...regularFeed])
+      .filter((d) => dishMatchesCategory(d, category));
+    return {
+      discountPool: merged.filter(isDiscountedDish),
+      regularPool: merged.filter((d) => !isDiscountedDish(d)),
+    };
+  }, [discountFeed, regularFeed, category]);
+
+  // Ochiq restoranlar taomlari oldinda, yopiqlari — oxirida
+  const discountParts = useOpenPartition(discountPool);
+  const regularParts = useOpenPartition(regularPool);
 
   // Har ochilganda tartib o'zgaradi — sahifa qayta render bo'lganda
   // emas, faqat ilova ochilganda (seed sessiyada saqlanadi)
   const shuffleSeed = useMemo(() => {
     const KEY = 'lokma_shuffle_seed';
-    let v = sessionStorage.getItem(KEY);
-    if (!v) {
-      v = String(Math.random());
-      sessionStorage.setItem(KEY, v);
-    }
-    return Number(v);
-  }, []);
-
-  // Barqaror aralashtirish: seed bir xil bo'lsa natija ham bir xil
-  const shuffle = useCallback((arr, seed) => {
-    const a = [...arr];
-    let s = seed * 10000;
-    for (let i = a.length - 1; i > 0; i--) {
-      s = (s * 9301 + 49297) % 233280;
-      const j = Math.floor((s / 233280) * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  }, []);
-
-  /*
-   * Bir kafedan to'planmasin — restoran bo'yicha guruhlab,
-   * har biridan navbatma-navbat (round-robin) olamiz.
-   * filteredDishes allaqachon: OCHIQ + kategoriya.
-   */
-  const pickMixed = useCallback((pool, seed, limit = 20) => {
-    if (!pool.length) return [];
-    const byRest = new Map();
-    for (const d of pool) {
-      const key = String(d.restaurantId || d.restaurantName || d.id || Math.random());
-      if (!byRest.has(key)) byRest.set(key, []);
-      byRest.get(key).push(d);
-    }
-    const buckets = [...byRest.values()].map((list, i) =>
-      shuffle(list, seed + i * 17),
-    );
-    const order = shuffle(
-      buckets.map((_, i) => i),
-      seed + 99,
-    );
-    const queues = order.map((i) => [...buckets[i]]);
-    const out = [];
-    let guard = 0;
-    while (out.length < limit && queues.some((q) => q.length) && guard < limit * 5) {
-      guard += 1;
-      for (const q of queues) {
-        if (out.length >= limit) break;
-        if (q.length) out.push(q.shift());
+    try {
+      let v = sessionStorage.getItem(KEY);
+      if (!v) {
+        v = String(Math.random());
+        sessionStorage.setItem(KEY, v);
       }
+      return Number(v) || 0.5;
+    } catch {
+      return Math.random(); // sessionStorage bloklangan bo'lishi mumkin
     }
-    return out;
-  }, [shuffle]);
+  }, []);
 
-  // Chegirma — ochiq + kategoriya + turli restoranlardan
-  const discountedShown = useMemo(() => {
-    const pool = filteredDishes.filter(
-      (d) => Number(d.oldPrice) > Number(d.price),
-    );
-    return pickMixed(pool, shuffleSeed, 20);
-  }, [filteredDishes, shuffleSeed, pickMixed]);
+  // Chegirma — kategoriya + turli restoranlardan, ochiqlari oldinda
+  const discountedShown = useMemo(
+    () => pickOpenFirst(discountParts, shuffleSeed),
+    [discountParts, shuffleSeed],
+  );
 
-  // Tavsiya qilamiz — ochiq + kategoriya + turli restoranlardan
-  const recommended = useMemo(() => {
-    const pool = filteredDishes.filter(
-      (d) => !(Number(d.oldPrice) > Number(d.price)),
-    );
-    return pickMixed(pool, shuffleSeed + 7, 20);
-  }, [filteredDishes, shuffleSeed, pickMixed]);
+  // Tavsiya qilamiz — chegirmasizlar, ochiqlari oldinda
+  const recommended = useMemo(
+    () => pickOpenFirst(regularParts, shuffleSeed + 7),
+    [regularParts, shuffleSeed],
+  );
 
-  // Tavsiya — chegirmasi yo'q taomlar (bitta narxli)
+  // Ikkala qatordagi yopiq taomlar (kartada belgi uchun)
+  const closedIds = useMemo(
+    () => new Set([...discountParts.closedIds, ...regularParts.closedIds]),
+    [discountParts.closedIds, regularParts.closedIds],
+  );
+
+  // «Barchasi» — tanlangan kategoriya bilan birga ochiladi
+  const openDiscover = useCallback((type) => {
+    const qs = category !== 'all' ? `?category=${encodeURIComponent(category)}` : '';
+    navigate(`/discover/${type}${qs}`);
+  }, [category, navigate]);
 
   const defaultAddress = useMemo(
     () => user.addresses.find((a) => a.id === user.defaultAddressId) ?? user.addresses[0],
@@ -253,9 +308,9 @@ export function HomePage() {
 
   const openModal = useCallback((d) => setModalDish(d), []);
   const closeModal = useCallback(() => setModalDish(null), []);
-const shuffledRestaurants = useMemo(
-    () => shuffle(filtered, shuffleSeed + 1),
-    [filtered, shuffleSeed, shuffle],
+  const shuffledRestaurants = useMemo(
+    () => seededShuffle(filtered, shuffleSeed + 1),
+    [filtered, shuffleSeed],
   );
 
   return (
@@ -315,36 +370,48 @@ const shuffledRestaurants = useMemo(
         </>
       )}
 
-      {/* Chegirmadagi taomlar */}
-      {discountedShown.length > 0 && (
+      {/* Chegirmadagi taomlar — tanlangan kategoriya bo'yicha */}
+      {(discountLoading || discountedShown.length > 0) && (
         <>
           <SectionHeader
             icon="discount"
             title={t('discountedDishes')}
             action={t('all')}
-            onAction={() => navigate('/discover/discount')}
+            onAction={() => openDiscover('discount')}
           />
           <div className="home-dishes-row no-scrollbar">
-            {discountedShown.map((d) => (
-              <DishGridCard key={d.id || d._id} dish={d} onClick={openModal} />
-            ))}
+            {discountLoading
+              ? Array.from({ length: 4 }).map((_, i) => <DishScrollCardSkeleton key={i} />)
+              : discountedShown.map((d) => (
+                  <DishGridCard
+                    key={d.id || d._id}
+                    dish={d}
+                    onClick={openModal}
+                    closed={closedIds.has(String(d.id || d._id))}
+                  />
+                ))}
           </div>
         </>
       )}
 
-      {/* Tavsiya qilamiz — har kirganda tartib o'zgaradi */}
-      {(allDishesLoading || recommended.length > 0) && (
+      {/* Tavsiya qilamiz — faqat chegirmasiz taomlar, kategoriya bo'yicha */}
+      {(regularLoading || recommended.length > 0) && (
         <>
           <SectionHeader
             title={t('recommended')}
             action={t('all')}
-            onAction={() => navigate('/discover/recommended')}
+            onAction={() => openDiscover('recommended')}
           />
           <div className="home-dishes-row no-scrollbar">
-            {allDishesLoading
+            {regularLoading
               ? Array.from({ length: 6 }).map((_, i) => <DishScrollCardSkeleton key={i} />)
               : recommended.map((d) => (
-                  <DishGridCard key={d.id || d._id} dish={d} onClick={openModal} />
+                  <DishGridCard
+                    key={d.id || d._id}
+                    dish={d}
+                    onClick={openModal}
+                    closed={closedIds.has(String(d.id || d._id))}
+                  />
                 ))}
           </div>
         </>
@@ -435,7 +502,8 @@ const shuffledRestaurants = useMemo(
           onClose={() => setAdModal(null)}
           onOpenDish={(dish) => {
             setAdModal(null);
-            const found = allDishes.find((d) => (d.id || d._id) === dish.id);
+            const pool = [...discountFeed, ...regularFeed, ...allDishes];
+            const found = pool.find((d) => String(d.id || d._id) === String(dish.id));
             openModal(found || dish);
           }}
           onOpenRestaurant={(restaurantId) => {

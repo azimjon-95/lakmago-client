@@ -8,7 +8,18 @@
  */
 
 .discover {
-  padding-bottom: 90px; /* CartBar + BottomNav uchun joy */
+  padding-bottom: 0;
+}
+
+/*
+ * Kontent qolgan balandlikni to'liq egallaydi — ma'lumot kam
+ * yoki bo'sh bo'lsa ham pastki menyu ekran tagida turadi.
+ * Pastki bo'shliq: savat paneli (fixed, menyu ustida) oxirgi
+ * kartalarni yopib qo'ymasin.
+ */
+.discover-main {
+  flex: 1 0 auto;
+  padding-bottom: 72px;
 }
 
 /* ═══ SARLAVHA ═══ */

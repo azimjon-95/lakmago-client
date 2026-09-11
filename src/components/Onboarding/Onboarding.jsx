@@ -4,6 +4,7 @@ import { useT } from '@/i18n';
 import { useUser } from '@/store/user';
 import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
 import './Onboarding.css';
+import { api } from '@/api';
 
 /*
  * ═══════════════════════════════════════════════════════════
@@ -72,7 +73,6 @@ export function Onboarding({ onDone }) {
     setSaving(false);
 
     try {
-      const { api } = await import('@/api');
       await api.updateMe({ firstName: firstName.trim(), lastName: lastName.trim() });
     } catch { /* lokal holat baribir yangilandi */ }
   };

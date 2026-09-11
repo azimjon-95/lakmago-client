@@ -1,4 +1,13 @@
+/*
+ * margin-top: auto — .app-shell flex-ustun va kamida ekran
+ * balandligida. Kontent QISQA bo'lsa (bo'sh ro'yxat, filtr
+ * natijasi yo'q) menyu kontent ortidan yuqoriga ko'tarilmaydi,
+ * ekran tagida qoladi. Kontent UZUN bo'lsa sticky ishlaydi.
+ * Barcha sahifalar uchun bitta qoida — har sahifada alohida
+ * "spacer" div kerak emas.
+ */
 .bottom-nav {
+  margin-top: auto;
   position: sticky;
   bottom: 0;
   display: flex;

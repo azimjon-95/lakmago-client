@@ -9,7 +9,7 @@
 // verifyTelegramLoginWidget() bilan tekshiradi (initData'dan
 // TEXNIK JIHATDAN FARQLI algoritm, backendga qarang).
 
-import { API_BASE } from '@/api';
+import { API_BASE, setAuthToken, setRefreshToken } from '@/api';
 
 /*
  * MUHIM — `??` BU YERDA YETARLI EMAS EDI.
@@ -88,7 +88,6 @@ export function renderTelegramLoginWidget(container, onSuccess, onError, hooks =
       }
       const data = await res.json();
 
-      const { setAuthToken, setRefreshToken } = await import('@/api');
       if (data.accessToken) setAuthToken(data.accessToken);
       else if (data.token) setAuthToken(data.token);
       if (data.refreshToken) setRefreshToken(data.refreshToken);

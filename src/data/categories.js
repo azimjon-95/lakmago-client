@@ -37,26 +37,61 @@ export function shuffled(list) {
 }
 
 
+/*
+ * ═══ ESKI (LEGACY) KATEGORIYA NOMLARI ═══
+ *
+ * Bazada ba'zi taomlar eski nom bilan saqlangan ('shorva',
+ * 'ichimlik', 'issiq' ...). Ilova esa faqat yangi id'larni
+ * biladi. Shu xarita tufayli "Sho'rva" tanlanganda 'shorva'
+ * deb saqlangan taomlar ham topiladi.
+ *
+ * MUHIM: serverdagi src/constants/dishCategories.js
+ * (DISH_CATEGORY_ALIASES) bilan BIR XIL bo'lishi shart.
+ */
+export const CATEGORY_ALIASES = Object.freeze({
+  sup: ['sup', 'shorva'],
+  salqin: ['salqin', 'ichimlik'],
+  zavtroki: ['zavtroki', 'nonushta'],
+  non: ['non', 'nonvoyxona'],
+  obed: ['obed', 'issiq'],
+  shashlik: ['shashlik', 'grill'],
+});
+
+/** Kategoriya id'siga mos keladigan barcha qiymatlar (alias bilan). */
+export function categoryValues(categoryId) {
+  return CATEGORY_ALIASES[categoryId] || [categoryId];
+}
+
+/** Ro'yxatda mavjud (ma'lum) kategoriya id'simi. */
+export function isKnownCategory(categoryId) {
+  return CATEGORIES.some((c) => c.id === categoryId);
+}
+
+function valueMatches(raw, values) {
+  if (Array.isArray(raw)) return raw.some((v) => values.includes(v));
+  if (typeof raw === 'string' && raw) return values.includes(raw);
+  return false;
+}
+
 export function dishMatchesCategory(dish, categoryId) {
   if (!categoryId || categoryId === 'all') return true;
   if (!dish) return false;
-  const raw = dish.category;
-  if (Array.isArray(raw)) return raw.includes(categoryId);
-  if (typeof raw === 'string' && raw) return raw === categoryId;
-  if (Array.isArray(dish.categories)) return dish.categories.includes(categoryId);
+  const values = categoryValues(categoryId);
+  if (valueMatches(dish.category, values)) return true;
+  // `category` bo'sh bo'lsa — eski `categories` massiviga qaraymiz
+  if (!dish.category && valueMatches(dish.categories, values)) return true;
   return false;
 }
 
 export function restaurantMatchesCategory(restaurant, categoryId) {
   if (!categoryId || categoryId === 'all') return true;
   if (!restaurant) return false;
-  if (restaurant.category === categoryId) return true;
-  const dc = restaurant.dishCategories;
-  if (Array.isArray(dc) && dc.includes(categoryId)) return true;
-  if (Array.isArray(restaurant.categories) && restaurant.categories.includes(categoryId)) {
-    return true;
-  }
-  return false;
+  const values = categoryValues(categoryId);
+  return (
+    valueMatches(restaurant.category, values)
+    || valueMatches(restaurant.dishCategories, values)
+    || valueMatches(restaurant.categories, values)
+  );
 }
 
 export function filterByCategory(items, categoryId, matcher) {

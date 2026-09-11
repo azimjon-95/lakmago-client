@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api';
+import { dishFeedQuery } from '@/hooks/queries';
 import './Splash.css';
 
 const SHOW_MS = 3400;
@@ -71,11 +72,10 @@ export function Splash({ onDone }) {
         queryFn: ({ signal }) =>
           api.getTrendingDishes({ signal }),
       },
-      {
-        queryKey: ['dishes', 'discounted'],
-        queryFn: ({ signal }) =>
-          api.getDiscountedDishes({ signal }),
-      },
+      // Bosh sahifadagi «Super Chegirmalar» / «Tavsiya qilamiz»
+      // qatorlari — HomePage bilan aynan bir xil kalit
+      dishFeedQuery({ discounted: true }),
+      dishFeedQuery({ discounted: false }),
       {
         queryKey: ['dishes', 'all'],
         queryFn: ({ signal }) =>

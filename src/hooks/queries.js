@@ -69,6 +69,35 @@ export const useDiscountedDishes = () =>
     queryFn: ({ signal }) => api.getDiscountedDishes({ signal }),
   });
 
+/*
+ * ═══ BOSH SAHIFA QATORLARI — SERVER FILTRLI TASMA ═══
+ *
+ * «Super Chegirmalar» va «Tavsiya qilamiz» qatorlari endi
+ * /dishes/all?discounted=&category= dan to'g'ridan-to'g'ri
+ * olinadi — «Barchasi» sahifasi bilan AYNAN bir manba.
+ *
+ * AVVALGI MUAMMO: bosh sahifa eng yangi 50 ta taomni olib,
+ * kategoriyani mijozda filtrlardi. Tanlangan kategoriyadagi
+ * taomlar o'sha 50 talikka tushmasa (yoki restoran yopiq
+ * bo'lsa) qatorlar butunlay yo'qolardi — «Barchasi» sahifasida
+ * esa o'sha taomlar bemalol ko'rinardi.
+ *
+ * Kalit kategoriya bo'yicha — har kategoriya alohida keshlanadi,
+ * qaytib tanlanganda darhol chiqadi.
+ */
+export const HOME_FEED_LIMIT = 50;
+
+export const dishFeedQuery = ({ discounted, category = 'all', limit = HOME_FEED_LIMIT }) => ({
+  queryKey: ['dishes', 'feed', discounted ? 'discount' : 'regular', category, limit],
+  queryFn: async ({ signal }) => {
+    const res = await api.getDishesFeed({ discounted, category, limit, signal });
+    return Array.isArray(res?.items) ? res.items : [];
+  },
+  staleTime: 2 * 60_000,
+});
+
+export const useDishFeed = (params) => useQuery(dishFeedQuery(params));
+
 export const useAllDishes = () =>
   useQuery({
     queryKey: ['dishes', 'all'],
