@@ -15,13 +15,23 @@
   /* GIF fonining rangi bilan BIR XIL */
   background: #002634;
 
+  /*
+   * Poster (16 KB) fon sifatida — GIF/video yuklanguncha
+   * foydalanuvchi bo'sh ekranga emas, tayyor kadrga qaraydi.
+   * GIF yuklangach uning ustiga tushadi, almashuv sezilmaydi.
+   */
+  background-image: url('/splash-poster.jpg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+
   opacity: 1;
   transition: opacity 400ms ease;
 
   pointer-events: auto;
 }
 
-.splash__gif {
+.splash__media {
   display: block;
 
   width: 100%;
