@@ -12,18 +12,25 @@
 
   overflow: hidden;
 
-  /* GIF fonining rangi bilan BIR XIL */
-  background: #002634;
-
   /*
-   * Poster (16 KB) fon sifatida — GIF/video yuklanguncha
-   * foydalanuvchi bo'sh ekranga emas, tayyor kadrga qaraydi.
-   * GIF yuklangach uning ustiga tushadi, almashuv sezilmaydi.
+   * FON = GIF'ning o'z foni.
+   *
+   * Telefon ekrani GIF'dan uzunroq, shuning uchun tepa va pastda
+   * bo'sh joy qoladi. U joy GIF foni bilan bir xil bo'lsa,
+   * chegara umuman sezilmaydi va rasm butun ekranga yoyilgandek
+   * ko'rinadi.
+   *
+   * Ranglar GIF'ning o'zidan olingan: tepasi #022935, pasti
+   * #073846 (yengil gradient). Shuning uchun bu yerda ham
+   * gradient — bir tekis rang qo'yilsa chegara chizig'i bilinardi.
+   *
+   * MUHIM: bu yerga rasm (background-image) QO'YILMAYDI.
+   * Avval splash-poster.jpg fon qilingandi, lekin u butunlay
+   * boshqa rasm (eski splash: qopqoqli laganda) — ekranning
+   * tepasi va pastida begona surat ko'rinib qolgandi.
    */
-  background-image: url('/splash-poster.jpg');
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
+  background-color: #032a37;
+  background-image: linear-gradient(180deg, #022935 0%, #04303d 50%, #073846 100%);
 
   opacity: 1;
   transition: opacity 400ms ease;

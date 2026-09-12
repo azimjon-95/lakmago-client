@@ -49,7 +49,6 @@ const VIDEO_SOURCES = [
 ];
 
 const GIF_SRC = '/splash-courier.gif';
-const POSTER_SRC = '/splash-poster.jpg';
 
 /*
  * Video yo'qligi bir marta aniqlansa, shu sessiyada qayta
@@ -154,7 +153,11 @@ export function Splash({ onDone }) {
       ) : (
         <video
           className="splash__media"
-          poster={POSTER_SRC}
+          /*
+           * poster QO'YILMAYDI: splash-poster.jpg — eski splashning
+           * boshqa surati. Video yuklanguncha fon rangi ko'rinadi,
+           * u GIF/video foni bilan bir xil.
+           */
           autoPlay
           muted
           playsInline
