@@ -139,6 +139,10 @@ export const translations = {
     submitBtn: 'Yuborish',
     signingIn: 'Kirilmoqda…',
     widgetLoadFailed: "Telegram kirish oynasini yuklab bo'lmadi. Internetni tekshirib, sahifani yangilang.",
+    signInFailed: "Kirish muvaffaqiyatsiz bo'ldi. Qayta urinib ko'ring.",
+    savingAddress: 'Manzil saqlanmoqda...',
+    addressSyncFailedTitle: "Manzilni saqlab bo'lmadi",
+    addressSyncFailed: "Manzilni serverga saqlashda xatolik yuz berdi. Internetni tekshirib, qayta urinib ko'ring.",
     telegramLoginNote: "Bir marta kirasiz — savatingiz, manzillaringiz va buyurtmalaringiz telefonda ham, kompyuterda ham o'zingiz bilan yuradi.",
 
     // Do'stlarni taklif qilish kartasi
@@ -500,6 +504,10 @@ export const translations = {
     submitBtn: 'Юбориш',
     signingIn: 'Кирилмоқда…',
     widgetLoadFailed: 'Telegram кириш ойнасини юклаб бўлмади. Интернетни текшириб, саҳифани янгиланг.',
+    signInFailed: 'Кириш муваффақиятсиз бўлди. Қайта уриниб кўринг.',
+    savingAddress: 'Манзил сақланмоқда...',
+    addressSyncFailedTitle: 'Манзилни сақлаб бўлмади',
+    addressSyncFailed: 'Манзилни серверга сақлашда хатолик юз берди. Интернетни текшириб, қайта уриниб кўринг.',
     telegramLoginNote: 'Бир марта кирасиз — саватингиз, манзилларингиз ва буюртмаларингиз телефонда ҳам, компьютерда ҳам ўзингиз билан юради.',
     orLabel: 'ёки',
 
@@ -844,6 +852,10 @@ export const translations = {
     submitBtn: 'Отправить',
     signingIn: 'Выполняется вход…',
     widgetLoadFailed: 'Не удалось загрузить окно входа Telegram. Проверьте интернет и обновите страницу.',
+    signInFailed: 'Не удалось войти. Попробуйте ещё раз.',
+    savingAddress: 'Сохранение адреса...',
+    addressSyncFailedTitle: 'Не удалось сохранить адрес',
+    addressSyncFailed: 'Ошибка при сохранении адреса на сервере. Проверьте интернет и попробуйте ещё раз.',
     telegramLoginNote: 'Вход один раз — корзина, адреса и заказы остаются с вами и на телефоне, и на компьютере.',
     orLabel: 'или',
 

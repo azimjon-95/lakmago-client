@@ -17,6 +17,9 @@ import { api } from '@/api';
 import { haptic, getTelegram } from '@/lib/telegram';
 import { useDishes, useRestaurants } from '@/hooks/queries';
 import { savePendingPayment, getPendingPayments, clearPendingPayment } from '@/lib/pendingPayment';
+import { setPendingIntent, clearPendingIntent } from '@/lib/pendingIntent';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { useRequireSubscription } from '@/hooks/useRequireSubscription';
 import './Cart.css';
 
 
@@ -92,6 +95,8 @@ function openPaymentUrl(url) {
 export function CartPage() {
   const navigate = useNavigate();
   const t = useT();
+  const { ensureAuth, AuthGate } = useRequireAuth();
+  const { ensureSubscription, SubscriptionGate } = useRequireSubscription();
   // Selectorlar alohida — useCart() to'liq obyekt qaytaradi va
   // har store o'zgarishida qayta render bo'ladi.
   const items = useCart((s) => s.items);
@@ -711,7 +716,7 @@ export function CartPage() {
     );
   }
 
-  function handlePlaceOrder() {
+  async function handlePlaceOrder() {
     // Manzil faqat yetkazishda majburiy
     if (!isPickup && !selectedAddress) { setShowAddressSheet(true); return; }
     if (!user.phone) { setPhoneDraft(''); setShowPhoneEdit(true); return; }
@@ -719,6 +724,30 @@ export function CartPage() {
     if (timingMode === 'scheduled' && !scheduledFor && timeSlots.length) {
       setScheduledFor(timeSlots[0].value);
     }
+
+    /*
+     * PHASE 3: auth/obuna faqat SHU YERDA, YAKUNIY qadam sifatida
+     * tekshiriladi — manzil/telefon YUQORIDA ALLAQACHON hal
+     * qilingan (ular guest holatida ham local ishlaydi, audit
+     * tasdiqlagan). Guest foydalanuvchi savatga taom qo'sha oladi,
+     * manzil/telefon kirita oladi — faqat ENDI, "Buyurtma berish"
+     * bosilganda, agar hali autentifikatsiya qilinmagan bo'lsa,
+     * AuthGateModal ochiladi.
+     *
+     * pendingIntent — faqat KUTILMAGAN reload/remount fallback
+     * signali (pendingIntent.js spetsifikatsiyasi, 24-band). Normal
+     * holatda (modal joyida ochiladi, komponent unmount bo'lmaydi)
+     * bu deyarli hech qachon o'qilmaydi — faqat yozib qo'yiladi va
+     * muvaffaqiyatli/bekor qilingan holatda darhol tozalanadi.
+     */
+    setPendingIntent({ type: 'order', returnPath: '/cart' });
+
+    const authed = await ensureAuth();
+    if (!authed) { clearPendingIntent(); return; }
+
+    const subscribed = await ensureSubscription();
+    if (!subscribed) { clearPendingIntent(); return; }
+
     /*
      * Bu yerda ENDI to'g'ridan-to'g'ri yubormaymiz — avval
      * SO'NGGI TEKSHIRUV modali ochiladi (OrderConfirmModal).
@@ -798,6 +827,15 @@ export function CartPage() {
         : {}),
     })
       .then(async (created) => {
+        /*
+         * Order so'rovi MUVAFFAQIYATLI yuborildi (cash yoki karta,
+         * ikkalasi ham shu blok ichida) — checkout "niyati" endi
+         * bajarildi, pendingIntent kerak emas. Xato holatida
+         * ATAYLAB tozalanmaydi (pastga qarang, 17-band: pendingIntent
+         * order yaratish uchun avtoritet emas, TTL o'zi tozalaydi).
+         */
+        clearPendingIntent();
+
         // NAQD — buyurtma darhol restoranga boradi
         if (paymentMethod === 'cash') {
           useCart.getState().clear();
@@ -1386,6 +1424,8 @@ export function CartPage() {
           onConfirm={confirmAndSubmit}
         />
       )}
+      {AuthGate}
+      {SubscriptionGate}
     </div>
   );
 }

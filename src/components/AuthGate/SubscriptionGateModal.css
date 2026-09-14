@@ -1,0 +1,48 @@
+.sgm-overlay {
+  position: fixed; inset: 0; z-index: 70;
+  display: flex; align-items: flex-end; justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: fade-in 0.2s var(--ease);
+}
+
+.sgm-sheet {
+  position: relative;
+  width: 100%; max-width: var(--app-width);
+  max-height: 92vh;
+  display: flex; flex-direction: column;
+  background: var(--surface);
+  border-radius: 22px 22px 0 0;
+  padding: 10px 0 calc(18px + env(safe-area-inset-bottom, 0px));
+  animation: slide-up 0.28s var(--ease);
+  overflow: hidden;
+}
+
+.sgm-handle {
+  width: 36px; height: 4px;
+  margin: 4px auto 6px;
+  border-radius: 999px;
+  background: var(--line);
+  flex: none;
+}
+
+.sgm-close {
+  position: absolute;
+  top: 14px; right: 14px;
+  z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--surface-2);
+}
+
+/* sub-gate__card asli "position: fixed" qobiq ichida ishlatilishi
+   uchun mo'ljallangan — bu yerda faqat modalga moslashtiramiz. */
+.sgm-card.sub-gate__card {
+  max-width: none;
+  width: 100%;
+  border: none;
+  padding: 28px 22px 8px;
+  overflow-y: auto;
+}

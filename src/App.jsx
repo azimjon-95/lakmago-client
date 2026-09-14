@@ -17,15 +17,13 @@ const SearchPage = lazy(() => import('@/pages/Search/SearchPage').then((m) => ({
 const DiscoverDishesPage = lazy(() => import('@/pages/Discover/DiscoverDishesPage').then((m) => ({ default: m.DiscoverDishesPage })));
 import { useUser } from '@/store/user';
 import { authenticateWithTelegram, getStartParam, isTelegramEnv } from '@/lib/telegram';
-import { TelegramOnly } from '@/components/TelegramOnly/TelegramOnly';
 import { api, getAuthToken, hasRefreshToken, restoreSession } from '@/api';
 import { joinUserRoom } from '@/lib/socket';
+import { syncGuestAddresses } from '@/lib/syncGuestAddresses';
 import { I18nProvider } from '@/i18n';
 import { ActiveOrderBadge } from '@/components/ActiveOrderBadge/ActiveOrderBadge';
 import { SupportChat } from '@/components/SupportChat/SupportChat';
-import { SubscriptionGate } from '@/components/SubscriptionGate/SubscriptionGate';
 import { Splash } from '@/components/Splash/Splash';
-import { Onboarding, needsOnboarding } from '@/components/Onboarding/Onboarding';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,48 +54,28 @@ function FloatingLayer() {
 
 export default function App() {
   /*
-   * I18nProvider ENDI TelegramOnly'ni HAM o'rab oladi.
+   * PHASE 3 (Guest-First Auth): ilova endi HAR DOIM <AppInner />
+   * ko'rsatadi — Telegram ichida ham, Safari'da ham, guest bo'lsa
+   * ham. TelegramOnly (Login Widget) endi App darajasida BLOKLOVCHI
+   * ekran sifatida ishlatilmaydi — u faqat AuthGateModal ichida
+   * (order/booking submit vaqtida, useRequireAuth() orqali) chiqadi.
+   * TelegramOnly.jsx fayli o'zi o'zgartirilmadi, faqat bu yerdan
+   * chaqirilishi olib tashlandi.
    *
-   * ILGARI: App() Telegram muhitidan tashqarida bo'lsa
-   * to'g'ridan-to'g'ri <TelegramOnly /> qaytarardi,
-   * I18nProvider esa faqat AppInner() ICHIDA edi. Natijada
-   * TelegramOnly useT() ni CHAQIRA OLMASDI (I18nProvider
-   * mount bo'lmagan bosqichda) - shuning uchun u butunlay
-   * qattiq yozilgan matn bilan qolgan edi, til hech qachon
-   * o'zgarmasdi.
-   *
-   * AUTH FUNDAMENTI (2-bosqich): brauzerda (Telegram tashqarisida)
-   * ilova endi ikki holatga ega:
-   *  - webLoggedIn=false — TelegramOnly (Login Widget bilan kirish
-   *    imkoniyati)
-   *  - webLoggedIn=true — AppInner, xuddi Mini App bilan bir xil
-   *    tajriba (faqat authMode='web', pastga qarang)
-   * Sahifa YANGILANGANDA ham holat saqlanadi — accessToken
-   * localStorage/sessionStorage'da bo'lsa (Login Widget orqali
-   * avval kirilgan bo'lsa), boshlang'ich holat darhol "kirilgan"
-   * deb hisoblanadi, foydalanuvchi qayta login qilishga majbur
-   * bo'lmaydi.
+   * AVVAL (2-bosqich): brauzerda login qilinmagan bo'lsa <TelegramOnly />
+   * to'liq ekranni bloklardi — Main Page'ni umuman ko'rsatmasdi.
    */
-  const [webLoggedIn, setWebLoggedIn] = useState(() => !!getAuthToken());
   const inTelegram = isTelegramEnv();
 
   /*
-   * ═══ SESSIYANI TIKLASH ═══
+   * ═══ SESSIYANI TIKLASH (o'zgarishsiz — mavjud mexanizm) ═══
    *
-   * MUAMMO: accessToken sessionStorage'da saqlanadi — brauzer yoki
-   * tab yopilganda O'CHADI. Shu sababli allaqachon ro'yxatdan
-   * o'tgan mijoz lokma.uz ga qayta kirganda kirish ekranini
-   * KO'RARDI, garchi refreshToken localStorage'da saqlanib
-   * turgan bo'lsa ham. (Tugmani bosgach tanirdi — chunki
-   * Telegram uni qayta tasdiqlardi. Ya'ni ortiqcha qadam edi.)
-   *
-   * YECHIM: ochilishda accessToken yo'q, lekin refreshToken bor
-   * bo'lsa — jimgina yangilaymiz. Muvaffaqiyatli bo'lsa mijoz
-   * kirish ekranini umuman ko'rmaydi.
-   *
-   * Tiklash tugagunicha HECH NARSA ko'rsatilmaydi: kirish
-   * ekranini bir lahzaga chiqarib, keyin yo'qotish mijozni
-   * chalg'itardi.
+   * accessToken sessionStorage'da saqlanadi — brauzer/tab
+   * yopilganda o'chadi. Agar refreshToken localStorage'da bo'lsa
+   * (oldin login qilingan bo'lsa), jimgina tiklaymiz. Bu YANGI
+   * (hech qachon login qilmagan) guest uchun UMUMAN ishga
+   * tushmaydi (hasRefreshToken()===false), shuning uchun ular
+   * uchun Main Page HECH QANDAY kechikishsiz ochiladi.
    */
   const [restoring, setRestoring] = useState(
     () => !inTelegram && !getAuthToken() && hasRefreshToken(),
@@ -107,19 +85,14 @@ export default function App() {
     if (!restoring) return;
     let cancelled = false;
     restoreSession()
-      .then((ok) => { if (!cancelled && ok) setWebLoggedIn(true); })
-      .catch(() => { /* tiklab bo'lmadi — kirish ekrani ko'rsatiladi */ })
+      .catch(() => { /* tiklab bo'lmadi — AppInner guest sifatida ochiladi */ })
       .finally(() => { if (!cancelled) setRestoring(false); });
     return () => { cancelled = true; };
   }, [restoring]);
 
   return (
     <I18nProvider>
-      {restoring ? null : (
-        inTelegram || webLoggedIn
-          ? <AppInner authMode={inTelegram ? 'telegram' : 'web'} />
-          : <TelegramOnly onLoggedIn={() => setWebLoggedIn(true)} />
-      )}
+      {restoring ? null : <AppInner authMode={inTelegram ? 'telegram' : 'web'} />}
     </I18nProvider>
   );
 }
@@ -127,24 +100,9 @@ export default function App() {
 function AppInner({ authMode = 'telegram' }) {
   const updateUser = useUser((s) => s.updateUser);
   const setAuthStatus = useUser((s) => s.setAuthStatus);
-  const currentUser = useUser((s) => s.user);
-  const authStatus = useUser((s) => s.authStatus);
 
   // Splash faqat sessiya boshида bir marta (qayta yuklaшда emas)
   const [showSplash, setShowSplash] = useState(() => !sessionStorage.getItem('lokmago_splash_seen'));
-
-  /*
-   * Birinchi kirishdagi sozlash (ism/familiya + manzil).
-   *
-   * Splash tugagandan KEYIN va auth hal bo'lgach ko'rsatiladi.
-   * Shart Onboarding modulida — u yerda batafsil izohlangan:
-   * saqlangan manzili yo'q mijozga bir marta ko'rsatiladi.
-   */
-  const [onbDone, setOnbDone] = useState(false);
-  const showOnboarding = !showSplash
-    && authStatus === 'done'
-    && !onbDone
-    && needsOnboarding(currentUser);
 
   const finishSplash = () => {
     sessionStorage.setItem('lokmago_splash_seen', '1');
@@ -154,7 +112,25 @@ function AppInner({ authMode = 'telegram' }) {
   useEffect(() => {
     const loadAddresses = useUser.getState().loadAddresses;
 
-    const applyProfile = (profile) => {
+    const applyProfile = async (profile) => {
+      /*
+       * MUHIM TUZATISH (residual risk audit): bu useEffect([])
+       * FAQAT bir marta (mount'da) ishga tushadi — shuning uchun
+       * yopilgan funksiya (closure) ichida "currentUser"ni
+       * TO'G'RIDAN-TO'G'RI ishlatish REACT STALE CLOSURE xatosiga
+       * olib kelardi: applyProfile har doim MOUNT PAYTIDAGI
+       * currentUser qiymatini ko'rardi, undan keyin (masalan auth
+       * hali tugamagan paytda guest manzil qo'shsa) sodir bo'lgan
+       * o'zgarishlarni HECH QACHON ko'rmasdi. Natijada guest
+       * qo'shgan manzil updateUser() ning O'ZIDA (loadAddresses()
+       * gacha yetmasdan ham) yo'qolib qolardi.
+       *
+       * TUZATISH: useUser.getState().user — bu Zustand'ning
+       * to'g'ridan-to'g'ri, ENG SO'NGGI holatni o'qish usuli,
+       * React render siklidan MUSTAQIL — closure muammosiga
+       * duchor emas.
+       */
+      const latest = useUser.getState().user;
       updateUser({
         telegramId: profile.telegramId,
         firstName: profile.firstName,
@@ -164,13 +140,33 @@ function AppInner({ authMode = 'telegram' }) {
         isPremium: profile.isPremium,
         photoUrl: profile.photoUrl,
         photoInitials: initialsOf(profile.firstName, profile.lastName),
-        phone: currentUser.phone ?? profile.phone ?? null,
-        addresses: currentUser.addresses.length ? currentUser.addresses : profile.addresses ?? [],
+        phone: latest.phone ?? profile.phone ?? null,
+        addresses: latest.addresses.length ? latest.addresses : profile.addresses ?? [],
         verified: true,
       });
       setAuthStatus('done');
-      // Serverdagi manzillar va shaxsiy socket xonasi
-      loadAddresses?.();
+
+      /*
+       * ASOSIY TUZATISH (AuthGateModal.jsx bilan BIR XIL, umumiy
+       * lib/syncGuestAddresses.js orqali): loadAddresses() DARHOL
+       * chaqirilmaydi — avval guest tempId manzillari (agar bo'lsa)
+       * SERVERGA ketma-ket saqlanadi, shundan KEYINGINA
+       * loadAddresses() chaqiriladi. Bu yerda (App.jsx, fon
+       * jarayoni, UI yo'q) xato bo'lsa — faqat log qilinadi,
+       * loadAddresses() CHAQIRILMAYDI (manzil local'da tempId
+       * bilan qoladi — order baribir muvaffaqiyatli bo'ladi,
+       * chunki checkout manzil MA'LUMOTINI to'g'ridan-to'g'ri
+       * yuboradi, server Address yozuviga bog'liq emas — faqat
+       * "boshqa qurilmada ham ko'rinish" keyinga qoladi).
+       */
+      const syncResult = await syncGuestAddresses();
+      if (!syncResult.ok) {
+        console.warn('Guest manzilini serverga saqlab bo\'lmadi (keyinroq qayta urinilishi mumkin):', syncResult.error);
+      } else {
+        // Serverdagi manzillar va shaxsiy socket xonasi
+        await loadAddresses?.();
+      }
+
       const uid = profile._id || profile.id;
       if (uid) joinUserRoom(uid);
     };
@@ -181,6 +177,15 @@ function AppInner({ authMode = 'telegram' }) {
      * o'qiymiz. authenticateWithTelegram() ISHLATILMAYDI, chunki u
      * Telegram.WebApp.initData'ga tayanadi — brauzerda bu obyekt
      * umuman mavjud emas.
+     *
+     * MUHIM (Phase 3): guest (hali hech qachon login qilmagan
+     * brauzer foydalanuvchisi) uchun ham api.getMe() chaqiriladi —
+     * token yo'q bo'lgani uchun bu 401 bilan tugaydi va catch()
+     * setAuthStatus('failed') qiladi. Bu XATO EMAS: 'failed'
+     * shunchaki "hali autentifikatsiya qilinmagan" degani —
+     * ilova guest sifatida ishlayveradi, checkout/booking
+     * vaqtida useRequireAuth() kerak bo'lganda AuthGateModal'ni
+     * ochadi.
      */
     const authPromise = authMode === 'web'
       ? api.getMe().then((res) => res.user)
@@ -198,9 +203,7 @@ function AppInner({ authMode = 'telegram' }) {
   return (
     <QueryClientProvider client={queryClient}>
       {showSplash && <Splash onDone={finishSplash} />}
-      {showOnboarding && <Onboarding onDone={() => setOnbDone(true)} />}
       <BrowserRouter>
-        <SubscriptionGate>
         <ErrorBoundary>
         <Suspense fallback={<div className="app-shell" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="spinner" /></div>}>
           <StartParamHandler />
@@ -220,7 +223,6 @@ function AppInner({ authMode = 'telegram' }) {
           </Routes>
         </Suspense>
         </ErrorBoundary>
-        </SubscriptionGate>
         <FloatingLayer />
       </BrowserRouter>
     </QueryClientProvider>

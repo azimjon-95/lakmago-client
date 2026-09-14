@@ -12,6 +12,9 @@ import { tashkentTodayAsLocalDate } from '@/lib/tashkentTime';
 import { TimePicker } from './TimePicker';
 import { PreOrderScreen } from './PreOrderScreen';
 import { RestaurantLocationMap } from './RestaurantLocationMap';
+import { setPendingIntent, clearPendingIntent } from '@/lib/pendingIntent';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { useRequireSubscription } from '@/hooks/useRequireSubscription';
 import './Reservation.css';
 
 // Telefon raqamni chiroyli formatlash: +998 90 123 45 67
@@ -48,6 +51,8 @@ export function ReservationPage() {
   const navigate = useNavigate();
   const t = useT();
   const { data: restaurant } = useRestaurant(id);
+  const { ensureAuth, AuthGate } = useRequireAuth();
+  const { ensureSubscription, SubscriptionGate } = useRequireSubscription();
 
   const days = useMemo(() => nextDays(7, 'Bugun'), []);
   const [dayIdx, setDayIdx] = useState(0);
@@ -89,6 +94,27 @@ export function ReservationPage() {
   // mijozga bot orqali eslatma keladi.
   async function finishReservation(chosen) {
     if (submittingRef.current) return;
+
+    /*
+     * PHASE 3: auth/obuna faqat SHU YERDA tekshiriladi — ism/telefon
+     * FORM MAYDONLARI (yuqorida, "name"/"phone") allaqachon har
+     * bron uchun alohida so'raladi (mijoz boshqa odam uchun bron
+     * qilishi mumkin, shuning uchun bu ataylab profilga
+     * bog'lanmagan — o'zgartirilmadi).
+     *
+     * MUHIM: bu tekshiruv submittingRef qulflanishidan OLDIN —
+     * aks holda foydalanuvchi auth/obuna modalini bekor qilsa,
+     * submittingRef abadiy "true" holida qolib, qayta urinib
+     * bo'lmas edi (finally blokigacha yetib bormaydi).
+     */
+    setPendingIntent({ type: 'booking', returnPath: `/restaurant/${id}/reserve` });
+
+    const authed = await ensureAuth();
+    if (!authed) { clearPendingIntent(); return; }
+
+    const subscribed = await ensureSubscription();
+    if (!subscribed) { clearPendingIntent(); return; }
+
     submittingRef.current = true;
     setSaving(true);
     setSaveError(null);
@@ -118,6 +144,7 @@ export function ReservationPage() {
           })),
         note: '',
       });
+      clearPendingIntent();
       setPreOrderDishes(chosen);
       setStep('done');
     } catch (e) {
@@ -130,16 +157,20 @@ export function ReservationPage() {
 
   if (step === 'preorder' && restaurant) {
     return (
-      <PreOrderScreen
-        restaurant={restaurant}
-        reservationInfo={{ dateLabel, time, guests }}
-        onCancelAll={() => { haptic(); navigate(-1); }}
-        onConfirm={(chosen) => finishReservation(chosen)}
-        saving={saving}
-        saveError={saveError}
-        onBack={() => setStep('form')}
-        t={t}
-      />
+      <>
+        <PreOrderScreen
+          restaurant={restaurant}
+          reservationInfo={{ dateLabel, time, guests }}
+          onCancelAll={() => { haptic(); navigate(-1); }}
+          onConfirm={(chosen) => finishReservation(chosen)}
+          saving={saving}
+          saveError={saveError}
+          onBack={() => setStep('form')}
+          t={t}
+        />
+        {AuthGate}
+        {SubscriptionGate}
+      </>
     );
   }
 
