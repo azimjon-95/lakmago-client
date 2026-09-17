@@ -637,9 +637,22 @@ export function CartPage() {
     }
   };
 
-  // Ishlatiladigan bonus: balansдан va summадан oshмаsин
-  const bonusApplied = useBonus ? Math.min(bonusBalance, orderSum) : 0;
-  const total = orderSum - bonusApplied;
+  /*
+   * ═══ BONUS HOZIRCHA O'CHIRILGAN ═══
+   *
+   * LokmaGo'da bonus tizimi hali yo'q va SERVER uni qo'llamaydi
+   * (yangi moliyaviy model bonusni bilmaydi — buyurtma to'liq
+   * narxda yaratiladi).
+   *
+   * Agar bu yerda bonus ayirilsa, mijoz ekranda KAMROQ summa
+   * ko'rib, aslida TO'LIQ summa to'lardi — eng yomon xatolardan
+   * biri. Shuning uchun mijoz tomonda ham 0.
+   *
+   * Bonus qo'shilganda: serverda `finance` ga bonus maydonlari
+   * kiritilgach, bu yerdagi hisob ham tiklanadi.
+   */
+  const bonusApplied = 0;
+  const total = orderSum;
   const selectedAddress = user.addresses.find((a) => a.id === user.defaultAddressId) ?? user.addresses[0];
 
   // Manzil yoki savat o'zgarganda yetkazish narxi serverdan
@@ -1233,8 +1246,13 @@ export function CartPage() {
       {/* Qo'shimcha tavsiya — "Hech narsani unutmadingizmi?" */}
       <CartUpsell groups={groups} />
 
-      {/* Bonus bilan to'lash (referal bonusi bor bo'lsa) */}
-      {bonusBalance > 0 && (
+      {/*
+        Bonus tugmasi hozircha KO'RSATILMAYDI: server bonusni
+        qo'llamaydi, shuning uchun uni taklif qilish mijozni
+        chalg'itadi. Balans o'z joyida saqlanadi — bonus tizimi
+        yoqilganda tugma qaytadi.
+      */}
+      {false && bonusBalance > 0 && (
         <button onClick={() => setUseBonus((v) => !v)} className={`cart-bonus ${useBonus ? 'is-active' : ''}`}>
           <div className="cart-bonus__left">
             <Icon name="gift" size={20} color={useBonus ? 'var(--success)' : 'var(--brand)'} />
