@@ -187,8 +187,14 @@ export const useOrders = create((set, get) => ({
     if (!state.activeOrder || state.activeOrder.id !== orderId) return;
     const sub = state.activeOrder.subOrders.find((s) => s.id === subId);
 
-    // Backendga yuborish (backendId bor bo'lsa)
-    if (sub?.backendId && !DEMO) {
+    /*
+     * XATO TUZATILDI: shart `sub?.backendId && !DEMO` edi, `DEMO`
+     * esa hech qayerda aniqlanmagan — olib tashlangan demo
+     * rejimidan qolgan qoldiq. Mijoz "Ha, oldim" tugmasini bosganda
+     * ReferenceError chiqib, baho serverga UMUMAN bormasdi va
+     * yetkazish tasdiqlanmasdi.
+     */
+    if (sub?.backendId) {
       try { await api.confirmDelivery(sub.backendId, rating, comment); } catch { /* ignore */ }
     }
 

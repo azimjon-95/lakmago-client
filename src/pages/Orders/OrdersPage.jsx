@@ -140,7 +140,7 @@ export function OrdersPage() {
         {active.length > 0 && (
           <>
             <div className="orders-section-label">
-              <span className="orders-live-dot" /> Faol buyurtmalar
+              <span className="orders-live-dot" /> {t('activeOrders')}
             </div>
             {active.map((o) => (
               <OrderCard
@@ -158,7 +158,7 @@ export function OrdersPage() {
         {past.length > 0 && (
           <>
             <div className="orders-section-label orders-section-label--muted">
-              Tarix
+              {t('orderHistory')}
             </div>
             {past.map((o) => (
               <OrderCard
@@ -180,6 +180,18 @@ export function OrdersPage() {
 
 // Bitta buyurtma kartasi — bosilsa tafsilot ochiladi
 function OrderCard({ order: o, open, onToggle, onRepeat, highlight }) {
+  /*
+   * XATO TUZATILDI: bu komponent `t('dishes')` kabi tarjimalarni
+   * ishlatardi, lekin `t` ni hech qayerdan olmasdi. U faqat karta
+   * OCHILGANDA (narxlar tafsiloti) render bo'lgani uchun xato
+   * darhol emas, mijoz buyurtma ustiga bosganda chiqardi:
+   * "ReferenceError: Can't find variable: t" — butun sahifa qulardi.
+   *
+   * `t` ni prop qilib uzatish ham mumkin edi, lekin hook to'g'ridan
+   * ishlatilgani ma'qul: chaqiruvchi joylarda unutib qoldirish
+   * xavfi yo'qoladi.
+   */
+  const t = useT();
   const st = STATUS[o.status] || STATUS.pending;
   const stepIndex = FLOW.indexOf(o.status);
   const itemCount = (o.items || []).reduce((s, i) => s + (i.quantity || 1), 0);
