@@ -147,11 +147,50 @@
   background: var(--brand); color: var(--brand-text); border-color: var(--brand);
 }
 
+/*
+ * ═══ BO'SH EKRAN ═══
+ *
+ * XATO TUZATILDI: faqat tugmaning uslubi bor edi, `.orders-empty`
+ * va uning ichidagi sarlavha/izoh esa UMUMAN uslubsiz qolgandi.
+ * Natijada ikona chap chetga yopishib, matn qatorlari bir-biriga
+ * tiqilib, butun ekran buzilgan ko'rinardi.
+ *
+ * `flex: 1` — bo'sh ekran qolgan balandlikni egallaydi va
+ * mazmun MARKAZDA turadi, tepaga yopishib qolmaydi.
+ */
+.orders-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 4px;
+  padding: 40px 24px 64px;
+  color: var(--muted);
+  font-size: 14.5px;
+}
+
+.orders-empty__title {
+  margin-top: 14px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.orders-empty__hint {
+  margin: 0;
+  max-width: 260px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
 .orders-empty__btn {
-  margin-top: 16px; padding: 12px 24px;
+  margin-top: 20px; padding: 12px 24px;
   background: var(--brand); color: var(--brand-text);
   border-radius: 14px; font-weight: 700; font-size: 14.5px;
 }
+.orders-empty__btn:active { opacity: 0.9; }
 
 .ord-btn--danger {
   border-color: rgba(225, 75, 66, 0.4);
