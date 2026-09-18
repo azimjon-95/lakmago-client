@@ -670,7 +670,11 @@ export function CartPage() {
     setQuoteLoading(true);
     Promise.all(
       ids.map((id) =>
-        api.getDeliveryQuote(id, selectedAddress.lat, selectedAddress.lng)
+        api.getDeliveryQuote(
+          id, selectedAddress.lat, selectedAddress.lng,
+          // Bepul yetkazish chegarasi server tomonda qo'llanishi uchun
+          groups.find((g) => g.restaurant.id === id)?.subtotal || 0,
+        )
           .then((q) => [id, q])
           .catch(() => [id, null]),
       ),

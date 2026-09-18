@@ -327,8 +327,14 @@ export const api = {
   // ===== To'lov tizimlari =====
   // Server vaqti — ish vaqtini to'g'ri hisoblash uchun
   // Yetkazish masofasi va narxi
-  getDeliveryQuote: (restaurantId, lat, lng) =>
-    apiFetch(`/maps/delivery-quote?restaurantId=${restaurantId}&lat=${lat}&lng=${lng}`),
+  /*
+   * `subtotal` — bepul yetkazish chegarasi server tomonda
+   * qo'llanishi uchun. Usiz mijoz chegaradan oshgan buyurtmada
+   * ham to'liq yetkazish narxini ko'rardi.
+   */
+  getDeliveryQuote: (restaurantId, lat, lng, subtotal = 0) =>
+    apiFetch(`/maps/delivery-quote?restaurantId=${restaurantId}&lat=${lat}&lng=${lng}`
+      + `&subtotal=${Math.max(0, Math.round(Number(subtotal) || 0))}`),
 
   getServerTime: () => apiFetch('/time', { method: 'GET' }),
 
