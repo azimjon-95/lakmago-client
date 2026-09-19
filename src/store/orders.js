@@ -50,6 +50,30 @@ export const useOrders = create((set, get) => ({
       fulfillment: opts.fulfillment || 'delivery',
       timingMode: opts.timingMode || 'asap',
       ...(opts.scheduledFor ? { scheduledFor: opts.scheduledFor } : {}),
+
+      /*
+       * ═══ MANZIL KOORDINATALARI ═══
+       *
+       * XATO TUZATILDI: CartPage bu qiymatlarni `opts` orqali
+       * berardi, lekin ular so'rov tanasiga QO'SHILMASDI. Server
+       * va kuryer paneli ularni qabul qilishga tayyor edi, ya'ni
+       * kuryerga har doim `lat/lng: null` borardi va yetkazish
+       * blokida "Yo'l ko'rsatish" umuman chiqmasdi.
+       *
+       * Ikkalasi ham bo'lgandagina yuboriladi: bittasi yetishmasa
+       * xarita nuqtani aniqlay olmaydi. NaN ham rad etiladi —
+       * bazaga yaroqsiz son tushmasin.
+       */
+      ...(() => {
+        const lat = Number(opts.addressLat);
+        const lng = Number(opts.addressLng);
+        const valid = opts.addressLat != null && opts.addressLng != null
+          && Number.isFinite(lat) && Number.isFinite(lng);
+        return valid ? { addressLat: lat, addressLng: lng } : {};
+      })(),
+      ...(opts.addressNote != null && String(opts.addressNote).trim()
+        ? { addressNote: String(opts.addressNote).trim() }
+        : {}),
       orders: groups.map((g) => ({
         restaurantId: pickId(g.restaurant),
         restaurantName: g.restaurant.name,
