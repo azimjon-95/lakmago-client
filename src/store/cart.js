@@ -97,6 +97,13 @@ export const useCart = create(
         deliveryMin: meta.restaurantDeliveryMin ?? meta.restaurant?.deliveryMin ?? 25,
         deliveryMax: meta.restaurantDeliveryMax ?? meta.restaurant?.deliveryMax ?? 40,
         deliveryFee: meta.restaurantDeliveryFee ?? meta.restaurant?.deliveryFee ?? 0,
+        /*
+         * Naqd qabul qilinadimi. `undefined` bo'lsa (eski savat
+         * yoki eski server) — ruxsat deb qaraladi, ya'ni avvalgi
+         * xatti-harakat saqlanadi. Faqat aniq `false` bo'lsagina
+         * naqd tanlovi yashiriladi.
+         */
+        cashEnabled: meta.restaurantCashEnabled ?? meta.restaurant?.cashEnabled ?? true,
         // Yetkazish shartlari — savatda hisob uchun
         freeDeliveryThreshold:
           meta.restaurantFreeDeliveryThreshold ?? meta.restaurant?.freeDeliveryThreshold ?? 0,

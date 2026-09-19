@@ -378,6 +378,16 @@ export function CartPage() {
     if (providers.length > 0) setPaymentMethod(providers[0].name);
   };
 
+  /*
+   * ═══ NAQD QABUL QILINADIMI ═══
+   *
+   * Restoran naqdni o'chirgan bo'lsa, mijoz faqat karta orqali
+   * to'lay oladi. Savatda bir necha restoran bo'lsa — ulardan
+   * BITTASI ham naqdni o'chirgan bo'lsa, naqd ko'rsatilmaydi
+   * (aks holda buyurtmaning bir qismi serverda rad etilardi).
+   */
+  const cashAllowed = groups.every((g) => g.restaurant?.cashEnabled !== false);
+
   // Naqdmi yoki karta orqalimi
   const isCard = providers.some((p) => p.name === paymentMethod);
 
@@ -417,6 +427,15 @@ export function CartPage() {
    * mijoz o'chirilgan tugma bilan qamalib qolardi.
    */
   useEffect(() => {
+    /*
+     * Restoran naqdni o'chirgan va mijoz naqdda turgan bo'lsa —
+     * kartaga o'tkazamiz (savat oldin ochilgan bo'lishi mumkin).
+     */
+    if (!cashAllowed && paymentMethod === 'cash' && providers.length) {
+      setPaymentMethod(providers[0].name);
+      return;
+    }
+
     if (providersLoaded && !providers.length && paymentMethod !== 'cash') {
       setPaymentMethod('cash');
     }
@@ -538,10 +557,15 @@ export function CartPage() {
       return {
         restaurant: rest,
         subtotal: sub,
-        // Server hisobi bo'lsa u ustun — masofaga qarab
+        /*
+         * Server hisobi USTUN — u masofani aniq biladi va
+         * kilometr rejimida narxni shunga qarab hisoblaydi.
+         * Server javobi yo'q bo'lsa mahalliy taxmin ko'rsatiladi
+         * (server bergan masofa bo'lsa, u ham hisobga olinadi).
+         */
         deliveryFee: quotes[rest.id]?.deliveryAvailable
           ? quotes[rest.id].deliveryPrice
-          : calcDeliveryFee(sub, rest, isPickup),
+          : calcDeliveryFee(sub, rest, isPickup, quotes[rest.id]?.distanceKm ?? null),
         quote: quotes[rest.id] || null,
         serviceFee: calcServiceFee(sub, rest),
         pickupDiscount: calcPickupDiscount(sub, rest, isPickup),
@@ -1185,14 +1209,20 @@ export function CartPage() {
       <div className="cart-section-label">{t('paymentLabel')}</div>
       <div className="cart-payment">
         <div className="cart-payment__options">
-          <button
-            onClick={() => { haptic(); setPaymentMethod('cash'); }}
-            className={`pay-opt ${paymentMethod === 'cash' ? 'is-active' : ''}`}
-          >
-            <span className="pay-opt__emoji">💵</span>
-            <span>{t('cash')}</span>
-            {paymentMethod === 'cash' && <Icon name="circleCheck" size={15} color="var(--brand)" />}
-          </button>
+          {/*
+            Restoran naqdni qabul qilmasa tugma KO'RSATILMAYDI —
+            mijoz tanlab, keyin serverda rad javobini olmasin.
+          */}
+          {cashAllowed && (
+            <button
+              onClick={() => { haptic(); setPaymentMethod('cash'); }}
+              className={`pay-opt ${paymentMethod === 'cash' ? 'is-active' : ''}`}
+            >
+              <span className="pay-opt__emoji">💵</span>
+              <span>{t('cash')}</span>
+              {paymentMethod === 'cash' && <Icon name="circleCheck" size={15} color="var(--brand)" />}
+            </button>
+          )}
 
           <button
             onClick={pickCardProvider}

@@ -8,17 +8,39 @@
  * O'zgartirsangiz ikkalasini birga o'zgartiring.
  */
 
-/** Yetkazish haqi. */
-export function calcDeliveryFee(subtotal, restaurant, isPickup) {
+/**
+ * Yetkazish haqi — MAHALLIY taxmin.
+ *
+ * Haqiqiy narxni SERVER hisoblaydi (masofa bo'yicha). Bu hisob
+ * faqat manzil koordinatasi yo'q yoki server javobi hali
+ * kelmagan paytda ko'rsatiladi.
+ *
+ * Ikki rejim, server bilan BIR XIL mantiq:
+ *   flat  — bitta narx;
+ *   perKm — bepul masofadan keyin har km uchun narx. Masofa
+ *           noma'lum bo'lgani uchun bu yerda qat'iy narxga
+ *           qaytiladi (server aniqlashtiradi).
+ *
+ * @param {number} [distanceKm] server bergan masofa (bo'lsa)
+ */
+export function calcDeliveryFee(subtotal, restaurant, isPickup, distanceKm = null) {
   if (isPickup) return 0;
-
-  const fee = Number(restaurant?.deliveryFee) || 0;
-  if (fee <= 0) return 0;
+  if (restaurant?.deliveryEnabled === false) return 0;
 
   const threshold = Number(restaurant?.freeDeliveryThreshold) || 0;
   if (threshold > 0 && subtotal >= threshold) return 0;
 
-  return fee;
+  const mode = restaurant?.delivery?.pricingMode === 'perKm' ? 'perKm' : 'flat';
+
+  if (mode === 'perKm' && Number.isFinite(Number(distanceKm))) {
+    const perKm = Math.max(0, Number(restaurant?.delivery?.perKm) || 0);
+    const freeKm = Math.max(0, Number(restaurant?.delivery?.freeKm) || 0);
+    const paidKm = Math.max(0, Number(distanceKm) - freeKm);
+    // 100 so'mgacha yaxlitlash — server bilan bir xil
+    return Math.round((paidKm * perKm) / 100) * 100;
+  }
+
+  return Math.max(0, Number(restaurant?.deliveryFee) || 0);
 }
 
 /** Xizmat haqi — foiz, min/max bilan. */

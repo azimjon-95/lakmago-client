@@ -89,6 +89,8 @@ export function FoodPage() {
           restaurantDeliveryMin: restaurant.deliveryMin,
           restaurantDeliveryMax: restaurant.deliveryMax,
           restaurantDeliveryFee: restaurant.deliveryFee,
+          // Naqd qabul qilinadimi — savatda to'lov tanlovi uchun
+          restaurantCashEnabled: restaurant?.cashEnabled,
           restaurantFreeDeliveryThreshold: restaurant.freeDeliveryThreshold,
           restaurantMinOrderAmount: restaurant.minOrderAmount,
           restaurantPrepMinutes: restaurant.prepMinutes,

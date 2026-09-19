@@ -106,6 +106,8 @@ export function RestaurantPage() {
       restaurantDeliveryMin: restaurant?.deliveryMin,
       restaurantDeliveryMax: restaurant?.deliveryMax,
       restaurantDeliveryFee: restaurant?.deliveryFee,
+      // Naqd qabul qilinadimi — savatda to'lov tanlovi uchun
+      restaurantCashEnabled: restaurant?.cashEnabled,
     })),
     [rawDishes, restaurant, id],
   );
