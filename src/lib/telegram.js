@@ -75,8 +75,18 @@ export function setTelegramSurfaceColor(color) {
   } catch { /* SSR/DOM yo'q */ }
 }
 
-export function haptic() {
-  getTelegram()?.HapticFeedback?.impactOccurred('light');
+/**
+ * Yengil tebranish.
+ *
+ * @param {'light'|'soft'|'medium'|'rigid'|'heavy'} [strength]
+ *   Standart 'light'. Jonli yangilanish kabi passiv hodisalar
+ *   uchun 'soft' — u sezilarli, lekin bezovta qilmaydi.
+ *
+ * Telegram tashqarisida (oddiy brauzer) jimgina o'tkazib
+ * yuboriladi — xato bermaydi.
+ */
+export function haptic(strength = 'light') {
+  getTelegram()?.HapticFeedback?.impactOccurred(strength);
 }
 
 

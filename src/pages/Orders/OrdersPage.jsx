@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { BottomNav } from '@/components/BottomNav';
@@ -57,12 +57,32 @@ export function OrdersPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  // Real-time: holat o'zgarsa ro'yxat yangilanadi
+  /*
+   * ═══ JONLI YANGILANISH ═══
+   *
+   * Restoran buyurtmani qabul qilsa yoki holat o'zgarsa, ro'yxat
+   * o'zi yangilanadi va telefon yengil tebranadi — mijoz ekranga
+   * qaramayotgan bo'lishi mumkin.
+   *
+   * Tebranish faqat HAQIQIY o'zgarishda bo'ladi: bir xil holat
+   * qayta kelsa (masalan qayta ulanishda) jim o'tadi.
+   */
+  const lastStatus = useRef({});
+
   useEffect(() => {
     if (!userId) return;
     const socket = getSocket();
     joinUserRoom(userId);
-    const refresh = () => load();
+
+    const refresh = (data) => {
+      const id = data?.orderId;
+      const status = data?.status;
+      const changed = !id || lastStatus.current[id] !== status;
+      if (id && status) lastStatus.current[id] = status;
+      if (changed) haptic('soft');
+      load();
+    };
+
     socket.on('order:status', refresh);
     return () => socket.off('order:status', refresh);
   }, [userId, load]);
