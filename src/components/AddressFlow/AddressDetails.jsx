@@ -29,6 +29,39 @@ export function AddressDetails({ location, onSave, onBack }) {
    */
   const [note, setNote] = useState('');
 
+  /*
+   * ═══ MANZILNI QO'LDA TO'G'RILASH ═══
+   *
+   * Xarita manzilni TAXMINAN aniqlaydi: ko'cha nomi yoki uy
+   * raqami noto'g'ri chiqishi mumkin (ayniqsa yangi mahallalarda).
+   * Avval "O'zgartirish" faqat orqaga qaytarardi — mijoz nuqtani
+   * qayta tanlashi kerak edi, lekin matnni tuzata olmasdi.
+   *
+   * Endi matn shu yerda tahrirlanadi. Koordinata O'ZGARMAYDI —
+   * kuryer baribir aniq nuqtaga boradi, matn esa unga qo'shimcha
+   * yordam beradi.
+   */
+  const [street, setStreet] = useState(location.street || '');
+  const [city, setCity] = useState(location.city || '');
+  const [editOpen, setEditOpen] = useState(false);
+  const [draftStreet, setDraftStreet] = useState('');
+  const [draftCity, setDraftCity] = useState('');
+
+  const openEdit = () => {
+    haptic();
+    setDraftStreet(street);
+    setDraftCity(city);
+    setEditOpen(true);
+  };
+
+  const applyEdit = () => {
+    haptic();
+    const next = draftStreet.trim();
+    if (next) setStreet(next);
+    setCity(draftCity.trim());
+    setEditOpen(false);
+  };
+
   const pickLabel = (l) => {
     haptic();
     setLabelId(l.id);
@@ -49,9 +82,9 @@ export function AddressDetails({ location, onSave, onBack }) {
      */
     onSave({
       title: title.trim() || 'Manzil',
-      address: location.street,
-      street: location.street,
-      city: location.city,
+      address: street,
+      street,
+      city,
       lat: location.lat,
       lng: location.lng,
       entrance: '', floor: '', flat: '',
@@ -75,8 +108,8 @@ export function AddressDetails({ location, onSave, onBack }) {
       <div className="addr-details__scroll">
         {/*
           Tanlangan manzil — xarita rasmi bilan.
-          "O'zgartirish" tugmasi orqasiga qaytaradi: mijoz nuqtani
-          qayta tanlashi mumkin, sahifani tashlab ketishi shart emas.
+          "O'zgartirish" manzil MATNINI tahrirlash oynasini ochadi.
+          Koordinata o'zgarmaydi — xarita nuqtasi joyida qoladi.
         */}
         <div className="addr-card">
           <div className="addr-card__body">
@@ -84,13 +117,13 @@ export function AddressDetails({ location, onSave, onBack }) {
               <Icon name="pin" size={16} color="var(--brand)" />
               <span>{t('address')}</span>
             </div>
-            <div className="addr-card__street">{location.street}</div>
-            {location.city && <div className="addr-card__city">{location.city}</div>}
+            <div className="addr-card__street">{street}</div>
+            {city && <div className="addr-card__city">{city}</div>}
           </div>
 
           <img className="addr-card__map" src="/address-map.jpg" alt="" aria-hidden="true" />
 
-          <button type="button" onClick={onBack} className="addr-card__edit">
+          <button type="button" onClick={openEdit} className="addr-card__edit">
             <Icon name="edit" size={14} color="var(--brand)" />
             <span>{t('editAddressBtn')}</span>
           </button>
@@ -145,6 +178,48 @@ export function AddressDetails({ location, onSave, onBack }) {
           </div>
         </div>
       </div>
+
+      {/*
+        Manzilni to'g'rilash oynasi. Koordinata o'zgarmaydi —
+        faqat kuryerga ko'rinadigan MATN tahrirlanadi.
+      */}
+      {editOpen && (
+        <div className="addr-edit" onClick={() => setEditOpen(false)}>
+          <div className="addr-edit__sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="addr-edit__title">{t('editStreetTitle')}</div>
+            <p className="addr-edit__why">{t('editStreetWhy')}</p>
+
+            <label className="addr-edit__label">{t('editStreetLabel')}</label>
+            <input
+              className="addr-edit__input"
+              value={draftStreet}
+              onChange={(e) => setDraftStreet(e.target.value.slice(0, 120))}
+              placeholder={t('editStreetExample')}
+              autoFocus
+            />
+            <div className="addr-edit__hint">{t('editStreetExample')}</div>
+
+            <label className="addr-edit__label">{t('cityLabel')}</label>
+            <input
+              className="addr-edit__input"
+              value={draftCity}
+              onChange={(e) => setDraftCity(e.target.value.slice(0, 80))}
+              placeholder="Toshkent"
+            />
+
+            <div className="addr-edit__actions">
+              <button type="button" className="addr-edit__cancel"
+                onClick={() => setEditOpen(false)}>
+                {t('cancel')}
+              </button>
+              <button type="button" className="addr-edit__save"
+                onClick={applyEdit} disabled={!draftStreet.trim()}>
+                {t('saveChanges')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="addr-details__footer">
         <button onClick={save} className="addrflow__btn-primary">{t('saveAddressBtn')}</button>
