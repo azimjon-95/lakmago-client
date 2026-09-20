@@ -386,7 +386,23 @@ export function CartPage() {
    * BITTASI ham naqdni o'chirgan bo'lsa, naqd ko'rsatilmaydi
    * (aks holda buyurtmaning bir qismi serverda rad etilardi).
    */
-  const cashAllowed = groups.every((g) => g.restaurant?.cashEnabled !== false);
+  /*
+   * XATO TUZATILDI: qiymat savatdagi NUSXADAN o'qilardi. Savatga
+   * taom restoran sozlamasi o'zgarishidan OLDIN solingan bo'lsa,
+   * nusxada eski qiymat turardi (yoki maydon umuman yo'q edi) —
+   * natijada admin naqdni o'chirgan bo'lsa ham mijozda "Naqd"
+   * tugmasi aktiv qolaverardi.
+   *
+   * Endi avval JONLI ma'lumot (`freshRest` — serverdan olinadi),
+   * u hali kelmagan bo'lsa nusxa ishlatiladi.
+   */
+  const [freshRest, setFreshRest] = useState({});
+
+  const cashAllowed = groups.every((g) => {
+    const live = freshRest[g.restaurant.id];
+    const value = live?.cashEnabled ?? g.restaurant?.cashEnabled;
+    return value !== false;
+  });
 
   // Naqdmi yoki karta orqalimi
   const isCard = providers.some((p) => p.name === paymentMethod);
@@ -519,8 +535,6 @@ export function CartPage() {
    * manbai. Shuning uchun mijozga ham aynan o'sha shartlarni
    * ko'rsatishimiz kerak.
    */
-  const [freshRest, setFreshRest] = useState({});
-
   useEffect(() => {
     const ids = [...new Set(groups.map((g) => g.restaurant.id))];
     if (ids.length === 0) return;
@@ -679,6 +693,23 @@ export function CartPage() {
   const total = orderSum;
   const selectedAddress = user.addresses.find((a) => a.id === user.defaultAddressId) ?? user.addresses[0];
 
+  /*
+   * ═══ SAVAT IMZOSI ═══
+   *
+   * XATO TUZATILDI: narx so'rovi faqat `groups.length` o'zgarganda
+   * qayta yuborilardi — ya'ni RESTORANLAR SONI o'zgarganda.
+   * Mijoz savatga yana bitta tort qo'shsa yoki sonini oshirsa,
+   * summa o'zgarsa ham so'rov qayta ketmasdi va server bepul
+   * yetkazish chegarasini eski summa bo'yicha hisoblab turardi.
+   * Faqat sahifani yangilaganda to'g'rilanardi.
+   *
+   * Imzoda restoran va uning summasi bor — summa o'zgarishi
+   * bilan so'rov qayta yuboriladi.
+   */
+  const cartSignature = groups
+    .map((g) => `${g.restaurant.id}:${g.subtotal ?? 0}`)
+    .join('|');
+
   // Manzil yoki savat o'zgarganda yetkazish narxi serverdan
   // qayta so'raladi (masofaga qarab hisoblanadi).
   useEffect(() => {
@@ -712,7 +743,7 @@ export function CartPage() {
     // Manzil tez o'zgarsa eski javob yangisini bosib ketmasin
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedAddress?.lat, selectedAddress?.lng, isPickup, groups.length]);
+  }, [selectedAddress?.lat, selectedAddress?.lng, isPickup, cartSignature]);
 
   /*
    * ═══ TAKRORIY YUBORISHDAN QULF ═══
