@@ -30,6 +30,10 @@
   position: absolute; right: 14px;
   top: calc(14px + var(--tg-top-offset));
 }
+.addrflow__header-sub {
+  font-size: 13px; color: var(--muted); line-height: 1.4; margin-top: 3px;
+  max-width: 280px;
+}
 .addrflow__header-title { font-size: 17px; font-weight: 700; color: var(--ink); margin: 0; }
 
 /* 1-bosqich: ruxsat ekrani */
@@ -117,21 +121,112 @@
 
 /* 3-bosqich: tafsilotlar */
 .addr-details__scroll { flex: 1; overflow-y: auto; padding: 16px; }
-.addr-details__section-title {
-  font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 12px;
+/*
+ * ═══ MANZIL KARTASI ═══
+ *
+ * Xarita rasmi o'ngda, matn chapda. Rasm `position: absolute` —
+ * matn uzun bo'lsa karta balandlashadi, rasm esa o'z joyida
+ * qoladi va matnni siqmaydi.
+ *
+ * Rasm `pointer-events: none`: ustiga bosilsa "O'zgartirish"
+ * tugmasi bosilishiga xalaqit qilmaydi.
+ */
+.addr-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  background: var(--brand-tint, #FFF4EA);
+  padding: 16px;
+  margin-bottom: 18px;
+  min-height: 132px;
 }
-.addr-details__picked {
-  display: flex; align-items: center; gap: 12px;
-  padding-bottom: 16px; margin-bottom: 18px;
-  border-bottom: 1px solid var(--line);
+.addr-card__body { position: relative; z-index: 2; max-width: 62%; }
+.addr-card__label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--muted); margin-bottom: 6px;
 }
-.addr-details__picked-icon {
-  width: 42px; height: 42px; border-radius: 50%;
-  background: var(--surface-2);
-  display: flex; align-items: center; justify-content: center; flex: none;
+.addr-card__street {
+  font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.3;
 }
-.addr-details__street { font-size: 16px; color: var(--ink); font-weight: 600; line-height: 1.3; }
-.addr-details__city { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.addr-card__city { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+.addr-card__map {
+  position: absolute;
+  right: -8px; top: 0;
+  width: 46%; height: 100%;
+  object-fit: cover; object-position: left center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.addr-card__edit {
+  position: absolute;
+  right: 12px; bottom: 12px;
+  z-index: 3;
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--brand-400, var(--brand));
+  color: var(--brand);
+  font-size: 13px; font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.addr-card__edit:active { transform: scale(0.97); }
+
+/*
+ * ═══ KURYERGA IZOH ═══
+ *
+ * Uchta raqamli maydon (kirish/qavat/xonadon) o'rniga bitta
+ * erkin maydon: mijoz o'z so'zlari bilan yozadi.
+ */
+.addr-note { margin-top: 20px; }
+.addr-note__head {
+  display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;
+}
+.addr-note__titles { flex: 1; min-width: 0; }
+.addr-note__title { font-size: 16px; font-weight: 700; color: var(--ink); }
+.addr-note__sub {
+  font-size: 13px; color: var(--muted); margin-top: 2px; line-height: 1.35;
+}
+.addr-note__badge {
+  flex: none;
+  padding: 5px 10px; border-radius: 999px;
+  background: var(--brand-tint, #FFF4EA);
+  color: var(--brand);
+  font-size: 12px; font-weight: 600;
+  white-space: nowrap;
+}
+
+.addr-note__box {
+  position: relative;
+  display: flex; gap: 8px;
+  padding: 12px 12px 26px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.addr-note__box:focus-within { border-color: var(--brand-400, var(--brand)); }
+.addr-note__box textarea {
+  flex: 1;
+  border: none; background: none; outline: none; resize: none;
+  font-size: 14.5px; line-height: 1.45; color: var(--ink);
+  font-family: inherit;
+}
+.addr-note__box textarea::placeholder { color: var(--muted); }
+.addr-note__count {
+  position: absolute; right: 12px; bottom: 8px;
+  font-size: 12px; color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.addr-note__tip {
+  display: flex; align-items: flex-start; gap: 8px;
+  margin-top: 12px; padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--brand-tint, #FFF4EA);
+  font-size: 13px; line-height: 1.4; color: var(--brand-dark, var(--ink));
+}
 
 .addr-details__row { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-end; }
 .addr-details__labels { display: flex; gap: 6px; flex: none; }
@@ -159,7 +254,10 @@
 .addr-details__field input::placeholder,
 .addr-details__field textarea::placeholder { color: var(--muted); }
 
-.addr-details__grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+/*
+ * `.addr-details__grid3` OLIB TASHLANDI — kirish/qavat/xonadon
+ * maydonlari bitta "Kuryerga izoh" maydoniga birlashtirildi.
+ */
 .addr-details__hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
 
 .addr-details__footer {

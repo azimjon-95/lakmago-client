@@ -15,9 +15,18 @@ export function AddressDetails({ location, onSave, onBack }) {
   const t = useT();
   const [labelId, setLabelId] = useState('home');
   const [title, setTitle] = useState(t('addrLabelHome'));
-  const [entrance, setEntrance] = useState('');
-  const [floor, setFloor] = useState('');
-  const [flat, setFlat] = useState('');
+  /*
+   * ═══ UCHTA MAYDON O'RNIGA BITTA IZOH ═══
+   *
+   * Avval "Kirish", "Qavat", "Xonadon" alohida raqamli
+   * maydonlar edi. Amalda mijozlar ularni to'ldirmasdi yoki
+   * noto'g'ri to'ldirardi: ko'p uylarda kirish raqami yo'q,
+   * ba'zilari mo'ljal yozishni xohlaydi, domofon kodi esa
+   * hech qaysi maydonga sig'masdi.
+   *
+   * Endi bitta erkin maydon — kuryer uchun eng kerakli narsa
+   * shu: mijoz o'z so'zlari bilan tushuntiradi.
+   */
   const [note, setNote] = useState('');
 
   const pickLabel = (l) => {
@@ -30,21 +39,23 @@ export function AddressDetails({ location, onSave, onBack }) {
 
   const save = () => {
     haptic();
-    // To'liq manzil matnи (kuryer uchun)
-    const parts = [location.street];
-    if (entrance) parts.push(`${entrance}-kirish`);
-    if (floor) parts.push(`${floor}-qavat`);
-    if (flat) parts.push(`xon. ${flat}`);
-    const address = parts.join(', ');
 
+    /*
+     * `entrance/floor/flat` bo'sh qiymat bilan saqlanadi —
+     * maydonlar olib tashlandi, lekin savat va server ularni
+     * hali o'qiydi. Bo'sh bo'lgani uchun ular manzil matniga
+     * ham, kuryerga ketadigan izohga ham ta'sir qilmaydi.
+     * Shunday qilib eski ma'lumot tuzilmasi buzilmaydi.
+     */
     onSave({
       title: title.trim() || 'Manzil',
-      address,
+      address: location.street,
       street: location.street,
       city: location.city,
       lat: location.lat,
       lng: location.lng,
-      entrance, floor, flat, note,
+      entrance: '', floor: '', flat: '',
+      note: note.trim(),
       labelId,
     });
   };
@@ -55,20 +66,34 @@ export function AddressDetails({ location, onSave, onBack }) {
         <button onClick={onBack} className="addrflow__back-btn" aria-label={t('back')}>
           <Icon name="arrowLeft" size={22} color="var(--ink)" />
         </button>
-        <h3 className="addrflow__header-title">{t('addressDetailsTitle')}</h3>
+        <div>
+          <h3 className="addrflow__header-title">{t('addressDetailsTitle')}</h3>
+          <p className="addrflow__header-sub">{t('addressDetailsSubtitle')}</p>
+        </div>
       </div>
 
       <div className="addr-details__scroll">
-        {/* Tanlangan manzil */}
-        <div className="addr-details__section-title">{t('address')}</div>
-        <div className="addr-details__picked">
-          <div className="addr-details__picked-icon">
-            <Icon name="pin" size={20} color="var(--brand)" />
+        {/*
+          Tanlangan manzil — xarita rasmi bilan.
+          "O'zgartirish" tugmasi orqasiga qaytaradi: mijoz nuqtani
+          qayta tanlashi mumkin, sahifani tashlab ketishi shart emas.
+        */}
+        <div className="addr-card">
+          <div className="addr-card__body">
+            <div className="addr-card__label">
+              <Icon name="pin" size={16} color="var(--brand)" />
+              <span>{t('address')}</span>
+            </div>
+            <div className="addr-card__street">{location.street}</div>
+            {location.city && <div className="addr-card__city">{location.city}</div>}
           </div>
-          <div>
-            <div className="addr-details__street">{location.street}</div>
-            {location.city && <div className="addr-details__city">{location.city}</div>}
-          </div>
+
+          <img className="addr-card__map" src="/address-map.jpg" alt="" aria-hidden="true" />
+
+          <button type="button" onClick={onBack} className="addr-card__edit">
+            <Icon name="edit" size={14} color="var(--brand)" />
+            <span>{t('editAddressBtn')}</span>
+          </button>
         </div>
 
         {/* Manzil turi + nomi */}
@@ -91,32 +116,33 @@ export function AddressDetails({ location, onSave, onBack }) {
           </div>
         </div>
 
-        {/* Kirish / qavat / xonadon */}
-        <div className="addr-details__grid3">
-          <div className="addr-details__field">
-            <label>{t('entranceLabel')}</label>
-            <input value={entrance} onChange={(e) => setEntrance(e.target.value)} inputMode="numeric" placeholder="—" />
+        {/* Kuryerga izoh — bitta erkin maydon */}
+        <div className="addr-note">
+          <div className="addr-note__head">
+            <Icon name="info" size={18} color="var(--brand)" />
+            <div className="addr-note__titles">
+              <div className="addr-note__title">{t('courierNoteLabel')}</div>
+              <div className="addr-note__sub">{t('courierNoteSub')}</div>
+            </div>
+            <span className="addr-note__badge">{t('courierNoteOptional')}</span>
           </div>
-          <div className="addr-details__field">
-            <label>{t('floorLabel')}</label>
-            <input value={floor} onChange={(e) => setFloor(e.target.value)} inputMode="numeric" placeholder="—" />
-          </div>
-          <div className="addr-details__field">
-            <label>{t('apartmentLabel')}</label>
-            <input value={flat} onChange={(e) => setFlat(e.target.value)} inputMode="numeric" placeholder="—" />
-          </div>
-        </div>
 
-        {/* Izoh */}
-        <div className="addr-details__field">
-          <label>{t('additionalInfoLabel')}</label>
-          <textarea
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            rows={2}
-            placeholder={t('additionalInfoPlaceholder')}
-          />
-          <div className="addr-details__hint">{t('courierFindHint')}</div>
+          <div className="addr-note__box">
+            <Icon name="edit" size={16} color="var(--muted)" />
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value.slice(0, 200))}
+              rows={3}
+              maxLength={200}
+              placeholder={t('courierNotePlaceholder')}
+            />
+            <span className="addr-note__count">{note.length}/200</span>
+          </div>
+
+          <div className="addr-note__tip">
+            <Icon name="info" size={16} color="var(--brand)" />
+            <span>{t('courierFindHint')}</span>
+          </div>
         </div>
       </div>
 
