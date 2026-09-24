@@ -483,3 +483,148 @@
   width: 100%; margin-top: 2px;
   font-size: 11px; line-height: 1.35; color: var(--muted);
 }
+
+
+/*
+ * ═══════════════════════════════════════════════════════════
+ * "QAYERGA YETKAZIB BERILSIN?" — YANGI DIZAYN
+ * ═══════════════════════════════════════════════════════════
+ *
+ * Hammasi `.locperm` ichida: boshqa manzil sahifalariga
+ * (xarita, tafsilotlar) ta'sir qilmaydi.
+ *
+ * Fon: yuqorida deyarli oq, pastda och shaftoli — dizayndagi
+ * ranglar (#FEFDFB → #FFF3E5) aynan o'lchab olingan.
+ */
+.locperm {
+  position: relative;
+  min-height: 100%;
+  height: 100%;
+  display: flex; flex-direction: column;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 24px
+           calc(20px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, #FEFDFB 0%, #FFF8F0 55%, #FFF3E5 100%);
+  overflow: hidden;
+}
+
+/* Xira xarita chiziqlari — faqat SVG, rasm yuklanmaydi */
+.locperm__bg {
+  position: absolute; inset: 0; z-index: 0;
+  opacity: 0.35;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cg fill='none' stroke='%23F1DFC9' stroke-width='2'%3E%3Cpath d='M0 60 Q60 40 120 70 T240 50'/%3E%3Cpath d='M0 150 Q80 130 140 160 T240 140'/%3E%3Cpath d='M60 0 Q40 80 70 140 T50 240'/%3E%3Cpath d='M170 0 Q190 70 160 130 T180 240'/%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.locperm > * { position: relative; z-index: 1; }
+
+.locperm__close {
+  position: absolute; z-index: 3;
+  top: calc(12px + env(safe-area-inset-top, 0px)); left: 16px;
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(60, 35, 10, 0.12);
+}
+.locperm__close:active { transform: scale(0.94); }
+
+.locperm__head {
+  margin-top: 44px;
+  text-align: center;
+}
+
+/*
+ * Sarlavha — serif shrift, dizayndagidek. Tizim serif
+ * shriftlaridan foydalaniladi, qo'shimcha yuklanmaydi.
+ */
+.locperm__title {
+  margin: 0;
+  font-family: 'Georgia', 'Iowan Old Style', 'Times New Roman', serif;
+  font-size: clamp(30px, 8.6vw, 38px);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.5px;
+  color: #2B2622;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.locperm__text {
+  margin: 14px auto 0;
+  max-width: 320px;
+  font-size: 14.5px; line-height: 1.5;
+  color: #6B625A;
+}
+
+/*
+ * Uy rasmi — qolgan bo'sh joyni egallaydi va markazda turadi.
+ * Rasm chetlari shaffof, shuning uchun soyani `drop-shadow`
+ * beradi: u shakl bo'ylab tushadi, to'rtburchak quti bo'ylab emas.
+ */
+.locperm__hero {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 0;
+  margin: 8px -24px 0;
+}
+.locperm__img {
+  width: min(100%, 420px);
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 24px rgba(200, 120, 50, 0.16));
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.locperm__error {
+  margin: 0 0 12px;
+  padding: 10px 14px; border-radius: 12px;
+  background: #FFECE8; color: #C0392B;
+  font-size: 13.5px; text-align: center;
+}
+
+.locperm__actions {
+  display: flex; flex-direction: column; align-items: stretch; gap: 6px;
+}
+
+/* Asosiy tugma — dizayndagi rang (#FC8213) va issiq soya */
+.locperm__btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 60px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #FF9A3C 0%, #FC8213 100%);
+  color: #fff;
+  font-size: 17px; font-weight: 600;
+  box-shadow:
+    0 10px 24px rgba(252, 130, 19, 0.35),
+    0 2px 6px rgba(252, 130, 19, 0.25);
+  transition: transform 0.1s, box-shadow 0.15s;
+}
+.locperm__btn:active {
+  transform: scale(0.985);
+  box-shadow: 0 5px 14px rgba(252, 130, 19, 0.3);
+}
+.locperm__btn:disabled { opacity: 0.85; }
+
+.locperm__link {
+  min-height: 48px;
+  color: #F07A1A;
+  font-size: 16px; font-weight: 600;
+}
+
+/* Pastdagi ingichka chiziq va nuqta */
+.locperm__divider {
+  display: flex; align-items: center; justify-content: center;
+  margin: 2px auto 0; width: 60%;
+}
+.locperm__divider::before,
+.locperm__divider::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, #F0D5B8);
+}
+.locperm__divider::after {
+  background: linear-gradient(90deg, #F0D5B8, transparent);
+}
+.locperm__divider span {
+  width: 6px; height: 6px; margin: 0 10px;
+  border-radius: 50%; background: #FC8213;
+}

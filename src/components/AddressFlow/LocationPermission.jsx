@@ -37,41 +37,58 @@ export function LocationPermission({ onDetected, onApproximate, onManual, onClos
     }
   };
 
+  /*
+   * ═══ DIZAYN ═══
+   *
+   * Yuqorida sarlavha, markazda uy rasmi, pastda tugmalar.
+   * Rasm chetlari SHAFFOF (location-hero.webp) — sahifa foni
+   * ostidan ko'rinib turadi va rasm alohida "quti" bo'lib
+   * ajralib qolmaydi.
+   *
+   * Uslublar `.locperm` ichida — boshqa manzil sahifalariga
+   * ta'sir qilmaydi.
+   */
   return (
-    <div className="addrflow">
+    <div className="locperm">
+      {/* Fondagi xira xarita chiziqlari — sahifa bo'shligini to'ldiradi */}
+      <div className="locperm__bg" aria-hidden="true" />
+
       {onClose && (
-        <button onClick={onClose} className="addrflow__back" aria-label={t('close')}>
-          <Icon name="x" size={20} color="var(--muted)" />
+        <button onClick={onClose} className="locperm__close" aria-label={t('close')}>
+          <Icon name="x" size={20} color="var(--ink)" />
         </button>
       )}
 
-      <div className="addrflow__hero">
-        <div className="loc-illustration">
-          <div className="loc-illustration__pin">
-            <Icon name="pin" size={64} color="var(--brand)" strokeWidth={1.5} />
-          </div>
-          <div className="loc-illustration__ring" />
-        </div>
+      <div className="locperm__head">
+        <h2 className="locperm__title">{t('whereToDeliverQuestion')}</h2>
+        <p className="locperm__text">{t('locationPermissionHint')}</p>
       </div>
 
-      <h2 className="addrflow__title">{t('whereToDeliverQuestion')}</h2>
-      <p className="addrflow__text">
-        {t('locationPermissionHint')}
-      </p>
+      <div className="locperm__hero">
+        <img
+          src="/location-hero.webp"
+          alt=""
+          aria-hidden="true"
+          className="locperm__img"
+          draggable="false"
+        />
+      </div>
 
-      {err && <div className="addrflow__error">{err}</div>}
+      {err && <div className="locperm__error">{err}</div>}
 
-      <div className="addrflow__actions">
-        <button onClick={detect} disabled={loading} className="addrflow__btn-primary">
+      <div className="locperm__actions">
+        <button onClick={detect} disabled={loading} className="locperm__btn">
           {loading ? (
             <><span className="spinner spinner--sm" /> {t('detectingLocation')}</>
           ) : (
-            <><Icon name="navigation" size={18} color="var(--brand-text)" /> {t('autoDetectLocation')}</>
+            <><Icon name="pin" size={20} color="#fff" /> {t('autoDetectLocation')}</>
           )}
         </button>
-        <button onClick={onManual} className="addrflow__btn-link">
+        <button onClick={onManual} className="locperm__link">
           {t('enterManually')}
         </button>
+        {/* Pastdagi bezak chizig'i */}
+        <div className="locperm__divider" aria-hidden="true"><span /></div>
       </div>
     </div>
   );
