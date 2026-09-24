@@ -6,68 +6,152 @@ import { api } from '@/api';
 
 // 1) Joriy koordinatani olish
 // Qaytaradi: { lat, lng } yoki xato tashlaydi
-export async function getCurrentPosition() {
-  const tg = getTelegram();
+/*
+ * ═══════════════════════════════════════════════════════════
+ * JORIY JOYLASHUV — ANIQLIK BILAN
+ * ═══════════════════════════════════════════════════════════
+ *
+ * Qaytaradi: { lat, lng, accuracy } — `accuracy` metrda
+ * (kichik = aniqroq). Chaqiruvchi shunga qarab mijozdan
+ * tasdiq so'raydi yoki to'g'ridan-to'g'ri qabul qiladi.
+ *
+ * AVVALGI KAMCHILIKLAR (tuzatildi):
+ *  1) Telegram LocationManager birinchi natijani ANIQLIKNI
+ *     TEKSHIRMASDAN qaytarardi — Wi-Fi/tarmoq bo'yicha 1–2 km
+ *     xatoli joy ham "aniq" deb o'tib ketardi.
+ *  2) Brauzerda vaqtincha xato (masalan GPS signal yo'qolishi)
+ *     kelsa, allaqachon olingan YAXSHI natija tashlab yuborilib,
+ *     butun jarayon xato bilan tugardi.
+ *  3) (0, 0) kabi buzuq koordinata tekshirilmasdi.
+ */
 
-  // Telegram LocationManager (Bot API 8.0+) — eng ishonchli Mini App ичida
-  if (tg?.LocationManager) {
-    try {
-      const lm = tg.LocationManager;
-      // Init (bir marta)
-      if (!lm.isInited) {
-        await new Promise((resolve) => lm.init(resolve));
-      }
-      if (lm.isLocationAvailable) {
-        const data = await new Promise((resolve) => lm.getLocation(resolve));
-        if (data?.latitude) {
-          return { lat: data.latitude, lng: data.longitude };
-        }
-      }
-    } catch { /* brauzer geolocation'ga o'tamiz */ }
+// Shu aniqlikka yetganda kutish to'xtatiladi (metr)
+const GOOD_ENOUGH_M = 20;
+// Telegram natijasi shundan yomon bo'lsa — brauzer bilan aniqlashtiramiz
+const TG_REFINE_ABOVE_M = 60;
+// Eng uzoq kutish (GPS sovuq holatda qulflanishiga vaqt kerak)
+const MAX_WAIT_MS = 10000;
+
+/** Koordinata haqiqiymi (0,0 va chegaradan tashqari qiymatlar rad). */
+function validCoords(lat, lng) {
+  return Number.isFinite(lat) && Number.isFinite(lng)
+    && Math.abs(lat) <= 90 && Math.abs(lng) <= 180
+    && !(lat === 0 && lng === 0);
+}
+
+/** Telegram LocationManager (Bot API 8.0+) orqali. */
+async function telegramPosition() {
+  const lm = getTelegram()?.LocationManager;
+  if (!lm) return null;
+  try {
+    if (!lm.isInited) await new Promise((resolve) => lm.init(resolve));
+    if (!lm.isLocationAvailable) return null;
+    const d = await new Promise((resolve) => lm.getLocation(resolve));
+    if (!d || !validCoords(d.latitude, d.longitude)) return null;
+    return {
+      lat: d.latitude,
+      lng: d.longitude,
+      // Telegram aniqlikni bermasa — noma'lum deb hisoblaymiz
+      accuracy: Number.isFinite(d.horizontal_accuracy) ? d.horizontal_accuracy : null,
+    };
+  } catch {
+    return null;
   }
+}
 
-  // Brauzer geolocation (fallback)
+/**
+ * Brauzer geolokatsiyasi — bir necha o'lchovdan ENG ANIQINI tanlaydi.
+ *
+ * watchPosition ishlatiladi, getCurrentPosition emas: u birinchi
+ * (odatda tarmoq bo'yicha, noaniq) natijada to'xtamaydi va GPS
+ * qulflanishini kutadi.
+ */
+function browserPosition() {
   if (!navigator.geolocation) {
-    throw new Error('Qurilma joylashuvni qo‘llab-quvvatlamaydi');
+    return Promise.reject(new Error('Qurilma joylashuvni qo‘llab-quvvatlamaydi'));
   }
-  // Aniqlik uchun bir necha o'lchov olamiz va eng aniqini tanlaymiz.
-  // watchPosition GPS qulflanishini kutadi (getCurrentPosition ba'zan
-  // birinchi, noaniq natijani qaytaradi).
+
   return new Promise((resolve, reject) => {
     let best = null;
     let watchId = null;
     let timer = null;
+    let done = false;
 
-    const finish = () => {
+    const finish = (error) => {
+      if (done) return;
+      done = true;
       if (watchId !== null) navigator.geolocation.clearWatch(watchId);
       if (timer) clearTimeout(timer);
+
       if (best) {
-        resolve({ lat: best.coords.latitude, lng: best.coords.longitude, accuracy: best.coords.accuracy });
+        resolve({
+          lat: best.coords.latitude,
+          lng: best.coords.longitude,
+          accuracy: best.coords.accuracy,
+        });
       } else {
-        reject(new Error('Joylashuv aniqlanmadi'));
+        reject(error || new Error('Joylashuv aniqlanmadi'));
       }
     };
 
     watchId = navigator.geolocation.watchPosition(
       (pos) => {
-        // Eng aniq o'lchovni saqlaymiz (accuracy — metrda, kichik = aniqroq)
-        if (!best || pos.coords.accuracy < best.coords.accuracy) best = pos;
-        // 30 metrdan aniq bo'lsa — yetarli, kutmaymiz
-        if (pos.coords.accuracy <= 30) finish();
+        const { latitude, longitude, accuracy } = pos.coords;
+        if (!validCoords(latitude, longitude)) return;
+        if (!best || accuracy < best.coords.accuracy) best = pos;
+        if (accuracy <= GOOD_ENOUGH_M) finish();
       },
       (err) => {
-        if (watchId !== null) navigator.geolocation.clearWatch(watchId);
-        if (timer) clearTimeout(timer);
-        if (err.code === 1) reject(new Error('Joylashuvga ruxsat berilmadi'));
-        else if (err.code === 3) reject(new Error('Joylashuv aniqlanmadi (vaqt tugadi)'));
-        else reject(new Error('Joylashuvni olishda xato'));
+        /*
+         * Yaxshi natija allaqachon bo'lsa — XATONI e'tiborsiz
+         * qoldirib, o'shani qaytaramiz. Faqat ruxsat berilmagan
+         * holatda darhol to'xtaymiz.
+         */
+        if (err.code === 1) {
+          finish(new Error('Joylashuvga ruxsat berilmadi'));
+          return;
+        }
+        if (best) { finish(); return; }
+        if (err.code === 3) finish(new Error('Joylashuv aniqlanmadi (vaqt tugadi)'));
+        else finish(new Error('Joylashuvni olishda xato'));
       },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+      { enableHighAccuracy: true, timeout: MAX_WAIT_MS + 5000, maximumAge: 0 },
     );
 
-    // 8 soniyada eng yaxshi natijani olamiz (cheksiz kutmaymiz)
-    timer = setTimeout(finish, 8000);
+    timer = setTimeout(() => finish(), MAX_WAIT_MS);
   });
+}
+
+export async function getCurrentPosition() {
+  const tg = await telegramPosition();
+
+  // Telegram yetarlicha aniq natija berdi
+  if (tg && tg.accuracy !== null && tg.accuracy <= TG_REFINE_ABOVE_M) return tg;
+
+  /*
+   * Telegram natijasi taxminiy yoki aniqligi noma'lum —
+   * brauzer GPS'i bilan aniqlashtiramiz va ikkisidan
+   * ANIQROG'INI olamiz. Brauzer ishlamasa Telegram natijasi
+   * baribir qaytadi (hech bo'lmasa taxminiy joy).
+   */
+  try {
+    const br = await browserPosition();
+    if (!tg) return br;
+    const tgAcc = tg.accuracy ?? Infinity;
+    return br.accuracy < tgAcc ? br : tg;
+  } catch (e) {
+    if (tg) return tg;
+    throw e;
+  }
+}
+
+/**
+ * Natija aniq deb hisoblanadimi.
+ * Undan yomon bo'lsa mijozdan xaritada tasdiqlash so'raladi.
+ */
+export const PRECISE_LOCATION_M = 80;
+export function isPrecise(pos) {
+  return Number.isFinite(pos?.accuracy) && pos.accuracy <= PRECISE_LOCATION_M;
 }
 
 // 2) Koordinatani manzilга aylantirish (reverse geocoding)

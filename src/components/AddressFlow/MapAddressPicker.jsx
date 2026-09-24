@@ -17,7 +17,20 @@ const DEFAULT_CENTER = [41.311081, 69.240562];
  * karta suriladi). Markaz o'zgarganda manzil server orqali
  * (Yandex Geocoder, kalit serverda qoladi) aniqlanadi.
  */
-export function MapAddressPicker({ onPick, onBack }) {
+/*
+ * Tashqi xarita havolalari — tanlangan nuqtani ko'rish uchun.
+ * DIQQAT: bu ilovalar nuqtani BIZGA qaytara olmaydi (platforma
+ * cheklovi), shuning uchun tanlash shu sahifada, ular faqat
+ * ko'rish/tekshirish uchun.
+ */
+const MAP_APPS = [
+  { id: 'google', label: 'Google', url: (la, ln) => `https://www.google.com/maps/search/?api=1&query=${la},${ln}` },
+  // Yandex'da tartib: LONGITUDE,LATITUDE
+  { id: 'yandex', label: 'Yandex', url: (la, ln) => `https://yandex.com/maps/?ll=${ln},${la}&z=17&pt=${ln},${la},pm2rdm` },
+  { id: 'apple', label: 'Apple', url: (la, ln) => `https://maps.apple.com/?ll=${la},${ln}&q=${la},${ln}` },
+];
+
+export function MapAddressPicker({ start = null, onPick, onBack }) {
   const t = useT();
   const boxRef = useRef(null);
   const mapRef = useRef(null);
@@ -29,6 +42,11 @@ export function MapAddressPicker({ onPick, onBack }) {
   const [address, setAddress] = useState(null);       // { street, city, full }
   const [resolving, setResolving] = useState(false);
   const [locating, setLocating] = useState(false);
+  // Taxminiy joydan boshlanganda — mijozga igna surish kerakligini aytamiz
+  const [approxM, setApproxM] = useState(
+    Number.isFinite(start?.accuracy) ? Math.round(start.accuracy) : null,
+  );
+  const [appsOpen, setAppsOpen] = useState(false);
 
   const resolveAddress = useCallback(async (lat, lng) => {
     const myReq = ++reqIdRef.current;
@@ -49,6 +67,8 @@ export function MapAddressPicker({ onPick, onBack }) {
   const onBoundsChange = useCallback(() => {
     if (!mapRef.current) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    // Mijoz kartani surdi — ogohlantirish vazifasini bajardi
+    setApproxM(null);
     debounceRef.current = setTimeout(() => {
       const [lat, lng] = mapRef.current.getCenter();
       resolveAddress(lat, lng);
@@ -71,25 +91,47 @@ export function MapAddressPicker({ onPick, onBack }) {
         const ymaps = await loadYmaps(cfg.mapsKey);
         if (dead || !boxRef.current) return;
 
-        // Joriy joylashuv bo'lsa shundan boshlaymiz, bo'lmasa Toshkent markazi
-        let start = DEFAULT_CENTER;
-        try {
-          const pos = await getCurrentPosition();
-          if (!dead) start = [pos.lat, pos.lng];
-        } catch { /* ruxsat yo'q — standart markaz */ }
+        /*
+         * Boshlang'ich nuqta ustuvorligi:
+         *   1) chaqiruvchi bergan (taxminiy joy yoki tahrirlash);
+         *   2) joriy joylashuv;
+         *   3) Toshkent markazi.
+         * Chaqiruvchi nuqta bergan bo'lsa geolokatsiya QAYTA
+         * so'ralmaydi — mijoz ikkinchi marta kutib o'tirmasin.
+         */
+        let center = DEFAULT_CENTER;
+        if (start && Number.isFinite(start.lat) && Number.isFinite(start.lng)) {
+          center = [start.lat, start.lng];
+        } else {
+          try {
+            const pos = await getCurrentPosition();
+            if (!dead) {
+              center = [pos.lat, pos.lng];
+              if (Number.isFinite(pos.accuracy) && pos.accuracy > 80) {
+                setApproxM(Math.round(pos.accuracy));
+              }
+            }
+          } catch { /* ruxsat yo'q — standart markaz */ }
+        }
         if (dead) return;
 
         const map = new ymaps.Map(boxRef.current, {
-          center: start,
-          zoom: 16,
+          center,
+          zoom: 17,
           controls: ['zoomControl'],
+        }, {
+          /*
+           * Yandex'ning o'z "Yandex Xaritada ochish" bloki
+           * yashiriladi — o'rniga uchta xarita tanlovi bor.
+           */
+          suppressMapOpenBlock: true,
         });
         map.behaviors.disable('scrollZoom');
         mapRef.current = map;
         map.events.add('boundschange', onBoundsChange);
 
         setStatus('ready');
-        resolveAddress(start[0], start[1]);
+        resolveAddress(center[0], center[1]);
       } catch (e) {
         if (!dead) { setStatus('error'); setError(e.message || 'Xarita yuklanmadi'); }
       }
@@ -108,9 +150,10 @@ export function MapAddressPicker({ onPick, onBack }) {
     haptic();
     setLocating(true);
     try {
-      const { lat, lng } = await getCurrentPosition();
+      const { lat, lng, accuracy } = await getCurrentPosition();
       mapRef.current?.setCenter([lat, lng], 17, { duration: 300 });
       resolveAddress(lat, lng);
+      if (Number.isFinite(accuracy) && accuracy > 80) setApproxM(Math.round(accuracy));
     } catch { /* ruxsat berilmadi — jim */ }
     finally { setLocating(false); }
   };
@@ -153,6 +196,39 @@ export function MapAddressPicker({ onPick, onBack }) {
             <div className="map-picker__pin">
               <Icon name="pin" size={40} color="var(--brand)" strokeWidth={1.5} />
               <span className="map-picker__pin-shadow" />
+            </div>
+
+            {/* Taxminiy joy — mijozga nima qilish kerakligini aytamiz */}
+            {approxM && (
+              <div className="map-picker__approx">
+                <Icon name="info" size={16} color="var(--brand)" />
+                <span>{t('approxLocationHint').replace('{m}', approxM)}</span>
+              </div>
+            )}
+
+            {/* Tashqi xaritada ko'rish — uchta tanlov */}
+            <div className="map-picker__apps">
+              <button type="button" className="map-picker__apps-toggle"
+                onClick={() => { haptic(); setAppsOpen((v) => !v); }}>
+                <Icon name="pin" size={15} color="var(--brand)" />
+                <span>{t('openInMapsLabel')}</span>
+              </button>
+              {appsOpen && (
+                <div className="map-picker__apps-list">
+                  {MAP_APPS.map((a) => (
+                    <button key={a.id} type="button" className="map-picker__app"
+                      onClick={() => {
+                        const [la, ln] = mapRef.current?.getCenter() || [];
+                        if (!Number.isFinite(la)) return;
+                        haptic();
+                        window.open(a.url(la.toFixed(6), ln.toFixed(6)), '_blank', 'noopener');
+                      }}>
+                      {a.label}
+                    </button>
+                  ))}
+                  <div className="map-picker__apps-hint">{t('mapAppsHint')}</div>
+                </div>
+              )}
             </div>
 
             <button

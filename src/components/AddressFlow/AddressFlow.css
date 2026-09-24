@@ -434,3 +434,52 @@
   background: var(--brand); color: var(--brand-text, #fff);
 }
 .addr-edit__save:disabled { opacity: 0.5; }
+
+
+/*
+ * ═══ XARITA: TAXMINIY JOY OGOHLANTIRISHI ═══
+ * Yuqorida, xaritani yopmaydigan yupqa panel. Mijoz kartani
+ * surishi bilan yo'qoladi — vazifasini bajargan bo'ladi.
+ */
+.map-picker__approx {
+  position: absolute; left: 12px; right: 12px; top: 12px; z-index: 5;
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 10px 12px; border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  font-size: 13px; line-height: 1.4; color: var(--ink);
+}
+
+/*
+ * ═══ TASHQI XARITA TANLOVI ═══
+ * Chap pastki burchak — Yandex'ning o'z bloki turgan joy.
+ */
+.map-picker__apps {
+  position: absolute; left: 12px; bottom: 12px; z-index: 5;
+  display: flex; flex-direction: column-reverse; align-items: flex-start; gap: 6px;
+}
+.map-picker__apps-toggle {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 12px; border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+  font-size: 13px; font-weight: 600; color: var(--ink);
+}
+.map-picker__apps-list {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  max-width: 260px;
+  padding: 8px; border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.14);
+}
+.map-picker__app {
+  flex: 1 1 auto; min-width: 70px;
+  padding: 9px 10px; border-radius: 10px;
+  background: var(--canvas); border: 1px solid var(--line);
+  font-size: 13px; font-weight: 600; color: var(--ink);
+}
+.map-picker__app:active { transform: scale(0.97); }
+.map-picker__apps-hint {
+  width: 100%; margin-top: 2px;
+  font-size: 11px; line-height: 1.35; color: var(--muted);
+}

@@ -1,22 +1,44 @@
 import { useState } from 'react';
 import { LocationPermission } from './LocationPermission';
-import { AddressSearch } from './AddressSearch';
 import { AddressDetails } from './AddressDetails';
 import { MapAddressPicker } from './MapAddressPicker';
 import './AddressFlow.css';
 
-// Manzil qo'shish oqimи (3 bosqich):
-//   1) permission — joylashuvга ruxsat yoki qo'lda
-//   2) search     — manzil qidirish
-//   3) details    — kirish/qavat/xonadon/izoh
+/*
+ * ═══════════════════════════════════════════════════════════
+ * MANZIL QO'SHISH OQIMI
+ * ═══════════════════════════════════════════════════════════
+ *
+ *   permission ──(aniq joy)───────────────► details
+ *        │     ──(taxminiy joy)──► map ───► details
+ *        └────(qo'lda)────────────► map ───► details
+ *
+ * SODDALASHTIRILDI: avval "qo'lda" tugmasi alohida QIDIRUV
+ * sahifasiga olib borardi, u yerdan esa yana xaritaga. Mijoz
+ * uchun bu ortiqcha qadam edi: matn bo'yicha qidiruv ko'pincha
+ * uyni topolmasdi (ayniqsa mahallalarda) va baribir xaritaga
+ * o'tishga to'g'ri kelardi. Endi to'g'ridan-to'g'ri xarita.
+ *
+ * TAXMINIY JOY: geolokatsiya faqat taxminan aniqlasa (masalan
+ * Wi-Fi bo'yicha 500 m), mijoz to'g'ridan-to'g'ri tafsilotlarga
+ * emas, XARITAGA o'tadi — igna o'sha joyda, mijoz uni uyiga
+ * suradi. Aks holda kuryer noto'g'ri manzilga borardi.
+ */
 export function AddressFlow({ onSave, onClose, startStep = 'permission' }) {
-  const [step, setStep] = useState(startStep);
+  // Eski 'search' qadami endi xaritaga yo'naltiriladi
+  const [step, setStep] = useState(startStep === 'search' ? 'map' : startStep);
   const [location, setLocation] = useState(null);
+  // Xarita qaysi nuqtadan boshlansin (taxminiy joy yoki tahrirlash)
+  const [mapStart, setMapStart] = useState(null);
 
-  // Joylashuv aniqlandi (avtomatik yoki qidiruvдан) → tafsilotlarга
-  const handlePicked = (loc) => {
+  const toDetails = (loc) => {
     setLocation(loc);
     setStep('details');
+  };
+
+  const toMap = (start = null) => {
+    setMapStart(start);
+    setStep('map');
   };
 
   const handleSave = (address) => {
@@ -28,24 +50,18 @@ export function AddressFlow({ onSave, onClose, startStep = 'permission' }) {
     <div className="addrflow-overlay">
       {step === 'permission' && (
         <LocationPermission
-          onDetected={handlePicked}
-          onManual={() => setStep('search')}
+          onDetected={toDetails}
+          onApproximate={(pos) => toMap(pos)}
+          onManual={() => toMap(null)}
           onClose={onClose}
-        />
-      )}
-
-      {step === 'search' && (
-        <AddressSearch
-          onPick={handlePicked}
-          onMap={() => setStep('map')}
-          onBack={() => setStep('permission')}
         />
       )}
 
       {step === 'map' && (
         <MapAddressPicker
-          onPick={handlePicked}
-          onBack={() => setStep('search')}
+          start={mapStart}
+          onPick={toDetails}
+          onBack={() => setStep('permission')}
         />
       )}
 
@@ -53,7 +69,8 @@ export function AddressFlow({ onSave, onClose, startStep = 'permission' }) {
         <AddressDetails
           location={location}
           onSave={handleSave}
-          onBack={() => setStep('search')}
+          // Orqaga — xaritaga, tanlangan nuqtadan davom etadi
+          onBack={() => toMap({ lat: location.lat, lng: location.lng })}
         />
       )}
     </div>

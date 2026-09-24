@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Icon } from '@/components/Icon';
-import { getCurrentPosition, reverseGeocode } from '@/lib/location';
+import { getCurrentPosition, reverseGeocode, isPrecise } from '@/lib/location';
 import { haptic } from '@/lib/telegram';
 import { useT } from '@/i18n';
 
 // 1-bosqich: joylashuvга ruxsat so'rash yoki qo'lda kiritish
-export function LocationPermission({ onDetected, onManual, onClose }) {
+export function LocationPermission({ onDetected, onApproximate, onManual, onClose }) {
   const t = useT();
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState(null);
@@ -15,9 +15,21 @@ export function LocationPermission({ onDetected, onManual, onClose }) {
     setErr(null);
     setLoading(true);
     try {
-      const { lat, lng } = await getCurrentPosition();
-      const addr = await reverseGeocode(lat, lng);
-      onDetected({ lat, lng, ...addr });
+      const pos = await getCurrentPosition();
+
+      /*
+       * Joy faqat TAXMINAN aniqlangan bo'lsa (Wi-Fi/tarmoq),
+       * mijozni xaritaga yuboramiz — igna o'sha nuqtada turadi,
+       * u uni aniq uyiga suradi. Aniq bo'lsa (GPS) — darhol
+       * tafsilotlarga, ortiqcha qadamsiz.
+       */
+      if (!isPrecise(pos) && onApproximate) {
+        onApproximate(pos);
+        return;
+      }
+
+      const addr = await reverseGeocode(pos.lat, pos.lng);
+      onDetected({ lat: pos.lat, lng: pos.lng, ...addr });
     } catch (e) {
       setErr(e.message);
     } finally {
