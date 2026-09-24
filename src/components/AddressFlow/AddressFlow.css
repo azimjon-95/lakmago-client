@@ -501,7 +501,19 @@
   min-height: 100%;
   height: 100%;
   display: flex; flex-direction: column;
-  padding: calc(16px + env(safe-area-inset-top, 0px)) 24px
+  /*
+   * Yuqori chekinish `--tg-top-offset` orqali (theme.css).
+   *
+   * XATO TUZATILDI: avval faqat `env(safe-area-inset-top)` edi —
+   * u iPhone "chelak" qismini hisobga oladi, lekin Telegram'ning
+   * to'liq ekran rejimidagi "Закрыть" va "···" tugmalarini EMAS.
+   * Natijada yopish tugmasi ularning ORQASIGA tushib qolardi.
+   *
+   * `--tg-top-offset` ikkalasini birga hisoblaydi va barcha
+   * sahifalarda ishlatiladi — oddiy brauzerda 0, Telegram'da
+   * aynan tugmalar balandligi.
+   */
+  padding: calc(16px + var(--tg-top-offset, 0px)) 24px
            calc(20px + env(safe-area-inset-bottom, 0px));
   background: linear-gradient(180deg, #FEFDFB 0%, #FFF8F0 55%, #FFF3E5 100%);
   overflow: hidden;
@@ -520,7 +532,7 @@
 
 .locperm__close {
   position: absolute; z-index: 3;
-  top: calc(12px + env(safe-area-inset-top, 0px)); left: 16px;
+  top: calc(12px + var(--tg-top-offset, 0px)); left: 16px;
   width: 44px; height: 44px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   background: #fff;
