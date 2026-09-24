@@ -153,3 +153,12 @@
   color: var(--muted);
   box-shadow: none;
 }
+
+/*
+ * Tanlangan hajm — ajralib tursin, chunki u taom narxini
+ * belgilaydi (qo'shimchadan farqli o'laroq).
+ */
+.dish-modal__option.is-variant-sel {
+  border-color: var(--brand);
+  background: rgba(252, 130, 19, 0.06);
+}

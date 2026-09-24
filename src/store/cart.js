@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { dishUnitPrice } from '@/lib/dishPricing';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 
@@ -19,8 +20,14 @@ function buildKey(dishId, options) {
   return `${dishId}__${optIds}`;
 }
 
+/*
+ * Narx YAGONA manbadan (lib/dishPricing.js): hajm/razmer tanlansa
+ * uning narxi taom narxini ALMASHTIRADI, qo'shimchalar QO'SHILADI.
+ * Avval hamma tanlov qo'shilardi — hajmlarda narx ikki-uch barobar
+ * oshib ketardi.
+ */
 function unitPrice(dish, options) {
-  return dish.price + options.reduce((sum, o) => sum + o.price, 0);
+  return dishUnitPrice(dish, options || []);
 }
 
 export const useCart = create(

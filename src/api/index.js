@@ -1,6 +1,8 @@
 // LokmaGo API mijozi — faqat real backend (Express + MongoDB).
 // Mock/demo rejim yo'q: barcha ma'lumot serverdan keladi.
 
+import { resilientFetch } from '@/lib/resilientFetch';
+
 export const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
 
 /*
@@ -81,7 +83,12 @@ async function doFetch(path, { signal, ...options } = {}) {
   const url = `${API_BASE}${path}`;
   let res;
   try {
-    res = await fetch(url, {
+    /*
+     * resilientFetch: 15 s vaqt chegarasi + o'qish so'rovlarida
+     * server qayta ishga tushganda qayta urinish. Yozish
+     * so'rovlari (buyurtma, to'lov) hech qachon takrorlanmaydi.
+     */
+    res = await resilientFetch(url, {
       ...options,
       signal,
       headers: {
@@ -93,6 +100,8 @@ async function doFetch(path, { signal, ...options } = {}) {
   } catch (e) {
     // Tarmoq darajasidagi xato: CORS, Mixed Content (HTTPS→HTTP), server o'chiq
     if (e.name === 'AbortError') throw e;
+    // Vaqt chegarasi — o'z tushunarli xabari bilan qaytadi
+    if (e.kind === 'timeout') throw e;
     const err = new Error('Serverga ulanib bo‘lmadi');
     err.kind = 'network';
     err.url = url;

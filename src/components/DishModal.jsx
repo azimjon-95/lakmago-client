@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { dishUnitPrice, isVariantGroup, cheapestOption } from '@/lib/dishPricing';
 import { useSheetDrag } from '@/hooks/useSheetDrag';
 import { Icon } from './Icon';
 import { DishPhoto } from './DishPhoto';
@@ -21,11 +22,24 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
   const isFav = useUser((st) =>
     Boolean(st.user.favorites?.dishes?.includes(dishId)));
   const [quantity, setQuantity] = useState(1);
+  /*
+   * Hajm/razmer guruhi: BITTA tanlanadi, tanlash SHART va eng
+   * arzon varianti oldindan belgilanadi — mijoz tugmani bosishi
+   * bilan to'g'ri narxni ko'radi.
+   */
+  const variantOf = (g) => isVariantGroup(g, dish.price);
+
   const [selected, setSelected] = useState(() => {
     const init = {};
     dish.optionGroups?.forEach((g) => {
-      if (g.required && !g.multiple && g.options[0]) init[g.id] = [g.options[0].id];
-      else init[g.id] = [];
+      if (variantOf(g)) {
+        const first = cheapestOption(g);
+        init[g.id] = first ? [first.id] : [];
+      } else if (g.required && !g.multiple && g.options[0]) {
+        init[g.id] = [g.options[0].id];
+      } else {
+        init[g.id] = [];
+      }
     });
     return init;
   });
@@ -38,12 +52,19 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
     return out;
   }, [selected, dish.optionGroups]);
 
-  const unitPrice = dish.price + selectedOptions.reduce((s, o) => s + o.price, 0);
+  // Yagona manba — savat va server bilan bir xil hisob
+  const unitPrice = dishUnitPrice(dish, selectedOptions);
   const total = unitPrice * quantity;
 
   function toggle(groupId, optId, multiple) {
     setSelected((prev) => {
       const cur = prev[groupId] ?? [];
+      /*
+       * Hajm guruhi baza ma'lumotida `multiple: true` bo'lib qolgan
+       * bo'lishi mumkin (import xatosi) — baribir BITTA tanlanadi.
+       */
+      const group = dish.optionGroups?.find((g) => g.id === groupId);
+      if (group && variantOf(group)) return { ...prev, [groupId]: [optId] };
       if (multiple) {
         return { ...prev, [groupId]: cur.includes(optId) ? cur.filter((x) => x !== optId) : [...cur, optId] };
       }
@@ -205,12 +226,24 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
               <div className="dish-modal__options">
                 {g.options.map((o) => {
                   const isSel = selected[g.id]?.includes(o.id);
+                  /*
+                   * Hajm guruhida narx TO'LIQ ko'rsatiladi ("61 500"),
+                   * qo'shimchada esa farq ("+5 000"). Hajmda "+" belgisi
+                   * mijozni chalg'itardi — go'yo narx qo'shiladi.
+                   */
+                  const isVariant = variantOf(g);
                   return (
-                    <button key={o.id} onClick={() => toggle(g.id, o.id, g.multiple)} className="dish-modal__option">
+                    <button key={o.id} onClick={() => toggle(g.id, o.id, g.multiple)}
+                      className={`dish-modal__option ${isVariant && isSel ? 'is-variant-sel' : ''}`}>
                       <span className="dish-modal__option-name">
-                        {o.name}{o.price > 0 && <span className="dish-modal__option-price"> +{formatSomShort(o.price)}</span>}
+                        {o.name}
+                        {isVariant ? (
+                          <span className="dish-modal__option-price"> · {formatSomShort(o.price)}</span>
+                        ) : (
+                          o.price > 0 && <span className="dish-modal__option-price"> +{formatSomShort(o.price)}</span>
+                        )}
                       </span>
-                      {g.multiple ? (
+                      {g.multiple && !isVariant ? (
                         <span className={`dish-modal__check ${isSel ? 'is-sel' : ''}`}>{isSel && <Icon name="check" size={15} color="var(--brand-text)" />}</span>
                       ) : (
                         <span className={`dish-modal__radio ${isSel ? 'is-sel' : ''}`} />
