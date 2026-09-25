@@ -95,6 +95,19 @@
 .dish-modal__check.is-sel { background: var(--brand); border-color: var(--brand); }
 .dish-modal__radio { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--muted); }
 .dish-modal__radio.is-sel { border: 5px solid var(--brand); background: var(--surface); }
+
+/*
+ * Majburiy qo'shimcha — tanlash allaqachon bajarilgan (checkmark
+ * ko'rinadi) va bosib bo'lmaydi. Qora ekranda "o'chirilgan"
+ * tugma bilan adashtirmaslik uchun opacity emas, orqa fon rangi
+ * bilan ajratiladi — mijoz "bu nega ochilmayapti" deb o'ylamasin,
+ * balki "bu allaqachon qo'shilgan" deb tushunsin.
+ */
+.dish-modal__option.is-mandatory {
+  background: rgba(252, 130, 19, 0.04);
+  cursor: default;
+}
+.dish-modal__mandatory-badge { color: var(--brand); font-size: 11px; font-weight: 500; }
 /* Pastda qotirilган (Yandex Eda uslubida) — doim ko'rinadi */
 .dish-modal__footer {
   display: flex; align-items: center; gap: 12px;

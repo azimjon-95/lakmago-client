@@ -38,7 +38,15 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
       } else if (g.required && !g.multiple && g.options[0]) {
         init[g.id] = [g.options[0].id];
       } else {
-        init[g.id] = [];
+        /*
+         * MAJBURIY QO'SHIMCHA: restoran belgilagan bo'lsa, taom
+         * ochilishi bilan avtomatik tanlangan holda keladi va
+         * mijoz uni OLIB TASHLAY OLMAYDI — toggle() pastda ham
+         * himoyalangan (ikki joyda himoya — chunki checkbox
+         * o'zi disabled bo'lsa ham, biror joydan dasturiy
+         * chaqiruv bo'lib qolishi mumkin).
+         */
+        init[g.id] = (g.options || []).filter((o) => o.mandatory).map((o) => o.id);
       }
     });
     return init;
@@ -65,6 +73,9 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
        */
       const group = dish.optionGroups?.find((g) => g.id === groupId);
       if (group && variantOf(group)) return { ...prev, [groupId]: [optId] };
+      // Majburiy qo'shimchani mijoz o'chira olmaydi (checkbox
+      // ham disabled — bu qo'shimcha himoya, dasturiy xato uchun).
+      if (group?.options?.find((o) => o.id === optId)?.mandatory) return prev;
       if (multiple) {
         return { ...prev, [groupId]: cur.includes(optId) ? cur.filter((x) => x !== optId) : [...cur, optId] };
       }
@@ -232,11 +243,14 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
                    * mijozni chalg'itardi — go'yo narx qo'shiladi.
                    */
                   const isVariant = variantOf(g);
+                  const isMandatory = !isVariant && Boolean(o.mandatory);
                   return (
                     <button key={o.id} onClick={() => toggle(g.id, o.id, g.multiple)}
-                      className={`dish-modal__option ${isVariant && isSel ? 'is-variant-sel' : ''}`}>
+                      disabled={isMandatory}
+                      className={`dish-modal__option ${isVariant && isSel ? 'is-variant-sel' : ''} ${isMandatory ? 'is-mandatory' : ''}`}>
                       <span className="dish-modal__option-name">
                         {o.name}
+                        {isMandatory && <span className="dish-modal__mandatory-badge"> · {t('mandatory')}</span>}
                         {isVariant ? (
                           <span className="dish-modal__option-price"> · {formatSomShort(o.price)}</span>
                         ) : (

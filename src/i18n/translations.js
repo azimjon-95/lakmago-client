@@ -59,6 +59,7 @@ export const translations = {
     addToCart: "Savatga qo'shish",
     portionSize: 'Porsiya hajmi',
     extras: "Qo'shimchalar",
+    mandatory: 'majburiy',
 
     // Savatcha
     cart: 'Savat',
@@ -446,6 +447,7 @@ export const translations = {
     addToCart: 'Саватга қўшиш',
     portionSize: 'Порция ҳажми',
     extras: 'Қўшимчалар',
+    mandatory: 'мажбурий',
 
     cart: 'Сават',
     cartEmpty: 'Саватингиз бўш',
@@ -809,6 +811,7 @@ export const translations = {
     addToCart: 'В корзину',
     portionSize: 'Размер порции',
     extras: 'Добавки',
+    mandatory: 'обязательно',
 
     cart: 'Корзина',
     cartEmpty: 'Ваша корзина пуста',
