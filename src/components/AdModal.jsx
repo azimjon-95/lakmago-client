@@ -1,6 +1,7 @@
 import { Icon } from './Icon';
 import { formatSomShort } from '@/lib/utils';
 import { useT } from '@/i18n';
+import { useModalBackClose } from '@/hooks/useModalBackClose';
 import './AdModal.css';
 
 /**
@@ -24,6 +25,9 @@ import './AdModal.css';
  */
 export function AdModal({ ad, onClose, onOpenDish, onOpenRestaurant }) {
   const t = useT();
+  // Ota-komponent shart bo'lgandagina mount qiladi — shuning
+  // uchun "ochiqmi" har doim true (Android/Telegram orqaga tugmasi).
+  useModalBackClose(true, onClose);
   const linkedDish = ad.targetType === 'dish' && ad.dish;
   const customDish = ad.targetType === 'dish' && !ad.dish;
 

@@ -7,6 +7,7 @@ import { api } from '@/api';
 import { getSocket, joinUserRoom } from '@/lib/socket';
 import { useUser } from '@/store/user';
 import { useLockScroll } from '@/hooks/useLockScroll';
+import { useModalBackClose } from '@/hooks/useModalBackClose';
 
 // Bottom-right animatsiyali chat tugmasi + oyna.
 // Mijoz sayt adminlari (yordam xizmati) bilan gaplashadi.
@@ -20,6 +21,7 @@ export function SupportChat() {
   const [sending, setSending] = useState(false);
   const [unread, setUnread] = useState(0);
   useLockScroll(open);
+  useModalBackClose(open, () => setOpen(false));
   const userId = useUser((st) => st.user?._id || st.user?.id);
 
   /*

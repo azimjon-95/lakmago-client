@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/Icon';
 import { useT } from '@/i18n';
 import { useLockScroll } from '@/hooks/useLockScroll';
+import { useModalBackClose } from '@/hooks/useModalBackClose';
 import { useUser } from '@/store/user';
 import { isTelegramEnv, authenticateWithTelegram } from '@/lib/telegram';
 import { joinUserRoom } from '@/lib/socket';
@@ -41,6 +42,7 @@ function initialsOf(first, last) {
 export function AuthGateModal({ open, onSuccess, onClose }) {
   const t = useT();
   useLockScroll(open);
+  useModalBackClose(open, onClose);
 
   const updateUser = useUser((s) => s.updateUser);
   const setAuthStatus = useUser((s) => s.setAuthStatus);

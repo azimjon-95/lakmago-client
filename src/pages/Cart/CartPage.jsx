@@ -20,6 +20,7 @@ import { savePendingPayment, getPendingPayments, clearPendingPayment } from '@/l
 import { setPendingIntent, clearPendingIntent } from '@/lib/pendingIntent';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useRequireSubscription } from '@/hooks/useRequireSubscription';
+import { useModalBackClose } from '@/hooks/useModalBackClose';
 import './Cart.css';
 
 
@@ -349,6 +350,7 @@ export function CartPage() {
     }
   }, [deliveryOff, fulfillment]);
   const [showPhoneEdit, setShowPhoneEdit] = useState(false);
+  useModalBackClose(showPhoneEdit, () => setShowPhoneEdit(false));
   const [phoneDraft, setPhoneDraft] = useState(user.phone ?? '');
   const [paymentMethod, setPaymentMethod] = useState(lastPaymentMethod);
 
@@ -1602,6 +1604,7 @@ function CartUpsell({ groups }) {
  */
 function PaymentRedirectSheet({ url, provider, onClose }) {
   const t = useT();
+  useModalBackClose(true, onClose);
   const label = PROVIDER_LABEL[provider] || 'Click';
   return (
     <div className="ocm-overlay" onClick={onClose}>

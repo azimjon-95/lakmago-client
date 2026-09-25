@@ -4,6 +4,7 @@ import { api } from '@/api';
 import { getTelegram, haptic } from '@/lib/telegram';
 import { useT } from '@/i18n';
 import { useLockScroll } from '@/hooks/useLockScroll';
+import { useModalBackClose } from '@/hooks/useModalBackClose';
 import '@/components/SubscriptionGate/SubscriptionGate.css';
 import './SubscriptionGateModal.css';
 
@@ -25,6 +26,16 @@ export function SubscriptionGateModal({ open, onSuccess, onClose }) {
   useLockScroll(open);
 
   const [state, setState] = useState({ loading: true, required: false, subscribed: true, channelUrl: '' });
+  /*
+   * Orqaga tugmasi faqat MODAL HAQIQATAN ko'rinayotganda ro'yxatga
+   * olinishi kerak — `open` o'zi yetarli emas, chunki pastdagi
+   * shart (loading/required/subscribed) hali hech narsa
+   * chizmasligi mumkin. Farqli bo'lib qolsa (masalan `open=true`,
+   * lekin hali tekshirilmoqda), orqaga tugmasi bu modalni
+   * "yopishga" urinib, aslida hech narsa qilmas edi.
+   */
+  const visible = open && !state.loading && state.required && !state.subscribed;
+  useModalBackClose(visible, onClose);
   const [checking, setChecking] = useState(false);
   const [autoChecking, setAutoChecking] = useState(false);
 

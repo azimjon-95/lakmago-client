@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Icon } from '@/components/Icon';
 import { lockScroll, unlockScroll } from '@/lib/scrollLock';
+import { useModalBackClose } from '@/hooks/useModalBackClose';
 import './ClosedAlert.css';
 
 /**
@@ -8,6 +9,8 @@ import './ClosedAlert.css';
  * Yopiq muassasadan buyurtma berishga urinilganda chiqadi.
  */
 export function ClosedAlert({ info, onClose }) {
+  useModalBackClose(Boolean(info), onClose);
+
   // Orqa fon scroll bo'lmasin — FAQAT modal ochiq bo'lganda.
   // Avval info bo'lmasa ham ishlab, sahifani qotirib qo'yardi.
   useEffect(() => {

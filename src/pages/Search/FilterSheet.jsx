@@ -3,6 +3,7 @@ import { CategoryIcon } from '@/components/CategoryIcons/CategoryIcon';
 import { haptic } from '@/lib/telegram';
 import { CATEGORIES as CATS } from '@/data/categories';
 import { useT } from '@/i18n';
+import { useModalBackClose } from '@/hooks/useModalBackClose';
 
 // Maxsus istaklar (Uzum uslubida)
 export const SPECIALS = [
@@ -33,6 +34,7 @@ export function FilterSheet({
   onReset, onClose, resultCount,
 }) {
   const t = useT();
+  useModalBackClose(true, onClose);
   const toggleSpecial = (id) => {
     haptic();
     setSpecials((prev) => prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]);

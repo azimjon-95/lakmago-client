@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { LocationPermission } from './LocationPermission';
 import { AddressDetails } from './AddressDetails';
 import { MapAddressPicker } from './MapAddressPicker';
+import { useModalBackClose } from '@/hooks/useModalBackClose';
 import './AddressFlow.css';
 
 /*
@@ -45,6 +46,20 @@ export function AddressFlow({ onSave, onClose, startStep = 'permission' }) {
     onSave(address);
     onClose();
   };
+
+  /*
+   * Orqaga tugmasi bosilganda — o'z ICHIDAGI navigatsiya
+   * mantig'i bilan bir xil: xarita bosqichida oldingi (ruxsat)
+   * bosqichga, tafsilotlar bosqichida xaritaga qaytadi. Faqat
+   * ENG BOSHIDA (ruxsat bosqichi) butun oqim yopiladi — xuddi
+   * shu bosqichning o'z "Yopish" tugmasi (onClose) bilan bir xil.
+   */
+  const handleBack = () => {
+    if (step === 'map') { setStep('permission'); return; }
+    if (step === 'details' && location) { toMap({ lat: location.lat, lng: location.lng }); return; }
+    onClose();
+  };
+  useModalBackClose(true, handleBack);
 
   return (
     <div className="addrflow-overlay">

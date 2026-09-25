@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { lockScroll, unlockScroll } from '@/lib/scrollLock';
+import { useUI } from '@/store/ui';
 
 /*
  * ═══════════════════════════════════════════════════════════
@@ -55,6 +56,26 @@ export function useSheetDrag(onClose) {
     return () => {
       unlockScroll();
     };
+  }, []);
+
+  /*
+   * ═══ ANDROID / TELEGRAM "ORQAGA" TUGMASI ═══
+   *
+   * Bu hook DishModal, AddressSheet, RestaurantInfoSheet va
+   * OrderConfirmModal — barchasi tomonidan ishlatiladi, shuning
+   * uchun bu YAGONA joy ularning hammasini modal stekiga
+   * (store/ui.js) ro'yxatdan o'tkazadi — har birida alohida
+   * yozish shart emas.
+   *
+   * `state.current.onClose` yuqoridagi `state.current = {...}`
+   * orqali har renderda yangilanadi — shuning uchun stekka
+   * to'g'ridan-to'g'ri `state`ni beramiz: orqaga bosilganda
+   * har doim ENG SO'NGGI `onClose` chaqiriladi.
+   */
+  useEffect(() => {
+    const ref = { get current() { return state.current.onClose; } };
+    return useUI.getState().pushModal(ref);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /*

@@ -3,6 +3,7 @@ import { Icon } from '@/components/Icon';
 import { api } from '@/api';
 import { loadYmaps } from '@/lib/yandexMaps';
 import { useT } from '@/i18n';
+import { useModalBackClose } from '@/hooks/useModalBackClose';
 
 /**
  * Restoran joylashuvi — kichik preview, bosilsa katta xarita.
@@ -17,6 +18,7 @@ import { useT } from '@/i18n';
 export function RestaurantLocationMap({ restaurant }) {
   const t = useT();
   const [big, setBig] = useState(false);
+  useModalBackClose(big, () => setBig(false));
 
   if (!restaurant?.lat || !restaurant?.lng) return null;
 

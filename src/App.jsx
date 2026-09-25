@@ -24,6 +24,7 @@ import { I18nProvider } from '@/i18n';
 import { ActiveOrderBadge } from '@/components/ActiveOrderBadge/ActiveOrderBadge';
 import { SupportChat } from '@/components/SupportChat/SupportChat';
 import { Splash } from '@/components/Splash/Splash';
+import { useTelegramBack } from '@/hooks/useTelegramBack';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -207,6 +208,7 @@ function AppInner({ authMode = 'telegram' }) {
         <ErrorBoundary>
         <Suspense fallback={<div className="app-shell" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="spinner" /></div>}>
           <StartParamHandler />
+          <TelegramBackHandler />
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/restaurant/:id" element={<RestaurantPage />} />
@@ -254,6 +256,14 @@ function StartParamHandler() {
     navigate(`/food/${param.id}`, { replace: true });
   }, [navigate]);
 
+  return null;
+}
+
+// Android/Telegram "orqaga" tugmasi — useNavigate/useLocation
+// kerak bo'lgani uchun BrowserRouter ICHIDA chaqiriladi (App()
+// darajasida emas). Tafsilot: hooks/useTelegramBack.js
+function TelegramBackHandler() {
+  useTelegramBack();
   return null;
 }
 
