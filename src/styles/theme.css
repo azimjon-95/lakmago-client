@@ -18,6 +18,21 @@
     max(env(safe-area-inset-top, 0px), var(--tg-safe-top, 0px))
     + var(--tg-content-top, 0px)
   );
+
+  /*
+   * ═══ PASTKI BO'SHLIQ — YAGONA MANBA ═══
+   *
+   * Xuddi yuqoridagi bilan bir xil muammo, pastki chetda:
+   * Samsung (One UI) kabi ba'zi Android qurilmalarida
+   * `env(safe-area-inset-bottom)` navigatsiya panelini hisobga
+   * olmay 0 qaytaradi — iPhone'da va ba'zi Android'larda to'g'ri
+   * ishlasa ham. Natijada "Savatga", "Buyurtma berish" kabi
+   * pastki tugmalar tizim tugmalari bilan qoplanib qolardi.
+   *
+   * `lib/telegram.js` `tg.safeAreaInset.bottom` ni o'qib,
+   * platformadan qat'i nazar to'g'ri qiymatni beradi.
+   */
+  --tg-bottom-offset: max(env(safe-area-inset-bottom, 0px), var(--tg-safe-bottom, 0px));
 }
 
 /* ============================================
@@ -379,7 +394,7 @@ ul { list-style: none; }
   .home-dishes-grid { grid-template-columns: repeat(4, 1fr); }
 
   /* Pastki menyu ixchamroq (balandlik tejaladi) */
-  .bottom-nav { padding: 6px 0 calc(6px + env(safe-area-inset-bottom, 0px)); }
+  .bottom-nav { padding: 6px 0 calc(6px + var(--tg-bottom-offset, 0px)); }
   .bottom-nav__tab span { font-size: 9px; }
 
   /* Taom oynasi — yotiqda rasm kichikroq, kontent ko'proq ko'rinadi */
@@ -407,13 +422,13 @@ ul { list-style: none; }
 
   /* Suzuvchi tugmalar — yotiqda ekrandan chiqib ketmasin */
   .support-fab {
-    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(64px + var(--tg-bottom-offset, 0px));
     right: calc(12px + env(safe-area-inset-right, 0px));
     width: 48px; height: 48px;
   }
   .active-order-badge {
     /* Markazda qoladi (left:50% + transform), faqat balandlik ixchamlashadi */
-    bottom: calc(var(--bottom-nav-h, 62px) + env(safe-area-inset-bottom, 0px));
+    bottom: calc(var(--bottom-nav-h, 62px) + var(--tg-bottom-offset, 0px));
   }
 }
 

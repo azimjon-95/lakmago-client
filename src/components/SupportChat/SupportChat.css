@@ -6,7 +6,7 @@
   right: calc(14px + env(safe-area-inset-right, 0px));
   /* Savat paneli (fixed) + pastki menyu USTIDA — to'qnashmaydi.
      --cart-bar-offset: savat bo'lganda JS/CSS orqali oshiriladi. */
-  bottom: calc(var(--bottom-nav-h, 0px) + 16px + var(--cart-bar-offset, 0px) + env(safe-area-inset-bottom, 0px));
+  bottom: calc(var(--bottom-nav-h, 0px) + 16px + var(--cart-bar-offset, 0px) + var(--tg-bottom-offset, 0px));
   z-index: 46;
   width: 48px; height: 48px;
   transition: bottom 0.25s var(--ease);
@@ -133,7 +133,7 @@
 
 /* Input qatori — chap va o'ngni to'liq egallaydi */
 .support-chat__input {
-  padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  padding: 10px 12px calc(10px + var(--tg-bottom-offset, 0px));
   align-items: center;
 }
 .support-chat__input input { min-width: 0; }

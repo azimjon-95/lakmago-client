@@ -11,7 +11,7 @@
   max-height: 88vh; overflow-y: auto;
   background: var(--surface);
   border-radius: 22px 22px 0 0;
-  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(20px + var(--tg-bottom-offset, 0px));
   animation: slide-up 0.26s var(--ease);
 }
 .rinfo-sheet__grabber {

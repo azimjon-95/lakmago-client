@@ -270,6 +270,24 @@ export async function authenticateWithTelegram() {
        */
       const sysTop = tg.safeAreaInset?.top ?? 0;
       root.style.setProperty('--tg-safe-top', `${sysTop}px`);
+
+      /*
+       * ═══ PASTKI TIZIM BO'SHLIG'I (Android navigatsiya paneli) ═══
+       *
+       * XUDDI SHU MUAMMO, pastki chetda: Samsung (One UI) kabi
+       * qurilmalarda tizim navigatsiya paneli (gesture chizig'i
+       * yoki 3 tugma) `env(safe-area-inset-bottom)` orqali
+       * TO'G'RI kelmaydi — iPhone va ba'zi Android'larda ishlagan
+       * bo'lsa ham, Samsung'da 0 qaytishi mumkin va "Savatga"
+       * kabi pastki tugmalar tizim tugmalari bilan qoplanib qoladi.
+       *
+       * Yechim xuddi yuqoridagi bilan bir xil: Telegram O'ZI
+       * beradigan qiymat (tg.safeAreaInset.bottom) ishlatiladi,
+       * CSS'da esa ikkalasining kattarog'i olinadi
+       * (--tg-bottom-offset, theme.css).
+       */
+      const sysBottom = tg.safeAreaInset?.bottom ?? 0;
+      root.style.setProperty('--tg-safe-bottom', `${sysBottom}px`);
     };
     syncViewport();
     if (typeof tg.onEvent === 'function') {

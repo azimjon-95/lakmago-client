@@ -275,7 +275,7 @@
 .addr-details__hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
 
 .addr-details__footer {
-  padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
+  padding: 12px 16px calc(16px + var(--tg-bottom-offset, 0px));
   border-top: 1px solid var(--line);
   background: var(--canvas); flex: none;
 }
@@ -356,7 +356,7 @@
 
 .map-picker__footer {
   flex: none;
-  padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+  padding: 14px 16px calc(14px + var(--tg-bottom-offset, 0px));
   background: var(--canvas);
   border-top: 1px solid var(--line);
 }
@@ -391,7 +391,7 @@
   width: 100%; max-width: 480px;
   background: var(--surface);
   border-radius: 20px 20px 0 0;
-  padding: 20px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+  padding: 20px 16px calc(20px + var(--tg-bottom-offset, 0px));
   max-height: 88vh; overflow-y: auto;
   animation: addrEditUp 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -514,7 +514,7 @@
    * aynan tugmalar balandligi.
    */
   padding: calc(16px + var(--tg-top-offset, 0px)) 24px
-           calc(20px + env(safe-area-inset-bottom, 0px));
+           calc(20px + var(--tg-bottom-offset, 0px));
   background: linear-gradient(180deg, #FEFDFB 0%, #FFF8F0 55%, #FFF3E5 100%);
   overflow: hidden;
 }

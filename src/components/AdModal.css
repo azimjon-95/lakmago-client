@@ -32,7 +32,7 @@
 }
 
 .ad-modal__body {
-  padding: 18px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+  padding: 18px 20px calc(20px + var(--tg-bottom-offset, 0px));
 }
 
 .ad-modal__tag {
