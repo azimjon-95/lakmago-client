@@ -3,6 +3,39 @@ import { setAuthToken, setRefreshToken } from '@/api';
 // TZ: WebApp ochilganda Telegram.WebApp.ready() chaqiriladi, initData va
 // initDataUnsafe.user o'qiladi, backendga yuboriladi (POST /api/auth/telegram).
 
+/*
+ * ═══ PASTKI BO'SHLIQ — FAQAT KAMAYISHGA RUXSAT ═══
+ *
+ * KUZATILGAN XATO: ba'zi Android qurilmalarida (gesture navigatsiya,
+ * tugmalar YASHIRIN) ilova ochilganda avval TO'G'RI (kichik yoki
+ * yo'q) bo'shliq bilan joylashadi, keyin — bir necha yuz millisoniyadan
+ * so'ng, Telegram sysBottom qiymatini QAYTA yuborganda (viewportChanged
+ * hodisasi) — bo'shliq NOTO'G'RI KATTALASHIB qoladi. 48px chegara
+ * (theme.css) buni to'liq tuzata olmaydi, chunki noto'g'ri qiymat
+ * shu chegara ICHIDA ham bo'lishi mumkin.
+ *
+ * YECHIM: birinchi kelgan (odatda TO'G'RI) qiymatni "eng kichik
+ * ko'rilgan" sifatida eslab qolamiz va undan KATTAROQ qiymatlarni
+ * E'TIBORSIZ qoldiramiz — bo'shliq vaqt o'tishi bilan faqat
+ * KICHRAYISHI yoki O'ZGARMASLIGI mumkin, HECH QACHON kattaymaydi.
+ *
+ * Ekran aylantirilsa (orientatsiya o'zgarsa) tozalanadi — chunki
+ * shunda haqiqiy layout o'zgaradi va yangi o'lchov kerak.
+ */
+let minSeenBottom = null;
+let lastOrientationKey = null;
+
+function ratchetDownBottomInset(value) {
+  const orientationKey = window.innerWidth > window.innerHeight ? 'l' : 'p';
+  if (orientationKey !== lastOrientationKey) {
+    lastOrientationKey = orientationKey;
+    minSeenBottom = value;
+    return value;
+  }
+  minSeenBottom = minSeenBottom === null ? value : Math.min(minSeenBottom, value);
+  return minSeenBottom;
+}
+
 
 
 
@@ -302,8 +335,13 @@ export async function authenticateWithTelegram() {
        * beradigan qiymat (tg.safeAreaInset.bottom) ishlatiladi,
        * CSS'da esa ikkalasining kattarog'i olinadi
        * (--tg-bottom-offset, theme.css).
+       *
+       * `ratchetDownBottomInset` — yuqoridagi izoh (fayl boshida):
+       * Telegram bu qiymatni bir necha marta, HAR XIL (ba'zan
+       * noto'g'ri kattaroq) qiymat bilan yuborishi mumkin — shu
+       * funksiya faqat eng kichigini saqlaydi.
        */
-      const sysBottom = tg.safeAreaInset?.bottom ?? 0;
+      const sysBottom = ratchetDownBottomInset(tg.safeAreaInset?.bottom ?? 0);
       root.style.setProperty('--tg-safe-bottom', `${sysBottom}px`);
     };
     syncViewport();
