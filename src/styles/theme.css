@@ -31,8 +31,24 @@
    *
    * `lib/telegram.js` `tg.safeAreaInset.bottom` ni o'qib,
    * platformadan qat'i nazar to'g'ri qiymatni beradi.
+   *
+   * ═══ LEKIN: TESKARI XATO HAM BO'LISHI MUMKIN ═══
+   *
+   * Ba'zi qurilmalarda (3 tugmali navigatsiya rejimi) aksincha —
+   * Telegram HAQIQIY tugmalar balandligidan KATTAROQ qiymat
+   * berishi mumkin, natijada "Savatga" kabi tugmalar ostida
+   * KERAKSIZ katta bo'sh joy paydo bo'lardi.
+   *
+   * 48px — Android 3 tugmali navigatsiya panelining odatiy
+   * balandligi (~48dp). Haqiqiy qiymat undan katta bo'lishi
+   * DEYARLI MUMKIN EMAS (jest paneli esa ancha kichik, ~24px) —
+   * shuning uchun bu yuqori chegara HAQIQIY himoyani kamaytirmaydi,
+   * faqat noto'g'ri (haddan tashqari katta) qiymatlarni kesadi.
    */
-  --tg-bottom-offset: max(env(safe-area-inset-bottom, 0px), var(--tg-safe-bottom, 0px));
+  --tg-bottom-offset: min(
+    max(env(safe-area-inset-bottom, 0px), var(--tg-safe-bottom, 0px)),
+    48px
+  );
 }
 
 /* ============================================

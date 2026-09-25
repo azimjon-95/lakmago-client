@@ -237,7 +237,24 @@ export async function authenticateWithTelegram() {
     // (notch, klaviatura, kengaytirish) layout to'g'ri moslashadi.
     const syncViewport = () => {
       const root = document.documentElement;
-      const h = tg.viewportStableHeight || tg.viewportHeight;
+      /*
+       * ═══ BALANDLIK HAQIQIY EKRANDAN OSHIB KETMASIN ═══
+       *
+       * Ba'zi Android qurilmalarda (ayniqsa 3 tugmali navigatsiya
+       * rejimida) Telegram tg.viewportStableHeight HAQIQIY ko'rinadigan
+       * balandlikdan KATTAROQ qiymat qaytarishi mumkin — go'yo tizim
+       * navigatsiya paneli ostidagi joy ham ilova uchun bo'sh ekan.
+       * Natijada .app-shell HAQIQIY ekrandan balandroq bo'lib,
+       * pastda keraksiz bo'sh joy paydo bo'lardi (Bosh/Qidiruv/...
+       * tab-panelidan pastda oq chiziq).
+       *
+       * window.innerHeight — brauzer O'ZI ko'rsatayotgan HAQIQIY
+       * balandlik, har doim ishonchli. Ikkalasining KICHIGINI
+       * olamiz: Telegram to'g'ri bersa o'zgarmaydi, ortiqcha bersa
+       * — haqiqiy ekran bilan cheklanadi.
+       */
+      const tgH = tg.viewportStableHeight || tg.viewportHeight;
+      const h = tgH ? Math.min(tgH, window.innerHeight) : 0;
       if (h) root.style.setProperty('--tg-viewport-height', `${h}px`);
 
       // To'liq ekranda Telegram tugmalari (Закрыть, ⌄, ⋯) kontent ustiga
