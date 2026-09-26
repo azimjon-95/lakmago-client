@@ -18,6 +18,7 @@ import { ClosedAlert } from '@/components/ClosedAlert';
 import { useRestaurants, useTrendingDishes, useBannersQuery, useAllDishes, useBannerAds, useDishFeed } from '@/hooks/queries';
 import { isDiscountedDish } from '@/lib/discount';
 import { PullToRefresh } from '@/components/PullToRefresh';
+import { useRecommendedStream } from '@/hooks/useRecommendedStream';
 import { API_BASE, api } from '@/api';
 import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
 import { CategoryIcon } from '@/components/CategoryIcons/CategoryIcon';
@@ -186,9 +187,14 @@ export function HomePage() {
   // Bosh sahifani pastga tortib yangilash — barcha ma'lumotlarni
   // qayta so'raydi (sahifa qayta yuklanmaydi, faqat ma'lumot
   // yangilanadi — zamonaviy ilovalar shunday ishlaydi)
-  const handlePullRefresh = useCallback(() => Promise.all([
-    refetchRest(), refetchTrending(), refetchDiscount(), refetchRegular(), refetchBanners(), refetchAds(),
-  ]), [refetchRest, refetchTrending, refetchDiscount, refetchRegular, refetchBanners, refetchAds]);
+  // «Tavsiya qilamiz» davomi ham boshidan boshlanadi (useRecommendedStream)
+  const [recResetKey, setRecResetKey] = useState(0);
+  const handlePullRefresh = useCallback(() => {
+    setRecResetKey((n) => n + 1);
+    return Promise.all([
+      refetchRest(), refetchTrending(), refetchDiscount(), refetchRegular(), refetchBanners(), refetchAds(),
+    ]);
+  }, [refetchRest, refetchTrending, refetchDiscount, refetchRegular, refetchBanners, refetchAds]);
 
   // Reklamalar (restoran/taom) oddiy bannerlar bilan BITTA
   // karuselda aralashadi — foydalanuvchi uchun farqi yo'q, faqat
@@ -288,6 +294,21 @@ export function HomePage() {
     () => pickOpenFirst(regularParts, shuffleSeed + 7),
     [regularParts, shuffleSeed],
   );
+
+  /*
+   * «Tavsiya qilamiz» davomi — oxiriga yaqinlashganda qolgan barcha
+   * taomlar jimgina qo'shib boriladi. Yuqoridagi 20 taom (recommended)
+   * O'ZGARMAYDI. Tafsilot: hooks/useRecommendedStream.js
+   */
+  const recStream = useRecommendedStream({
+    enabled: !regularLoading && recommended.length > 0,
+    firstPage: regularFeed,
+    shown: recommended,
+    accept: (d) => !isDiscountedDish(d) && dishMatchesCategory(d, category),
+    category,
+    resetKey: recResetKey,
+    seed: shuffleSeed + 13,
+  });
 
   // Ikkala qatordagi yopiq taomlar (kartada belgi uchun)
   const closedIds = useMemo(
@@ -402,7 +423,7 @@ export function HomePage() {
             action={t('all')}
             onAction={() => openDiscover('recommended')}
           />
-          <div className="home-dishes-row no-scrollbar">
+          <div className="home-dishes-row no-scrollbar" ref={recStream.rowRef}>
             {regularLoading
               ? Array.from({ length: 6 }).map((_, i) => <DishScrollCardSkeleton key={i} />)
               : recommended.map((d) => (
@@ -413,6 +434,25 @@ export function HomePage() {
                     closed={closedIds.has(String(d.id || d._id))}
                   />
                 ))}
+            {/* Davomi — oxiriga qo'shib boriladi, mavjud kartalar joyidan qimirlamaydi */}
+            {!regularLoading && recStream.extra.map((d) => (
+              <DishGridCard
+                key={d.id || d._id}
+                dish={d}
+                onClick={openModal}
+                closed={recStream.closedIds.has(String(d.id || d._id))}
+              />
+            ))}
+            {recStream.loading && Array.from({ length: 2 }).map((_, i) => <DishScrollCardSkeleton key={`more-${i}`} />)}
+            {/*
+              Kuzatuvchi nuqta DOIM chiziladi (hasMore'ga bog'lanmagan):
+              aks holda tasma tugab, keyin kategoriya almashsa u yangi
+              element bo'lib qaytadi va observer eskisini kuzatib qoladi.
+              Davomi yo'qligini loadMore o'zi biladi.
+            */}
+            {!regularLoading && (
+              <span ref={recStream.sentinelRef} className="home-dishes-row__sentinel" aria-hidden="true" />
+            )}
           </div>
         </>
       )}

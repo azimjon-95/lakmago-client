@@ -277,3 +277,11 @@ margin-left: 13px;
   flex: none;
 }
 .home-header__icon-btn:active { background: var(--line); }
+
+/* «Tavsiya qilamiz» — oxiriga yaqinlashishni kuzatuvchi nuqta.
+   Ko'rinmaydi, joy egallamaydi (1px), faqat IntersectionObserver uchun. */
+.home-dishes-row__sentinel {
+  flex: 0 0 1px;
+  align-self: stretch;
+  pointer-events: none;
+}
