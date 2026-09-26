@@ -262,12 +262,19 @@ export const api = {
    * ko'rsatish" tugmasi ishlay oladi. Mavjud getAllDishes'ga
    * TEGILMADI — Splash va HomePage undan o'zgarishsiz foydalanadi.
    */
-  getDishesFeed: async ({ discounted, category, cursor, limit = 24, signal } = {}) => {
+  /*
+   * fair=true — bosh sahifa: restoranlar navbatma-navbat (server).
+   * seed — sessiya urug'i: qayta so'rovda tartib bir xil qoladi.
+   * Ikkalasi ixtiyoriy; berilmasa xatti-harakat avvalgidek.
+   */
+  getDishesFeed: async ({ discounted, category, cursor, limit = 24, fair, seed, signal } = {}) => {
     const params = new URLSearchParams({ limit: String(limit) });
     if (discounted === true) params.set('discounted', '1');
     else if (discounted === false) params.set('discounted', '0');
     if (category && category !== 'all') params.set('category', category);
     if (cursor) params.set('cursor', cursor);
+    if (fair) params.set('fair', '1');
+    if (fair && Number.isInteger(seed) && !cursor) params.set('seed', String(seed));
     return apiFetch(`/dishes/all?${params.toString()}`, { signal });
   },
 

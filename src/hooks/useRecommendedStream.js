@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '@/api';
-import { HOME_FEED_LIMIT } from '@/hooks/queries';
 import { useOpenPartition } from '@/hooks/useOpenStatus';
 import { drainPool, tailOf } from '@/lib/mixDishes';
 
@@ -19,14 +18,18 @@ import { drainPool, tailOf } from '@/lib/mixDishes';
  *            Tarmoq so'rovi YO'Q — darhol.
  *   2-qadam: /dishes/all?discounted=0 ning keyingi sahifalari.
  *
- * ─── CURSOR — SERVER O'ZGARTIRILMAGAN ───
- * Bosh sahifaning so'rovi (useDishFeed) faqat `items`ni saqlaydi,
- * `nextCursor`ni emas. Server cursor'i `${createdAt ISO}|${_id}` —
- * sahifaning OXIRGI taomidan yasaladi (controllers/catalog.js).
- * Javobda har bir taomda shu ikki maydon bor, shuning uchun AYNAN
- * shu cursor mijozda tiklanadi: qo'shimcha so'rov ham, server
- * o'zgarishi ham kerak emas. Birinchi sahifa to'liq kelmagan bo'lsa
- * (< HOME_FEED_LIMIT) — davomi yo'q.
+ * ─── CURSOR ───
+ * Asosiy yo'l: serverning adolatli rejimi (fair=1) bergan
+ * `fair|{seed}|{offset}` cursor'i — tartibni server biladi, mijoz
+ * uni qayta yasay OLMAYDI (createdAt bo'yicha emas).
+ *
+ * Eski server (VPS yangilanmaguncha) fair'ni bilmaydi va nextCursor'ni
+ * FAQAT createdAt bilan beradi — bir xil vaqtli (import qilingan)
+ * taomlar tushib qolardi. Shu holda cursor sahifaning oxirgi
+ * taomidan `createdAt|_id` qilib tiklanadi: server bu formatni
+ * qabul qiladi va tenglikda _id bo'yicha davom etadi.
+ * (Avvalgi izohdagi "server cursor'i createdAt|_id" degan gap
+ * noto'g'ri edi — server uni faqat QABUL qilardi, bermasdi.)
  *
  * ─── "MIJOZ SEZMASIN" ───
  * IntersectionObserver oxiridan ~900px (3-4 karta) OLDIN ishga
@@ -71,7 +74,10 @@ function cursorAfter(page) {
  * @param {number}  p.resetKey  — pastga tortib yangilashda oshiriladi
  * @param {number}  p.seed      — aralashtirish urug'i
  */
-export function useRecommendedStream({ enabled, firstPage, shown, accept, category, resetKey, seed }) {
+export function useRecommendedStream({
+  enabled, firstPage, shown, accept, category, resetKey, seed,
+  firstCursor = null, firstHasMore = false,
+}) {
   const [extra, setExtra] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -94,7 +100,7 @@ export function useRecommendedStream({ enabled, firstPage, shown, accept, catego
 
   // Har renderda yangilanadi — eskirgan qiymat ishlatilmasin
   const live = useRef({});
-  live.current = { firstPage, shown, accept, category, seed };
+  live.current = { firstPage, shown, accept, category, seed, firstCursor, firstHasMore };
 
   const reset = useCallback(() => {
     genRef.current += 1;
@@ -133,7 +139,10 @@ export function useRecommendedStream({ enabled, firstPage, shown, accept, catego
       seenRef.current = seen;
       // Davomi eski 20 talik qator oxiridan uzluksiz aralashsin
       poolRef.current.tail = tailOf(visible);
-      cursorRef.current = page.length >= HOME_FEED_LIMIT ? cursorAfter(page) : null;
+      const { firstCursor: fc, firstHasMore: fh } = live.current;
+      // Yangi server: fair|… yoki createdAt|_id — o'zi to'g'ri.
+      // Eski server: faqat sana — cursor taomdan tiklanadi.
+      cursorRef.current = fc && fh ? (fc.includes('|') ? fc : cursorAfter(page)) : null;
       setHasMore(Boolean(cursorRef.current));
       const out = drainPool(poolRef.current, leftovers, sd, !cursorRef.current);
       if (out.length) setExtra(out);
@@ -152,7 +161,7 @@ export function useRecommendedStream({ enabled, firstPage, shown, accept, catego
 
     try {
       const res = await api.getDishesFeed({
-        discounted: false, category: cat, limit: PAGE_SIZE, cursor: cursorRef.current, signal: ctrl.signal,
+        discounted: false, category: cat, limit: PAGE_SIZE, cursor: cursorRef.current, fair: true, signal: ctrl.signal,
       });
       if (gen !== genRef.current) return; // eskirgan javob
 

@@ -37,6 +37,14 @@ import './Home.css';
 
 const ROW_LIMIT = 20;
 
+/*
+ * Tasma javobi endi { items, nextCursor, hasMore }. Eski shakl (massiv)
+ * ham qabul qilinadi — xavfsizlik uchun. Doimiy bo'sh massiv: har
+ * renderda yangi [] yaratilib, useMemo'lar bekorga qayta hisoblanmasin.
+ */
+const EMPTY_FEED = [];
+const feedItems = (data) => (Array.isArray(data) ? data : data?.items) ?? EMPTY_FEED;
+
 /** Barqaror aralashtirish: seed bir xil bo'lsa natija ham bir xil. */
 function seededShuffle(arr, seed) {
   const a = [...arr];
@@ -178,11 +186,13 @@ export function HomePage() {
    * 50 talikka tushmasa qatorlar butunlay yo'qolardi.
    */
   const {
-    data: discountFeed = [], isLoading: discountLoading, refetch: refetchDiscount,
+    data: discountFeedData, isLoading: discountLoading, refetch: refetchDiscount,
   } = useDishFeed({ discounted: true, category });
   const {
-    data: regularFeed = [], isLoading: regularLoading, refetch: refetchRegular,
+    data: regularFeedData, isLoading: regularLoading, refetch: refetchRegular,
   } = useDishFeed({ discounted: false, category });
+  const discountFeed = feedItems(discountFeedData);
+  const regularFeed = feedItems(regularFeedData);
 
   // Bosh sahifani pastga tortib yangilash — barcha ma'lumotlarni
   // qayta so'raydi (sahifa qayta yuklanmaydi, faqat ma'lumot
@@ -303,6 +313,8 @@ export function HomePage() {
   const recStream = useRecommendedStream({
     enabled: !regularLoading && recommended.length > 0,
     firstPage: regularFeed,
+    firstCursor: regularFeedData?.nextCursor ?? null,
+    firstHasMore: Boolean(regularFeedData?.hasMore),
     shown: recommended,
     accept: (d) => !isDiscountedDish(d) && dishMatchesCategory(d, category),
     category,
