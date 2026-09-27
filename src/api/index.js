@@ -205,11 +205,28 @@ async function apiFetch(path, opts = {}) {
   return normalizeIds(json);
 }
 
+/*
+ * Xarita konfiguratsiyasi (mapsKey) sessiya davomida O'ZGARMAYDI —
+ * har safar manzil oynasi ochilganda (yoki bron xaritasi ko'rsatilganda)
+ * qayta so'ralishi shart emas. Bitta promise kesh qilinadi; xato
+ * bo'lsa keshdan chiqariladi — keyingi chaqiruv qayta urinadi.
+ */
+let mapsConfigPromise = null;
+function fetchMapsConfig(opts) {
+  if (!mapsConfigPromise) {
+    mapsConfigPromise = apiFetch('/maps/config', opts).catch((e) => {
+      mapsConfigPromise = null;
+      throw e;
+    });
+  }
+  return mapsConfigPromise;
+}
+
 export const api = {
   // ===== Xarita =====
   // Yandex JS API kaliti — server domenga cheklab beradi,
-  // kodda saqlanmaydi
-  getMapsConfig: (opts) => apiFetch('/maps/config', opts),
+  // kodda saqlanmaydi. Kesh: fetchMapsConfig (yuqorida).
+  getMapsConfig: (opts) => fetchMapsConfig(opts),
   // Koordinatadan manzil (kalit serverda qoladi — proksi)
   reverseGeocodeYandex: (lat, lng, opts) =>
     apiFetch(`/maps/reverse?lat=${lat}&lng=${lng}`, opts),

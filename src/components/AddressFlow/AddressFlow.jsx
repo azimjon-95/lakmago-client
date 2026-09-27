@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LocationPermission } from './LocationPermission';
 import { AddressDetails } from './AddressDetails';
 import { MapAddressPicker } from './MapAddressPicker';
 import { useModalBackClose } from '@/hooks/useModalBackClose';
+import { api } from '@/api';
+import { loadYmaps } from '@/lib/yandexMaps';
 import './AddressFlow.css';
 
 /*
@@ -31,6 +33,37 @@ export function AddressFlow({ onSave, onClose, startStep = 'permission' }) {
   const [location, setLocation] = useState(null);
   // Xarita qaysi nuqtadan boshlansin (taxminiy joy yoki tahrirlash)
   const [mapStart, setMapStart] = useState(null);
+
+  /*
+   * ═══ XARITANI OLDINDAN ISINITISH ═══
+   *
+   * MUAMMO: mijoz "Kartadan tanlang" bosgach, ekranda bo'sh
+   * aylanuvchi belgi uzoq turardi. Sabab — ketma-ket ish:
+   *   1) O'Z SERVERIMIZDAN mapsKey so'raladi;
+   *   2) SHUNDAN KEYIN Yandex'ning og'ir JS skripti yuklanadi
+   *      (tashqi, sekin tarmoqda ayniqsa sezilarli);
+   *   3) shundan keyingina xarita chizila boshlaydi.
+   * Bu ish FAQAT mijoz xarita bosqichiga YETGANDA boshlanardi.
+   *
+   * YECHIM: shu ikki qadam (server so'rovi + Yandex skripti) OQIM
+   * ochilishi bilan — ruxsat ekranida, mijoz hali "Kartadan
+   * tanlang"ni ko'rmasdan — FONDA boshlanadi. Xarita bosqichiga
+   * yetganda skript ko'pincha allaqachon tayyor yoki deyarli
+   * tayyor bo'ladi.
+   *
+   * Xato jimgina yutiladi: haqiqiy xato xabari MapAddressPicker
+   * o'zi xarita bosqichida (mijozga ko'rinadigan joyda) ko'rsatadi
+   * — bu yerda faqat tezlik uchun oldindan urinish.
+   *
+   * getMapsConfig keshlangan (api/index.js) — RestaurantLocationMap
+   * (bron xaritasi) ham shu keshdan foydalanadi, qo'shimcha so'rov
+   * yubormaydi.
+   */
+  useEffect(() => {
+    api.getMapsConfig()
+      .then((cfg) => { if (cfg?.enabled && cfg?.mapsKey) loadYmaps(cfg.mapsKey); })
+      .catch(() => {});
+  }, []);
 
   const toDetails = (loc) => {
     setLocation(loc);
