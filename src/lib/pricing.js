@@ -30,17 +30,37 @@ export function calcDeliveryFee(subtotal, restaurant, isPickup, distanceKm = nul
   const threshold = Number(restaurant?.freeDeliveryThreshold) || 0;
   if (threshold > 0 && subtotal >= threshold) return 0;
 
-  const mode = restaurant?.delivery?.pricingMode === 'perKm' ? 'perKm' : 'flat';
+    const mode = restaurant?.delivery?.pricingMode === 'perKm' ? 'perKm' : 'flat';
+  const flatFee = Math.max(0, Number(restaurant?.deliveryFee) || 0);
 
-  if (mode === 'perKm' && Number.isFinite(Number(distanceKm))) {
-    const perKm = Math.max(0, Number(restaurant?.delivery?.perKm) || 0);
-    const freeKm = Math.max(0, Number(restaurant?.delivery?.freeKm) || 0);
-    const paidKm = Math.max(0, Number(distanceKm) - freeKm);
-    // 100 so'mgacha yaxlitlash — server bilan bir xil
-    return Math.round((paidKm * perKm) / 100) * 100;
+  if (mode === 'perKm') {
+    /*
+     * Boshlang'ich narx: `freeKm` masofagacha olinadigan summa
+     * (0 = shu masofagacha bepul). Server: services/deliveryEngine.js.
+     *   narx = basePrice + (masofa - freeKm) * perKm
+     */
+    const basePrice = Math.max(0, Math.round(Number(restaurant?.delivery?.basePrice) || 0));
+
+    /*
+     * Masofa FAQAT haqiqiy son bo'lsa ma'lum. `Number.isFinite(Number(x))`
+     * bu yerda XATO edi: Number(null) === 0, ya'ni masofa NOMA'LUM (null)
+     * bo'lsa ham "0 km" deb hisoblanib, narx 0 (bepul) chiqardi — server
+     * esa bunday holda qat'iy narxga qaytadi. Savatda narx avval "bepul"
+     * bo'lib turib, keyin sakrab o'zgarardi.
+     */
+    if (typeof distanceKm === 'number' && Number.isFinite(distanceKm)) {
+      const perKm = Math.max(0, Math.round(Number(restaurant?.delivery?.perKm) || 0)); // server: Math.round
+      const freeKm = Math.max(0, Number(restaurant?.delivery?.freeKm) || 0);
+      const paidKm = Math.max(0, distanceKm - freeKm);
+      // Faqat km qismi 100 so'mgacha yaxlitlanadi — server bilan bir xil
+      return basePrice + Math.round((paidKm * perKm) / 100) * 100;
+    }
+
+    // Masofa noma'lum: qat'iy narx, lekin boshlang'ich narxdan kam emas (server bilan bir xil)
+    return Math.max(flatFee, basePrice);
   }
 
-  return Math.max(0, Number(restaurant?.deliveryFee) || 0);
+  return flatFee;
 }
 
 /** Xizmat haqi — foiz, min/max bilan. */
