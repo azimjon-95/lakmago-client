@@ -177,6 +177,57 @@ export const useUser = create(
     });
   },
 
+    /*
+   * Mavjud manzilni TAHRIRLASH (buyurtma tasdiqlash qadamidan).
+   *
+   * Avval lokal yangilanadi (mijoz o'zgarishni DARHOL ko'radi), keyin
+   * serverga PATCH. Server javobi kelsa — u haqiqat manbai: ro'yxat
+   * server bilan almashtiriladi. Server yo'q/xato bo'lsa — lokal holat
+   * qoladi (addAddress bilan bir xil offline qoidasi), lekin xato
+   * YUTILMAYDI: natija `{ ok, synced }` sifatida qaytadi, chaqiruvchi
+   * "saqlanmadi" deb ogohlantira oladi.
+   *
+   * `id` o'zgarmaydi va defaultAddressId ga tegilmaydi.
+   * Faqat ruxsat etilgan maydonlar yuboriladi (server zod sxemasi bilan
+   * bir xil) — tasodifan `id`/`_id` serverga ketib qolmasin.
+   */
+  updateAddress: async (id, patch) => {
+    const ALLOWED = ['title', 'address', 'street', 'city', 'note', 'labelId', 'lat', 'lng'];
+    const clean = {};
+    for (const k of ALLOWED) if (patch[k] !== undefined) clean[k] = patch[k];
+
+    let exists = false;
+    set((state) => {
+      exists = state.user.addresses.some((a) => a.id === id);
+      if (!exists) return state;
+      return {
+        user: {
+          ...state.user,
+          addresses: state.user.addresses.map((a) => (a.id === id ? { ...a, ...clean } : a)),
+        },
+      };
+    });
+    if (!exists) return { ok: false, synced: false };
+
+    try {
+      const res = await api.updateAddress(id, clean);
+      if (res?.addresses) {
+        set((state) => ({
+          user: {
+            ...state.user,
+            addresses: res.addresses.map((a) => ({ ...a, id: String(a._id) })),
+            // Tanlangan manzil o'zgarmasin: id server javobida ham bir xil
+            defaultAddressId: state.user.defaultAddressId,
+          },
+        }));
+      }
+      return { ok: true, synced: true };
+    } catch {
+      // Lokal saqlangan (yoki vaqtinchalik id — serverda hali yo'q)
+      return { ok: true, synced: false };
+    }
+  },
+
   setDefaultAddress: async (id) => {
     set((state) => ({ user: { ...state.user, defaultAddressId: id } }));
     try {

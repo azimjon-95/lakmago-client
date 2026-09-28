@@ -4,6 +4,7 @@ import { Icon } from '@/components/Icon';
 import { DishPhoto } from '@/components/DishPhoto';
 import { AddressSheet } from '@/components/AddressSheet';
 import { OrderConfirmModal } from '@/components/OrderConfirmModal';
+import { AddressEditSheet } from '@/components/AddressEditSheet';
 import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
 import { useCart } from '@/store/cart';
 import { useUser } from '@/store/user';
@@ -122,6 +123,7 @@ export function CartPage() {
   const updateUser = useUser((s) => s.updateUser);
   const addAddress = useUser((s) => s.addAddress);
   const setDefaultAddress = useUser((s) => s.setDefaultAddress);
+  const updateAddress = useUser((s) => s.updateAddress);
   const lastPaymentMethod = useUser((s) => s.lastPaymentMethod);
   const setLastPaymentMethod = useUser((s) => s.setLastPaymentMethod);
   const placeOrder = useOrders((s) => s.placeOrder);
@@ -129,6 +131,10 @@ export function CartPage() {
   // Yetkazish narxi — masofaga qarab serverda hisoblanadi
   const [quotes, setQuotes] = useState({});
   const [quoteLoading, setQuoteLoading] = useState(false);
+  // Narx QAYSI manzil+savat uchun hisoblangani — manzil almashganda eski narx
+  // "yangi" deb ko'rsatilmasin (tasdiqlash qadami shunga qarab tugmani bloklaydi)
+  const [quotesKey, setQuotesKey] = useState('');
+  const [showAddressEdit, setShowAddressEdit] = useState(false);
 
   // Yopilgan restoran taomlari savatdan avtomatik chiqadi
   const [removedNote, setRemovedNote] = useState(null);
@@ -702,6 +708,7 @@ export function CartPage() {
    */
   const needsPoint = !isPickup && Boolean(selectedAddress) && !hasValidCoords(selectedAddress);
 
+
   /*
    * ═══ SAVAT IMZOSI ═══
    *
@@ -718,14 +725,39 @@ export function CartPage() {
   const cartSignature = groups
     .map((g) => `${g.restaurant.id}:${g.subtotal ?? 0}`)
     .join('|');
+  // Narx so'rovi shu kalit uchun (bo'sh = so'rov yo'q: olib ketish yoki nuqtasiz manzil)
+  const quoteKey = isPickup || !hasValidCoords(selectedAddress)
+    ? ''
+    : `${Number(selectedAddress.lat)},${Number(selectedAddress.lng)}|${cartSignature}`;
+
+  /*
+   * Tasdiqlash oynasining 2-qadami (manzil) nima uchun "Ha, shu manzilga"
+   * ni bloklashi kerakligi:
+   *   no_point     — manzilda xarita nuqtasi yo'q;
+   *   calculating  — narx hali SHU manzil uchun hisoblanmagan (manzil
+   *                  almashtirilgan zahoti eski narx bilan yuborilmasin);
+   *   out_of_range — server: bu manzilga yetkazib bo'lmaydi.
+   * null — davom etish mumkin.
+   */
+  const addressBlock = (() => {
+    if (isPickup || !selectedAddress) return null;
+    if (!hasValidCoords(selectedAddress)) return { kind: 'no_point' };
+    if (quoteLoading || quotesKey !== quoteKey) return { kind: 'calculating' };
+    if (pricing.outOfRange.length) {
+      return { kind: 'out_of_range', message: pricing.outOfRange[0]?.quote?.reason || '' };
+    }
+    return null;
+  })();
 
   // Manzil yoki savat o'zgarganda yetkazish narxi serverdan
   // qayta so'raladi (masofaga qarab hisoblanadi).
   useEffect(() => {
     if (isPickup || !selectedAddress?.lat || !selectedAddress?.lng) {
       setQuotes({});
+      setQuotesKey('');
       return;
     }
+    const keyForThisRequest = quoteKey;
 
     const ids = groups.map((g) => g.restaurant.id).filter(Boolean);
     if (!ids.length) return;
@@ -746,6 +778,7 @@ export function CartPage() {
       .then((pairs) => {
         if (cancelled) return;
         setQuotes(Object.fromEntries(pairs.filter(([, q]) => q)));
+        setQuotesKey(keyForThisRequest);
       })
       .finally(() => { if (!cancelled) setQuoteLoading(false); });
 
@@ -880,6 +913,13 @@ export function CartPage() {
       else promptAddressPoint();
       return;
     }
+    /*
+     * Manzil almashtirilgan bo'lsa narx SHU manzil uchun hisoblanmaguncha
+     * (yoki manzil radiusdan tashqarida bo'lsa) YUBORMAYMIZ. Tugma bu
+     * holatda o'chiq turadi; bu — poyga holatiga qarshi oxirgi qulf.
+     * submitLock O'RNATILMAGAN — mijoz kutib, qayta bosa oladi.
+     */
+    if (!isPickup && addressBlock) return;
 
     /*
      * OXIRGI HIMOYA: yuborish oldidan provayder yana bir bor
@@ -1520,6 +1560,15 @@ export function CartPage() {
         />
       )}
 
+      {/* Tanlangan manzilni tahrirlash (tasdiqlash qadamidan) */}
+      {showAddressEdit && selectedAddress && (
+        <AddressEditSheet
+          address={selectedAddress}
+          onSave={(patch) => updateAddress(selectedAddress.id, patch)}
+          onClose={() => setShowAddressEdit(false)}
+        />
+      )}
+
       {showPhoneEdit && (
         <div onClick={() => setShowPhoneEdit(false)} className="sheet-overlay">
           <div onClick={(e) => e.stopPropagation()} className="sheet">
@@ -1556,6 +1605,11 @@ export function CartPage() {
           submitting={paying}
           onClose={() => setShowConfirm(false)}
           onConfirm={confirmAndSubmit}
+          // Yetkazishda 2-qadam: "Shu manzilga yetkazamizmi?"
+          address={isPickup ? null : selectedAddress}
+          addressBlock={addressBlock}
+          onChooseAddress={() => setShowAddressSheet(true)}
+          onEditAddress={() => setShowAddressEdit(true)}
         />
       )}
       {AuthGate}
