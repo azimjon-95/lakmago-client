@@ -34,6 +34,8 @@ export const translations = {
 
     // Bosh sahifa
     deliveryAddress: 'Yetkazish manzili',
+    addressPointMissing: "Xarita nuqtasi yo'q — tahrirlash",
+    addressPointMissingMsg: "Yetkazish uchun manzilni xaritadan tanlang. Hozirgi manzilda joylashuv (nuqta) yo'q.",
     trendingDishes: 'Trend taomlar',
     discountedDishes: 'Super Chegirmalar',
     recommended: 'Tavsiya qilamiz',
@@ -424,6 +426,8 @@ export const translations = {
     navProfile: 'Профил',
 
     deliveryAddress: 'Етказиш манзили',
+    addressPointMissing: 'Харита нуқтаси йўқ — таҳрирлаш',
+    addressPointMissingMsg: 'Етказиш учун манзилни харитадан танланг. Ҳозирги манзилда жойлашув (нуқта) йўқ.',
     trendingDishes: 'Тренд таомлар',
     discountedDishes: 'Супер Чегирмалар',
     recommended: 'Тавсия қиламиз',
@@ -788,6 +792,8 @@ export const translations = {
     navProfile: 'Профиль',
 
     deliveryAddress: 'Адрес доставки',
+    addressPointMissing: 'Нет точки на карте — изменить',
+    addressPointMissingMsg: 'Для доставки выберите адрес на карте. У текущего адреса нет точки на карте.',
     trendingDishes: 'Популярные блюда',
     discountedDishes: 'Супер скидки',
     recommended: 'Рекомендуем',

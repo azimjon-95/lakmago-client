@@ -1060,3 +1060,18 @@ margin-left: 16px;
   .cart-pending__btn:active:not(:disabled) { transform: none; }
   .cart-pending__btn--primary.is-loading:disabled { animation: none; opacity: 0.75; }
 }
+
+/*
+ * Tanlangan manzilda xarita nuqtasi (lat/lng) yo'q — yetkazishda
+ * buyurtma berib bo'lmaydi. Sariq ogohlantirish: `required` (brand,
+ * manzil umuman yo'q) dan farqli — manzil BOR, faqat nuqta yetishmaydi.
+ */
+.cart-field--warn {
+  border: 1.5px solid #e0a100;
+  background: linear-gradient(180deg, rgba(224, 161, 0, 0.12) 0%, var(--surface) 100%);
+}
+.cart-field__warn {
+  font-size: 12px; font-weight: 600;
+  color: #b07d00;
+  margin-top: 2px;
+}

@@ -21,6 +21,7 @@ import { setPendingIntent, clearPendingIntent } from '@/lib/pendingIntent';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useRequireSubscription } from '@/hooks/useRequireSubscription';
 import { useModalBackClose } from '@/hooks/useModalBackClose';
+import { hasValidCoords, deliveryAddressCheck } from '@/lib/addressCoords';
 import './Cart.css';
 
 
@@ -694,6 +695,12 @@ export function CartPage() {
   const bonusApplied = 0;
   const total = orderSum;
   const selectedAddress = user.addresses.find((a) => a.id === user.defaultAddressId) ?? user.addresses[0];
+  /*
+   * Tanlangan manzilda xarita nuqtasi (lat/lng) yo'qmi — faqat yetkazishda.
+   * Manzil maydoni shu bilan ogohlantirish ko'rsatadi va buyurtma
+   * bosilganda (handlePlaceOrder / confirmAndSubmit) yo'l berilmaydi.
+   */
+  const needsPoint = !isPickup && Boolean(selectedAddress) && !hasValidCoords(selectedAddress);
 
   /*
    * ═══ SAVAT IMZOSI ═══
@@ -790,9 +797,35 @@ export function CartPage() {
     );
   }
 
+  /*
+   * Mijozga nima yetishmayotganini aytadi va uni SHU ZAHOTI to'g'ri
+   * oynaga olib boradi (savatga qaytish shart emas):
+   *   • boshqa nuqtali manzil bor — manzillar ro'yxati (1 bosishda tanlaydi);
+   *   • yo'q — to'g'ridan-to'g'ri xaritadan qo'shish oqimi.
+   * Xabar oynadan OLDIN ko'rsatiladi (oyna savatni yopib qo'yadi).
+   */
+  function openAddressFix() {
+    const { panel } = deliveryAddressCheck({ isPickup, selectedAddress, addresses: user.addresses });
+    if (panel === 'flow') setShowAddressFlow(true);
+    else setShowAddressSheet(true);
+  }
+
+  function promptAddressPoint() {
+    alert(t('addressPointMissingMsg'));
+    openAddressFix();
+  }
+
   async function handlePlaceOrder() {
     // Manzil faqat yetkazishda majburiy
     if (!isPickup && !selectedAddress) { setShowAddressSheet(true); return; }
+    /*
+     * YETKAZISHDA XARITA NUQTASI MAJBURIY: manzil matni bor, lekin
+     * lat/lng yo'q bo'lsa (masalan Profil'dagi matnli forma orqali
+     * saqlangan) buyurtma berilmaydi — aks holda kuryerga nuqta
+     * yetib bormaydi va per-km yetkazish narxi 0 bo'lib qoladi.
+     * placeOrder'ga UMUMAN kirmaymiz. Olib ketishda talab qilinmaydi.
+     */
+    if (!isPickup && !hasValidCoords(selectedAddress)) { promptAddressPoint(); return; }
     if (!user.phone) { setPhoneDraft(''); setShowPhoneEdit(true); return; }
     // Belgilangan vaqt tanlanmagan bo'lsa — birinchi slotni olamiz
     if (timingMode === 'scheduled' && !scheduledFor && timeSlots.length) {
@@ -833,6 +866,20 @@ export function CartPage() {
 
   function confirmAndSubmit() {
     if (submitLock.current) return;
+
+    /*
+     * YAKUNIY HIMOYA: placeOrder aynan shu yerdan chaqiriladi.
+     * handlePlaceOrder'dagi tekshiruvdan keyin auth/obuna qadamlari
+     * (guest manzillari serverga sinxronlanishi mumkin) manzilni
+     * o'zgartirib yuborgan bo'lishi mumkin — shuning uchun yuborishdan
+     * oldin yana bir bor. Qulf (submitLock) hali O'RNATILMAGAN.
+     */
+    if (!isPickup && (!selectedAddress || !hasValidCoords(selectedAddress))) {
+      setShowConfirm(false);
+      if (!selectedAddress) setShowAddressSheet(true);
+      else promptAddressPoint();
+      return;
+    }
 
     /*
      * OXIRGI HIMOYA: yuborish oldidan provayder yana bir bor
@@ -1189,15 +1236,17 @@ export function CartPage() {
       {/* Manzil — faqat yetkazishda */}
       {!isPickup && (
       <button
-        onClick={() => setShowAddressSheet(true)}
-        className={`cart-field ${selectedAddress ? '' : 'cart-field--required'}`}
+        onClick={needsPoint ? openAddressFix : () => setShowAddressSheet(true)}
+        className={`cart-field ${selectedAddress ? (needsPoint ? 'cart-field--warn' : '') : 'cart-field--required'}`}
       >
         <Icon name="pin" size={22} color="var(--brand)" />
         <div className="cart-field__body">
           {selectedAddress ? (
             <>
               <div className="cart-field__value">{selectedAddress.title} · {selectedAddress.address}</div>
-              <div className="cart-field__label">{t('deliveryAddress')}</div>
+              {needsPoint
+                ? <div className="cart-field__warn">{t('addressPointMissing')}</div>
+                : <div className="cart-field__label">{t('deliveryAddress')}</div>}
             </>
           ) : (
             <div className="cart-field__value cart-field__value--accent">{t('address')}</div>
