@@ -1,6 +1,7 @@
 import { Icon } from './Icon';
 import { useSheetDrag } from '@/hooks/useSheetDrag';
-import { formatSom } from '@/lib/utils';
+import { formatSom, formatSomShort } from '@/lib/utils';
+import { deliveryTerms, hasDeliveryTerms } from '@/lib/deliveryInfo';
 import { useOpenStatus } from '@/hooks/useOpenStatus';
 import { useT } from '@/i18n';
 import './cards/RestaurantInfoSheet.css';
@@ -19,7 +20,13 @@ export function RestaurantInfoSheet({ restaurant, onClose }) {
   const r = restaurant || {};
   const { isOpen, hoursLabel, nextOpen } = useOpenStatus(r);
 
-  const hasFees = r.deliveryFee > 0
+  /*
+   * Yetkazish shartlari — restoranning FAOL rejimiga qarab (lib/deliveryInfo.js).
+   * Avval faqat `deliveryFee` ko'rsatilardi: kilometrli restoranda u zaxira
+   * narx bo'lgani uchun mijoz noto'g'ri narxni ko'rardi.
+   */
+  const terms = deliveryTerms(r);
+  const hasFees = hasDeliveryTerms(r)
     || r.minOrderAmount > 0 || r.deliveryMin > 0;
 
   /*
@@ -82,11 +89,7 @@ export function RestaurantInfoSheet({ restaurant, onClose }) {
                   ko'rsatilib, "yana qancha qo'shiladi?" degan
                   savol tug'ilardi. Hisob-kitobda o'zgarish yo'q.
                 */}
-                <Row
-                  label={t('deliveryTabTitle')}
-                  value={r.deliveryFee > 0 ? formatSom(r.deliveryFee) : t('free')}
-                  free={!(r.deliveryFee > 0)}
-                />
+                <DeliveryRows terms={terms} t={t} />
                 <Row
                   label={t('minOrderLabel')}
                   value={r.minOrderAmount > 0 ? formatSom(r.minOrderAmount) : t('unlimited')}
@@ -126,13 +129,85 @@ export function RestaurantInfoSheet({ restaurant, onClose }) {
   );
 }
 
-function Row({ label, value, free }) {
+function Row({ label, value, free, muted }) {
   return (
-    <div className="rinfo-row">
+    <div className={`rinfo-row ${muted ? 'rinfo-row--muted' : ''}`}>
       <span className="rinfo-row__label">{label}</span>
       <span className={`rinfo-row__value ${free ? 'rinfo-row__value--free' : ''}`}>
         {value}
       </span>
     </div>
+  );
+}
+
+/*
+ * "Yetkazib berish" qatori + faol rejimni TUSHUNTIRADIGAN pastki qatorlar.
+ *
+ *   Kilometrga qarab:   1 km gacha — 5 000 so'm
+ *                       Keyin har km uchun +2 000 so'm
+ *                       Masalan, 3 km — 9 000 so'm
+ *                       Masalan, 5 km — 13 000 so'm
+ *   Bitta narx:         15 000 so'm  (+ "masofadan qat'i nazar")
+ *   Bepul / o'chiq:     Bepul / Mavjud emas
+ *
+ * Bepul yetkazish chegarasi va eng uzoq masofa — ikkala rejimda ham.
+ * Kilometrli rejimda oxirida "aniq narx savatda" eslatmasi: mijoz ekrandagi
+ * misolni o'z narxi deb o'ylamasin.
+ */
+function DeliveryRows({ terms, t }) {
+  const title = t('deliveryTabTitle');
+
+  if (terms.mode === 'off') return <Row label={title} value={t('deliveryUnavailable')} />;
+
+  if (terms.mode === 'flat') {
+    return (
+      <>
+        <Row label={title} value={terms.free ? t('free') : formatSom(terms.fee)} free={terms.free} />
+        {(terms.threshold > 0 || terms.maxKm > 0 || !terms.free) && (
+          <div className="rinfo-sub">
+            {!terms.free && <p className="rinfo-sub__note">{t('deliveryFlatNote')}</p>}
+            {terms.threshold > 0 && (
+              <Row label={t('deliveryFreeFrom', { sum: formatSomShort(terms.threshold) })} value={t('free')} free />
+            )}
+            {terms.maxKm > 0 && (
+              <Row label={t('deliveryMaxKm')} value={t('deliveryMaxKmValue', { km: terms.maxKm })} />
+            )}
+          </div>
+        )}
+      </>
+    );
+  }
+
+  // perKm
+  const plus = terms.basePrice > 0 ? '+' : '';
+  return (
+    <>
+      <Row label={title} value={t('deliveryByKm')} />
+      <div className="rinfo-sub" data-testid="delivery-terms">
+        {terms.freeKm > 0 ? (
+          <Row
+            label={t('deliveryUpToKm', { km: terms.freeKm })}
+            value={terms.basePrice > 0 ? formatSom(terms.basePrice) : t('free')}
+            free={terms.basePrice === 0}
+          />
+        ) : terms.basePrice > 0 ? (
+          <Row label={t('deliveryStartPrice')} value={formatSom(terms.basePrice)} />
+        ) : null}
+        <Row
+          label={terms.hasFirstTier ? t('deliveryThenPerKm') : t('deliveryPerKm')}
+          value={`${plus}${formatSom(terms.perKm)}`}
+        />
+        {terms.examples.map((ex) => (
+          <Row key={ex.km} label={t('deliveryExampleKm', { km: ex.km })} value={formatSom(ex.price)} muted />
+        ))}
+        {terms.threshold > 0 && (
+          <Row label={t('deliveryFreeFrom', { sum: formatSomShort(terms.threshold) })} value={t('free')} free />
+        )}
+        {terms.maxKm > 0 && (
+          <Row label={t('deliveryMaxKm')} value={t('deliveryMaxKmValue', { km: terms.maxKm })} />
+        )}
+        <p className="rinfo-sub__note">{t('deliveryExactNote')}</p>
+      </div>
+    </>
   );
 }

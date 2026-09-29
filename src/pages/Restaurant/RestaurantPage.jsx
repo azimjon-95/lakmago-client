@@ -1,3 +1,4 @@
+import { isFreeDelivery, hasDeliveryTerms } from '@/lib/deliveryInfo';
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { CATEGORIES } from '@/data/categories';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
@@ -54,7 +55,7 @@ export function RestaurantPage() {
     restaurant?.openTime || restaurant?.closeTime || restaurant?.legalName ||
     restaurant?.legalAddress || restaurant?.inn || restaurant?.address ||
     restaurant?.minOrderAmount > 0 ||
-    restaurant?.serviceFeePercent > 0 || restaurant?.deliveryFee > 0,
+    restaurant?.serviceFeePercent > 0 || hasDeliveryTerms(restaurant),
   );
 
   /*
@@ -322,7 +323,7 @@ export function RestaurantPage() {
             </button>
           )}
 
-          {restaurant.deliveryFee === 0 && (
+          {isFreeDelivery(restaurant) && (
             <div className="rest-stat">
               <span className="rest-stat__icon rest-stat__icon--free">
                 <Icon name="bike" size={20} color="var(--brand)" />

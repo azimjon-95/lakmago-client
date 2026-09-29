@@ -22,9 +22,20 @@ export function I18nProvider({ children }) {
     localStorage.setItem(STORAGE_KEY, code);
   }, []);
 
-  // Tarjima funksiyasi — kalit topilmasa, uz'ga, u ham yo'q bo'lsa kalitning o'ziga qaytadi
-  const t = useCallback((key) => {
-    return translations[lang]?.[key] ?? translations[DEFAULT_LANG]?.[key] ?? key;
+    /*
+   * Tarjima funksiyasi — kalit topilmasa, uz'ga, u ham yo'q bo'lsa kalitning o'ziga qaytadi.
+   *
+   * Ixtiyoriy `params`: matndagi {nom} o'rniga qiymat qo'yiladi —
+   *   t('deliveryUpToKm', { km: 1 })  →  "1 km gacha"
+   * TO'LIQ jumla tarjima qilinadi (so'z tartibi tillarda har xil:
+   * "1 km gacha" / "До 1 км"), shuning uchun bo'laklarni yopishtirib
+   * bo'lmaydi. `params` berilmasa — avvalgidek, hech narsa almashtirilmaydi
+   * (matndagi {…} belgilari buzilmaydi). Topilmagan {nom} o'z holicha qoladi.
+   */
+  const t = useCallback((key, params) => {
+    const text = translations[lang]?.[key] ?? translations[DEFAULT_LANG]?.[key] ?? key;
+    if (!params) return text;
+    return text.replace(/\{(\w+)\}/g, (m, name) => (name in params ? String(params[name]) : m));
   }, [lang]);
 
   return (

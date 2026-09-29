@@ -1,3 +1,4 @@
+import { isFreeDelivery } from '@/lib/deliveryInfo';
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
@@ -64,7 +65,8 @@ export function SearchPage() {
       list = list.filter((r) => (r.deliveryMin ?? 30) <= maxTime);
     }
     if (specials.includes('discount')) list = list.filter((r) => r.discount > 0);
-    if (specials.includes('free')) list = list.filter((r) => r.deliveryFee === 0);
+    // Kilometrli restoran "bepul" emas (1 km gacha bepul bo'lsa ham keyin pullik)
+    if (specials.includes('free')) list = list.filter((r) => isFreeDelivery(r));
     if (specials.includes('fresh')) list = list.filter((r) => r.isFresh);
     if (specials.includes('top')) list = list.filter((r) => (r.rating ?? 0) >= 4.5);
 

@@ -101,3 +101,24 @@
 .rinfo-status.is-open { background: rgba(111, 191, 115, 0.12); color: var(--success); }
 .rinfo-status.is-closed { background: rgba(225, 75, 66, 0.12); color: var(--danger); }
 .rinfo-note--tight { margin-top: 6px; }
+
+/*
+ * YETKAZISH SHARTLARI — asosiy qator ostidagi tushuntirish bloki.
+ * Chap chiziq bu qatorlar yuqoridagi "Yetkazib berish"ga tegishli
+ * ekanini ko'rsatadi; ixcham qatorlar oynani cho'zib yubormaydi.
+ */
+.rinfo-sub {
+  margin: -2px 0 6px;
+  padding: 2px 0 2px 12px;
+  border-left: 3px solid var(--brand-tint, rgba(255, 92, 0, 0.16));
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+}
+.rinfo-sub .rinfo-row { padding: 8px 0; border-bottom: none; }
+.rinfo-sub .rinfo-row__label { font-size: 14px; }
+.rinfo-sub .rinfo-row__value { font-size: 14px; }
+.rinfo-row--muted .rinfo-row__label,
+.rinfo-row--muted .rinfo-row__value { color: var(--muted); font-weight: 600; }
+.rinfo-sub__note {
+  margin: 6px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--muted-2);
+}

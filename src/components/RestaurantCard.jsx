@@ -4,6 +4,7 @@ import { Icon } from './Icon';
 import { PHOTO_STYLES } from './DishPhoto';
 import { RestaurantBannerFallback } from './RestaurantBannerFallback';
 import { formatSomShort } from '@/lib/utils';
+import { cardDeliveryLabel } from '@/lib/deliveryInfo';
 import { useT } from '@/i18n';
 import { isOpenNow, workHoursLabel } from '@/lib/workHours';
 import { usePrefetchRestaurant } from '@/hooks/queries';
@@ -25,7 +26,13 @@ export const RestaurantCard = memo(function RestaurantCard({ restaurant: r }) {
   const hasPhoto = (r.images || []).length > 0;
   const photoKey = hasPhoto ? r.images[0] : null;
   const style = photoKey ? PHOTO_STYLES[photoKey] : null;
-  const freeDelivery = r.deliveryFee === 0;
+  /*
+   * Yetkazish yozuvi restoranning FAOL rejimiga qarab (lib/deliveryInfo.js).
+   * Avval `deliveryFee === 0` "Bepul yetkazish" deb yozardi — kilometrli
+   * restoranda esa bu faqat zaxira narx: mijoz aslida har km uchun to'laydi.
+   */
+  const delivery = cardDeliveryLabel(r);
+  const freeDelivery = delivery?.kind === 'free';
   const realImg = r.imageUrl || (r.images && r.images.find((u) => typeof u === 'string' && u.startsWith('http')));
   const optimizedImg = realImg && realImg.includes('/upload/')
     ? realImg.replace('/upload/', '/upload/f_auto,q_auto,w_500,c_fill/')
@@ -109,7 +116,15 @@ export const RestaurantCard = memo(function RestaurantCard({ restaurant: r }) {
           {freeDelivery ? (
             <span className="rcard__free"><Icon name="bike" size={13} color="var(--success)" /> {t('freeDelivery')}</span>
           ) : (
-            <span className="rcard__meta-item"><Icon name="bike" size={13} color="var(--muted)" /> {formatSomShort(r.deliveryFee)} {t('som')}</span>
+            delivery && (
+            <span className="rcard__meta-item">
+              <Icon name="bike" size={13} color="var(--muted)" />{' '}
+              {delivery.kind === 'flat' && `${formatSomShort(delivery.price)} ${t('som')}`}
+              {delivery.kind === 'from' && t('deliveryFromShort', { price: formatSomShort(delivery.price) })}
+              {delivery.kind === 'freeUpTo' && t('deliveryFreeUpToShort', { km: delivery.km })}
+              {delivery.kind === 'perKm' && t('deliveryPerKmShort', { price: formatSomShort(delivery.price) })}
+            </span>
+          )
           )}
         </div>
       </div>
