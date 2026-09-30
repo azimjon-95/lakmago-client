@@ -347,16 +347,16 @@ export function HomePage() {
   //   [filtered, shuffleSeed],
   // );
   const shuffledRestaurants = useMemo(() => {
-    const zinat = filtered.find(
-      (r) => r.name?.toLowerCase() === 'zinat restaurant'
+    const ziynat = filtered.find(
+      (r) => r.name?.toLowerCase() === 'ziynat restaurant'
     );
-    
+
     const others = seededShuffle(
-      filtered.filter((r) => r !== zinat),
-        shuffleSeed + 1
+      filtered.filter((r) => r !== ziynat),
+      shuffleSeed + 1
     );
-    
-    return zinat ? [zinat, ...others] : others;
+
+    return ziynat ? [ziynat, ...others] : others;
   }, [filtered, shuffleSeed]);
 
   return (
