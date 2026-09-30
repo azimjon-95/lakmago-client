@@ -341,10 +341,23 @@ export function HomePage() {
 
   const openModal = useCallback((d) => setModalDish(d), []);
   const closeModal = useCallback(() => setModalDish(null), []);
-  const shuffledRestaurants = useMemo(
-    () => seededShuffle(filtered, shuffleSeed + 1),
-    [filtered, shuffleSeed],
-  );
+  
+  // const shuffledRestaurants = useMemo(
+  //   () => seededShuffle(filtered, shuffleSeed + 1),
+  //   [filtered, shuffleSeed],
+  // );
+  const shuffledRestaurants = useMemo(() => {
+    const zinat = filtered.find(
+      (r) => r.name?.toLowerCase() === 'zinat restaurant'
+    );
+    
+    const others = seededShuffle(
+      filtered.filter((r) => r !== zinat),
+        shuffleSeed + 1
+    );
+    
+    return zinat ? [zinat, ...others] : others;
+  }, [filtered, shuffleSeed]);
 
   return (
     <div className="app-shell home">
