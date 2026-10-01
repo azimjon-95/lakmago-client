@@ -32,6 +32,7 @@ import {
 
 import { AddressSheet } from '@/components/AddressSheet';
 import './Home.css';
+import { placePinned } from '@/lib/restaurantPins';
 
 // Kategoriyalar markaziy ro'yxatdan (src/data/categories.js)
 
@@ -342,22 +343,15 @@ export function HomePage() {
   const openModal = useCallback((d) => setModalDish(d), []);
   const closeModal = useCallback(() => setModalDish(null), []);
   
-  // const shuffledRestaurants = useMemo(
-  //   () => seededShuffle(filtered, shuffleSeed + 1),
-  //   [filtered, shuffleSeed],
-  // );
-  const shuffledRestaurants = useMemo(() => {
-    const ziynat = filtered.find(
-      (r) => r.name?.toLowerCase() === 'ziynat restaurant'
-    );
-
-    const others = seededShuffle(
-      filtered.filter((r) => r !== ziynat),
-      shuffleSeed + 1
-    );
-
-    return ziynat ? [ziynat, ...others] : others;
-  }, [filtered, shuffleSeed]);
+  /*
+   * "Barcha restoranlar": tasodifiy (seed bilan) tartib; admin pin qilgan
+   * restoranlar (1, 2, 3-o'rin, muddat bilan) o'z o'rniga chiqadi — lib/restaurantPins.js.
+   * Pin yo'q bo'lsa tartib avvalgidek (faqat seededShuffle).
+   */
+  const shuffledRestaurants = useMemo(
+    () => placePinned(seededShuffle(filtered, shuffleSeed + 1)),
+    [filtered, shuffleSeed],
+  );
 
   return (
     <div className="app-shell home">
@@ -512,6 +506,7 @@ export function HomePage() {
     <RestaurantCard
       key={r.id || r._id}
       restaurant={r}
+      showPin
     />
   ))
 ) : (

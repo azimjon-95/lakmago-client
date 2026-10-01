@@ -9,8 +9,10 @@ import { useT } from '@/i18n';
 import { isOpenNow, workHoursLabel } from '@/lib/workHours';
 import { usePrefetchRestaurant } from '@/hooks/queries';
 import './cards/RestaurantCard.css';
+import { PinBadge } from '@/components/PinBadge';
+import { activePin } from '@/lib/restaurantPins';
 
-export const RestaurantCard = memo(function RestaurantCard({ restaurant: r }) {
+export const RestaurantCard = memo(function RestaurantCard({ restaurant: r, showPin = false }) {
   // Ish vaqti — har render'da hisoblanadi (vaqt o'zgaradi)
   const hours = workHoursLabel(r);
   // Server /restaurants javobida ish kunlarini (workingDays) ham
@@ -75,6 +77,8 @@ export const RestaurantCard = memo(function RestaurantCard({ restaurant: r }) {
 
         {/* Rasm yo'q yoki hali yuklanmagan — umumiy zaxira ko'rinish */}
         {showFallback && <RestaurantBannerFallback name={r.name} />}
+        {/* Admin pin qilgan (faol) restoran — burchakda kichik pin; faqat bosh sahifada (showPin) */}
+        {showPin && activePin(r) && <PinBadge label={t('pinned')} />}
         {r.discount && <div className="rcard__tag rcard__tag--discount">−{r.discount}%</div>}
         {r.isFresh && !r.discount && <div className="rcard__tag rcard__tag--new">{t('fresh')}</div>}
         {/* Yetkazish vaqti — banner burchagida (Uzum uslubi) */}
