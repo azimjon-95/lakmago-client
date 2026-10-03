@@ -77,6 +77,8 @@ export const translations = {
 
     // Restoran
     freeDelivery: 'Bepul yetkazish',
+    freeDeliveryReached: "Bepul yetkazish qo'lga kiritildi!",
+    freeDeliveryLeft: 'Bepul yetkazishgacha',
     delivery: 'Yetkazish',
     rating: 'Reyting',
     reserveTable: 'Stol bron qilish',
@@ -501,6 +503,8 @@ export const translations = {
     restaurants: 'Ресторанлар',
 
     freeDelivery: 'Бепул етказиш',
+    freeDeliveryReached: 'Бепул етказиш қўлга киритилди!',
+    freeDeliveryLeft: 'Бепул етказишгача',
     delivery: 'Етказиш',
     rating: 'Рейтинг',
     reserveTable: 'Стол брон қилиш',
@@ -900,6 +904,8 @@ export const translations = {
     restaurants: 'Рестораны',
 
     freeDelivery: 'Бесплатная доставка',
+    freeDeliveryReached: 'Бесплатная доставка получена!',
+    freeDeliveryLeft: 'До бесплатной доставки',
     delivery: 'Доставка',
     rating: 'Рейтинг',
     reserveTable: 'Забронировать стол',
