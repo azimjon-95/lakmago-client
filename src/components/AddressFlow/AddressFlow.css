@@ -593,6 +593,13 @@
   background: #FFECE8; color: #C0392B;
   font-size: 13.5px; text-align: center;
 }
+.locperm__error-btn {
+  display: block; margin: 8px auto 0;
+  padding: 7px 14px; border-radius: 10px;
+  background: #fff; color: #C0392B;
+  border: 1px solid #F3B8AE;
+  font-size: 13px; font-weight: 600;
+}
 
 .locperm__actions {
   display: flex; flex-direction: column; align-items: stretch; gap: 6px;

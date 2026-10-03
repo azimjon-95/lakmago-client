@@ -1,18 +1,28 @@
 import { useState } from 'react';
 import { Icon } from '@/components/Icon';
-import { getCurrentPosition, reverseGeocode, isPrecise } from '@/lib/location';
+import { getCurrentPosition, reverseGeocode, isPrecise, canOpenLocationSettings, openLocationSettings } from '@/lib/location';
 import { haptic } from '@/lib/telegram';
 import { useT } from '@/i18n';
 
 // 1-bosqich: joylashuvга ruxsat so'rash yoki qo'lda kiritish
+// Xato sababi → tarjima kaliti (foydalanuvchiga nima qilish kerakligi aytiladi)
+const ERR_KEY = {
+  denied: 'locErrDenied',
+  timeout: 'locErrTimeout',
+  unavailable: 'locErrUnavailable',
+  unsupported: 'locErrUnsupported',
+};
+
 export function LocationPermission({ onDetected, onApproximate, onManual, onClose }) {
   const t = useT();
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState(null);
+  const [errCode, setErrCode] = useState(null);
 
   const detect = async () => {
     haptic();
     setErr(null);
+    setErrCode(null);
     setLoading(true);
     try {
       const pos = await getCurrentPosition();
@@ -31,7 +41,8 @@ export function LocationPermission({ onDetected, onApproximate, onManual, onClos
       const addr = await reverseGeocode(pos.lat, pos.lng);
       onDetected({ lat: pos.lat, lng: pos.lng, ...addr });
     } catch (e) {
-      setErr(e.message);
+      setErr(ERR_KEY[e.code] ? t(ERR_KEY[e.code]) : (e.message || t('locErrUnavailable')));
+      setErrCode(e.code || null);
     } finally {
       setLoading(false);
     }
@@ -74,7 +85,17 @@ export function LocationPermission({ onDetected, onApproximate, onManual, onClos
         />
       </div>
 
-      {err && <div className="locperm__error">{err}</div>}
+      {err && (
+        <div className="locperm__error" role="alert" data-testid="locperm-error">
+          {err}
+          {/* Ruxsat rad etilgan: Telegram sozlamalarini ochish — mijoz o'zi izlab yurmasin */}
+          {errCode === 'denied' && canOpenLocationSettings() && (
+            <button type="button" onClick={openLocationSettings} className="locperm__error-btn" data-testid="locperm-settings">
+              {t('openLocationSettings')}
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="locperm__actions">
         <button onClick={detect} disabled={loading} className="locperm__btn">

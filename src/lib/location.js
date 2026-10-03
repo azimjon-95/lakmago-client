@@ -29,8 +29,47 @@ import { api } from '@/api';
 const GOOD_ENOUGH_M = 20;
 // Telegram natijasi shundan yomon bo'lsa — brauzer bilan aniqlashtiramiz
 const TG_REFINE_ABOVE_M = 60;
-// Eng uzoq kutish (GPS sovuq holatda qulflanishiga vaqt kerak)
-const MAX_WAIT_MS = 10000;
+
+/*
+ * ═══════════════════════════════════════════════════════════
+ * KUTISH CHEGARALARI — "Aniqlanmoqda..." abadiy qotib qolmasin
+ * ═══════════════════════════════════════════════════════════
+ * AVVAL: Telegram LocationManager (`init`, `getLocation`) va geokoder `fetch` HECH QANDAY
+ * chegarasiz kutilardi. Qishloqdagi sust/uzilib turadigan internetda yoki Telegram ruxsat
+ * oynasiga javob bermaganda callback umuman chaqirilmasdi — `await` abadiy turib, tugma
+ * "Aniqlanmoqda..." bo'lib qolardi va mijoz hech narsa qila olmasdi.
+ *
+ * Endi har bosqichning o'z chegarasi bor; chegara tugasa keyingi usulga o'tiladi yoki aniq
+ * sabab bilan xato beriladi (LocationError.code). Testda kichik qiymat qo'yish mumkin.
+ */
+export const LOC = {
+  telegramMs: 8000,        // Telegram init / getLocation (ruxsat so'ralgan bo'lsa)
+  telegramPromptMs: 30000, // birinchi marta: Telegram ruxsat oynasi — o'qib, bosishga vaqt kerak
+  browserMs: 15000,        // brauzer GPS (sovuq GPS qishloqda 10–40 s olishi mumkin)
+  geocodeMs: 6000,         // koordinata → manzil (har bir xizmat uchun)
+};
+
+/**
+ * Joylashuv xatosi. `code`:
+ *   unsupported — qurilma/brauzer joylashuvni bilmaydi;
+ *   denied      — ruxsat berilmagan (Telegram yoki telefon sozlamasida o'chiq);
+ *   timeout     — vaqt ichida signal topilmadi (GPS sovuq, yopiq joy, qishloqda tarmoq yo'q);
+ *   unavailable — qurilma joylashuvni bera olmadi (joylashuv xizmati/GPS o'chiq).
+ */
+export class LocationError extends Error {
+  constructor(code, message) {
+    super(message);
+    this.name = 'LocationError';
+    this.code = code;
+  }
+}
+
+/** Promise ni `ms` dan keyin `fallback` bilan tugatadi (asl promise keyin tugasa — e'tiborsiz). */
+export function withTimeout(promise, ms, fallback = null) {
+  let timer;
+  const timeout = new Promise((resolve) => { timer = setTimeout(() => resolve(fallback), ms); });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
 
 /** Koordinata haqiqiymi (0,0 va chegaradan tashqari qiymatlar rad). */
 function validCoords(lat, lng) {
@@ -39,24 +78,48 @@ function validCoords(lat, lng) {
     && !(lat === 0 && lng === 0);
 }
 
-/** Telegram LocationManager (Bot API 8.0+) orqali. */
+/**
+ * Telegram LocationManager (Bot API 8.0+) orqali.
+ * @returns {{ pos: {lat,lng,accuracy}|null, denied: boolean }}
+ *   denied — ruxsat so'ralgan, lekin berilmagan (foydalanuvchi sozlamadan yoqishi kerak).
+ */
 async function telegramPosition() {
   const lm = getTelegram()?.LocationManager;
-  if (!lm) return null;
+  if (!lm) return { pos: null, denied: false };
   try {
-    if (!lm.isInited) await new Promise((resolve) => lm.init(resolve));
-    if (!lm.isLocationAvailable) return null;
-    const d = await new Promise((resolve) => lm.getLocation(resolve));
-    if (!d || !validCoords(d.latitude, d.longitude)) return null;
+    if (!lm.isInited) {
+      // init javob bermasa Telegram LocationManager ishlamayapti — darhol brauzerga o'tamiz (ikki marta kutmaymiz)
+      const inited = await withTimeout(new Promise((resolve) => lm.init(() => resolve(true))), LOC.telegramMs, false);
+      if (!inited) return { pos: null, denied: false };
+    }
+    if (!lm.isLocationAvailable) return { pos: null, denied: false };
+    // Hali so'ralmagan bo'lsa Telegram ruxsat oynasini ko'rsatadi — foydalanuvchiga vaqt beramiz
+    const budget = lm.isAccessRequested ? LOC.telegramMs : LOC.telegramPromptMs;
+    const d = await withTimeout(new Promise((resolve) => lm.getLocation(resolve)), budget, null);
+    if (!d || !validCoords(d.latitude, d.longitude)) {
+      return { pos: null, denied: Boolean(lm.isAccessRequested && lm.isAccessGranted === false) };
+    }
     return {
-      lat: d.latitude,
-      lng: d.longitude,
-      // Telegram aniqlikni bermasa — noma'lum deb hisoblaymiz
-      accuracy: Number.isFinite(d.horizontal_accuracy) ? d.horizontal_accuracy : null,
+      pos: {
+        lat: d.latitude,
+        lng: d.longitude,
+        // Telegram aniqlikni bermasa — noma'lum deb hisoblaymiz
+        accuracy: Number.isFinite(d.horizontal_accuracy) ? d.horizontal_accuracy : null,
+      },
+      denied: false,
     };
   } catch {
-    return null;
+    return { pos: null, denied: false };
   }
+}
+
+/** Telegram'ning joylashuv sozlamalarini ochadi (ruxsat rad etilgan bo'lsa). */
+export function canOpenLocationSettings() {
+  return typeof getTelegram()?.LocationManager?.openSettings === 'function';
+}
+export function openLocationSettings() {
+  if (!canOpenLocationSettings()) return false;
+  try { getTelegram().LocationManager.openSettings(); return true; } catch { return false; }
 }
 
 /**
@@ -65,10 +128,13 @@ async function telegramPosition() {
  * watchPosition ishlatiladi, getCurrentPosition emas: u birinchi
  * (odatda tarmoq bo'yicha, noaniq) natijada to'xtamaydi va GPS
  * qulflanishini kutadi.
+ *
+ * Vaqt tugaganda ENG YAXSHI olingan natija qaytadi (noaniq bo'lsa ham — chaqiruvchi xaritada
+ * tasdiqlatadi); hech narsa bo'lmasa — sababi bilan LocationError.
  */
 function browserPosition() {
   if (!navigator.geolocation) {
-    return Promise.reject(new Error('Qurilma joylashuvni qo‘llab-quvvatlamaydi'));
+    return Promise.reject(new LocationError('unsupported', 'Qurilma joylashuvni qo‘llab-quvvatlamaydi'));
   }
 
   return new Promise((resolve, reject) => {
@@ -90,7 +156,7 @@ function browserPosition() {
           accuracy: best.coords.accuracy,
         });
       } else {
-        reject(error || new Error('Joylashuv aniqlanmadi'));
+        reject(error || new LocationError('timeout', 'Joylashuv aniqlanmadi (vaqt tugadi)'));
       }
     };
 
@@ -108,22 +174,27 @@ function browserPosition() {
          * holatda darhol to'xtaymiz.
          */
         if (err.code === 1) {
-          finish(new Error('Joylashuvga ruxsat berilmadi'));
+          finish(new LocationError('denied', 'Joylashuvga ruxsat berilmadi'));
           return;
         }
         if (best) { finish(); return; }
-        if (err.code === 3) finish(new Error('Joylashuv aniqlanmadi (vaqt tugadi)'));
-        else finish(new Error('Joylashuvni olishda xato'));
+        if (err.code === 3) finish(new LocationError('timeout', 'Joylashuv aniqlanmadi (vaqt tugadi)'));
+        else finish(new LocationError('unavailable', 'Joylashuvni olishda xato'));
       },
-      { enableHighAccuracy: true, timeout: MAX_WAIT_MS + 5000, maximumAge: 0 },
+      /*
+       * maximumAge 30 s: yaqinda (masalan xarita ilovasi) olingan joy qabul qilinadi — qishloqda
+       * sovuq GPS 10–40 s olishi mumkin, tayyor joy bo'lsa kutib o'tirmaymiz. Aniqligi baribir
+       * tekshiriladi (isPrecise); noaniq bo'lsa mijoz xaritada tasdiqlaydi.
+       */
+      { enableHighAccuracy: true, timeout: LOC.browserMs + 5000, maximumAge: 30000 },
     );
 
-    timer = setTimeout(() => finish(), MAX_WAIT_MS);
+    timer = setTimeout(() => finish(), LOC.browserMs);
   });
 }
 
 export async function getCurrentPosition() {
-  const tg = await telegramPosition();
+  const { pos: tg, denied } = await telegramPosition();
 
   // Telegram yetarlicha aniq natija berdi
   if (tg && tg.accuracy !== null && tg.accuracy <= TG_REFINE_ABOVE_M) return tg;
@@ -141,6 +212,13 @@ export async function getCurrentPosition() {
     return br.accuracy < tgAcc ? br : tg;
   } catch (e) {
     if (tg) return tg;
+    /*
+     * Telegram ruxsat so'ralgan-u berilmagan bo'lsa, brauzerdagi "vaqt tugadi" / "xato" ning
+     * haqiqiy sababi ham shu — foydalanuvchiga to'g'ri yo'l-yo'riq ko'rsatamiz.
+     */
+    if (denied && (e.code === 'timeout' || e.code === 'unavailable')) {
+      throw new LocationError('denied', 'Joylashuvga ruxsat berilmadi');
+    }
     throw e;
   }
 }
@@ -154,18 +232,42 @@ export function isPrecise(pos) {
   return Number.isFinite(pos?.accuracy) && pos.accuracy <= PRECISE_LOCATION_M;
 }
 
+/**
+ * fetch + kutish chegarasi. Chaqiruvchining `signal` i (masalan yangi qidiruv eskisini bekor
+ * qilganda) bilan birlashtiriladi: u bekor qilsa AbortError tashlanadi, chegara tugasa — oddiy
+ * xato (chaqiruvchi zaxira yo'liga o'tadi).
+ */
+async function fetchJson(url, signal) {
+  const ctrl = new AbortController();
+  const onAbort = () => ctrl.abort();
+  if (signal) {
+    if (signal.aborted) ctrl.abort();
+    else signal.addEventListener('abort', onAbort, { once: true });
+  }
+  const timer = setTimeout(() => ctrl.abort(), LOC.geocodeMs);
+  try {
+    const res = await fetch(url, { signal: ctrl.signal, headers: { 'Accept': 'application/json' } });
+    if (!res.ok) throw new Error('geocode');
+    return await res.json();
+  } catch (e) {
+    // Faqat CHAQIRUVCHI bekor qilgan bo'lsagina AbortError; o'z chegaramiz tugagani — oddiy xato
+    if (e.name === 'AbortError' && !signal?.aborted) throw new Error('geocode-timeout');
+    throw e;
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener('abort', onAbort);
+  }
+}
+
 // 2) Koordinatani manzilга aylantirish (reverse geocoding)
 // Nominatim (OpenStreetMap) — bepul, kalit talab qilmaydi.
 export async function reverseGeocode(lat, lng, signal) {
   const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=uz`;
   try {
-    const res = await fetch(url, { signal, headers: { 'Accept': 'application/json' } });
-    if (!res.ok) throw new Error('geocode');
-    const data = await res.json();
-    return formatAddress(data);
+    return formatAddress(await fetchJson(url, signal));
   } catch (e) {
     if (e.name === 'AbortError') throw e;
-    // Xato bo'lsa koordinata ko'rsatamiz
+    // Xato / chegara tugasa koordinata ko'rsatamiz (mijoz qotib qolmaydi)
     return { street: `${lat.toFixed(5)}, ${lng.toFixed(5)}`, city: '', full: `${lat.toFixed(5)}, ${lng.toFixed(5)}` };
   }
 }
@@ -176,9 +278,7 @@ export async function searchAddress(query, signal) {
   // O'zbekiston bilan cheklaymiz (aniqroq natija)
   const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(query)}&countrycodes=uz&limit=8&accept-language=uz`;
   try {
-    const res = await fetch(url, { signal, headers: { 'Accept': 'application/json' } });
-    if (!res.ok) return [];
-    const list = await res.json();
+    const list = await fetchJson(url, signal);
     return list.map((item) => ({
       lat: Number(item.lat),
       lng: Number(item.lon),
@@ -200,8 +300,9 @@ export async function searchAddress(query, signal) {
  */
 export async function reverseGeocodeViaYandex(lat, lng) {
   try {
-    const { address } = await api.reverseGeocodeYandex(lat, lng);
-    if (address) return formatYandexAddress(address);
+    // Server proksi ham sust tarmoqda osilib qolmasin — chegara tugasa Nominatim'ga o'tamiz
+    const res = await withTimeout(api.reverseGeocodeYandex(lat, lng), LOC.geocodeMs, null);
+    if (res?.address) return formatYandexAddress(res.address);
   } catch { /* Nominatim'ga o'tamiz */ }
   return reverseGeocode(lat, lng);
 }
