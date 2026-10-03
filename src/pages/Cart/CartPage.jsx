@@ -5,6 +5,8 @@ import { DishPhoto } from '@/components/DishPhoto';
 import { AddressSheet } from '@/components/AddressSheet';
 import { OrderConfirmModal } from '@/components/OrderConfirmModal';
 import { AddressEditSheet } from '@/components/AddressEditSheet';
+import { CoCard, CoOption, ScooterBadge, CashArt, CardArt } from './CheckoutParts';
+import './CheckoutSections.css';
 import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
 import { useCart } from '@/store/cart';
 import { useUser } from '@/store/user';
@@ -655,6 +657,12 @@ export function CartPage() {
   const fmtClock = (d) => d.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', hour12: false });
   const readyTimeLabel = fmtClock(new Date(Date.now() + prepMinutes * 60_000));
   const etaLabel = fmtClock(new Date(Date.now() + deliveryMinutes * 60_000));
+  // "taxminan 20–35 daqiqa": eng sekin restoran bo'yicha (etaLabel bilan bir xil mantiq)
+  const etaHi = deliveryMinutes;
+  const etaLo = Math.min(
+    groups.length ? Math.max(...groups.map((g) => g.restaurant.deliveryMin ?? 25)) : 25,
+    etaHi,
+  );
 
   // Belgilangan vaqt uchun slotlar (30 daqiqalik oraliq, 8 soatgacha)
   const timeSlots = useMemo(() => {
@@ -1193,170 +1201,221 @@ export function CartPage() {
         </div>
       ))}
 
-      {/* Yetkazish turi — kuryer yoki o'zim olib ketaman */}
-      <div className="cart-section-label">{t('howToReceive')}</div>
-      <div className="cart-fulfillment">
-        <button
-          onClick={() => { if (deliveryOff) return; haptic(); setFulfillment('delivery'); }}
-          disabled={!!deliveryOff}
-          className={`cart-ftab ${fulfillment === 'delivery' ? 'is-active' : ''} ${deliveryOff ? 'is-disabled' : ''}`}
-        >
-          <Icon name="bike" size={19} color={fulfillment === 'delivery' ? 'var(--brand)' : 'var(--muted)'} />
-          <span className="cart-ftab__title">{t('deliveryTabTitle')}</span>
-          <span className="cart-ftab__sub">
-            {deliveryOff
+      {/*
+        ═══ BUYURTMA BO'LIMLARI — yangi dizayn (CheckoutParts.jsx / CheckoutSections.css) ═══
+        Faqat KO'RINISH o'zgargan: holat, shartlar va bosish mantiqi avvalgidek.
+      */}
+
+      {/* Buyurtma turi — kuryer yoki o'zim olib ketaman */}
+      <CoCard icon="bag" title={t('orderTypeTitle')}>
+        <div className="co-grid2">
+          <CoOption
+            testId="co-fulfil-delivery"
+            active={fulfillment === 'delivery'}
+            disabled={!!deliveryOff}
+            onClick={() => { if (deliveryOff) return; haptic(); setFulfillment('delivery'); }}
+            media={<ScooterBadge />}
+            title={t('deliveryTabTitle')}
+            sub={deliveryOff
               ? t('notAvailable')
               : (pricing.deliveryFee === 0 ? t('free') : formatSom(pricing.deliveryFee))}
-          </span>
-        </button>
-        <button
-          onClick={() => { haptic(); setFulfillment('pickup'); }}
-          className={`cart-ftab ${fulfillment === 'pickup' ? 'is-active' : ''}`}
-        >
-          <Icon name="bag" size={19} color={fulfillment === 'pickup' ? 'var(--brand)' : 'var(--muted)'} />
-          <span className="cart-ftab__title">{t('pickupSelf')}</span>
-        </button>
-      </div>
-
-      {/* Yetkazish mavjud emasligi haqida aniq ogohlantirish */}
-      {deliveryOff && (
-        <div className="cart-delivery-off">
-          <Icon name="info" size={16} color="var(--appetite)" />
-          <span>
-            {deliveryOff.length === 1
-              ? `${deliveryOff[0].name} ${t('restaurantNoDelivery')}`
-              : t('someRestaurantsNoDelivery')}
-            {' '}{t('canPickupInstead')}
-          </span>
+          />
+          <CoOption
+            testId="co-fulfil-pickup"
+            active={fulfillment === 'pickup'}
+            onClick={() => { haptic(); setFulfillment('pickup'); }}
+            media={<Icon name="store" size={34} color="#5B6577" strokeWidth={1.7} />}
+            title={t('pickupSelf')}
+            sub={t('pickupSelfSub')}
+          />
         </div>
-      )}
 
-      {/* Vaqt — hozir yoki belgilangan */}
-      <div className="cart-section-label">{t('whenLabel')}</div>
-      <div className="cart-timing">
-        <div className="cart-timing__tabs">
+        {/* Yetkazish mavjud emasligi haqida aniq ogohlantirish */}
+        {deliveryOff && (
+          <div className="cart-delivery-off">
+            <Icon name="info" size={16} color="var(--appetite)" />
+            <span>
+              {deliveryOff.length === 1
+                ? `${deliveryOff[0].name} ${t('restaurantNoDelivery')}`
+                : t('someRestaurantsNoDelivery')}
+              {' '}{t('canPickupInstead')}
+            </span>
+          </div>
+        )}
+      </CoCard>
+
+      {/* Qachon — hozir yoki belgilangan vaqt */}
+      <CoCard icon="clock" title={t('whenLabel')}>
+        <div className="co-grid2 co-grid2--time">
           <button
+            type="button"
+            data-testid="co-time-asap"
             onClick={() => { haptic(); setTimingMode('asap'); }}
-            className={`cart-ttab ${timingMode === 'asap' ? 'is-active' : ''}`}
+            className={`co-time ${timingMode === 'asap' ? 'is-active' : ''}`}
           >
-            {isPickup ? t('readyWhenDone') : t('asapLabel')}
+            <Icon name={isPickup ? 'clock' : 'scooter'} size={26} color="currentColor" strokeWidth={1.9} />
+            <span className="co-time__text">
+              <b>{isPickup ? t('readyWhenDone') : t('asapLabel')}</b>
+              <small>({isPickup
+                ? t('approxOne').replace('{min}', prepMinutes)
+                : t('approxRange').replace('{min}', etaLo).replace('{max}', etaHi)})</small>
+            </span>
+            {timingMode === 'asap' && <Icon name="circleCheck" size={20} color="#fff" />}
           </button>
           <button
+            type="button"
+            data-testid="co-time-scheduled"
             onClick={() => { haptic(); setTimingMode('scheduled'); }}
-            className={`cart-ttab ${timingMode === 'scheduled' ? 'is-active' : ''}`}
+            className={`co-time ${timingMode === 'scheduled' ? 'is-active' : ''}`}
           >
-            {t('scheduleLabel')}
+            <Icon name="calendar" size={24} color="currentColor" strokeWidth={1.9} />
+            <span className="co-time__text"><b>{t('scheduleLabel')}</b></span>
+            {timingMode === 'scheduled'
+              ? <Icon name="circleCheck" size={20} color="#fff" />
+              : <Icon name="chevronRight" size={18} color="var(--muted)" />}
           </button>
         </div>
 
         {timingMode === 'asap' ? (
-          <div className="cart-timing__hint">
-            <Icon name="clock" size={15} color="var(--success)" />
-            <span>
-              {isPickup
-                ? t('readyAtApprox').replace('{time}', readyTimeLabel)
-                : t('deliveredAtApprox').replace('{time}', etaLabel)}
+          <div className="co-hint">
+            <Icon name="clock" size={26} color="var(--success)" strokeWidth={1.9} />
+            <span className="co-hint__text">
+              <span className="co-hint__title">
+                {isPickup
+                  ? t('readyAtApprox').replace('{time}', readyTimeLabel)
+                  : t('deliveredAtApprox').replace('{time}', etaLabel)}
+              </span>
+              <span className="co-hint__sub">{t('hintMayChange')}</span>
             </span>
+            <Icon name="chevronRight" size={18} color="var(--muted)" />
           </div>
         ) : (
-          <div className="cart-slots no-scrollbar">
+          <div className="co-slots no-scrollbar">
             {timeSlots.map((slot) => (
               <button
                 key={slot.value}
+                type="button"
                 onClick={() => { haptic(); setScheduledFor(slot.value); }}
-                className={`cart-slot ${scheduledFor === slot.value ? 'is-active' : ''}`}
+                className={`co-slot ${scheduledFor === slot.value ? 'is-active' : ''}`}
               >
                 {slot.label}
               </button>
             ))}
           </div>
         )}
-      </div>
+      </CoCard>
 
       {/* Manzil — faqat yetkazishda */}
       {!isPickup && (
-      <button
-        onClick={needsPoint ? openAddressFix : () => setShowAddressSheet(true)}
-        className={`cart-field ${selectedAddress ? (needsPoint ? 'cart-field--warn' : '') : 'cart-field--required'}`}
-      >
-        <Icon name="pin" size={22} color="var(--brand)" />
-        <div className="cart-field__body">
+        <CoCard icon="pin" title={t('address')} warn={Boolean(selectedAddress) && needsPoint}>
           {selectedAddress ? (
             <>
-              <div className="cart-field__value">{selectedAddress.title} · {selectedAddress.address}</div>
-              {needsPoint
-                ? <div className="cart-field__warn">{t('addressPointMissing')}</div>
-                : <div className="cart-field__label">{t('deliveryAddress')}</div>}
+              <div className="co-addr">
+                <Icon name="pin" size={26} color="var(--brand)" />
+                <div className="co-addr__body">
+                  <div className="co-addr__title">{selectedAddress.title} · {selectedAddress.address}</div>
+                  {needsPoint
+                    ? <div className="co-addr__warn">{t('addressPointMissing')}</div>
+                    : <div className="co-sub">{t('deliveryAddress')}</div>}
+                </div>
+                {/* Xarita: tanlangan manzilni xaritada ko'rish/nuqtasini to'g'rilash (mavjud AddressEditSheet) */}
+                <button
+                  type="button"
+                  data-testid="co-addr-map"
+                  onClick={() => { haptic(); setShowAddressEdit(true); }}
+                  className="co-pill"
+                >
+                  <Icon name="map" size={16} color="var(--ink)" />
+                  {t('mapBtn')}
+                </button>
+              </div>
+              <button
+                type="button"
+                data-testid="co-addr-change"
+                onClick={needsPoint ? openAddressFix : () => setShowAddressSheet(true)}
+                className="co-rowbtn"
+              >
+                <Icon name="home" size={20} color="var(--ink)" />
+                <span>{t('changeAddress')}</span>
+                <Icon name="chevronRight" size={18} color="var(--muted)" />
+              </button>
             </>
           ) : (
-            <div className="cart-field__value cart-field__value--accent">{t('address')}</div>
+            <button
+              type="button"
+              data-testid="co-addr-change"
+              onClick={() => setShowAddressSheet(true)}
+              className="co-rowbtn co-rowbtn--required"
+            >
+              <Icon name="pin" size={20} color="var(--brand)" />
+              <span>{t('address')}</span>
+              <Icon name="chevronRight" size={18} color="var(--muted)" />
+            </button>
           )}
-        </div>
-        <Icon name="chevronRight" size={18} color="var(--muted)" />
-      </button>
+        </CoCard>
       )}
 
       {/* Olib ketish manzili — restoran qayerdan olinadi */}
       {isPickup && groups.length > 0 && (
-        <div className="cart-pickup-info">
-          <Icon name="pin" size={20} color="var(--brand)" />
-          <div className="cart-pickup-info__body">
-            <div className="cart-pickup-info__title">{t('pickupAddressTitle')}</div>
-            {groups.map((g) => (
-              <div key={g.restaurant.id} className="cart-pickup-info__row">
-                <b>{g.restaurant.name}</b>
-                {g.restaurant.address && <span> — {g.restaurant.address}</span>}
-              </div>
-            ))}
-          </div>
-        </div>
+        <CoCard icon="pin" title={t('pickupAddressTitle')}>
+          {groups.map((g) => (
+            <div key={g.restaurant.id} className="co-pickup-row">
+              <b>{g.restaurant.name}</b>
+              {g.restaurant.address && <span> — {g.restaurant.address}</span>}
+            </div>
+          ))}
+        </CoCard>
       )}
 
-      {/* Telefon */}
-      <button
-        onClick={() => { setPhoneDraft(user.phone || ''); setShowPhoneEdit(true); }}
-        className={`cart-field ${user.phone ? '' : 'cart-field--required'}`}
-      >
-        <Icon name="phone" size={22} color={user.phone ? 'var(--success)' : 'var(--brand)'} />
-        <div className="cart-field__body">
-          <div className={`cart-field__value ${user.phone ? '' : 'cart-field__value--accent'}`}>
-            {user.phone || '+998 __ ___ __ __'}
-          </div>
-          <div className="cart-field__label">{t('phoneLabel')}</div>
-        </div>
-        <Icon name="chevronRight" size={18} color="var(--muted)" />
-      </button>
+      {/* Bog'lanish — telefon */}
+      <CoCard icon="phone" title={t('contactTitle')}>
+        <button
+          type="button"
+          data-testid="co-phone"
+          onClick={() => { setPhoneDraft(user.phone || ''); setShowPhoneEdit(true); }}
+          className={`co-phone ${user.phone ? '' : 'is-required'}`}
+        >
+          <span className="co-phone__icon">
+            <Icon name="phone" size={22} color={user.phone ? 'var(--success)' : 'var(--brand)'} />
+          </span>
+          <span className="co-phone__body">
+            <div className="co-phone__num">{user.phone || '+998 __ ___ __ __'}</div>
+            <div className="co-sub">{t('phoneRowLabel')}</div>
+          </span>
+          <span className="co-pill">
+            <Icon name="edit" size={15} color="var(--ink)" />
+            {t('changeBtn')}
+          </span>
+        </button>
+      </CoCard>
 
       {/* To'lov */}
-      <div className="cart-section-label">{t('paymentLabel')}</div>
-      <div className="cart-payment">
-        <div className="cart-payment__options">
+      <CoCard icon="wallet" title={t('paymentLabel')}>
+        <div className="co-grid2">
           {/*
             Restoran naqdni qabul qilmasa tugma KO'RSATILMAYDI —
             mijoz tanlab, keyin serverda rad javobini olmasin.
           */}
           {cashAllowed && (
-            <button
+            <CoOption
+              testId="co-pay-cash"
+              active={paymentMethod === 'cash'}
               onClick={() => { haptic(); setPaymentMethod('cash'); }}
-              className={`pay-opt ${paymentMethod === 'cash' ? 'is-active' : ''}`}
-            >
-              <span className="pay-opt__emoji">💵</span>
-              <span>{t('cash')}</span>
-              {paymentMethod === 'cash' && <Icon name="circleCheck" size={15} color="var(--brand)" />}
-            </button>
+              media={<CashArt />}
+              title={t('cash')}
+              sub={t('cashSub')}
+            />
           )}
 
-          <button
-            onClick={pickCardProvider}
+          <CoOption
+            testId="co-pay-card"
+            active={isCard}
             disabled={!onlineAvailable}
-            className={`pay-opt ${isCard ? 'is-active' : ''} ${
-              !onlineAvailable ? 'is-disabled' : ''
-            }`}
-          >
-            <span className="pay-opt__emoji">💳</span>
-            <span>{t('byCard')}</span>
-            {isCard && <Icon name="circleCheck" size={15} color="var(--success)" />}
-          </button>
+            onClick={pickCardProvider}
+            media={<CardArt />}
+            title={t('byCard')}
+            sub={t('cardSub')}
+          />
         </div>
 
         {/*
@@ -1380,24 +1439,23 @@ export function CartPage() {
           Qaysi tizim orqali — IKKITADAN KO'P provayder ulangan
           bo'lsagina ko'rsatiladi. Bitta bo'lsa tanlov ma'nosiz
           (u allaqachon avtomatik tanlangan, pickCardProvider),
-          shuning uchun mijozga ortiqcha qadam ko'rsatilmaydi —
-          xuddi kuchli e-commerce saytlarida bo'lgani kabi:
-          tanlov faqat haqiqatan variant bo'lganda chiqadi.
+          shuning uchun mijozga ortiqcha qadam ko'rsatilmaydi.
         */}
         {isCard && providers.length > 1 && (
-          <div className="cart-providers">
+          <div className="co-providers">
             {providers.map((p) => (
               <button
                 key={p.name}
+                type="button"
                 onClick={() => { haptic(); setPaymentMethod(p.name); }}
-                className={`cart-provider ${paymentMethod === p.name ? 'is-active' : ''}`}
+                className={`co-provider ${paymentMethod === p.name ? 'is-active' : ''}`}
               >
                 {PROVIDER_LABEL[p.name] || p.name}
               </button>
             ))}
           </div>
         )}
-      </div>
+      </CoCard>
 
       {/* Qo'shimcha tavsiya — "Hech narsani unutmadingizmi?" */}
       <CartUpsell groups={groups} />
