@@ -43,7 +43,19 @@ export const useOrders = create((set, get) => ({
     const payload = {
       address,
       phone,
-      paymentMethod: paymentMethod === 'payme' ? 'payme' : paymentMethod === 'cash' ? 'cash' : 'payme',
+      /*
+       * Haqiqiy tanlangan tizim yuboriladi (masalan 'click').
+       * ILGARI cash'dan boshqa HAMMA narsa 'payme' bo'lib ketardi —
+       * Click bilan to'lanayotgan buyurtma ham to'langunga qadar
+       * bazada "Payme" bo'lib turardi (admin panelda chalkashlik).
+       * To'lov oqimi bunga bog'liq EMAS: havola provider bilan
+       * alohida so'raladi, to'lov o'tgach server baribir haqiqiy
+       * nomni yozadi. Server qabul qilmaydigan nom bo'lsa — eski
+       * xatti-harakat ('payme') saqlanadi.
+       */
+      paymentMethod: paymentMethod === 'cash'
+        ? 'cash'
+        : (['click', 'payme', 'uzum'].includes(paymentMethod) ? paymentMethod : 'payme'),
       paymentLabel,
       useBonus,
       // Yetkazish turi va vaqt (olib ketish / belgilangan vaqt)
