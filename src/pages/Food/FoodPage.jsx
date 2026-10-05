@@ -67,7 +67,7 @@ export function FoodPage() {
   }, [id]);
 
   // Ish vaqti — yopiq bo'lsa qo'shib bo'lmaydi
-  const { isOpen, hoursLabel, nextOpen } = useOpenStatus(restaurant || dish);
+  const { isOpen, alertInfo } = useOpenStatus(restaurant || dish);
   const { closedInfo, showClosed, hideClosed } = useClosedAlert();
 
   const add = () => {
@@ -75,8 +75,7 @@ export function FoodPage() {
     if (!isOpen) {
       showClosed({
         name: restaurant?.name || dish?.restaurantName,
-        hoursLabel,
-        nextOpen,
+        ...alertInfo,
       });
       return;
     }
@@ -98,6 +97,7 @@ export function FoodPage() {
           restaurantPickupDiscountPercent: restaurant.pickupDiscountPercent,
           restaurantOpenTime: restaurant.openTime,
           restaurantCloseTime: restaurant.closeTime,
+          restaurantWorkingDays: restaurant.workingDays,
         }
       : dish;
     addItem(enriched, quantity, []);

@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useSyncExternalStore } from 'react';
-import { isOpenNow, workHoursLabel, nextOpenLabel } from '@/lib/workHours';
+import {
+  isOpenNow, workHoursLabel, nextOpenLabel, isOffToday, workDaysLabel, offDaysLabel,
+} from '@/lib/workHours';
 import { api } from '@/api';
 
 /**
@@ -99,6 +101,8 @@ export function useOpenStatus(source) {
   const hours = {
     openTime: source?.openTime ?? source?.restaurantOpenTime ?? '',
     closeTime: source?.closeTime ?? source?.restaurantCloseTime ?? '',
+    // Ish kunlari — restoran: workingDays, taom: restaurantWorkingDays
+    workingDays: source?.workingDays ?? source?.restaurantWorkingDays,
   };
 
   const now = serverNow();
@@ -121,12 +125,28 @@ export function useOpenStatus(source) {
    */
   const isOpen = source?.isOpen === false ? false : localIsOpen;
 
+  const offToday = isOffToday(hours, now);
+  const hoursLabel = workHoursLabel(hours);
+  const daysLabel = workDaysLabel(hours);
+  const offLabel = offDaysLabel(hours);
+  const nextOpen = nextOpenLabel(hours, now);
+
   return {
     isOpen,
-    hoursLabel: workHoursLabel(hours),
-    nextOpen: nextOpenLabel(hours, now),
+    hoursLabel,
+    nextOpen,
     openTime: hours.openTime,
     closeTime: hours.closeTime,
+    // Ish kunlari
+    offToday,            // bugun dam olish kuni
+    daysLabel,           // "Du–Ju" (har kuni ishlasa null)
+    offDaysLabel: offLabel, // "Sh, Ya"
+    /*
+     * ClosedAlert uchun tayyor ma'lumot — chaqiruvchilar
+     * `showClosed({ name, ...alertInfo })` qiladi, shunda
+     * yangi maydon qo'shilsa har joyni qayta yozish shart emas.
+     */
+    alertInfo: { hoursLabel, nextOpen, offToday, daysLabel, offDaysLabel: offLabel },
   };
 }
 
@@ -148,8 +168,15 @@ export function useOpenDishes(dishes) {
 export function isDishOpen(dish, now = serverNow()) {
   const open = dish?.restaurantOpenTime || dish?.restaurant?.openTime;
   const close = dish?.restaurantCloseTime || dish?.restaurant?.closeTime;
-  if (!open || !close) return true;
-  return isOpenNow({ openTime: open, closeTime: close }, now);
+  // Ish kunlari (dam olish kunida taom ham savatga olinmaydi)
+  const workingDays = dish?.restaurantWorkingDays ?? dish?.restaurant?.workingDays;
+  return isOpenNow({ openTime: open || '', closeTime: close || '', workingDays }, now);
+}
+
+/** Taomning restorani bugun umuman ishlamaydimi (dam olish kuni). */
+export function isDishOffToday(dish, now = serverNow()) {
+  const workingDays = dish?.restaurantWorkingDays ?? dish?.restaurant?.workingDays;
+  return isOffToday({ workingDays }, now);
 }
 
 /**

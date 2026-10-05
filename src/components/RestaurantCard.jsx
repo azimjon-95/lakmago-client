@@ -6,7 +6,7 @@ import { RestaurantBannerFallback } from './RestaurantBannerFallback';
 import { formatSomShort } from '@/lib/utils';
 import { cardDeliveryLabel } from '@/lib/deliveryInfo';
 import { useT } from '@/i18n';
-import { isOpenNow, workHoursLabel } from '@/lib/workHours';
+import { isOpenNow, workHoursLabel, isOffToday, workDaysLabel } from '@/lib/workHours';
 import { usePrefetchRestaurant } from '@/hooks/queries';
 import './cards/RestaurantCard.css';
 import { PinBadge } from '@/components/PinBadge';
@@ -20,6 +20,9 @@ export const RestaurantCard = memo(function RestaurantCard({ restaurant: r, show
   // ishonamiz, aks holda mijozning o'z (Toshkent vaqtiga mos)
   // jonli hisobiga tayanamiz.
   const open = r.isOpen === false ? false : isOpenNow(r);
+  // Ish kunlari: bugun dam olish kunimi va qaysi kunlari ishlaydi
+  const offToday = isOffToday(r);
+  const days = workDaysLabel(r);
 
   const navigate = useNavigate();
   const t = useT();
@@ -99,12 +102,13 @@ export const RestaurantCard = memo(function RestaurantCard({ restaurant: r, show
         {r.cuisine && <div className="rcard__cuisine">{r.cuisine}</div>}
 
         {/* Ish vaqti va hozirgi holat */}
-        {hours && (
+        {(hours || days) && (
           <div className="rcard__hours">
             <Icon name="clock" size={12} color={open ? 'var(--success)' : 'var(--danger)'} />
-            <span>{hours}</span>
+            {hours && <span>{hours}</span>}
+            {days && <span className="rcard__days">· {days}</span>}
             <span className={`rcard__status ${open ? 'is-open' : 'is-closed'}`}>
-              {open ? 'Ochiq' : 'Yopiq'}
+              {open ? 'Ochiq' : (offToday ? 'Bugun ishlamaydi' : 'Yopiq')}
             </span>
           </div>
         )}

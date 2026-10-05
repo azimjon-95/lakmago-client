@@ -29,10 +29,11 @@ export function useCartCleanup(onRemoved) {
 
     const groups = restaurantGroups();
     const closed = groups.filter((g) => {
-      const { openTime, closeTime } = g.restaurant;
-      // Ish vaqti ma'lum bo'lsa tekshiramiz
-      if (!openTime || !closeTime) return false;
-      return !isOpenNow({ openTime, closeTime });
+      const { openTime, closeTime, workingDays } = g.restaurant;
+      // Ish vaqti yoki ish kunlari ma'lum bo'lsa tekshiramiz
+      const hasDays = Array.isArray(workingDays) && workingDays.length > 0;
+      if ((!openTime || !closeTime) && !hasDays) return false;
+      return !isOpenNow({ openTime, closeTime, workingDays });
     });
 
     for (const g of closed) {
@@ -63,8 +64,9 @@ export function useCartCleanup(onRemoved) {
 
           // Restoran o'chirilgan yoki bloklangan
           const unavailable = r.isActive === false || r.isBlocked === true;
-          const closed = r.openTime && r.closeTime
-            && !isOpenNow({ openTime: r.openTime, closeTime: r.closeTime });
+          // Server tayyor isOpen beradi (ish kunlari + vaqt zonasi bilan)
+          const closed = r.isOpen === false
+            || !isOpenNow({ openTime: r.openTime, closeTime: r.closeTime, workingDays: r.workingDays });
 
           if (unavailable || closed) {
             removeRestaurant(id);

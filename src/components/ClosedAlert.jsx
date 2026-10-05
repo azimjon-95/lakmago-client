@@ -27,23 +27,41 @@ export function ClosedAlert({ info, onClose }) {
     <div className="closed-alert" onClick={onClose}>
       <div className="closed-alert__box" onClick={(e) => e.stopPropagation()}>
         <div className="closed-alert__icon">
-          <Icon name="clock" size={28} color="var(--danger)" />
+          <Icon name={info.offToday ? 'calendar' : 'clock'} size={28} color="var(--danger)" />
         </div>
 
         <h3 className="closed-alert__title">
-          {info.name ? `${info.name} hozir yopiq` : 'Restoran hozir yopiq'}
+          {info.offToday
+            ? (info.name ? `${info.name} bugun ishlamaydi` : 'Restoran bugun ishlamaydi')
+            : (info.name ? `${info.name} hozir yopiq` : 'Restoran hozir yopiq')}
         </h3>
 
         <p className="closed-alert__text">
-          Ish vaqti boshlangach buyurtma berishingiz mumkin.
+          {info.offToday
+            ? 'Bugun restoranning dam olish kuni. Ish kunida buyurtma berishingiz mumkin.'
+            : 'Ish vaqti boshlangach buyurtma berishingiz mumkin.'}
         </p>
 
-        {info.hoursLabel && (
-          <div className="closed-alert__hours">
-            <Icon name="clock" size={14} color="var(--muted)" />
-            <span>Ish vaqti: {info.hoursLabel}</span>
-          </div>
-        )}
+        <div className="closed-alert__chips">
+          {info.hoursLabel && (
+            <div className="closed-alert__hours">
+              <Icon name="clock" size={14} color="var(--muted)" />
+              <span>Ish vaqti: {info.hoursLabel}</span>
+            </div>
+          )}
+          {info.daysLabel && (
+            <div className="closed-alert__hours">
+              <Icon name="calendar" size={14} color="var(--muted)" />
+              <span>Ish kunlari: {info.daysLabel}</span>
+            </div>
+          )}
+          {info.offDaysLabel && (
+            <div className="closed-alert__hours closed-alert__hours--off">
+              <Icon name="calendar" size={14} color="var(--danger)" />
+              <span>Dam olish: {info.offDaysLabel}</span>
+            </div>
+          )}
+        </div>
 
         {info.nextOpen && (
           <div className="closed-alert__next">{info.nextOpen}</div>

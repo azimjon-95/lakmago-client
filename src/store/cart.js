@@ -126,6 +126,8 @@ export const useCart = create(
         // Ish vaqti — yopiq restoran taomlari savatdan chiqadi
         openTime: meta.restaurantOpenTime ?? meta.restaurant?.openTime ?? '',
         closeTime: meta.restaurantCloseTime ?? meta.restaurant?.closeTime ?? '',
+        // Ish kunlari — dam olish kunida savatdan chiqadi / buyurtma berilmaydi
+        workingDays: meta.restaurantWorkingDays ?? meta.restaurant?.workingDays ?? [],
       },
       items,
       subtotal: items.reduce((s, i) => s + i.unitPrice * i.quantity, 0),

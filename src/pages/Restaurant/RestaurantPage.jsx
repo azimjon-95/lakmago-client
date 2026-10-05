@@ -42,7 +42,7 @@ export function RestaurantPage() {
 
   // Ish vaqti har daqiqada qayta hisoblanadi: restoran ochilganda
   // sahifa o'zi jonlanadi, mijoz yangilashi shart emas
-  const { isOpen, hoursLabel } = useOpenStatus(restaurant);
+  const { isOpen, hoursLabel, offToday, daysLabel, alertInfo } = useOpenStatus(restaurant);
 
   // Bo'sh ma'lumotlar ko'rsatilmasin — element umuman chizilmaydi
   // Oyna ichida ko'rsatishga biror narsa bormi
@@ -275,10 +275,9 @@ export function RestaurantPage() {
           <div className="rest-closed">
             <Icon name="clock" size={16} color="var(--danger)" />
             <span>
-              Hozir yopiq
-              {restaurant.openTime && (
-                <> · Ish vaqti {restaurant.openTime}–{restaurant.closeTime}</>
-              )}
+              {offToday ? 'Bugun ishlamaydi (dam olish kuni)' : 'Hozir yopiq'}
+              {hoursLabel && <> · Ish vaqti {hoursLabel}</>}
+              {daysLabel && <> · Ish kunlari {daysLabel}</>}
             </span>
           </div>
         )}
@@ -461,7 +460,7 @@ export function RestaurantPage() {
                       disabled={!isOpen}
                       onDisabledTap={() => showClosed({
                         name: restaurant?.name,
-                        hoursLabel,
+                        ...alertInfo,
                       })}
                     />)}
               </div>

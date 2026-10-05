@@ -14,7 +14,7 @@ import { useOrders } from '@/store/orders';
 import { useT } from '@/i18n';
 import { formatSom } from '@/lib/utils';
 import { calcDeliveryFee, calcServiceFee, checkMinOrder, freeDeliveryGap, calcPickupDiscount } from '@/lib/pricing';
-import { isOpenNow } from '@/lib/workHours';
+import { isOpenNow, isOffToday, workDaysLabel } from '@/lib/workHours';
 import { useCartCleanup } from '@/hooks/useCartCleanup';
 import { api } from '@/api';
 import { haptic, getTelegram } from '@/lib/telegram';
@@ -1564,8 +1564,9 @@ export function CartPage() {
             <div key={`closed-${r.id || r._id}`} className="cart-footer__warn cart-footer__warn--closed">
               <Icon name="clock" size={14} color="var(--danger)" />
               <span>
-                <b>{r.name}</b> {t('restaurantClosedNow')}
+                <b>{r.name}</b> {isOffToday(r) ? t('closedToday').toLowerCase() : t('restaurantClosedNow')}
                 {r.openTime && ` · ${t('workingHoursRange')} ${r.openTime}–${r.closeTime}`}
+                {workDaysLabel(r) && ` · ${workDaysLabel(r)}`}
               </span>
             </div>
           );

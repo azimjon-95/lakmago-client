@@ -27,7 +27,7 @@ export const DishRow = memo(function DishRow({ dish, onOpen, restaurant, onClose
   ].filter(Boolean).join(' · ');
 
   // Restoran yopiq bo'lsa qo'shib bo'lmaydi
-  const { isOpen, hoursLabel, nextOpen } = useOpenStatus(restaurant || dish);
+  const { isOpen, alertInfo } = useOpenStatus(restaurant || dish);
   const blocked = stopped || !isOpen;
 
   function quickAdd(e) {
@@ -38,8 +38,7 @@ export const DishRow = memo(function DishRow({ dish, onOpen, restaurant, onClose
     if (!isOpen) {
       onClosedAlert?.({
         name: restaurant?.name || dish.restaurantName,
-        hoursLabel,
-        nextOpen,
+        ...alertInfo,
       });
       return;
     }

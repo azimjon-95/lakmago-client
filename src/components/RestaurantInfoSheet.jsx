@@ -18,7 +18,7 @@ import './cards/RestaurantInfoSheet.css';
 export function RestaurantInfoSheet({ restaurant, onClose }) {
   const t = useT();
   const r = restaurant || {};
-  const { isOpen, hoursLabel, nextOpen } = useOpenStatus(r);
+  const { isOpen, hoursLabel, nextOpen, offToday, daysLabel, offDaysLabel } = useOpenStatus(r);
 
   /*
    * Yetkazish shartlari — restoranning FAOL rejimiga qarab (lib/deliveryInfo.js).
@@ -68,10 +68,15 @@ export function RestaurantInfoSheet({ restaurant, onClose }) {
           <div className={`rinfo-status ${isOpen ? 'is-open' : 'is-closed'}`}>
             <Icon name="clock" size={16} color={isOpen ? 'var(--success)' : 'var(--danger)'} />
             <span>
-              {isOpen ? t('currentlyOpen') : t('currentlyClosed')}
+              {isOpen ? t('currentlyOpen') : (offToday ? t('closedToday') : t('currentlyClosed'))}
               {hoursLabel && ` · ${hoursLabel}`}
             </span>
           </div>
+          {daysLabel && (
+            <p className="rinfo-note rinfo-note--tight">
+              Ish kunlari: {daysLabel}{offDaysLabel ? ` · Dam olish: ${offDaysLabel}` : ''}
+            </p>
+          )}
           {!isOpen && nextOpen && (
             <p className="rinfo-note rinfo-note--tight">{nextOpen}</p>
           )}

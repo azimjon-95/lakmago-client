@@ -4,6 +4,7 @@ import { Icon } from './Icon';
 import { formatSom } from '@/lib/utils';
 import { isDiscountedDish, discountPercent } from '@/lib/discount';
 import { useT } from '@/i18n';
+import { isDishOffToday } from '@/hooks/useOpenStatus';
 
 /*
  * Taom grid kartasi (bosh sahifa qatorlari, «Barchasi», qidiruv,
@@ -31,7 +32,11 @@ export const DishGridCard = memo(function DishGridCard({ dish, onClick, closed =
         {hasDiscount && (
           <div className="dgcard__badge">−{discountPercent(dish)}%</div>
         )}
-        {closed && <div className="dgcard__closed">{t('currentlyClosed')}</div>}
+        {closed && (
+          <div className="dgcard__closed">
+            {isDishOffToday(dish) ? t('closedToday') : t('currentlyClosed')}
+          </div>
+        )}
       </div>
       <div className="dgcard__body">
         <div className="dgcard__name">{dish.name}</div>

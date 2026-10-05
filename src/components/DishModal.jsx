@@ -84,15 +84,14 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
   }
 
   // Restoran ish vaqti — yopiq bo'lsa qo'shib bo'lmaydi
-  const { isOpen, hoursLabel, nextOpen } = useOpenStatus(restaurant || dish);
+  const { isOpen, alertInfo } = useOpenStatus(restaurant || dish);
 
   function handleAdd() {
     if (!isOpen) {
       haptic();
       onClosedAlert?.({
         name: restaurant?.name || dish.restaurantName,
-        hoursLabel,
-        nextOpen,
+        ...alertInfo,
       });
       return;
     }
@@ -117,6 +116,7 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
           restaurantPickupDiscountPercent: restaurant.pickupDiscountPercent,
           restaurantOpenTime: restaurant.openTime,
           restaurantCloseTime: restaurant.closeTime,
+          restaurantWorkingDays: restaurant.workingDays,
         }
       : dish;
 

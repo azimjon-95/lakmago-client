@@ -133,3 +133,6 @@
   pointer-events: none;
 }
 .pinbadge svg { display: block; filter: drop-shadow(0 0.5px 0.5px rgba(120, 40, 0, 0.35)); }
+
+/* Ish kunlari (masalan "· Du–Ju") — vaqt yonida, kulrang */
+.rcard__days { color: var(--muted); white-space: nowrap; }
