@@ -68,6 +68,7 @@ export function SupportChat() {
           from: m.from === 'admin' ? 'support' : 'user',
           text: m.text,
           adminName: m.adminName,
+          edited: Boolean(m.editedAt),
         }));
         // Tarix bo'sh bo'lsa — xush kelibsiz
         setMessages(list.length ? list : [{ id: 'w', from: 'support', text: t('chatWelcome') }]);
@@ -87,14 +88,31 @@ export function SupportChat() {
     joinUserRoom(userId);
     const handler = (data) => {
       setMessages((m) => [...m, {
-        id: Date.now(), from: 'support', text: data.text, adminName: data.adminName,
+        // Server xabar id'sini beradi — admin keyin tahrirlasa/o'chirsa shu bilan topiladi
+        id: data.id || Date.now(), from: 'support', text: data.text, adminName: data.adminName,
       }]);
       // Chat yopiq bo'lsa — o'qilmagan belgisi
       setUnread((n) => (open ? 0 : n + 1));
     };
+    // Admin javobini tahrirladi / o'chirdi — jonli yangilanadi
+    const onEdit = (data) => {
+      if (!data?.id) return;
+      setMessages((m) => m.map((msg) => (String(msg.id) === String(data.id)
+        ? { ...msg, text: data.text, edited: true } : msg)));
+    };
+    const onDelete = (data) => {
+      if (!data?.id) return;
+      setMessages((m) => m.filter((msg) => String(msg.id) !== String(data.id)));
+    };
     socket.on('support:reply', handler);
+    socket.on('support:edit', onEdit);
+    socket.on('support:delete', onDelete);
     // Umumiy socket — uzmaymiz, faqat tinglovchini olib tashlaymiz
-    return () => socket.off('support:reply', handler);
+    return () => {
+      socket.off('support:reply', handler);
+      socket.off('support:edit', onEdit);
+      socket.off('support:delete', onDelete);
+    };
   }, [userId, open]);
 
   useEffect(() => {
@@ -156,6 +174,7 @@ export function SupportChat() {
             {messages.map((m) => (
               <div key={m.id} className={`support-msg support-msg--${m.from}`}>
                 {m.text}
+                {m.edited && <span className="support-msg__edited">tahrirlandi</span>}
               </div>
             ))}
           </div>
