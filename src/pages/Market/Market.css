@@ -25,14 +25,19 @@
 .market-header {
   display: flex; align-items: center; gap: 10px;
   padding: 12px 16px 6px;
+  /* Market rangi — o'lcham (padding) o'zgarmagan, faqat fon */
+  background: linear-gradient(135deg, #17834A 0%, #23A55E 100%);
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 18px;
+  box-shadow: 0 6px 16px -10px rgba(23, 131, 74, 0.55);
 }
 .market-header__logo {
   width: 40px; height: 40px; flex: none; object-fit: contain;
-  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.15));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
 }
 .market-header__title { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; }
-.market-header__title span { font-size: 18px; font-weight: 800; color: var(--ink); letter-spacing: 0.1px; }
-.market-header__title small { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.market-header__title span { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: 0.1px; }
+.market-header__title small { font-size: 12px; color: rgba(255, 255, 255, 0.85); margin-top: 2px; }
 
 /* Admin bannerlari — bosh sahifa karuseli */
 .market-banner { padding-top: 12px; }
