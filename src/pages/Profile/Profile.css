@@ -98,7 +98,7 @@
 /* ===== Referral karta ===== */
 .referral-card {
   background: linear-gradient(135deg, var(--brand-tint), var(--surface));
-  border: 1px solid rgba(255, 92, 0, 0.28);
+  border: 1px solid rgba(var(--brand-rgb),  0.28);
   border-radius: 16px;
   padding: 16px;
   margin: 0 16px 14px;
@@ -140,8 +140,8 @@
   padding: 22px 18px 16px;
   border-radius: 22px;
   background:
-    radial-gradient(120% 100% at 50% 0%, #FFF1E8 0%, #FFF8F3 55%, #FFFFFF 100%);
-  border: 1px solid rgba(255, 92, 0, 0.16);
+    radial-gradient(120% 100% at 50% 0%, var(--brand-tint) 0%, var(--brand-50, #FFF8F3) 55%, #FFFFFF 100%);
+  border: 1px solid rgba(var(--brand-rgb),  0.16);
   text-align: center;
   overflow: hidden;
 }
@@ -151,7 +151,7 @@
   top: -60px; left: 50%;
   width: 240px; height: 240px;
   transform: translateX(-50%);
-  background: radial-gradient(circle, rgba(255,92,0,0.12) 0%, transparent 68%);
+  background: radial-gradient(circle, rgba(var(--brand-rgb), 0.12) 0%, transparent 68%);
   pointer-events: none;
 }
 
@@ -165,8 +165,8 @@
   font-size: 30px; font-weight: 700; color: var(--brand-text);
   overflow: hidden;
   box-shadow:
-    0 0 0 3px rgba(255, 92, 0, 0.16),
-    0 10px 24px rgba(255, 92, 0, 0.18);
+    0 0 0 3px rgba(var(--brand-rgb),  0.16),
+    0 10px 24px rgba(var(--brand-rgb),  0.18);
 }
 .profile-hero__avatar img {
   width: 100%; height: 100%; object-fit: cover; display: block;

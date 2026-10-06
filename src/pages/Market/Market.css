@@ -11,6 +11,7 @@
  */
 :root[data-section='market'] {
   --brand: #1F9D55;
+  --brand-rgb: 31, 157, 85;
   --brand-400: #1F9D55;
   --brand-600: #17834A;
   --brand-text: #FFFFFF;
@@ -26,7 +27,9 @@
   display: flex; align-items: center; gap: 10px;
   padding: 12px 16px 6px;
   /* Market rangi — o'lcham (padding) o'zgarmagan, faqat fon */
-  background: linear-gradient(135deg, #17834A 0%, #23A55E 100%);
+  /* Telegram tepa qismi bilan AYNAN bir rang (lib/telegram.js SECTION_SURFACE.market) —
+     status bar va sarlavha orasida chegara ko'rinmaydi */
+  background: #1F9D55;
   border-bottom-left-radius: 18px;
   border-bottom-right-radius: 18px;
   box-shadow: 0 6px 16px -10px rgba(23, 131, 74, 0.55);

@@ -313,7 +313,7 @@
   border-radius: 18px;
   background: var(--brand); color: var(--brand-text);
   font-size: 19px; font-weight: 800;
-  box-shadow: 0 8px 20px rgba(255, 92, 0, 0.32);
+  box-shadow: 0 8px 20px rgba(var(--brand-rgb),  0.32);
   transition: transform 160ms ease, filter 160ms ease, opacity 160ms ease, box-shadow 160ms ease;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -349,8 +349,8 @@
   animation: ocm-attention 1.6s ease-in-out infinite;
 }
 @keyframes ocm-attention {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 92, 0, 0); }
-  50%      { box-shadow: 0 0 0 5px rgba(255, 92, 0, 0.18); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--brand-rgb),  0); }
+  50%      { box-shadow: 0 0 0 5px rgba(var(--brand-rgb),  0.18); }
 }
 
 @media (prefers-reduced-motion: reduce) {

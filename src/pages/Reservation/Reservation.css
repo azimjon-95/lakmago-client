@@ -198,8 +198,8 @@
 .resv-basket__del { padding: 4px; opacity: 0.8; }
 
 .resv-preorder-dish.is-picked {
-  border-color: rgba(255, 92, 0, 0.45);
-  background: rgba(255, 92, 0, 0.06);
+  border-color: rgba(var(--brand-rgb),  0.45);
+  background: rgba(var(--brand-rgb),  0.06);
 }
 .resv-preorder-empty {
   padding: 32px 16px; text-align: center;

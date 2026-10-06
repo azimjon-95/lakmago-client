@@ -14,6 +14,7 @@ import { useFeatures, useMarketCategories, useMarketStores, useMarketBanners } f
 import { BannerSlider } from '@/components/BannerSlider';
 import { HomeSections } from '@/components/HomeSections/HomeSections';
 import { useUser } from '@/store/user';
+import { useSection } from '@/store/section';
 import { useI18n } from '@/i18n';
 import { api } from '@/api';
 import { marketCatLabel } from '@/data/market';
@@ -62,11 +63,13 @@ export function MarketPage() {
    * <html> ga qo'yiladi, shunda portal orqali chiqadigan oynalar ham
    * oladi. Sahifadan chiqilganda o'zining oltin/to'q sariq rangi qaytadi.
    */
-  useEffect(() => {
-    const root = document.documentElement;
-    root.setAttribute('data-section', 'market');
-    return () => root.removeAttribute('data-section');
-  }, []);
+  /*
+   * Bo'lim — Market. Sahifadan chiqqanda (Qidiruv, Buyurtmalar, Profil,
+   * savat...) ham Market'da qolinadi; Lokma Go'ga faqat bosh sahifa
+   * ochilganda qaytiladi (HomePage → setSection('go')). store/section.js
+   */
+  const setSection = useSection((s) => s.setSection);
+  useEffect(() => { setSection('market'); }, [setSection]);
 
   const [category, setCategory] = useState('all');
   const [modalDish, setModalDish] = useState(null);

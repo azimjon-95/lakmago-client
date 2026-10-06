@@ -110,7 +110,7 @@
 .rinfo-sub {
   margin: -2px 0 6px;
   padding: 2px 0 2px 12px;
-  border-left: 3px solid var(--brand-tint, rgba(255, 92, 0, 0.16));
+  border-left: 3px solid var(--brand-tint, rgba(var(--brand-rgb),  0.16));
   border-bottom: 1px solid var(--line);
   padding-bottom: 10px;
 }

@@ -15,8 +15,19 @@ import { useT } from '@/i18n';
 import { restaurantMatchesCategory, dishMatchesCategory } from '@/data/categories';
 import { FilterSheet, CATEGORIES, SPECIALS, SORTS } from './FilterSheet';
 import './Search.css';
+import { useSection } from '@/store/section';
+import { MarketSearch } from './MarketSearch';
 
+/*
+ * Market rejimida qidiruv — do'konlar va mahsulotlar (MarketSearch).
+ * Lokma Go'da — avvalgi restoran/taom qidiruvi (FoodSearchPage) o'zgarmagan.
+ */
 export function SearchPage() {
+  const market = useSection((s) => s.section === 'market');
+  return market ? <MarketSearch /> : <FoodSearchPage />;
+}
+
+function FoodSearchPage() {
   const navigate = useNavigate();
   const t = useT();
   const inputRef = useRef(null);

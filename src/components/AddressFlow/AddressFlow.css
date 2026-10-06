@@ -290,7 +290,7 @@
   padding: 0 16px 4px;
 }
 .addr-search__quick .addr-search__current { padding: 12px; }
-.addr-search__current-icon--map { background: rgba(255, 92, 0, 0.12); }
+.addr-search__current-icon--map { background: rgba(var(--brand-rgb),  0.12); }
 
 /* ═══════════════════════════════════════════
    Karta orqali manzil tanlash

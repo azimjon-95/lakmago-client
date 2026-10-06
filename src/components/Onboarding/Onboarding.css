@@ -42,7 +42,7 @@
   border-radius: 18px;
   display: flex; align-items: center; justify-content: center;
   background: linear-gradient(160deg, var(--brand) 0%, var(--brand-600) 100%);
-  box-shadow: 0 8px 18px -6px rgba(255, 92, 0, 0.45);
+  box-shadow: 0 8px 18px -6px rgba(var(--brand-rgb),  0.45);
 }
 
 .onb__title {

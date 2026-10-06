@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, memo } from 'react';
+import { useState, useMemo, useCallback, memo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { BannerSlider } from '@/components/BannerSlider';
@@ -17,6 +17,7 @@ import { useOpenPartition, useClosedAlert } from '@/hooks/useOpenStatus';
 import { ClosedAlert } from '@/components/ClosedAlert';
 import { useRestaurants, useTrendingDishes, useBannersQuery, useAllDishes, useBannerAds, useDishFeed, useFeatures } from '@/hooks/queries';
 import { HomeSections } from '@/components/HomeSections/HomeSections';
+import { useSection } from '@/store/section';
 import { isDiscountedDish } from '@/lib/discount';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { useRecommendedStream } from '@/hooks/useRecommendedStream';
@@ -180,6 +181,13 @@ export function HomePage() {
   const { data: bannerAds = [], refetch: refetchAds } = useBannerAds();
   // Lokma Market / To'yxonalar tugmalari — server .env ruxsatiga qarab
   const authStatus = useUser((s) => s.authStatus);
+  /*
+   * Market rejimida "/" ga qaytilsa (buyurtmadan keyin "Bosh sahifaga",
+   * orqaga va h.k.) — Market bosh sahifasiga yo'naltiriladi. Lokma Go'ga
+   * faqat "Lokma Go" tugmasi qaytaradi (u bo'limni oldin 'go' qiladi).
+   */
+  const inMarket = useSection((s) => s.section === 'market');
+  useEffect(() => { if (inMarket) navigate('/market', { replace: true }); }, [inMarket, navigate]);
   const { data: features } = useFeatures(authStatus);
 
   /*
@@ -356,6 +364,9 @@ export function HomePage() {
     () => placePinned(seededShuffle(filtered, shuffleSeed + 1)),
     [filtered, shuffleSeed],
   );
+
+  // Market rejimi — yo'naltirish ketmoqda, Lokma Go sahifasini chizmaymiz
+  if (inMarket) return null;
 
   return (
     <div className="app-shell home">

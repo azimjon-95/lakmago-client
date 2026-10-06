@@ -93,6 +93,9 @@
   --muted-2: #B0B5BF;      /* eng past darajali matn */
 
   /* ---- BREND: to'q sariq (Express Orange) ---- */
+  /* Brend rangi RGB ko'rinishida — shaffof soya/fonlar uchun: rgba(var(--brand-rgb), .2).
+     Market bo'limida yashilga almashadi (pages/Market/Market.css) */
+  --brand-rgb: 255, 92, 0;
   --brand: #FF5C00;        /* asosiy — banner, faol nav, chegirma sarlavhasi */
   --brand-400: #FF5C00;    /* moslik uchun alias */
   --brand-600: #E04E00;    /* bosilgan holat — to'qroq */
@@ -674,9 +677,9 @@ ul { list-style: none; }
   display: flex; align-items: center; gap: 8px;
   padding: 10px 16px;
   background: linear-gradient(180deg,
-    rgba(255, 92, 0, 0.16) 0%,
-    rgba(255, 92, 0, 0.06) 100%);
-  border-bottom: 0.5px solid rgba(255, 92, 0, 0.25);
+    rgba(var(--brand-rgb),  0.16) 0%,
+    rgba(var(--brand-rgb),  0.06) 100%);
+  border-bottom: 0.5px solid rgba(var(--brand-rgb),  0.25);
   font-size: 13.5px;
   color: var(--brand-100);
   font-weight: 600;

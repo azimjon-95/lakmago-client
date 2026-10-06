@@ -4,6 +4,7 @@ import { Icon } from '../Icon';
 import { useCart } from '@/store/cart';
 import { useUser } from '@/store/user';
 import { useT } from '@/i18n';
+import { useSection } from '@/store/section';
 import './BottomNav.css';
 
 const tabs = [
@@ -28,15 +29,19 @@ export function BottomNav() {
   const cartCount = useCart((s) => s.totalCount());
   // Profil uchun Telegram rasmi — bo'lmasa ikonka ko'rsatiladi
   const photoUrl = useUser((st) => st.user.photoUrl);
+  // Market'da "Bosh" — Market bosh sahifasi (Lokma Go'ga tashlab yubormaydi)
+  const market = useSection((s) => s.section === 'market');
+  const homePath = market ? '/market' : '/';
 
   return (
     <nav className="bottom-nav">
       {tabs.map((tab) => {
-        const active = pathname === tab.path;
+        const target = tab.path === '/' ? homePath : tab.path;
+        const active = pathname === target;
         return (
           <button
             key={tab.path}
-            onClick={() => navigate(tab.path)}
+            onClick={() => navigate(target)}
             className={`bottom-nav__tab ${active ? 'is-active' : ''}`}
           >
             {tab.path === '/profile' && photoUrl ? (

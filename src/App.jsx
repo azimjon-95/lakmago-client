@@ -26,6 +26,7 @@ import { ActiveOrderBadge } from '@/components/ActiveOrderBadge/ActiveOrderBadge
 import { SupportChat } from '@/components/SupportChat/SupportChat';
 import { Splash } from '@/components/Splash/Splash';
 import { useTelegramBack } from '@/hooks/useTelegramBack';
+import { initSectionTheme } from '@/store/section';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -110,6 +111,9 @@ function AppInner({ authMode = 'telegram' }) {
     sessionStorage.setItem('lokmago_splash_seen', '1');
     setShowSplash(false);
   };
+
+  // Joriy bo'lim (Lokma Go / Market) ranglari — sahifa yangilansa ham tiklanadi
+  useEffect(() => { initSectionTheme(); }, [showSplash]);
 
   useEffect(() => {
     const loadAddresses = useUser.getState().loadAddresses;

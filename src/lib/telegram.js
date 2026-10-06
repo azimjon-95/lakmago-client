@@ -94,6 +94,33 @@ export function getTelegram() {
  *
  * @param {string} color - '#RRGGBB'
  */
+/*
+ * ═══ BO'LIM RANGI (Lokma Go / Lokma Market) ═══
+ *
+ * Market'da Telegram'ning tepa qismi (status bar orqasi, "Назад"
+ * qatori) Market sarlavhasi bilan BIR XIL yashil bo'ladi — to'q
+ * fonda Telegram soat/antenna/batareyani OQ chizadi. Lokma Go'ga
+ * qaytilganda oq holat avtomatik tiklanadi.
+ *
+ * `surfaceColor` — joriy bo'lim rangi. Ilova fon rejimidan qaytganda
+ * (activated) va ochilish kechikishlarida ham AYNAN shu rang qayta
+ * beriladi (aks holda market ichida oq bo'lib qolardi).
+ */
+export const SECTION_SURFACE = { go: '#FFFFFF', market: '#1F9D55' };
+let surfaceColor = SECTION_SURFACE.go;
+
+/** Bo'limni qo'llash: <html data-section>, CSS ranglar, Telegram tepa qismi. */
+export function applySectionTheme(section) {
+  const sec = section === 'market' ? 'market' : 'go';
+  try {
+    const root = document.documentElement;
+    if (sec === 'market') root.setAttribute('data-section', 'market');
+    else root.removeAttribute('data-section');
+  } catch { /* DOM yo'q */ }
+  surfaceColor = SECTION_SURFACE[sec];
+  setTelegramSurfaceColor(surfaceColor);
+}
+
 export function setTelegramSurfaceColor(color) {
   const tg = getTelegram();
   if (!tg) return;
@@ -236,7 +263,8 @@ export async function authenticateWithTelegram() {
     const applyColors = () => {
       // Tepa chizig'i OQ, status bar ikonlari TO'Q bo'lishi kerak.
       // Telegram kontrastni header rangidan hisoblaydi.
-      setTelegramSurfaceColor('#FFFFFF');
+      // Joriy bo'lim rangi (Lokma Go — oq, Market — yashil)
+      setTelegramSurfaceColor(surfaceColor);
       try {
         tg.setBottomBarColor?.('#FFFFFF');
       } catch {

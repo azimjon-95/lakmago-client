@@ -60,14 +60,14 @@
   width: 22px; height: 22px; border-radius: 50%;
   background: var(--brand);
   display: inline-flex; align-items: center; justify-content: center;
-  box-shadow: 0 2px 6px rgba(255, 92, 0, 0.35);
+  box-shadow: 0 2px 6px rgba(var(--brand-rgb),  0.35);
 }
 
 .co-scooter {
   width: 40px; height: 40px; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center;
   background: linear-gradient(145deg, #FF8A3D 0%, var(--brand) 100%);
-  box-shadow: 0 4px 10px rgba(255, 92, 0, 0.28);
+  box-shadow: 0 4px 10px rgba(var(--brand-rgb),  0.28);
 }
 
 /* ───── Qachon ───── */
@@ -85,7 +85,7 @@
 .co-time.is-active {
   background: linear-gradient(135deg, #FF7F33 0%, #F2570F 100%);
   color: #fff;
-  box-shadow: 0 8px 18px rgba(255, 92, 0, 0.28);
+  box-shadow: 0 8px 18px rgba(var(--brand-rgb),  0.28);
 }
 .co-time__text { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
 .co-time__text b { font-size: 14px; font-weight: 700; line-height: 1.2; }

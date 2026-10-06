@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { useT } from '@/i18n';
+import { useSection } from '@/store/section';
 import './HomeSections.css';
 
 /*
@@ -52,10 +53,11 @@ function Tile({ variant, img, title, sub, soon, onClick }) {
 export const HomeSections = memo(function HomeSections({ current = 'home', market, wedding }) {
   const t = useT();
   const navigate = useNavigate();
+  const setSection = useSection((s) => s.setSection);
 
   const first = current === 'market'
     // Marketdan — ovqat bo'limiga qaytish (doim mavjud)
-    ? <Tile variant="go" img={IMG.go} title={t('lokmaGo')} sub={t('lokmaGoSubtitle')} onClick={() => navigate('/')} />
+    ? <Tile variant="go" img={IMG.go} title={t('lokmaGo')} sub={t('lokmaGoSubtitle')} onClick={() => { setSection('go'); navigate('/'); }} />
     : market
       ? <Tile variant="market" img={IMG.market} title={t('lokmaMarket')} sub={t('marketSubtitle')} onClick={() => navigate('/market')} />
       : null;
