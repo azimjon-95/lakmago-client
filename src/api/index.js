@@ -233,6 +233,8 @@ export const api = {
 
   // ===== Katalog =====
   getBanners: (opts) => apiFetch('/banners', opts),
+  // Lokma Market sahifasi bannerlari (admin: Bannerlar → "Lokma Market")
+  getMarketBanners: (opts) => apiFetch('/banners?placement=market', opts),
   // Restoran/taom reklamalari — admin tasdiqlagan, bosh sahifa banneriga qo'shiladi
   getBannerAds: (opts) => apiFetch('/ads/banner', opts),
   clickAd: (id) => apiFetch(`/ads/${id}/click`, { method: 'POST' }),

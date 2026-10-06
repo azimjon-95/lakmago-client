@@ -4,32 +4,60 @@
 .market-header {
   position: sticky; top: 0; z-index: 20;
   display: flex; align-items: center; gap: 10px;
-  padding: 10px 12px;
+  padding: 10px 14px 12px;
   padding-top: max(10px, env(safe-area-inset-top));
-  background: var(--surface);
-  border-bottom: 1px solid var(--line);
+  background: linear-gradient(135deg, #17834A 0%, #23A55E 100%);
+  color: #fff;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  box-shadow: 0 6px 18px -10px rgba(23, 131, 74, 0.6);
 }
 .market-header__back {
   width: 38px; height: 38px; flex: none;
   display: flex; align-items: center; justify-content: center;
-  border-radius: 12px; background: var(--canvas, #f5f5f5);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.18);
   -webkit-tap-highlight-color: transparent;
 }
-.market-header__title { display: flex; flex-direction: column; min-width: 0; }
-.market-header__title span { font-size: 17px; font-weight: 700; color: var(--ink); }
-.market-header__title small { font-size: 12px; color: var(--muted); }
-
-.market-hero {
-  margin: 12px 16px 4px;
-  padding: 14px 16px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, var(--market-tint) 0%, #D3F1DF 100%);
-  border: 1px solid #BFE8CF;
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+.market-header__back:active { background: rgba(255, 255, 255, 0.3); }
+.market-header__logo {
+  width: 40px; height: 40px; flex: none; object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
 }
-.market-hero__title { font-size: 15px; font-weight: 700; color: #11552F; line-height: 1.25; }
-.market-hero__sub { font-size: 12px; color: #2E7A4C; margin-top: 4px; }
-.market-hero__art { font-size: 40px; line-height: 1; flex: none; }
+.market-header__title { display: flex; flex-direction: column; min-width: 0; }
+.market-header__title span { font-size: 17px; font-weight: 800; letter-spacing: 0.2px; }
+.market-header__title small { font-size: 12px; opacity: 0.85; }
+
+/* Admin bannerlari — bosh sahifa karuseli */
+.market-banner { padding-top: 12px; }
+
+/* Bannerlar hali yo'q — o'rnatilgan bezakli banner */
+.market-hero {
+  position: relative;
+  margin: 14px 16px 2px;
+  padding: 16px 112px 16px 16px;
+  min-height: 116px;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 85% 50%, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0) 45%),
+    linear-gradient(135deg, #E9F8EF 0%, #CDEFD9 100%);
+  border: 1px solid #BFE8CF;
+  overflow: hidden;
+  display: flex; align-items: center;
+}
+.market-hero__eyebrow {
+  display: inline-block;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
+  color: #fff; background: var(--market);
+  padding: 2px 8px; border-radius: 999px; margin-bottom: 6px;
+}
+.market-hero__title { font-size: 16px; font-weight: 800; color: #0F4D2A; line-height: 1.25; }
+.market-hero__sub { font-size: 12px; color: #2E7A4C; margin-top: 4px; font-weight: 600; }
+.market-hero__art {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%) rotate(-6deg);
+  width: 104px; height: 104px; object-fit: contain;
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.18));
+}
 
 /* Kategoriyalar — emoji doira, tanlangani yashil */
 .market-cats {

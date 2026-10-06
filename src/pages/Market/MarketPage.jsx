@@ -10,7 +10,9 @@ import { CartBar } from '@/components/CartBar';
 import { RestaurantCardSkeleton, DishScrollCardSkeleton } from '@/components/Skeleton/Skeleton';
 import { ClosedAlert } from '@/components/ClosedAlert';
 import { useClosedAlert, useOpenPartition } from '@/hooks/useOpenStatus';
-import { useFeatures, useMarketCategories, useMarketStores } from '@/hooks/queries';
+import { useFeatures, useMarketCategories, useMarketStores, useMarketBanners } from '@/hooks/queries';
+import { BannerSlider } from '@/components/BannerSlider';
+import { HomeSections } from '@/components/HomeSections/HomeSections';
 import { useUser } from '@/store/user';
 import { useI18n } from '@/i18n';
 import { api } from '@/api';
@@ -58,6 +60,8 @@ export function MarketPage() {
   const { closedInfo, showClosed, hideClosed } = useClosedAlert();
 
   const { data: meta } = useMarketCategories();
+  // Market bannerlari — admin "Bannerlar"da joylashuvni "Lokma Market" qiladi
+  const { data: banners = [] } = useMarketBanners(allowed);
   const { data: stores = [], isLoading: storesLoading, isError: storesError, refetch } = useMarketStores(allowed);
   const discQ = useMarketProducts({ discounted: true, category, enabled: allowed });
   const regQ = useMarketProducts({ discounted: false, category, enabled: allowed });
@@ -89,9 +93,10 @@ export function MarketPage() {
 
   const header = (
     <header className="market-header">
-      <button type="button" className="market-header__back" onClick={() => navigate(-1)} aria-label="Orqaga">
-        <Icon name="arrowLeft" size={20} color="var(--ink)" />
+      <button type="button" className="market-header__back" onClick={() => navigate('/')} aria-label={t('goHome')}>
+        <Icon name="arrowLeft" size={20} color="#fff" />
       </button>
+      <img className="market-header__logo" src="/sections/market-basket.webp" alt="" width="40" height="40" />
       <div className="market-header__title">
         <span>{t('lokmaMarket')}</span>
         <small>{t('marketSubtitle')}</small>
@@ -119,13 +124,27 @@ export function MarketPage() {
     <div className="app-shell market">
       {header}
 
-      <div className="market-hero">
-        <div>
-          <div className="market-hero__title">{t('marketHero')}</div>
-          <div className="market-hero__sub">{stores.length > 0 ? `${stores.length} · ${t('stores')}` : '\u00a0'}</div>
+      {/*
+        Banner: admin qo'shgan Market bannerlari (bosh sahifa bannerlari bilan bir xil
+        karusel). Hali qo'shilmagan bo'lsa — o'rnatilgan bezakli banner.
+      */}
+      {banners.length > 0 ? (
+        <div className="market-banner">
+          <BannerSlider banners={banners} onAdClick={() => {}} />
         </div>
-        <span className="market-hero__art" aria-hidden="true">🛒</span>
-      </div>
+      ) : (
+        <div className="market-hero">
+          <div className="market-hero__text">
+            <div className="market-hero__eyebrow">{t('lokmaMarket')}</div>
+            <div className="market-hero__title">{t('marketHero')}</div>
+            {stores.length > 0 && <div className="market-hero__sub">{stores.length} · {t('stores')}</div>}
+          </div>
+          <img className="market-hero__art" src="/sections/market-basket.webp" alt="" width="104" height="104" />
+        </div>
+      )}
+
+      {/* Bo'limlar orasida o'tish: Lokma Go (taomlar) · To'yxonalar */}
+      <HomeSections current="market" wedding={Boolean(features?.wedding)} />
 
       {/* Kategoriyalar */}
       {presentCats.length > 0 && (

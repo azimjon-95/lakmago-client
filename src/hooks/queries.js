@@ -178,3 +178,13 @@ export const useMarketStores = (enabled = true) =>
     queryFn: ({ signal }) => api.getMarketStores({ signal }),
     enabled,
   });
+
+export const useMarketBanners = (enabled = true) =>
+  useQuery({
+    queryKey: ['banners', 'market'],
+    queryFn: async ({ signal }) => {
+      try { return await api.getMarketBanners({ signal }); } catch { return []; }
+    },
+    staleTime: 10 * 60_000,
+    enabled,
+  });
