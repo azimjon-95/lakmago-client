@@ -295,6 +295,26 @@ export const api = {
     return apiFetch(`/dishes/all?${params.toString()}`, { signal });
   },
 
+  // ===== Lokma Market (do'konlar) va bo'lim ruxsatlari =====
+  // Qaysi bo'limlar shu mijozga ochiq — server .env: LOKMA_MARKET_ACCESS / LOKMA_WEDDING_ACCESS
+  getFeatures: (opts) => apiFetch('/features', opts),
+  getMarketCategories: (opts) => apiFetch('/market/categories', opts),
+  getMarketStores: async (opts) => {
+    const res = await apiFetch('/market/stores?limit=50', opts);
+    return Array.isArray(res) ? res : (res.items ?? []);
+  },
+  // Do'kon mahsulotlari — /dishes/all bilan bir xil format (cursor, fair, discounted)
+  getMarketProducts: async ({ discounted, category, cursor, limit = 24, fair, seed, signal } = {}) => {
+    const params = new URLSearchParams({ limit: String(limit) });
+    if (discounted === true) params.set('discounted', '1');
+    else if (discounted === false) params.set('discounted', '0');
+    if (category && category !== 'all') params.set('category', category);
+    if (cursor) params.set('cursor', cursor);
+    if (fair) params.set('fair', '1');
+    if (fair && Number.isInteger(seed) && !cursor) params.set('seed', String(seed));
+    return apiFetch(`/market/products?${params.toString()}`, { signal });
+  },
+
   // ===== Auth =====
   // Eslatma: haqiqiy login oqimi src/lib/telegram.js da (Telegram
   // WebApp obyektidan initData olish alohida logika talab qiladi),

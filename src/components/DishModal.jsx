@@ -9,11 +9,14 @@ import { useLockScroll } from '@/hooks/useLockScroll';
 import { useUser } from '@/store/user';
 import { useOpenStatus } from '@/hooks/useOpenStatus';
 import { haptic, shareDish } from '@/lib/telegram';
-import { useT } from '@/i18n';
+import { useI18n } from '@/i18n';
+import { unitSuffix, isMarketProduct } from '@/data/market';
 import './cards/DishModal.css';
 
 export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
-  const t = useT();
+  const { t, lang } = useI18n();
+  // Do'kon mahsuloti — narx birligi, qadoq, brend; tayyorlanish vaqti ko'rsatilmaydi
+  const market = isMarketProduct(dish);
   const addItem = useCart((s) => s.addItem);
   useLockScroll(true);
   // Sevimlilar — selector primitiv qaytaradi (qayta render bo'lmasin)
@@ -158,7 +161,10 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
         <div className="dish-modal__body">
           <div className="dish-modal__head">
             <div className="dish-modal__name">{dish.name}</div>
-            <div className="dish-modal__price">{formatSom(dish.price)}</div>
+            <div className="dish-modal__price">
+              {formatSom(dish.price)}
+              {dish.unit && <span className="dish-modal__unit"> {unitSuffix(dish.unit, lang)}</span>}
+            </div>
           </div>
           {dish.description && <p className="dish-modal__desc">{dish.description}</p>}
 
@@ -167,7 +173,17 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
             Ichimlikda `weight` yo'q, `volume` bor ("0.5 l"),
             shuning uchun ikkalasi ham tekshiriladi.
           */}
-          {(dish.weight || dish.weightGram || dish.volume || dish.calories || dish.prepMinutes) && (
+          {market && (dish.packSize || dish.brand) && (
+            <div className="dish-modal__nutrition">
+              {dish.packSize && (
+                <span><Icon name="scale" size={15} color="var(--muted)" />{dish.packSize}</span>
+              )}
+              {dish.brand && (
+                <span><Icon name="store" size={15} color="var(--muted)" />{dish.brand}</span>
+              )}
+            </div>
+          )}
+          {!market && (dish.weight || dish.weightGram || dish.volume || dish.calories || dish.prepMinutes) && (
             <div className="dish-modal__nutrition">
               {(dish.weight || dish.weightGram) && (
                 <span>

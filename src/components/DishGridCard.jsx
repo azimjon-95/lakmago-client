@@ -3,7 +3,8 @@ import { DishPhoto } from './DishPhoto';
 import { Icon } from './Icon';
 import { formatSom } from '@/lib/utils';
 import { isDiscountedDish, discountPercent } from '@/lib/discount';
-import { useT } from '@/i18n';
+import { useI18n } from '@/i18n';
+import { unitSuffix } from '@/data/market';
 import { isDishOffToday } from '@/hooks/useOpenStatus';
 
 /*
@@ -19,7 +20,9 @@ import { isDishOffToday } from '@/hooks/useOpenStatus';
  * bo'lmaydi (avval `onClick(dish)` undefined bo'lib xato berardi).
  */
 export const DishGridCard = memo(function DishGridCard({ dish, onClick, closed = false }) {
-  const t = useT();
+  const { t, lang } = useI18n();
+  // Do'kon mahsuloti: "12 000 so'm / kg", qadoq hajmi nom ostida (restoran taomida bo'sh)
+  const unit = unitSuffix(dish.unit, lang);
   const hasDiscount = isDiscountedDish(dish);
   return (
     <button
@@ -40,13 +43,16 @@ export const DishGridCard = memo(function DishGridCard({ dish, onClick, closed =
       </div>
       <div className="dgcard__body">
         <div className="dgcard__name">{dish.name}</div>
+        {dish.packSize && <div className="dgcard__pack">{dish.packSize}</div>}
         {dish.restaurantName && (
           <div className="dgcard__rest">
             <Icon name="bowl" size={11} color="var(--muted)" /> {dish.restaurantName}
           </div>
         )}
         <div className="dgcard__price-row">
-          <span className="dgcard__price">{formatSom(dish.price)}</span>
+          <span className="dgcard__price">
+            {formatSom(dish.price)}{unit && <span className="dgcard__unit"> {unit}</span>}
+          </span>
           {hasDiscount && <span className="dgcard__old">{formatSom(dish.oldPrice)}</span>}
         </div>
       </div>

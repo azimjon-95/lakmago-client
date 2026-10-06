@@ -175,3 +175,6 @@
   border-color: var(--brand);
   background: rgba(252, 130, 19, 0.06);
 }
+
+/* Do'kon mahsuloti: "/ kg" */
+.dish-modal__unit { font-size: 0.6em; font-weight: 500; color: var(--muted); }

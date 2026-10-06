@@ -15,7 +15,8 @@ import { useUser } from '@/store/user';
 import { useT } from '@/i18n';
 import { useOpenPartition, useClosedAlert } from '@/hooks/useOpenStatus';
 import { ClosedAlert } from '@/components/ClosedAlert';
-import { useRestaurants, useTrendingDishes, useBannersQuery, useAllDishes, useBannerAds, useDishFeed } from '@/hooks/queries';
+import { useRestaurants, useTrendingDishes, useBannersQuery, useAllDishes, useBannerAds, useDishFeed, useFeatures } from '@/hooks/queries';
+import { HomeSections } from '@/components/HomeSections/HomeSections';
 import { isDiscountedDish } from '@/lib/discount';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { useRecommendedStream } from '@/hooks/useRecommendedStream';
@@ -177,6 +178,9 @@ export function HomePage() {
   const { data: allDishes = [] } = useAllDishes();
   const { data: banners = [], refetch: refetchBanners } = useBannersQuery();
   const { data: bannerAds = [], refetch: refetchAds } = useBannerAds();
+  // Lokma Market / To'yxonalar tugmalari — server .env ruxsatiga qarab
+  const authStatus = useUser((s) => s.authStatus);
+  const { data: features } = useFeatures(authStatus);
 
   /*
    * ═══ «SUPER CHEGIRMALAR» VA «TAVSIYA QILAMIZ» — SERVERDAN ═══
@@ -380,6 +384,8 @@ export function HomePage() {
       </header>
 
       <BannerSlider banners={slidesWithAds} onAdClick={openAdModal} />
+
+      <HomeSections market={Boolean(features?.market)} wedding={Boolean(features?.wedding)} />
 
       <div className="home-categories no-scrollbar">
         {categories.map((c) => (

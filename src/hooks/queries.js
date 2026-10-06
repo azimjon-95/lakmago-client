@@ -148,3 +148,33 @@ export function usePrefetchRestaurant() {
     qc.prefetchQuery({ queryKey: ['dishes', id], queryFn: ({ signal }) => api.getDishes(id, { signal }) });
   }, [qc]);
 }
+
+/* ═══ LOKMA MARKET ═══ */
+
+/*
+ * Bo'lim ruxsatlari (Market / To'yxonalar tugmalari). Xato bo'lsa — hammasi
+ * yopiq (tugma chiqmaydi): server eski bo'lsa ham bosh sahifa buziлmaydi.
+ * Kirish (token) o'zgarsa qayta so'raladi — kalitda token borligi.
+ */
+export const useFeatures = (authStatus) =>
+  useQuery({
+    queryKey: ['features', authStatus || 'none'],
+    queryFn: async ({ signal }) => {
+      try { return await api.getFeatures({ signal }); } catch { return { market: false, wedding: false }; }
+    },
+    staleTime: 5 * 60_000,
+  });
+
+export const useMarketCategories = () =>
+  useQuery({
+    queryKey: ['market', 'categories'],
+    queryFn: ({ signal }) => api.getMarketCategories({ signal }),
+    staleTime: 30 * 60_000,
+  });
+
+export const useMarketStores = (enabled = true) =>
+  useQuery({
+    queryKey: ['market', 'stores'],
+    queryFn: ({ signal }) => api.getMarketStores({ signal }),
+    enabled,
+  });
