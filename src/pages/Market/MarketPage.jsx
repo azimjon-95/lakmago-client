@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Icon } from '@/components/Icon';
@@ -55,6 +55,19 @@ export function MarketPage() {
   const { data: features, isLoading: featLoading } = useFeatures(authStatus);
   const allowed = Boolean(features?.market);
 
+  /*
+   * MARKET RANGI: sahifa ochiq turganda butun ilova brend ranglari
+   * (savat tugmasi, faol menyu, narx urg'usi, "+" tugmalar, oynalar)
+   * yashilga o'tadi — :root[data-section="market"] (Market.css).
+   * <html> ga qo'yiladi, shunda portal orqali chiqadigan oynalar ham
+   * oladi. Sahifadan chiqilganda o'zining oltin/to'q sariq rangi qaytadi.
+   */
+  useEffect(() => {
+    const root = document.documentElement;
+    root.setAttribute('data-section', 'market');
+    return () => root.removeAttribute('data-section');
+  }, []);
+
   const [category, setCategory] = useState('all');
   const [modalDish, setModalDish] = useState(null);
   const { closedInfo, showClosed, hideClosed } = useClosedAlert();
@@ -93,9 +106,6 @@ export function MarketPage() {
 
   const header = (
     <header className="market-header">
-      <button type="button" className="market-header__back" onClick={() => navigate('/')} aria-label={t('goHome')}>
-        <Icon name="arrowLeft" size={20} color="#fff" />
-      </button>
       <img className="market-header__logo" src="/sections/market-basket.webp" alt="" width="40" height="40" />
       <div className="market-header__title">
         <span>{t('lokmaMarket')}</span>

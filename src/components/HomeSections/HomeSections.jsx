@@ -20,7 +20,7 @@ import './HomeSections.css';
 const IMG = {
   market: '/sections/market-basket.webp',
   wedding: '/sections/wedding-cloche.webp',
-  go: '/categories/fastfood.png',
+  go: '/sections/lokma-go.webp',
 };
 
 function Tile({ variant, img, title, sub, soon, onClick }) {
