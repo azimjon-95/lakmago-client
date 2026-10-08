@@ -16,6 +16,8 @@ const ProfilePage = lazy(() => import('@/pages/Profile/ProfilePage').then((m) =>
 const SearchPage = lazy(() => import('@/pages/Search/SearchPage').then((m) => ({ default: m.SearchPage })));
 const DiscoverDishesPage = lazy(() => import('@/pages/Discover/DiscoverDishesPage').then((m) => ({ default: m.DiscoverDishesPage })));
 const MarketPage = lazy(() => import('@/pages/Market/MarketPage').then((m) => ({ default: m.MarketPage })));
+// Lokma To'yxonalari — alohida sayt, Lokma ichida (iframe)
+const WeddingsPage = lazy(() => import('@/pages/Weddings/WeddingsPage').then((m) => ({ default: m.WeddingsPage })));
 import { useUser } from '@/store/user';
 import { authenticateWithTelegram, getStartParam, isTelegramEnv } from '@/lib/telegram';
 import { api, getAuthToken, hasRefreshToken, restoreSession } from '@/api';
@@ -226,6 +228,7 @@ function AppInner({ authMode = 'telegram' }) {
             <Route path="/search" element={<SearchPage />} />
             <Route path="/discover/:type" element={<DiscoverDishesPage />} />
             <Route path="/market" element={<MarketPage />} />
+            <Route path="/weddings" element={<WeddingsPage />} />
             <Route path="/orders" element={<OrdersPage />} />
                           <Route path="/profile" element={<ProfilePage />} />
           </Routes>
@@ -256,7 +259,10 @@ function StartParamHandler() {
     handled.current = true;
 
     const param = getStartParam();
-    if (!param || param.type !== 'dish') return;
+    if (!param) return;
+    // Bo'lim havolasi: t.me/<bot>/<app>?startapp=weddings | market
+    if (param.type === 'section') { navigate(param.to, { replace: true }); return; }
+    if (param.type !== 'dish') return;
 
     // Sahifa o'zi taomni yuklaydi va tekshiradi
     navigate(`/food/${param.id}`, { replace: true });

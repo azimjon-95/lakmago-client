@@ -542,6 +542,10 @@ export function getStartParam() {
 
   if (!raw) return null;
 
+  // Bo'lim havolalari (aniq ro'yxat — boshqa qiymat qabul qilinmaydi)
+  const SECTIONS = { weddings: '/weddings', toyxonalar: '/weddings', market: '/market' };
+  if (Object.prototype.hasOwnProperty.call(SECTIONS, String(raw))) return { type: 'section', to: SECTIONS[raw] };
+
   // XAVFSIZLIK: parametr faqat kutilgan naqshga mos bo'lsa qabul
   // qilinadi. Zararli qiymat (skript, yo'l, uzun matn) rad etiladi.
   // MongoDB ObjectId — aynan 24 ta o'n oltilik belgi.

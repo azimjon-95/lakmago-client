@@ -61,8 +61,9 @@ export const HomeSections = memo(function HomeSections({ current = 'home', marke
     : market
       ? <Tile variant="market" img={IMG.market} title={t('lokmaMarket')} sub={t('marketSubtitle')} onClick={() => navigate('/market')} />
       : null;
+  // To'yxonalar — Lokma ichida ochiladi (pages/Weddings, alohida sayt iframe'da)
   const second = wedding
-    ? <Tile variant="wedding" img={IMG.wedding} title={t('lokmaWedding')} soon={t('comingSoon')} />
+    ? <Tile variant="wedding" img={IMG.wedding} title={t('lokmaWedding')} sub={t('weddingSubtitle')} onClick={() => navigate('/weddings')} />
     : null;
 
   if (!first && !second) return null;

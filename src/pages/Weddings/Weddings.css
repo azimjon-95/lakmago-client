@@ -1,0 +1,54 @@
+/* To'yxonalar — butun ekran, Lokma ichida (iframe) */
+.weddings {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+.weddings__frame {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  background: #fff;
+}
+.weddings__loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: #fff;
+}
+.weddings__loading img { filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.15)); }
+.weddings__spinner {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 3px solid rgba(201, 66, 10, 0.18);
+  border-top-color: #C9420A;
+  animation: weddings-spin 0.8s linear infinite;
+}
+@keyframes weddings-spin { to { transform: rotate(360deg); } }
+
+.weddings--msg {
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+}
+.weddings__overlay { position: absolute; inset: 0; }
+.weddings--msg button {
+  min-width: 200px;
+  padding: 12px 18px;
+  border-radius: 14px;
+  background: #C9420A;
+  color: #fff;
+  font-weight: 600;
+}
+.weddings--msg button.is-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
