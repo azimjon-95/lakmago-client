@@ -26,6 +26,22 @@ export const WEDDING_URL = String(import.meta.env.VITE_WEDDING_URL || 'https://w
 const WEDDING_ORIGIN = (() => { try { return new URL(WEDDING_URL).origin; } catch { return 'https://wedding.lokma.uz'; } })();
 const LOAD_TIMEOUT_MS = 20_000;
 
+/*
+ * Lokma'ning pastki tizim bo'shlig'i (px) — styles/theme.css --tg-bottom-offset
+ * (calc/min/max ifodasi) ni haqiqiy pikselga aylantirish uchun o'lchab olamiz.
+ * To'yxonalar pastki menyusi shu bo'shliqni o'zi qo'shadi — Lokma menyusi kabi.
+ */
+function measureBottomOffset() {
+  try {
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;height:var(--tg-bottom-offset,0px)';
+    document.body.appendChild(probe);
+    const h = probe.getBoundingClientRect().height;
+    probe.remove();
+    return Number.isFinite(h) ? Math.round(h) : 0;
+  } catch { return 0; }
+}
+
 export function WeddingsPage() {
   const navigate = useNavigate();
   const { t, lang } = useI18n();
@@ -66,6 +82,7 @@ export function WeddingsPage() {
       })),
       defaultAddressId: user?.defaultAddressId ? String(user.defaultAddressId) : null,
       lang,
+      insets: { bottom: measureBottomOffset() },
     };
     // targetOrigin — FAQAT to'yxona sayti (boshqa manzilga hech qachon ketmaydi)
     win.postMessage({ type: 'lokma-wedding:context', payload }, WEDDING_ORIGIN);

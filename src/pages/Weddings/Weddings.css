@@ -19,7 +19,7 @@
   display: flex;
   flex-direction: column;
   padding-top: var(--tg-top-offset, 0px);
-  padding-bottom: var(--tg-bottom-offset, 0px);
+  /* Pastki bo'shliqni to'yxonalar menyusi o'zi oladi (insets.bottom) — Lokma menyusi kabi oq fonda */
   padding-left: env(safe-area-inset-left, 0px);
   padding-right: env(safe-area-inset-right, 0px);
   box-sizing: border-box;
@@ -46,8 +46,8 @@
 .weddings__spinner {
   width: 28px; height: 28px;
   border-radius: 50%;
-  border: 3px solid rgba(201, 66, 10, 0.18);
-  border-top-color: #C9420A;
+  border: 3px solid rgba(166, 30, 77, 0.18);
+  border-top-color: #A61E4D; /* To'yxonalar rangi (vino) */
   animation: weddings-spin 0.8s linear infinite;
 }
 @keyframes weddings-spin { to { transform: rotate(360deg); } }
@@ -65,7 +65,7 @@
   min-width: 200px;
   padding: 12px 18px;
   border-radius: 14px;
-  background: #C9420A;
+  background: #A61E4D;
   color: #fff;
   font-weight: 600;
 }
