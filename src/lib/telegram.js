@@ -545,6 +545,9 @@ export function getStartParam() {
   // Bo'lim havolalari (aniq ro'yxat — boshqa qiymat qabul qilinmaydi)
   const SECTIONS = { weddings: '/weddings', toyxonalar: '/weddings', market: '/market' };
   if (Object.prototype.hasOwnProperty.call(SECTIONS, String(raw))) return { type: 'section', to: SECTIONS[raw] };
+  // To'yxona havolasi: startapp=wedding_<slug> → to'yxonalar ichida shu to'yxona sahifasi
+  const wv = /^wedding_([a-z0-9-]{1,80})$/i.exec(String(raw));
+  if (wv) return { type: 'section', to: `/weddings/venue/${wv[1].toLowerCase()}` };
 
   // XAVFSIZLIK: parametr faqat kutilgan naqshga mos bo'lsa qabul
   // qilinadi. Zararli qiymat (skript, yo'l, uzun matn) rad etiladi.

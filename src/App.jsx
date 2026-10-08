@@ -28,6 +28,7 @@ import { ActiveOrderBadge } from '@/components/ActiveOrderBadge/ActiveOrderBadge
 import { SupportChat } from '@/components/SupportChat/SupportChat';
 import { Splash } from '@/components/Splash/Splash';
 import { useTelegramBack } from '@/hooks/useTelegramBack';
+import { WeddingHost } from '@/components/WeddingHost/WeddingHost';
 import { initSectionTheme } from '@/store/section';
 
 const queryClient = new QueryClient({
@@ -229,12 +230,15 @@ function AppInner({ authMode = 'telegram' }) {
             <Route path="/discover/:type" element={<DiscoverDishesPage />} />
             <Route path="/market" element={<MarketPage />} />
             <Route path="/weddings" element={<WeddingsPage />} />
+            <Route path="/weddings/venue/:slug" element={<WeddingsPage />} />
             <Route path="/orders" element={<OrdersPage />} />
                           <Route path="/profile" element={<ProfilePage />} />
           </Routes>
         </Suspense>
         </ErrorBoundary>
         <FloatingLayer />
+        {/* To'yxonalar: fonda isitiladigan doimiy iframe (to'yxonalar sahifasi uni ko'rsatadi) */}
+        <WeddingHost />
       </BrowserRouter>
     </QueryClientProvider>
   );

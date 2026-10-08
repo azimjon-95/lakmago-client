@@ -18,6 +18,7 @@
   background: #fff;
   display: flex;
   flex-direction: column;
+  z-index: 90;                 /* Lokma menyusi va savat tugmasi ustida (ko'rinib turganda) */
   padding-top: var(--tg-top-offset, 0px);
   /* Pastki bo'shliqni to'yxonalar menyusi o'zi oladi (insets.bottom) — Lokma menyusi kabi oq fonda */
   padding-left: env(safe-area-inset-left, 0px);
@@ -70,3 +71,11 @@
   font-weight: 600;
 }
 .weddings--msg button.is-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+
+/* Fonda isitilayotganda: ko'rinmaydi, bosilmaydi, lekin to'liq o'lchamda (sayt to'g'ri hisoblaydi) */
+.weddings.is-hidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}

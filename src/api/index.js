@@ -300,6 +300,9 @@ export const api = {
   // ===== Lokma Market (do'konlar) va bo'lim ruxsatlari =====
   // Qaysi bo'limlar shu mijozga ochiq — server .env: LOKMA_MARKET_ACCESS / LOKMA_WEDDING_ACCESS
   getFeatures: (opts) => apiFetch('/features', opts),
+  // Mijozning o'z to'yxona bronlari (Lokma profilidagi telefon bo'yicha, server tekshiradi)
+  getWeddingBookings: () => apiFetch('/weddings/my-bookings'),
+  cancelWeddingBooking: (id) => apiFetch(`/weddings/my-bookings/${id}/cancel`, { method: 'POST' }),
   getMarketCategories: (opts) => apiFetch('/market/categories', opts),
   getMarketStores: async (opts) => {
     const res = await apiFetch('/market/stores?limit=50', opts);

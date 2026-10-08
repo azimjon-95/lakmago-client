@@ -1,157 +1,52 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '@/store/user';
 import { useSection } from '@/store/section';
+import { useWeddingFrame } from '@/store/weddingFrame';
 import { useI18n } from '@/i18n';
 import { useFeatures } from '@/hooks/queries';
 import { setTelegramSurfaceColor, applySectionTheme } from '@/lib/telegram';
-import './Weddings.css';
+import '@/components/WeddingHost/WeddingHost.css';
 
 /*
- * ═══ LOKMA TO'YXONALARI — Lokma Go ICHIDA ═══
- *
- * To'yxonalar — alohida sayt (wedding.lokma.uz, alohida server), lekin mijoz
- * buni sezmasligi kerak: sayt shu sahifada butun ekranli <iframe> bo'lib
- * ochiladi (Telegram WebApp ham, mobil ilova ham — tashqi brauzerga chiqmaydi).
- *
- * Ko'prik (postMessage), ikki tomonda ham manzil (origin) qat'iy tekshiriladi:
- *   sayt → 'lokma-wedding:ready'            — tayyor, ma'lumot kutyapti
- *   biz  → 'lokma-wedding:context'          — ism, telefon, manzillar, til
- *                                              (FAQAT wedding.lokma.uz manziliga)
- *   sayt → 'lokma-wedding:navigate' {to}    — Lokma Go ('/') yoki Market ('/market')
- *
- * Mijoz ma'lumoti to'yxona serverida saqlanmaydi — faqat sahifa xotirasida.
+ * /weddings va /weddings/venue/:slug — to'yxonalar sahifasi.
+ * Sayt o'zi doimiy iframe'da (components/WeddingHost) turadi; bu sahifa uni
+ * faqat KO'RSATADI (va chuqur havola bo'lsa kerakli sahifani ochtiradi).
  */
-export const WEDDING_URL = String(import.meta.env.VITE_WEDDING_URL || 'https://wedding.lokma.uz').replace(/\/+$/, '');
-const WEDDING_ORIGIN = (() => { try { return new URL(WEDDING_URL).origin; } catch { return 'https://wedding.lokma.uz'; } })();
-const LOAD_TIMEOUT_MS = 20_000;
-
-/*
- * Lokma'ning pastki tizim bo'shlig'i (px) — styles/theme.css --tg-bottom-offset
- * (calc/min/max ifodasi) ni haqiqiy pikselga aylantirish uchun o'lchab olamiz.
- * To'yxonalar pastki menyusi shu bo'shliqni o'zi qo'shadi — Lokma menyusi kabi.
- */
-function measureBottomOffset() {
-  try {
-    const probe = document.createElement('div');
-    probe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;height:var(--tg-bottom-offset,0px)';
-    document.body.appendChild(probe);
-    const h = probe.getBoundingClientRect().height;
-    probe.remove();
-    return Number.isFinite(h) ? Math.round(h) : 0;
-  } catch { return 0; }
-}
-
 export function WeddingsPage() {
   const navigate = useNavigate();
-  const { t, lang } = useI18n();
-  const frameRef = useRef(null);
-  const user = useUser((s) => s.user);
+  const { slug } = useParams();
+  const { t } = useI18n();
   const authStatus = useUser((s) => s.authStatus);
-  const setSection = useSection((s) => s.setSection);
-  const { data: features, isLoading: featLoading } = useFeatures(authStatus);
-  const [ready, setReady] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const [reloadKey, setReloadKey] = useState(0);
+  const { data: features, isLoading } = useFeatures(authStatus);
+  const setVisible = useWeddingFrame((s) => s.setVisible);
+  const setPath = useWeddingFrame((s) => s.setPath);
+  const allowed = Boolean(features?.wedding);
 
-  // Telegram tepa qismi — to'yxonalar oq fonda; chiqishda joriy bo'lim rangi qaytadi
   useEffect(() => {
+    // Chuqur havola: faqat xavfsiz slug
+    setPath(slug && /^[a-z0-9-]{1,80}$/i.test(slug) ? `/venue/${slug}` : '/');
+  }, [slug, setPath]);
+
+  useEffect(() => {
+    if (!allowed) return undefined;
+    setVisible(true);
+    // To'yxonalar oq fonda; chiqishda joriy bo'lim rangi qaytadi
     setTelegramSurfaceColor('#FFFFFF');
-    return () => applySectionTheme(useSection.getState().section);
-  }, []);
-
-  const sendContext = useCallback(() => {
-    const win = frameRef.current?.contentWindow;
-    if (!win) return;
-    const payload = {
-      user: {
-        firstName: user?.firstName || '',
-        lastName: user?.lastName || '',
-        phone: user?.phone || null,
-        photoUrl: user?.photoUrl || '',
-      },
-      // Faqat ko'rsatish/qidirish uchun kerakli maydonlar
-      addresses: (user?.addresses || []).map((a) => ({
-        id: String(a.id || a._id || ''),
-        title: a.title || '',
-        address: a.address || '',
-        city: a.city || '',
-        lat: typeof a.lat === 'number' ? a.lat : undefined,
-        lng: typeof a.lng === 'number' ? a.lng : undefined,
-        labelId: a.labelId || '',
-      })),
-      defaultAddressId: user?.defaultAddressId ? String(user.defaultAddressId) : null,
-      lang,
-      insets: { bottom: measureBottomOffset() },
+    return () => {
+      setVisible(false);
+      setPath('/');
+      applySectionTheme(useSection.getState().section);
     };
-    // targetOrigin — FAQAT to'yxona sayti (boshqa manzilga hech qachon ketmaydi)
-    win.postMessage({ type: 'lokma-wedding:context', payload }, WEDDING_ORIGIN);
-  }, [user, lang]);
+  }, [allowed, setVisible, setPath]);
 
-  useEffect(() => {
-    const onMsg = (e) => {
-      if (e.origin !== WEDDING_ORIGIN || e.source !== frameRef.current?.contentWindow) return;
-      const d = e.data;
-      if (!d || typeof d !== 'object') return;
-      if (d.type === 'lokma-wedding:ready') {
-        setReady(true);
-        setFailed(false);
-        sendContext();
-      } else if (d.type === 'lokma-wedding:navigate') {
-        const to = d.to === '/market' ? '/market' : '/';
-        // Market'ga — Market bo'limi; Lokma Go'ga — oddiy bo'lim
-        setSection(to === '/market' ? 'market' : 'go');
-        navigate(to);
-      }
-    };
-    window.addEventListener('message', onMsg);
-    return () => window.removeEventListener('message', onMsg);
-  }, [sendContext, navigate, setSection]);
-
-  // Profil/manzil o'zgarsa (masalan, kirish tugadi) — yangisini yuboramiz
-  useEffect(() => { if (ready) sendContext(); }, [ready, sendContext]);
-
-  // Sayt javob bermasa — xato ekrani (internet yo'q, sayt ishlamayapti)
-  useEffect(() => {
-    if (ready) return undefined;
-    const timer = setTimeout(() => setFailed(true), LOAD_TIMEOUT_MS);
-    return () => clearTimeout(timer);
-  }, [ready, reloadKey]);
-
-  if (!featLoading && !features?.wedding) {
+  if (!isLoading && !allowed) {
     return (
-      <div className="weddings weddings--msg">
+      <div className="weddings weddings--msg is-visible">
         <p>{t('marketUnavailable')}</p>
         <button type="button" onClick={() => navigate('/')}>{t('goHome')}</button>
       </div>
     );
   }
-
-  return (
-    <div className="weddings">
-      <iframe
-        key={reloadKey}
-        ref={frameRef}
-        src={`${WEDDING_URL}/?embed=lokma`}
-        title={t('lokmaWedding')}
-        className="weddings__frame"
-        allow="geolocation; clipboard-write"
-        referrerPolicy="strict-origin-when-cross-origin"
-      />
-      {!ready && !failed && (
-        <div className="weddings__loading" aria-live="polite">
-          <img src="/sections/wedding-cloche.webp" alt="" width="96" height="96" />
-          <div className="weddings__spinner" />
-        </div>
-      )}
-      {failed && !ready && (
-        <div className="weddings weddings--msg weddings__overlay">
-          <img src="/sections/wedding-cloche.webp" alt="" width="88" height="88" />
-          <p>{t('dataLoadFailed')}</p>
-          <button type="button" onClick={() => { setFailed(false); setReloadKey((k) => k + 1); }}>{t('retry')}</button>
-          <button type="button" className="is-ghost" onClick={() => navigate('/')}>{t('goHome')}</button>
-        </div>
-      )}
-    </div>
-  );
+  return null;
 }
