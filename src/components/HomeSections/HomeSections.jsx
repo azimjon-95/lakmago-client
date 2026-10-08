@@ -45,7 +45,6 @@ function Tile({ variant, img, title, sub, soon, onClick }) {
           <span className="home-section-tile__sub">{sub}</span>
         ) : null}
       </span>
-      {!disabled && <Icon name="chevronRight" size={16} color="var(--muted)" />}
     </Tag>
   );
 }
