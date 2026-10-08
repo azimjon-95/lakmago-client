@@ -1,15 +1,33 @@
 /* To'yxonalar — butun ekran, Lokma ichida (iframe) */
+/*
+ * Butun ekran, lekin Telegram'ning yuqoridagi "Назад / ⋯" tugmalari va
+ * pastki tizim paneli OSTIGA tushmaydi: iframe ichida env(safe-area-*) 0 bo'ladi,
+ * shuning uchun bo'shliqni shu yerda — Lokma'ning yagona o'zgaruvchilari
+ * bilan (styles/theme.css: --tg-top-offset, --tg-bottom-offset) beramiz.
+ * Kompyuterda Lokma ilovasi kengligida markazda.
+ */
 .weddings {
   position: fixed;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  /* Lokma ilovasi kengligi bilan bir xil (theme.css: --app-width — telefonda to'liq ekran) */
+  max-width: var(--app-width, 100%);
   background: #fff;
   display: flex;
   flex-direction: column;
+  padding-top: var(--tg-top-offset, 0px);
+  padding-bottom: var(--tg-bottom-offset, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+  box-sizing: border-box;
 }
 .weddings__frame {
   flex: 1;
+  min-height: 0;
   width: 100%;
-  height: 100%;
   border: 0;
   display: block;
   background: #fff;
@@ -42,7 +60,7 @@
   text-align: center;
   color: var(--muted);
 }
-.weddings__overlay { position: absolute; inset: 0; }
+.weddings__overlay { position: absolute; inset: 0; transform: none; left: 0; max-width: none; }
 .weddings--msg button {
   min-width: 200px;
   padding: 12px 18px;
