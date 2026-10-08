@@ -362,7 +362,9 @@ export function RestaurantPage() {
         </div>
 
         {/* Stol bron qilish — bizning ustunligimiz */}
-        {restaurant.reservationEnabled !== false && (
+        {/* Do'konda stol yo'q: server isStore beradi; eski serverda kind/category bo'yicha ham yashiriladi */}
+        {restaurant.reservationEnabled !== false && !restaurant.isStore && restaurant.kind !== 'shop'
+          && !['magazin_oziq', 'magazin_meva', 'magazin'].includes(restaurant.category) && (
           <button onClick={() => navigate(`/restaurant/${id}/reserve`)} className="rest-reserve-btn">
             <Icon name="calendarPlus" size={17} color="var(--brand)" /> {t('reserveTable')}
           </button>

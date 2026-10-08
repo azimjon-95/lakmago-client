@@ -173,14 +173,9 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
             Ichimlikda `weight` yo'q, `volume` bor ("0.5 l"),
             shuning uchun ikkalasi ham tekshiriladi.
           */}
-          {market && (dish.packSize || dish.brand) && (
+          {market && dish.packSize && (
             <div className="dish-modal__nutrition">
-              {dish.packSize && (
-                <span><Icon name="scale" size={15} color="var(--muted)" />{dish.packSize}</span>
-              )}
-              {dish.brand && (
-                <span><Icon name="store" size={15} color="var(--muted)" />{dish.brand}</span>
-              )}
+              <span><Icon name="scale" size={15} color="var(--muted)" />{dish.packSize}</span>
             </div>
           )}
           {!market && (dish.weight || dish.weightGram || dish.volume || dish.calories || dish.prepMinutes) && (
