@@ -45,16 +45,19 @@ function Tile({ variant, img, title, sub, onClick }) {
       className={`home-section-tile home-section-tile--${variant}`}
       style={{ '--hs-photo': `url("${PHOTO[variant]}")` }}
     >
-      {/* Eski 3D belgi (rasmning o'zi — doira ichida emas) */}
-      <img className="home-section-tile__icon" src={img} alt="" width="48" height="48" loading="eager" decoding="async" draggable="false" />
-      <span className="home-section-tile__bottom">
-        <span className="home-section-tile__text">
-          <span className="home-section-tile__title">{title}</span>
-          {sub ? <span className="home-section-tile__sub">{sub}</span> : null}
+      {/* Yuqorida: eski 3D belgi (chapda) va strelka (o'ngda); pastda — nom to'liq kenglikda */}
+      <span className="home-section-tile__top">
+        {/* Belgi o'z o'lchamidagi oq (xira shisha) quti ustida */}
+        <span className="home-section-tile__icon-box">
+          <img className="home-section-tile__icon" src={img} alt="" width="34" height="34" loading="eager" decoding="async" draggable="false" />
         </span>
         <span className="home-section-tile__arrow" aria-hidden="true">
-          <Icon name="arrowRight" size={14} color="#1A1A17" />
+          <Icon name="arrowRight" size={13} color="#1A1A17" />
         </span>
+      </span>
+      <span className="home-section-tile__text">
+        <span className="home-section-tile__title">{title}</span>
+        {sub ? <span className="home-section-tile__sub">{sub}</span> : null}
       </span>
     </button>
   );

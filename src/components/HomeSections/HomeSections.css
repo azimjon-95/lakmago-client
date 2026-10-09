@@ -15,10 +15,10 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 8px;
-  min-height: 122px;
-  padding: 10px 10px 11px 12px;
-  border-radius: 20px;
+  gap: 6px;
+  min-height: 102px;           /* barcha bo'limlarda (Lokma Go, Market, To'yxonalar) bir xil */
+  padding: 9px 10px 10px 11px;
+  border-radius: 18px;
   overflow: hidden;
   text-align: left;
   color: #fff;
@@ -52,18 +52,25 @@
   --hs-g0: rgba(74, 16, 48, 0.08); --hs-g1: rgba(74, 16, 48, 0.55); --hs-g2: rgba(56, 8, 34, 0.92);
 }
 
-.home-section-tile__icon {
+.home-section-tile__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.home-section-tile__icon-box {
   flex: none;
-  align-self: flex-start;
-  width: 48px; height: 48px;
+  width: 44px; height: 44px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.94);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  display: grid; place-items: center;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.22);
+}
+.home-section-tile__icon {
+  width: 34px; height: 34px;
   object-fit: contain;
-  filter: drop-shadow(0 4px 7px rgba(0, 0, 0, 0.45));
   user-select: none; -webkit-user-drag: none;
 }
-.home-section-tile__bottom { display: flex; align-items: flex-end; gap: 8px; }
-.home-section-tile__text { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.home-section-tile__text { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .home-section-tile__title {
-  font-size: 14.5px; font-weight: 800; line-height: 1.15; color: #fff;
+  font-size: 14px; font-weight: 800; line-height: 1.15; color: #fff;
   overflow-wrap: anywhere;               /* nom TO'LIQ ko'rinadi: sig'masa qatorga o'tadi */
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
 }
@@ -73,7 +80,7 @@
 }
 .home-section-tile__arrow {
   flex: none;
-  width: 26px; height: 26px; border-radius: 50%;
+  width: 24px; height: 24px; border-radius: 50%;
   background: #fff;
   display: grid; place-items: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
@@ -81,7 +88,8 @@
 
 /* Juda tor ekran: belgi va yozuv biroz kichrayadi */
 @media (max-width: 340px) {
-  .home-section-tile { min-height: 112px; padding: 9px 8px 10px 10px; }
-  .home-section-tile__icon { width: 40px; height: 40px; }
-  .home-section-tile__title { font-size: 13px; }
+  .home-section-tile { min-height: 96px; padding: 8px 8px 9px 9px; }
+  .home-section-tile__icon-box { width: 38px; height: 38px; border-radius: 11px; }
+  .home-section-tile__icon { width: 29px; height: 29px; }
+  .home-section-tile__title { font-size: 12.5px; }
 }
