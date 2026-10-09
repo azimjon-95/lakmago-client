@@ -8,7 +8,6 @@ import { BottomNav } from '@/components/BottomNav';
 import { CartBar } from '@/components/CartBar';
 import { RestaurantCardSkeleton } from '@/components/Skeleton/Skeleton';
 import { DiscountSlider } from '@/components/MarketSlider/DiscountSlider';
-import { AllStores } from '@/components/MarketSlider/AllStores';
 import { ClosedAlert } from '@/components/ClosedAlert';
 import { useClosedAlert, useOpenPartition } from '@/hooks/useOpenStatus';
 import { useFeatures, useMarketCategories, useMarketStores, useMarketBanners } from '@/hooks/queries';
@@ -213,8 +212,6 @@ export function MarketPage() {
             )}
           </div>
 
-          {/* Barcha do'konlar — pastda ixcham ro'yxat (kategoriya filtridan mustaqil) */}
-          {!storesLoading && !storesError && <AllStores stores={stores} />}
         </>
       )}
 
