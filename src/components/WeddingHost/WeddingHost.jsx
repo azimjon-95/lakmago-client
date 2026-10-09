@@ -29,6 +29,8 @@ import './WeddingHost.css';
  *   biz  → 'lokma-wedding:open'          sahifaga o'tish (chuqur havola)
  *   sayt → 'lokma-wedding:navigate'      Lokma Go ('/') yoki Market ('/market')
  *   sayt → 'lokma-wedding:rpc'           amal so'rovi; javob: 'lokma-wedding:rpc-result'
+ *   sayt → 'lokma-wedding:route'         { canGoBack } — ichkarida orqaga qaytish mumkinmi
+ *   biz  → 'lokma-wedding:back'          Telegram "Назад": iframe ichida bir qadam orqaga
  */
 export const WEDDING_URL = String(import.meta.env.VITE_WEDDING_URL || 'https://wedding.lokma.uz').replace(/\/+$/, '');
 const WEDDING_ORIGIN = (() => { try { return new URL(WEDDING_URL).origin; } catch { return 'https://wedding.lokma.uz'; } })();
@@ -49,6 +51,8 @@ function measureCssVar(name) {
 /* Pastki: tizim paneli; tepa: status bar + Telegram "Назад / ⋯" tugmalari (theme.css) */
 const measureBottomOffset = () => measureCssVar('--tg-bottom-offset');
 const measureTopOffset = () => measureCssVar('--tg-top-offset');
+/* Faqat status bar (soat, antenna) balandligi — Telegram tugmalarisiz */
+const measureStatusTop = () => measureCssVar('--tg-safe-top');
 
 const str = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 
@@ -109,10 +113,22 @@ export function WeddingHost() {
         })),
         defaultAddressId: u?.defaultAddressId ? String(u.defaultAddressId) : null,
         lang: l,
-        insets: { bottom: measureBottomOffset(), top: latest.current.edge ? measureTopOffset() : 0 },
+        insets: {
+          bottom: measureBottomOffset(),
+          top: latest.current.edge ? measureTopOffset() : 0,
+          statusTop: latest.current.edge ? measureStatusTop() : 0,
+        },
       },
     });
   }, [post]);
+
+  // Telegram "Назад" iframe ichida orqaga qaytara olishi uchun
+  useEffect(() => {
+    const { setGoBack, setCanGoBack } = useWeddingFrame.getState();
+    if (!ready) { setCanGoBack(false); setGoBack(null); return undefined; }
+    setGoBack(() => post({ type: 'lokma-wedding:back' }));
+    return () => { setGoBack(null); setCanGoBack(false); };
+  }, [ready, post]);
 
   // Profil / til / manzil / edge o'zgarsa — yangisini yuboramiz
   useEffect(() => { if (ready) sendContext(); }, [ready, user, lang, edge, sendContext]);
@@ -194,6 +210,8 @@ export function WeddingHost() {
         setReady(true); setFailed(false);
         sendContext();
         post({ type: 'lokma-wedding:visible', visible: useWeddingFrame.getState().visible });
+      } else if (d.type === 'lokma-wedding:route') {
+        useWeddingFrame.getState().setCanGoBack(Boolean(d.canGoBack));
       } else if (d.type === 'lokma-wedding:navigate') {
         const to = d.to === '/market' ? '/market' : '/';
         setSection(to === '/market' ? 'market' : 'go');

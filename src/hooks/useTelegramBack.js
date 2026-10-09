@@ -2,6 +2,7 @@ import { useCallback, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getTelegram } from '@/lib/telegram';
 import { useUI } from '@/store/ui';
+import { useWeddingFrame } from '@/store/weddingFrame';
 
 /*
  * ═══════════════════════════════════════════════════════════
@@ -55,6 +56,12 @@ export function useTelegramBack() {
      */
     if (useUI.getState().modalCount > 0) {
       useUI.getState().closeTopModal();
+      return;
+    }
+    // To'yxonalar ichida (masalan to'yxona sahifasi) — avval iframe ichida orqaga
+    const wf = useWeddingFrame.getState();
+    if (wf.visible && wf.canGoBack && typeof wf.goBack === 'function') {
+      wf.goBack();
       return;
     }
     if (pathname !== '/') {
