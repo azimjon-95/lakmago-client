@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Icon } from '@/components/Icon';
 import { RestaurantCard } from '@/components/RestaurantCard';
-import { DishGridCard } from '@/components/DishGridCard';
 import { DishModal } from '@/components/DishModal';
 import { BottomNav } from '@/components/BottomNav';
 import { CartBar } from '@/components/CartBar';
-import { RestaurantCardSkeleton, DishScrollCardSkeleton } from '@/components/Skeleton/Skeleton';
+import { RestaurantCardSkeleton } from '@/components/Skeleton/Skeleton';
+import { DiscountSlider } from '@/components/MarketSlider/DiscountSlider';
+import { AllStores } from '@/components/MarketSlider/AllStores';
 import { ClosedAlert } from '@/components/ClosedAlert';
 import { useClosedAlert, useOpenPartition } from '@/hooks/useOpenStatus';
 import { useFeatures, useMarketCategories, useMarketStores, useMarketBanners } from '@/hooks/queries';
@@ -80,7 +81,6 @@ export function MarketPage() {
   const { data: banners = [] } = useMarketBanners(allowed);
   const { data: stores = [], isLoading: storesLoading, isError: storesError, refetch } = useMarketStores(allowed);
   const discQ = useMarketProducts({ discounted: true, category, enabled: allowed });
-  const regQ = useMarketProducts({ discounted: false, category, enabled: allowed });
 
   /*
    * Kategoriyalar: faqat do'konlarda MAHSULOTI BOR kategoriyalar
@@ -91,19 +91,20 @@ export function MarketPage() {
     return (meta?.categories || []).filter((c) => used.has(c.value));
   }, [meta, stores]);
 
+  // Kategoriya emojisi (rasmsiz mahsulot uchun slayderda)
+  const catMap = useMemo(() => new Map((meta?.categories || []).map((c) => [c.value, c])), [meta]);
+
   // Tanlangan kategoriya bo'yicha do'konlar; ochiqlari oldinda
   const shownStores = useMemo(() => {
     const list = category === 'all' ? stores : stores.filter((s) => (s.productCategories || []).includes(category));
     return [...list].sort((a, b) => Number(b.isOpen !== false) - Number(a.isOpen !== false));
   }, [stores, category]);
 
+  // Chegirmadagi mahsulotlar (slayder) — ochiq do'konlar oldinda, yopiqlari oxirida
   const discount = flat(discQ);
-  const regular = flat(regQ);
   const discParts = useOpenPartition(discount);
-  const regParts = useOpenPartition(regular);
   const discShown = useMemo(() => [...discParts.open, ...discParts.closed], [discParts]);
-  const regShown = useMemo(() => [...regParts.open, ...regParts.closed], [regParts]);
-  const closedIds = useMemo(() => new Set([...discParts.closedIds, ...regParts.closedIds]), [discParts, regParts]);
+  const closedIds = useMemo(() => new Set(discParts.closedIds), [discParts]);
 
   const openModal = useCallback((d) => setModalDish(d), []);
 
@@ -185,23 +186,15 @@ export function MarketPage() {
         </div>
       ) : (
         <>
-          {/* Chegirmadagi mahsulotlar */}
-          {(discQ.isLoading || discShown.length > 0) && (
-            <>
-              <div className="home-section-header">
-                <div className="home-section-header__title">
-                  <Icon name="discount" size={17} color="var(--appetite)" /> {t('marketDiscounts')}
-                </div>
-              </div>
-              <div className="home-dishes-row no-scrollbar">
-                {discQ.isLoading
-                  ? Array.from({ length: 4 }).map((_, i) => <DishScrollCardSkeleton key={i} />)
-                  : discShown.map((d) => (
-                    <DishGridCard key={d._id || d.id} dish={d} onClick={openModal} closed={closedIds.has(String(d._id || d.id))} />
-                  ))}
-              </div>
-            </>
-          )}
+          {/* Chegirmadagi mahsulotlar — o'zi harakatlanuvchi slayder (Do'konlar tepasida) */}
+          <DiscountSlider
+            title={t('marketDiscounts')}
+            items={discShown}
+            loading={discQ.isLoading}
+            closedIds={closedIds}
+            onOpen={openModal}
+            emojiOf={(d) => catMap.get(d.marketCategory)?.emoji}
+          />
 
           {/* Do'konlar */}
           <h2 className="home-restaurants-title">{t('stores')}</h2>
@@ -220,26 +213,8 @@ export function MarketPage() {
             )}
           </div>
 
-          {/* Barcha mahsulotlar — 2 ustunli setka, "Yana ko'rsatish" */}
-          {(regQ.isLoading || regShown.length > 0) && (
-            <>
-              <h2 className="home-restaurants-title">{t('products')}</h2>
-              <div className="market-grid">
-                {regQ.isLoading
-                  ? Array.from({ length: 6 }).map((_, i) => <DishScrollCardSkeleton key={i} />)
-                  : regShown.map((d) => (
-                    <DishGridCard key={d._id || d.id} dish={d} onClick={openModal} closed={closedIds.has(String(d._id || d.id))} />
-                  ))}
-              </div>
-              {regQ.hasNextPage && (
-                <div className="market-more">
-                  <button type="button" onClick={() => regQ.fetchNextPage()} disabled={regQ.isFetchingNextPage}>
-                    {regQ.isFetchingNextPage ? '…' : t('showMore')}
-                  </button>
-                </div>
-              )}
-            </>
-          )}
+          {/* Barcha do'konlar — pastda ixcham ro'yxat (kategoriya filtridan mustaqil) */}
+          {!storesLoading && !storesError && <AllStores stores={stores} />}
         </>
       )}
 

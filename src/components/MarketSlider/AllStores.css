@@ -1,0 +1,27 @@
+/* "Barcha do'konlar" — ixcham ro'yxat */
+.mas { padding-bottom: 8px; }
+.mas__list { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; }
+.mas-row {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; padding: 10px 12px 10px 10px;
+  border-radius: 18px; text-align: left;
+  background: var(--surface); border: 1px solid var(--line);
+  box-shadow: 0 6px 16px -12px rgba(15, 60, 40, 0.35);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 140ms ease;
+}
+.mas-row:active { transform: scale(0.985); }
+.mas-row__thumb {
+  flex: none; width: 58px; height: 58px; border-radius: 16px; overflow: hidden;
+  display: grid; place-items: center; background: #E8F7EE;
+}
+.mas-row__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mas-row__emoji { font-size: 28px; }
+.mas-row__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mas-row__name { font-size: 15.5px; font-weight: 800; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mas-row__desc { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mas-row__meta { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; margin-top: 2px; }
+.mas-row__status { padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; }
+.mas-row__status.is-open { color: #12733F; background: #E1F5EA; }
+.mas-row__status.is-closed { color: #C0352E; background: #FDE9E8; }
+.mas-row__hours { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; color: var(--muted); }

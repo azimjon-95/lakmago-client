@@ -1,0 +1,143 @@
+/* ═══ Chegirmadagi mahsulotlar slayderi (Lokma Market) ═══ */
+.mds { margin: 4px 0 8px; }
+.mds__head { display: flex; align-items: center; justify-content: space-between; padding: 6px 16px 10px; }
+.mds__title { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 800; color: var(--ink); }
+.mds__fire {
+  width: 28px; height: 28px; border-radius: 9px;
+  display: grid; place-items: center;
+  background: linear-gradient(135deg, #FF7A1A, #E5302B);
+  box-shadow: 0 4px 10px -3px rgba(229, 48, 43, 0.6);
+  animation: mds-flame 1.8s ease-in-out infinite;
+}
+.mds__count {
+  min-width: 26px; height: 24px; padding: 0 8px; border-radius: 999px;
+  display: grid; place-items: center;
+  font-size: 12.5px; font-weight: 800; color: #fff; background: #E5302B;
+}
+
+.mds__track {
+  display: flex; gap: 12px;
+  padding: 2px 16px 6px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 16px;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.mds-slide {
+  position: relative;
+  flex: none;
+  width: min(86%, 332px);
+  height: 152px;
+  scroll-snap-align: start;
+  display: flex; align-items: stretch; justify-content: space-between;
+  padding: 14px 12px 14px 16px;
+  border-radius: 24px;
+  overflow: hidden;
+  text-align: left;
+  color: #fff;
+  isolation: isolate;
+  background:
+    radial-gradient(120% 140% at 100% 0%, #3FBF73 0%, rgba(63, 191, 115, 0) 55%),
+    linear-gradient(135deg, #0B4A30 0%, #138A55 60%, #1FA866 100%);
+  box-shadow: 0 14px 26px -14px rgba(11, 74, 48, 0.75);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 160ms ease;
+}
+.mds-slide:active { transform: scale(0.98); }
+.mds-slide.is-closed { filter: grayscale(0.55) brightness(0.9); }
+
+/* Yorug'lik taralishi (shimmer) */
+.mds-slide__shine {
+  position: absolute; inset: -20% auto -20% -60%;
+  width: 45%;
+  background: linear-gradient(105deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.28) 50%, rgba(255, 255, 255, 0) 100%);
+  transform: skewX(-18deg);
+  animation: mds-shine 4.8s ease-in-out infinite;
+  pointer-events: none; z-index: 1;
+}
+/* Suzuvchi bezak doiralar */
+.mds-slide__blob { position: absolute; border-radius: 50%; z-index: -1; pointer-events: none; }
+.mds-slide__blob--a { width: 150px; height: 150px; right: -40px; bottom: -70px; background: rgba(255, 255, 255, 0.10); animation: mds-drift 7s ease-in-out infinite; }
+.mds-slide__blob--b { width: 70px; height: 70px; left: 38%; top: -30px; background: rgba(255, 255, 255, 0.08); animation: mds-drift 9s ease-in-out infinite reverse; }
+
+.mds-slide__info { position: relative; z-index: 2; flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 3px; padding-right: 8px; }
+.mds-slide__store {
+  align-self: flex-start; max-width: 100%;
+  padding: 2px 9px; border-radius: 999px;
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.2px;
+  color: #0B4A30; background: rgba(255, 255, 255, 0.92);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.mds-slide__name {
+  margin-top: 2px;
+  font-size: 15.5px; font-weight: 800; line-height: 1.2;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
+}
+.mds-slide__pack { font-size: 11px; color: rgba(255, 255, 255, 0.8); }
+.mds-slide__prices { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; margin-top: 3px; }
+.mds-slide__price { font-size: 21px; font-weight: 900; line-height: 1; letter-spacing: -0.3px; }
+.mds-slide__price small { font-size: 11px; font-weight: 600; opacity: 0.9; letter-spacing: 0; }
+.mds-slide__old { font-size: 12.5px; color: rgba(255, 255, 255, 0.7); text-decoration: line-through; }
+
+.mds-slide__photo-wrap { position: relative; z-index: 2; flex: none; align-self: center; width: 112px; height: 112px; }
+.mds-slide__photo {
+  display: block; width: 100%; height: 100%;
+  border-radius: 50%; overflow: hidden;
+  border: 4px solid #fff;
+  box-shadow: 0 10px 20px -6px rgba(0, 0, 0, 0.45);
+  background: linear-gradient(150deg, #FFFFFF 0%, #E3F6EA 100%);
+  display: grid; place-items: center;
+  animation: mds-float 3.4s ease-in-out infinite;
+}
+.mds-slide__emoji { font-size: 54px; line-height: 1; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.18)); }
+.mds-slide__badge {
+  position: absolute; left: -8px; top: -6px;
+  min-width: 46px; height: 46px; padding: 0 6px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  font-size: 14px; font-weight: 900; color: #fff;
+  background: radial-gradient(circle at 30% 25%, #FF6A5C, #E5302B 70%);
+  border: 2.5px solid #fff;
+  box-shadow: 0 6px 14px -4px rgba(229, 48, 43, 0.8);
+  transform: rotate(-10deg);
+  animation: mds-pulse 1.7s ease-in-out infinite;
+}
+
+.mds-slide--skeleton {
+  background: linear-gradient(110deg, #E4EEE8 30%, #F3F8F5 50%, #E4EEE8 70%);
+  background-size: 200% 100%;
+  animation: mds-skeleton 1.3s linear infinite;
+  box-shadow: none;
+}
+
+/* Nuqtalar + taymer chizig'i */
+.mds__dots { display: flex; justify-content: center; align-items: center; gap: 6px; padding: 8px 0 2px; }
+.mds__dot {
+  position: relative; width: 7px; height: 7px; padding: 0; border: 0;
+  border-radius: 999px; background: rgba(31, 157, 85, 0.25); overflow: hidden;
+  transition: width 260ms ease, background 260ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.mds__dot.is-active { width: 26px; background: rgba(31, 157, 85, 0.25); }
+.mds__dot.is-active:not(:has(.mds__dot-fill)) { background: #1F9D55; } /* animatsiyasiz rejimda to'liq */
+.mds__dot-fill {
+  position: absolute; inset: 0; border-radius: inherit;
+  background: #1F9D55; transform-origin: left center;
+  animation-name: mds-fill; animation-timing-function: linear; animation-fill-mode: forwards;
+}
+
+@keyframes mds-shine { 0%, 55% { transform: translateX(0) skewX(-18deg); } 100% { transform: translateX(520%) skewX(-18deg); } }
+@keyframes mds-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes mds-pulse { 0%, 100% { transform: rotate(-10deg) scale(1); } 50% { transform: rotate(-10deg) scale(1.1); } }
+@keyframes mds-drift { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-14px, -10px); } }
+@keyframes mds-flame { 0%, 100% { transform: scale(1) rotate(0); } 50% { transform: scale(1.1) rotate(-6deg); } }
+@keyframes mds-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes mds-skeleton { to { background-position: -200% 0; } }
+
+/* Harakatni kamaytirish — barcha animatsiyalar o'chiq */
+@media (prefers-reduced-motion: reduce) {
+  .mds-slide__shine, .mds-slide__blob, .mds-slide__photo, .mds-slide__badge, .mds__fire, .mds-slide--skeleton { animation: none; }
+}
