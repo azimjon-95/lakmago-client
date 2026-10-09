@@ -25,6 +25,12 @@
   padding-right: env(safe-area-inset-right, 0px);
   box-sizing: border-box;
 }
+/*
+ * Edge-to-edge (sayt 'edge-to-edge' qobiliyatini bildirganda): iframe ekran
+ * TEPASIDAN boshlanadi, to'yxonalar rasmi status bar va Telegram tugmalari
+ * ortiga chiqadi. Tepa bo'shliqni sayt o'zi hisobga oladi (insets.top).
+ */
+.weddings.is-edge { padding-top: 0; }
 .weddings__frame {
   flex: 1;
   min-height: 0;

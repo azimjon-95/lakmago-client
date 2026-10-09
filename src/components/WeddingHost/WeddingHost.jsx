@@ -22,7 +22,8 @@ import './WeddingHost.css';
  *     ilova orqali bajariladi — tokenlar iframe'ga HECH QACHON berilmaydi.
  *
  * Xabarlar (postMessage), ikki tomonda ham manzil (origin) qat'iy tekshiriladi:
- *   sayt → 'lokma-wedding:ready'         tayyor
+ *   sayt → 'lokma-wedding:ready'         tayyor; caps: ['edge-to-edge'] — sayt tepadagi
+ *                                        bo'shliqni o'zi hisobga oladi (iframe ekran tepasidan)
  *   biz  → 'lokma-wedding:context'       ism, telefon, manzillar, til (FAQAT wedding.lokma.uz ga)
  *   biz  → 'lokma-wedding:visible'       ko'rinish holati (GPS faqat ko'ringanda so'raladi)
  *   biz  → 'lokma-wedding:open'          sahifaga o'tish (chuqur havola)
@@ -34,17 +35,20 @@ const WEDDING_ORIGIN = (() => { try { return new URL(WEDDING_URL).origin; } catc
 const LOAD_TIMEOUT_MS = 20_000;
 const WARMUP_MS = 2500;
 
-/* Lokma'ning pastki tizim bo'shlig'i (px) — --tg-bottom-offset ni piksel qilib o'lchaymiz */
-function measureBottomOffset() {
+/* Lokma'ning tizim bo'shlig'i (px) — CSS o'zgaruvchisini piksel qilib o'lchaymiz */
+function measureCssVar(name) {
   try {
     const probe = document.createElement('div');
-    probe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;height:var(--tg-bottom-offset,0px)';
+    probe.style.cssText = `position:fixed;visibility:hidden;pointer-events:none;height:var(${name},0px)`;
     document.body.appendChild(probe);
     const h = probe.getBoundingClientRect().height;
     probe.remove();
     return Number.isFinite(h) ? Math.round(h) : 0;
   } catch { return 0; }
 }
+/* Pastki: tizim paneli; tepa: status bar + Telegram "Назад / ⋯" tugmalari (theme.css) */
+const measureBottomOffset = () => measureCssVar('--tg-bottom-offset');
+const measureTopOffset = () => measureCssVar('--tg-top-offset');
 
 const str = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 
@@ -64,8 +68,15 @@ export function WeddingHost() {
   const [ready, setReady] = useState(false);   // sayt "tayyor" dedimi
   const [failed, setFailed] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  /*
+   * Edge-to-edge: sayt buni qo'llasa (ready.caps), iframe ekranning ENG TEPASIDAN
+   * boshlanadi — to'yxonalar rasmi status bar va Telegram tugmalari ORTIGA chiqadi,
+   * tepa bo'shliqni sayt o'zi (insets.top) hisobga oladi. Eski sayt versiyasida
+   * avvalgidek: bo'shliqni Lokma qoldiradi.
+   */
+  const [edge, setEdge] = useState(false);
   const latest = useRef({});
-  latest.current = { user, lang };
+  latest.current = { user, lang, edge };
 
   // Fonda isitish: Lokma ochilgach bo'sh vaqtda (yoki to'yxonalarga kirilganda darhol)
   useEffect(() => {
@@ -98,13 +109,30 @@ export function WeddingHost() {
         })),
         defaultAddressId: u?.defaultAddressId ? String(u.defaultAddressId) : null,
         lang: l,
-        insets: { bottom: measureBottomOffset() },
+        insets: { bottom: measureBottomOffset(), top: latest.current.edge ? measureTopOffset() : 0 },
       },
     });
   }, [post]);
 
-  // Profil / til / manzil o'zgarsa — yangisini yuboramiz
-  useEffect(() => { if (ready) sendContext(); }, [ready, user, lang, sendContext]);
+  // Profil / til / manzil / edge o'zgarsa — yangisini yuboramiz
+  useEffect(() => { if (ready) sendContext(); }, [ready, user, lang, edge, sendContext]);
+
+  // Xavfsiz zona o'zgarsa (aylantirish, fullscreen, Telegram tugmalari) — o'lchamlarni qayta yuboramiz
+  useEffect(() => {
+    if (!ready) return undefined;
+    let raf = 0;
+    // telegram.js CSS o'zgaruvchilarini yangilab ulgurishi uchun keyingi kadrda o'lchaymiz
+    const resend = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => sendContext()); };
+    const tg = getTelegram();
+    const events = ['safeAreaChanged', 'contentSafeAreaChanged', 'fullscreenChanged'];
+    window.addEventListener('resize', resend);
+    events.forEach((ev) => { try { tg?.onEvent?.(ev, resend); } catch { /* eski Telegram */ } });
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', resend);
+      events.forEach((ev) => { try { tg?.offEvent?.(ev, resend); } catch { /* eski Telegram */ } });
+    };
+  }, [ready, sendContext]);
   useEffect(() => { if (ready) post({ type: 'lokma-wedding:visible', visible }); }, [ready, visible, post]);
   useEffect(() => { if (ready && visible && path && path !== '/') post({ type: 'lokma-wedding:open', path }); }, [ready, visible, path, post]);
 
@@ -160,6 +188,9 @@ export function WeddingHost() {
       const d = e.data;
       if (!d || typeof d !== 'object') return;
       if (d.type === 'lokma-wedding:ready') {
+        const isEdge = Array.isArray(d.caps) && d.caps.includes('edge-to-edge');
+        latest.current.edge = isEdge; // birinchi kontekst darhol to'g'ri o'lcham bilan ketsin
+        setEdge(isEdge);
         setReady(true); setFailed(false);
         sendContext();
         post({ type: 'lokma-wedding:visible', visible: useWeddingFrame.getState().visible });
@@ -190,7 +221,7 @@ export function WeddingHost() {
   if (!allowed || !armed) return null;
 
   return (
-    <div className={`weddings ${visible ? 'is-visible' : 'is-hidden'}`} aria-hidden={!visible}>
+    <div className={`weddings ${visible ? 'is-visible' : 'is-hidden'}${edge ? ' is-edge' : ''}`} aria-hidden={!visible}>
       <iframe
         key={reloadKey}
         ref={frameRef}
@@ -211,7 +242,7 @@ export function WeddingHost() {
         <div className="weddings weddings--msg weddings__overlay">
           <img src="/sections/wedding-cloche.webp" alt="" width="88" height="88" />
           <p>{t('dataLoadFailed')}</p>
-          <button type="button" onClick={() => { setFailed(false); setReady(false); setReloadKey((k) => k + 1); }}>{t('retry')}</button>
+          <button type="button" onClick={() => { setFailed(false); setReady(false); setEdge(false); setReloadKey((k) => k + 1); }}>{t('retry')}</button>
           <button type="button" className="is-ghost" onClick={() => { useWeddingFrame.getState().setVisible(false); navigate('/'); }}>{t('goHome')}</button>
         </div>
       )}
