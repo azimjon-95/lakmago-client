@@ -4,12 +4,17 @@ import { Icon } from './Icon';
 import { formatSomShort } from '@/lib/utils';
 import { useCart } from '@/store/cart';
 import { haptic } from '@/lib/telegram';
+import { useI18n } from '@/i18n';
+import { unitSuffix } from '@/data/market';
 import './cards/DishScrollCard.css';
 
 export const DishScrollCard = memo(function DishScrollCard({
   dish, onClick, showRestaurant = true, disabled = false, onDisabledTap,
 }) {
   const addItem = useCart((s) => s.addItem);
+  const { lang } = useI18n();
+  // Do'kon mahsuloti: "/ kg" va qadoq hajmi (restoran taomida bo'sh)
+  const unit = unitSuffix(dish.unit, lang);
   const discountPct = dish.oldPrice ? Math.round((1 - dish.price / dish.oldPrice) * 100) : null;
   const hasOptions = (dish.optionGroups?.length ?? 0) > 0;
 
@@ -42,11 +47,12 @@ export const DishScrollCard = memo(function DishScrollCard({
         </button>
       </div>
       <div className="dscard__name">{dish.name}</div>
+      {dish.packSize && <div className="dscard__pack">{dish.packSize}</div>}
       {showRestaurant && dish.restaurantName && (
         <div className="dscard__rest">{dish.restaurantName}</div>
       )}
       <div className="dscard__price">
-        <span className="dscard__price-main">{formatSomShort(dish.price)}</span>
+        <span className="dscard__price-main">{formatSomShort(dish.price)}{unit && <small className="dscard__unit"> {unit}</small>}</span>
         {dish.oldPrice && <span className="dscard__price-old">{formatSomShort(dish.oldPrice)}</span>}
       </div>
     </button>

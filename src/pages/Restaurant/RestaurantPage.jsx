@@ -8,21 +8,27 @@ import { DishModal } from '@/components/DishModal';
 import { CartBar } from '@/components/CartBar';
 import { RestaurantBanner } from '@/components/DishPhoto';
 import { RestaurantInfoSheet } from '@/components/RestaurantInfoSheet';
-import { useT } from '@/i18n';
+import { useI18n } from '@/i18n';
+import { isDiscountedDish } from '@/lib/discount';
+import { marketCatLabel } from '@/data/market';
+import { DiscountSlider } from '@/components/MarketSlider/DiscountSlider';
 import { useUser } from '@/store/user';
 import { haptic, getTelegram } from '@/lib/telegram';
 import { useClosedAlert, useOpenStatus } from '@/hooks/useOpenStatus';
 import { ClosedAlert } from '@/components/ClosedAlert';
-import { useRestaurant, useDishes } from '@/hooks/queries';
+import { useRestaurant, useDishes, useMarketCategories } from '@/hooks/queries';
 import './Restaurant.css';
 
 const REVIEWS_TAB = '__reviews__';
+const SALE_TAB = '__sale__';
+// Do'kon qoidasi — server services/storeRules.js bilan bir xil (eski serverda isStore bo'lmasa ham)
+const STORE_CATEGORIES = ['magazin_oziq', 'magazin_meva', 'magazin'];
 
 export function RestaurantPage() {
   const { id = '' } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const t = useT();
+  const { t, lang } = useI18n();
   const [modalDish, setModalDish] = useState(null);
   // Sevimlilar — localStorage'da saqlanadi.
   // Selector primitiv (boolean) qaytarishi shart: massiv qaytarilsa
@@ -39,6 +45,16 @@ export function RestaurantPage() {
   const { data: restaurant, isLoading: restLoading, error: restError } = useRestaurant(id);
   const { data: rawDishes = [], isLoading: dishesLoading } = useDishes(id);
   const restaurantReviews = restaurant?.reviews || [];
+
+  /*
+   * DO'KON (Lokma Market): menyu Lokma Go taom kategoriyalari (Milliy taom, Osh...) bilan
+   * EMAS, Market kategoriyalari (Mevalar, Sut, Go'sht...) bo'yicha guruhlanadi, tepada
+   * "Chegirmalar". Kategoriyalar ro'yxati serverdan (GET /market/categories).
+   */
+  const isStore = Boolean(restaurant?.isStore || restaurant?.kind === 'shop' || STORE_CATEGORIES.includes(restaurant?.category));
+  const { data: market } = useMarketCategories(isStore);
+  const catsLoading = isStore && !market;
+  const marketCatMap = useMemo(() => new Map((market?.categories || []).map((c) => [c.value, c])), [market]);
 
   // Ish vaqti har daqiqada qayta hisoblanadi: restoran ochilganda
   // sahifa o'zi jonlanadi, mijoz yangilashi shart emas
@@ -114,6 +130,28 @@ export function RestaurantPage() {
   );
 
   const sections = useMemo(() => {
+    if (isStore) {
+      // Kategoriyalar hali yuklanmagan — vaqtincha bitta guruh (skeleton ko'rsatiladi)
+      if (!market) return [[t('otherProducts'), restaurantDishes], [REVIEWS_TAB, []]];
+      const byCat = new Map();
+      restaurantDishes.forEach((d) => {
+        const key = marketCatMap.has(d.marketCategory) ? d.marketCategory : '__other__';
+        if (!byCat.has(key)) byCat.set(key, []);
+        byCat.get(key).push(d);
+      });
+      const out = [];
+      const sale = restaurantDishes.filter(isDiscountedDish);
+      if (sale.length) out.push([SALE_TAB, sale]);
+      // Market kategoriyalari — serverdagi (barcha do'konda bir xil) tartibda
+      (market.categories || []).forEach((c) => {
+        const items = byCat.get(c.value);
+        if (items?.length) out.push([`${c.emoji} ${marketCatLabel(c, lang)}`, items]);
+      });
+      const rest = byCat.get('__other__');
+      if (rest?.length) out.push([t('otherProducts'), rest]);
+      out.push([REVIEWS_TAB, []]);
+      return out;
+    }
     /*
      * Taomlar platformaning YAGONA kategoriyalari bo'yicha
      * guruhlanadi (Milliy taom, Osh, Shashlik...), restoran
@@ -154,7 +192,7 @@ export function RestaurantPage() {
     const list = Array.from(map.entries()).filter(([, items]) => items.length > 0);
     list.push([REVIEWS_TAB, []]);
     return list;
-  }, [restaurantDishes]);
+  }, [restaurantDishes, isStore, market, marketCatMap, lang, t]);
 
   // Ulashilган havola bilan kelinса (highlightDish) — o'sha taomni avtomatik ochamiz
   useEffect(() => {
@@ -191,7 +229,7 @@ export function RestaurantPage() {
    *
    * Sharhlar bo'limi kategoriya sanalmaydi — u menyu emas.
    */
-  const dishSections = sections.filter(([name]) => name !== REVIEWS_TAB).length;
+  const dishSections = sections.filter(([name]) => name !== REVIEWS_TAB && name !== SALE_TAB).length;
   const gridLayout = dishSections > 0 && dishSections <= 2;
 
   function scrollTo(name) {
@@ -375,7 +413,8 @@ export function RestaurantPage() {
       <div ref={tabsRef} className="rest-tabs no-scrollbar">
         {sections.map(([name]) => {
           const isTabActive = name === active;
-          const label = name === REVIEWS_TAB ? `${t('reviewsLabel')} (${restaurantReviews.length})` : name;
+          const label = name === REVIEWS_TAB ? `${t('reviewsLabel')} (${restaurantReviews.length})`
+            : name === SALE_TAB ? `🔥 ${t('saleTab')}` : name;
           return (
             <button
               key={name}
@@ -392,6 +431,25 @@ export function RestaurantPage() {
       {/* Menyu + sharhlar */}
       <div className="rest-content">
         {sections.map(([name, list]) => {
+          // Chegirmalar — jonli slayder (Lokma Market bilan bir xil), faqat do'konda
+          if (name === SALE_TAB) {
+            const closedAll = isOpen ? undefined : new Set(list.map((d) => String(d._id || d.id)));
+            return (
+              <div key={name} id={`sec-${name}`} className="rest-section">
+                <DiscountSlider
+                  title={t('saleTab')}
+                  items={list}
+                  loading={dishesLoading || catsLoading}
+                  closedIds={closedAll}
+                  emojiOf={(d) => marketCatMap.get(d.marketCategory)?.emoji}
+                  onOpen={(d) => {
+                    if (!isOpen) { haptic(); showClosed({ name: restaurant?.name, ...alertInfo }); return; }
+                    setModalDish(d);
+                  }}
+                />
+              </div>
+            );
+          }
           if (name === REVIEWS_TAB) {
             return (
               <div key={name} id={`sec-${name}`} className="rest-section rest-reviews">
@@ -450,7 +508,7 @@ export function RestaurantPage() {
                   egallab, qolganini topish uchun uzoq surish
                   kerak edi. */}
               <div className={gridLayout ? 'rest-grid' : 'rest-row no-scrollbar'}>
-                {dishesLoading
+                {dishesLoading || catsLoading
                   ? Array.from({ length: gridLayout ? 6 : 3 }).map((_, i) => (
                       <div key={i} className={gridLayout ? 'rest-grid__sk' : 'rest-row__sk'} />
                     ))

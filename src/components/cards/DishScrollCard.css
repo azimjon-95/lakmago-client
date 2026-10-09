@@ -22,8 +22,8 @@
 }
 .dscard__name { font-size: 13px; font-weight: 500; color: var(--ink); margin-top: 8px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dscard__rest { font-size: 11px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dscard__price { display: flex; align-items: baseline; gap: 6px; margin-top: 4px; }
-.dscard__price-main { font-size: 14px; font-weight: 600; color: var(--ink); }
+.dscard__price { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 6px; margin-top: 4px; }
+.dscard__price-main { font-size: 14px; font-weight: 600; color: var(--ink); white-space: nowrap; } /* "18 900 / kg" bir qatorda */
 .dscard__price-old { font-size: 11px; color: var(--muted); text-decoration: line-through; }
 
 /* Restoran yopiq — taom bosilmaydi, lekin ko'rinib turadi
@@ -37,3 +37,7 @@
   box-shadow: none;
   opacity: 1;
 }
+
+/* Do'kon mahsuloti: qadoq hajmi va narx birligi */
+.dscard__pack { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.dscard__unit { font-size: 10.5px; font-weight: 500; color: var(--muted); }

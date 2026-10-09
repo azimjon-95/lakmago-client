@@ -165,11 +165,12 @@ export const useFeatures = (authStatus) =>
     staleTime: 5 * 60_000,
   });
 
-export const useMarketCategories = () =>
+export const useMarketCategories = (enabled = true) =>
   useQuery({
     queryKey: ['market', 'categories'],
     queryFn: ({ signal }) => api.getMarketCategories({ signal }),
     staleTime: 30 * 60_000,
+    enabled,
   });
 
 export const useMarketStores = (enabled = true) =>
