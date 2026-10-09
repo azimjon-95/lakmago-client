@@ -17,8 +17,15 @@ export const useWeddingFrame = create((set) => ({
   path: '/',
   canGoBack: false,
   goBack: null,
+  /*
+   * tone — sayt tepasidagi fon: 'dark' (rasm ustida) | 'light' (och fon ustida).
+   * Telegram sarlavha rangi shunga moslanadi: to'q -> oq soat/antenna/"Назад",
+   * och -> qora. Sayt aylantirilganda o'zi yangilab turadi.
+   */
+  tone: 'dark',
   setVisible: (visible) => set({ visible }),
   setPath: (path) => set({ path }),
   setCanGoBack: (canGoBack) => set({ canGoBack }),
   setGoBack: (goBack) => set({ goBack }),
+  setTone: (tone) => set({ tone: tone === 'light' ? 'light' : 'dark' }),
 }));

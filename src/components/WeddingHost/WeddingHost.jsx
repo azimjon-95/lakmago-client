@@ -30,6 +30,7 @@ import './WeddingHost.css';
  *   sayt → 'lokma-wedding:navigate'      Lokma Go ('/') yoki Market ('/market')
  *   sayt → 'lokma-wedding:rpc'           amal so'rovi; javob: 'lokma-wedding:rpc-result'
  *   sayt → 'lokma-wedding:route'         { canGoBack } — ichkarida orqaga qaytish mumkinmi
+ *   sayt → 'lokma-wedding:chrome'        { tone: 'dark'|'light' } — tepadagi fon (Telegram rangi uchun)
  *   biz  → 'lokma-wedding:back'          Telegram "Назад": iframe ichida bir qadam orqaga
  */
 export const WEDDING_URL = String(import.meta.env.VITE_WEDDING_URL || 'https://wedding.lokma.uz').replace(/\/+$/, '');
@@ -210,6 +211,8 @@ export function WeddingHost() {
         setReady(true); setFailed(false);
         sendContext();
         post({ type: 'lokma-wedding:visible', visible: useWeddingFrame.getState().visible });
+      } else if (d.type === 'lokma-wedding:chrome') {
+        useWeddingFrame.getState().setTone(d.tone);
       } else if (d.type === 'lokma-wedding:route') {
         useWeddingFrame.getState().setCanGoBack(Boolean(d.canGoBack));
       } else if (d.type === 'lokma-wedding:navigate') {
