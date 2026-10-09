@@ -8,8 +8,8 @@ import './HomeSections.css';
 /*
  * ═══ BO'LIMLAR ORASIDA O'TISH TUGMALARI ═══
  *
- * Bosh sahifada (current='home'):   [ Lokma Market ]  [ To'yxonalar · Tez orada ]
- * Market sahifasida (current='market'): [ Lokma Go ]  [ To'yxonalar · Tez orada ]
+ * Bosh sahifada (current='home'):   [ Lokma Market ]  [ Lokma To'yxonalari ]
+ * Market sahifasida (current='market'): [ Lokma Go ]  [ Lokma To'yxonalari ]
  * Shu tariqa bo'limlar orasida bir bosishda o'tiladi.
  *
  * Ko'rinish — server .env ruxsatiga qarab (LOKMA_MARKET_ACCESS /
@@ -24,28 +24,39 @@ const IMG = {
   go: '/sections/lokma-go.webp',
 };
 
-function Tile({ variant, img, title, sub, soon, onClick }) {
-  const disabled = Boolean(soon);
-  const Tag = disabled ? 'div' : 'button';
+/*
+ * Orqa fon rasmlari (to'yxona saytidagi tugmalar bilan BIR XIL uslub):
+ *   go / market — Unsplash (to'yxona saytidagi bilan bir xil rasmlar),
+ *   wedding     — haqiqiy to'yxona zali (public/sections/wedding-bg.webp).
+ * Rasm yuklanmasa ham tugma o'z rangida (--hs-base) chiroyli ko'rinadi.
+ */
+const PHOTO = {
+  go: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=640&q=70&auto=format&fit=crop',
+  market: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=640&q=70&auto=format&fit=crop',
+  wedding: '/sections/wedding-bg.webp',
+};
+
+function Tile({ variant, img, title, sub, onClick }) {
   return (
-    <Tag
-      {...(disabled ? { 'aria-disabled': 'true' } : { type: 'button', onClick })}
-      className={`home-section-tile home-section-tile--${variant} ${disabled ? 'is-disabled' : ''}`}
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`${title}. ${sub || ''}`}
+      className={`home-section-tile home-section-tile--${variant}`}
+      style={{ '--hs-photo': `url("${PHOTO[variant]}")` }}
     >
-      <span className="home-section-tile__art" aria-hidden="true">
-        <img src={img} alt="" width="64" height="64" loading="eager" decoding="async" draggable="false" />
+      {/* Eski 3D belgi (rasmning o'zi — doira ichida emas) */}
+      <img className="home-section-tile__icon" src={img} alt="" width="48" height="48" loading="eager" decoding="async" draggable="false" />
+      <span className="home-section-tile__bottom">
+        <span className="home-section-tile__text">
+          <span className="home-section-tile__title">{title}</span>
+          {sub ? <span className="home-section-tile__sub">{sub}</span> : null}
+        </span>
+        <span className="home-section-tile__arrow" aria-hidden="true">
+          <Icon name="arrowRight" size={14} color="#1A1A17" />
+        </span>
       </span>
-      <span className="home-section-tile__text">
-        <span className="home-section-tile__title">{title}</span>
-        {soon ? (
-          <span className="home-section-tile__soon">
-            <Icon name="clock" size={11} color="currentColor" /> {soon}
-          </span>
-        ) : sub ? (
-          <span className="home-section-tile__sub">{sub}</span>
-        ) : null}
-      </span>
-    </Tag>
+    </button>
   );
 }
 

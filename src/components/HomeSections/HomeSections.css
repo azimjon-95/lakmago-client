@@ -1,4 +1,7 @@
-/* ═══ Bo'lim tugmalari: Lokma Market / Lokma Go / To'yxonalar ═══ */
+/* ═══ Bo'lim tugmalari: rasm fonli kartalar (Lokma Go · Market · To'yxonalar) ═══
+ * To'yxona saytidagi (LokmaSwitch) tugmalar bilan bir xil uslub: orqa fonda rasm,
+ * pastdan quyuqlashuv, chap yuqorida 3D belgi, pastda nom + izoh, o'ngda oq strelka.
+ */
 .home-sections {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -9,82 +12,76 @@
 
 .home-section-tile {
   position: relative;
-  display: flex; align-items: center; gap: 6px;
-  min-height: 78px;
-  padding: 8px 10px 8px 6px;
-  border-radius: 18px;
-  border: 1px solid transparent;
-  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 122px;
+  padding: 10px 10px 11px 12px;
+  border-radius: 20px;
   overflow: hidden;
+  text-align: left;
+  color: #fff;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
   isolation: isolate;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-  transition: transform 140ms ease, box-shadow 140ms ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 14px -6px rgba(0, 0, 0, 0.12);
+  background-color: var(--hs-base);
+  background-image:
+    linear-gradient(180deg, var(--hs-g0) 0%, var(--hs-g1) 46%, var(--hs-g2) 100%),
+    var(--hs-photo);
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 10px 22px -10px rgba(0, 0, 0, 0.5);
+  transition: transform 140ms ease;
 }
-.home-section-tile:not(.is-disabled):active { transform: scale(0.97); }
+.home-section-tile:active { transform: scale(0.97); }
 
-/* Yumshoq yorug'lik dog'i — rasm ortida */
-.home-section-tile::before {
-  content: '';
-  position: absolute; z-index: -1;
-  left: -18px; top: 50%;
-  width: 96px; height: 96px;
-  transform: translateY(-50%);
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 70%);
-}
-
-.home-section-tile--market {
-  background: linear-gradient(135deg, #FFF4E8 0%, #FFE2C4 100%);
-  border-color: #FFD2A6;
-}
 .home-section-tile--go {
-  background: linear-gradient(135deg, #FFF4E8 0%, #FFE0CC 100%);
-  border-color: #FFCDB0;
+  --hs-base: #5A2E16;
+  --hs-g0: rgba(60, 28, 12, 0.10); --hs-g1: rgba(60, 28, 12, 0.56); --hs-g2: rgba(52, 24, 10, 0.90);
+}
+.home-section-tile--market {
+  --hs-base: #0F5A3C;
+  --hs-g0: rgba(8, 60, 40, 0.10); --hs-g1: rgba(8, 60, 40, 0.60); --hs-g2: rgba(6, 58, 38, 0.92);
 }
 .home-section-tile--wedding {
-  background: linear-gradient(135deg, #FFF6EC 0%, #FBE7EC 100%);
-  border-color: #F4D3DA;
+  --hs-base: #4A1030;
+  --hs-g0: rgba(74, 16, 48, 0.08); --hs-g1: rgba(74, 16, 48, 0.55); --hs-g2: rgba(56, 8, 34, 0.92);
 }
-.home-section-tile.is-disabled { cursor: default; box-shadow: none; }
-.home-section-tile.is-disabled .home-section-tile__art img { filter: saturate(0.85); opacity: 0.85; }
-.home-section-tile.is-disabled .home-section-tile__title { color: var(--muted); }
 
-.home-section-tile__art {
+.home-section-tile__icon {
   flex: none;
-  width: 52px; height: 52px;
-  display: flex; align-items: center; justify-content: center;
-}
-.home-section-tile__art img {
-  width: 100%; height: 100%;
-  object-fit: contain;          /* obyekt to'liq ko'rinadi, kesilmaydi */
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.14));
+  align-self: flex-start;
+  width: 48px; height: 48px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 7px rgba(0, 0, 0, 0.45));
   user-select: none; -webkit-user-drag: none;
 }
-.home-section-tile__text { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.home-section-tile__bottom { display: flex; align-items: flex-end; gap: 8px; }
+.home-section-tile__text { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 2px; }
 .home-section-tile__title {
-  font-size: 14.5px; font-weight: 700; color: var(--ink); line-height: 1.15;
-  overflow-wrap: anywhere;
+  font-size: 14.5px; font-weight: 800; line-height: 1.15; color: #fff;
+  overflow-wrap: anywhere;               /* nom TO'LIQ ko'rinadi: sig'masa qatorga o'tadi */
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
 }
 .home-section-tile__sub {
-  font-size: 11.5px; color: var(--muted); line-height: 1.2;
-  /* Izoh to'liq ko'rinadi: kerak bo'lsa ikki qatorga o'tadi (…siz) */
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  font-size: 10.5px; line-height: 1.25; color: rgba(255, 255, 255, 0.92);
+  overflow-wrap: anywhere;
 }
-.home-section-tile__soon {
-  align-self: flex-start;
-  display: inline-flex; align-items: center; gap: 3px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.07);
-  color: var(--muted);
-  font-size: 11px; font-weight: 600;
-  white-space: nowrap;
+.home-section-tile__arrow {
+  flex: none;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: #fff;
+  display: grid; place-items: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
-/* Juda tor ekran (≤340px): rasm kichrayadi, matn sig'adi */
+/* Juda tor ekran: belgi va yozuv biroz kichrayadi */
 @media (max-width: 340px) {
-  .home-section-tile__art { width: 48px; height: 48px; }
+  .home-section-tile { min-height: 112px; padding: 9px 8px 10px 10px; }
+  .home-section-tile__icon { width: 40px; height: 40px; }
   .home-section-tile__title { font-size: 13px; }
 }
