@@ -1,0 +1,38 @@
+/* Hisob bloklangan — butun ekran */
+.rx-blocked {
+  position: fixed; inset: 0; z-index: 1000;
+  display: grid; place-items: center;
+  padding: calc(var(--tg-top-offset, 0px) + 24px) 20px calc(var(--tg-bottom-offset, 0px) + 24px);
+  background: linear-gradient(180deg, #FFF4F2 0%, #FFFFFF 60%);
+}
+.rx-blocked__card { width: 100%; max-width: 380px; text-align: center; }
+.rx-blocked__icon { font-size: 64px; line-height: 1; margin-bottom: 12px; }
+.rx-blocked__title { margin: 0 0 12px; font-size: 22px; font-weight: 800; color: var(--ink); }
+.rx-blocked__reason {
+  margin: 0 0 8px; padding: 14px 16px; border-radius: 16px;
+  background: #FDE9E8; color: #A3261F; font-size: 14.5px; line-height: 1.45; text-align: left;
+}
+.rx-blocked__date { margin: 0 0 12px; font-size: 12px; color: var(--muted); }
+.rx-blocked__text { margin: 0 0 20px; font-size: 13.5px; line-height: 1.45; color: var(--muted); }
+.rx-blocked__btn { width: 100%; padding: 14px; border-radius: 14px; background: var(--ink); color: #fff; font-weight: 700; }
+
+/* Naqd o'chirilgan — pastdan chiqadigan oyna */
+.rx-sheet { position: fixed; inset: 0; z-index: 900; display: flex; align-items: flex-end; justify-content: center; background: rgba(0, 0, 0, 0.45); }
+.rx-sheet__panel {
+  width: 100%; max-width: 480px;
+  padding: 22px 20px calc(var(--tg-bottom-offset, 0px) + 18px);
+  border-radius: 24px 24px 0 0; background: var(--surface); text-align: center;
+  animation: rx-up 220ms ease-out;
+}
+.rx-sheet__icon { font-size: 44px; line-height: 1; }
+.rx-sheet__title { margin: 10px 0 10px; font-size: 18px; font-weight: 800; color: var(--ink); }
+.rx-sheet__reason { margin: 0 0 10px; padding: 12px 14px; border-radius: 14px; background: #FFF4E5; color: #8A4B00; font-size: 14px; line-height: 1.45; text-align: left; }
+.rx-sheet__text { margin: 0 0 16px; font-size: 13.5px; color: var(--muted); line-height: 1.45; }
+.rx-sheet__warn { margin: 0 0 12px; font-size: 13px; color: #C0352E; }
+.rx-sheet__btn { width: 100%; padding: 14px; border-radius: 14px; background: var(--brand); color: #fff; font-weight: 700; }
+.rx-sheet__ghost { width: 100%; margin-top: 8px; padding: 12px; border-radius: 14px; color: var(--muted); font-weight: 600; }
+@keyframes rx-up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Savatdagi qulflangan "Naqd" tugmasi */
+.co-opt.is-locked { opacity: 0.55; }
+.co-opt__lock { position: absolute; top: 8px; right: 8px; font-size: 14px; }

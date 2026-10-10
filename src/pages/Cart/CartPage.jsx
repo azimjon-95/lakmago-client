@@ -6,6 +6,7 @@ import { AddressSheet } from '@/components/AddressSheet';
 import { OrderConfirmModal } from '@/components/OrderConfirmModal';
 import { AddressEditSheet } from '@/components/AddressEditSheet';
 import { CoCard, CoOption, ScooterBadge, CashArt, CardArt } from './CheckoutParts';
+import { CashLockedSheet } from '@/components/Restrictions/Restrictions';
 import './CheckoutSections.css';
 import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
 import { useCart } from '@/store/cart';
@@ -414,6 +415,16 @@ export function CartPage() {
     const value = live?.cashEnabled ?? g.restaurant?.cashEnabled;
     return value !== false;
   });
+
+  /*
+   * Admin naqd to'lovni o'chirgan mijoz (buyurtmadan voz kechgan): "Naqd" qulflangan,
+   * karta oldindan tanlanadi, "Naqd" bosilsa sababi ko'rsatiladi. Server ham tekshiradi.
+   */
+  const cashBlock = user?.cashDisabled?.active ? user.cashDisabled : null;
+  const [cashLockedOpen, setCashLockedOpen] = useState(false);
+  useEffect(() => {
+    if (cashBlock && paymentMethod === 'cash' && providers.length) setPaymentMethod(providers[0].name);
+  }, [cashBlock, paymentMethod, providers]);
 
   // Naqdmi yoki karta orqalimi
   const isCard = providers.some((p) => p.name === paymentMethod);
@@ -947,6 +958,13 @@ export function CartPage() {
       return;
     }
 
+    // Naqd o'chirilgan mijoz — sababini ko'rsatamiz (server baribir rad etardi)
+    if (paymentMethod === 'cash' && cashBlock) {
+      setShowConfirm(false);
+      setCashLockedOpen(true);
+      return;
+    }
+
     submitLock.current = true;
 
     /*
@@ -1091,6 +1109,14 @@ export function CartPage() {
         setPaying(false);
         setShowConfirm(false);
         submitLock.current = false;
+        // Admin naqdni hozirgina o'chirgan (ilova eski ma'lumotda edi) — qulflaymiz va sababini ko'rsatamiz
+        if (e?.code === 'CUSTOMER_CASH_DISABLED') {
+          updateUser({ cashDisabled: { active: true, reason: e.data?.reason || '', at: e.data?.at || null } });
+          if (providers.length) setPaymentMethod(providers[0].name);
+          setCashLockedOpen(true);
+          return;
+        }
+        if (e?.code === 'USER_BLOCKED') return; // butun ekranli "bloklangan" oynasi ochiladi
         alert(
           (e?.message === 'STALE_CART_ID' ? t('staleCartError') : (e?.message || t('orderNotSent')))
           + '\n\n' + t('cartSavedRetry'),
@@ -1389,6 +1415,15 @@ export function CartPage() {
         </button>
       </CoCard>
 
+      {cashLockedOpen && (
+        <CashLockedSheet
+          info={cashBlock}
+          cardAvailable={providers.length > 0}
+          onClose={() => setCashLockedOpen(false)}
+          onPickCard={() => { if (providers.length) setPaymentMethod(providers[0].name); setCashLockedOpen(false); }}
+        />
+      )}
+
       {/* To'lov */}
       <CoCard icon="wallet" title={t('paymentLabel')}>
         <div className="co-grid2">
@@ -1396,7 +1431,17 @@ export function CartPage() {
             Restoran naqdni qabul qilmasa tugma KO'RSATILMAYDI —
             mijoz tanlab, keyin serverda rad javobini olmasin.
           */}
-          {cashAllowed && (
+          {cashAllowed && (cashBlock ? (
+            <CoOption
+              testId="co-pay-cash"
+              locked
+              active={false}
+              onClick={() => { haptic(); setCashLockedOpen(true); }}
+              media={<CashArt />}
+              title={t('cash')}
+              sub={t('cashLockedSub')}
+            />
+          ) : (
             <CoOption
               testId="co-pay-cash"
               active={paymentMethod === 'cash'}
@@ -1405,7 +1450,7 @@ export function CartPage() {
               title={t('cash')}
               sub={t('cashSub')}
             />
-          )}
+          ))}
 
           <CoOption
             testId="co-pay-card"

@@ -78,16 +78,19 @@ export function CheckBadge({ className = '' }) {
 }
 
 /** Variant kartasi (buyurtma turi, to'lov usuli). */
-export function CoOption({ active, disabled, onClick, media, title, sub, testId }) {
+export function CoOption({ active, disabled, locked = false, onClick, media, title, sub, testId }) {
+  // locked — tanlab bo'lmaydi, lekin BOSILADI (sababini ko'rsatish uchun): naqd o'chirilgan mijoz
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
       aria-pressed={active}
+      aria-disabled={locked || undefined}
       data-testid={testId}
-      className={`co-opt ${active ? 'is-active' : ''} ${disabled ? 'is-disabled' : ''}`}
+      className={`co-opt ${active ? 'is-active' : ''} ${disabled ? 'is-disabled' : ''} ${locked ? 'is-locked' : ''}`}
     >
+      {locked && <span className="co-opt__lock" aria-hidden="true">🔒</span>}
       <span className="co-opt__media">{media}</span>
       <span className="co-opt__body">
         <span className="co-opt__title">{title}</span>

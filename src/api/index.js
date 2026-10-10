@@ -1,6 +1,7 @@
 // LokmaGo API mijozi — faqat real backend (Express + MongoDB).
 // Mock/demo rejim yo'q: barcha ma'lumot serverdan keladi.
 
+import { useRestrictions } from '@/store/restrictions';
 import { resilientFetch } from '@/lib/resilientFetch';
 
 export const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
@@ -189,15 +190,23 @@ async function apiFetch(path, opts = {}) {
      * — masalan "Telefon raqam noto'g'ri" o'rniga.
      */
     let serverMessage = '';
+    let body = null;
     try {
-      const body = await res.clone().json();
+      body = await res.clone().json();
       serverMessage = body?.error || '';
     } catch { /* JSON emas yoki bo'sh — umumiy xabar qoladi */ }
+
+    // Admin bloklagan mijoz — butun ilova "Hisob bloklangan" oynasiga o'tadi (App.jsx)
+    if (body?.code === 'USER_BLOCKED') {
+      useRestrictions.getState().setBlocked({ reason: body.reason || '', at: body.blockedAt || null });
+    }
 
     const err = new Error(serverMessage || `Server xatosi (${res.status})`);
     err.status = res.status;
     err.kind = 'http';
     err.url = `${API_BASE}${path}`;
+    err.code = body?.code || '';
+    err.data = body;
     throw err;
   }
   if (res.status === 204) return null;

@@ -29,6 +29,7 @@ import { SupportChat } from '@/components/SupportChat/SupportChat';
 import { Splash } from '@/components/Splash/Splash';
 import { useTelegramBack } from '@/hooks/useTelegramBack';
 import { WeddingHost } from '@/components/WeddingHost/WeddingHost';
+import { BlockedGate } from '@/components/Restrictions/Restrictions';
 import { initSectionTheme } from '@/store/section';
 
 const queryClient = new QueryClient({
@@ -152,6 +153,10 @@ function AppInner({ authMode = 'telegram' }) {
         phone: latest.phone ?? profile.phone ?? null,
         addresses: latest.addresses.length ? latest.addresses : profile.addresses ?? [],
         verified: true,
+        // Admin naqd to'lovni o'chirgan bo'lsa — savatda faqat karta (sababi bilan)
+        cashDisabled: profile.cashDisabled?.active
+          ? { active: true, reason: profile.cashDisabled.reason || '', at: profile.cashDisabled.at || null }
+          : null,
       });
       setAuthStatus('done');
 
@@ -237,6 +242,8 @@ function AppInner({ authMode = 'telegram' }) {
         </Suspense>
         </ErrorBoundary>
         <FloatingLayer />
+        {/* Admin bloklagan mijoz — butun ekranli oyna (sababi bilan) */}
+        <BlockedGate />
         {/* To'yxonalar: fonda isitiladigan doimiy iframe (to'yxonalar sahifasi uni ko'rsatadi) */}
         <WeddingHost />
       </BrowserRouter>
