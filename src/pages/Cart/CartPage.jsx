@@ -8,6 +8,7 @@ import { AddressEditSheet } from '@/components/AddressEditSheet';
 import { CoCard, CoOption, ScooterBadge, CashArt, CardArt } from './CheckoutParts';
 import { CashLockedSheet } from '@/components/Restrictions/Restrictions';
 import { syncPhoneToServer } from '@/lib/syncPhone';
+import { canRequestContact, requestContactNow } from '@/lib/contactVerify';
 import './CheckoutSections.css';
 import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
 import { useCart } from '@/store/cart';
@@ -1690,6 +1691,22 @@ export function CartPage() {
             <button onClick={savePhone} disabled={phoneDraft.trim().length < 9} className="btn-primary btn-block">
               {t('save')}
             </button>
+            {/* Ixtiyoriy: raqamni Telegram orqali ulashish — yozish shart emas, raqam hisobga tasdiqlanadi */}
+            {canRequestContact() && (
+              <button
+                type="button"
+                className="btn-block"
+                style={{ marginTop: 8, padding: '12px', borderRadius: 14, border: '1px solid var(--line)', fontWeight: 600, color: 'var(--ink)' }}
+                onClick={async () => {
+                  haptic();
+                  const okVerified = await requestContactNow();
+                  const fresh = useUser.getState().user.phone;
+                  if (okVerified && fresh) { setPhoneDraft(fresh); setShowPhoneEdit(false); }
+                }}
+              >
+                📱 {t('shareTelegramPhone')}
+              </button>
+            )}
           </div>
         </div>
       )}
