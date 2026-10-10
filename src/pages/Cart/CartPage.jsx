@@ -7,6 +7,7 @@ import { OrderConfirmModal } from '@/components/OrderConfirmModal';
 import { AddressEditSheet } from '@/components/AddressEditSheet';
 import { CoCard, CoOption, ScooterBadge, CashArt, CardArt } from './CheckoutParts';
 import { CashLockedSheet } from '@/components/Restrictions/Restrictions';
+import { syncPhoneToServer } from '@/lib/syncPhone';
 import './CheckoutSections.css';
 import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
 import { useCart } from '@/store/cart';
@@ -1126,6 +1127,7 @@ export function CartPage() {
 
   function savePhone() {
     updateUser({ phone: phoneDraft });
+    syncPhoneToServer(phoneDraft); // hisobga ham (bir marta; buyurtmani to'xtatmaydi)
     setShowPhoneEdit(false);
   }
 

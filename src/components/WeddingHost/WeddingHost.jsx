@@ -7,6 +7,7 @@ import { useI18n } from '@/i18n';
 import { useFeatures } from '@/hooks/queries';
 import { api } from '@/api';
 import { getTelegram, haptic } from '@/lib/telegram';
+import { syncPhoneToServer } from '@/lib/syncPhone';
 import './WeddingHost.css';
 
 /*
@@ -168,6 +169,7 @@ export function WeddingHost() {
         }
         if (!Object.keys(patch).length) throw new Error('Bo‘sh so‘rov');
         us.updateUser(patch);
+        if (patch.phone) syncPhoneToServer(patch.phone); // hisobga ham
         return true;
       }
       case 'addAddress': {
