@@ -10,13 +10,48 @@ function toSubOrder(o, i) {
   return {
     id: String(o._id),
     backendId: String(o._id),
-    restaurant: o.restaurant || { id: o.restaurantId, name: o.restaurantName, tint: '#3D2A10', icon: 'ti-tools-kitchen-2', deliveryMin: 25, deliveryMax: 40 },
-    items: o.items?.map((it) => ({ dish: { name: it.name, ...it }, quantity: it.quantity, unitPrice: it.unitPrice })) || o.itemsRaw || [],
+    restaurant: o.restaurant || {
+      id: o.restaurantId,
+      name: o.restaurantName,
+      tint: '#3D2A10',
+      icon: 'ti-tools-kitchen-2',
+      deliveryMin: 25,
+      deliveryMax: 40,
+      lat: o.restaurantLat ?? null,
+      lng: o.restaurantLng ?? null,
+      phone: o.restaurantPhone || '',
+      imageUrl: o.restaurantImage || '',
+      address: o.restaurantAddress || '',
+    },
+    items: o.items?.map((it) => ({
+      dish: { name: it.name, ...it },
+      quantity: it.quantity,
+      unitPrice: it.unitPrice,
+    })) || o.itemsRaw || [],
     subtotal: o.subtotal,
+    deliveryFee: o.deliveryFee ?? 0,
+    total: o.total,
     etaMinutes: o.etaMinutes ?? 30,
-    status: o.status === 'pending' ? 'accepted' : o.status, // mijozga pending'ni accepted ko'rsatamiz
+    status: o.status === 'pending' ? 'accepted' : o.status,
     courierName: o.courierName || courierNames[i % courierNames.length],
     rated: !!o.rating,
+    // Xarita + timeline
+    addressLat: o.addressLat ?? null,
+    addressLng: o.addressLng ?? null,
+    address: o.address || '',
+    distanceKm: o.distanceKm ?? null,
+    restaurantLat: o.restaurantLat ?? null,
+    restaurantLng: o.restaurantLng ?? null,
+    restaurantPhone: o.restaurantPhone || '',
+    restaurantImage: o.restaurantImage || '',
+    acceptedAt: o.acceptedAt || null,
+    readyAt: o.readyAt || null,
+    deliveringAt: o.deliveringAt || null,
+    deliveredAt: o.deliveredAt || null,
+    createdAt: o.createdAt || null,
+    orderNumber: o.dailyNumber != null
+      ? String(o.dailyNumber)
+      : (o.groupId || String(o._id)).slice(-8).toUpperCase(),
   };
 }
 

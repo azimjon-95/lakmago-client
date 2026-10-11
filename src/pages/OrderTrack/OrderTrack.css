@@ -89,3 +89,249 @@
   display: flex; align-items: center; gap: 6px;
   color: var(--success); font-size: 12px;
 }
+
+
+/* ============ Order track — Yandex Go uslubi ============ */
+.track-page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--canvas, #f5f5f5);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.track-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--surface, #fff);
+}
+.track-header__back {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 15px; font-weight: 500; color: var(--ink);
+  background: transparent; border: none;
+}
+.track-header__close {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface-2, #f0f0f0); border: none;
+}
+.track-header__title-block {
+  padding: 0 16px 8px;
+  background: var(--surface, #fff);
+}
+.track-header__title {
+  margin: 0; font-size: 18px; font-weight: 700; color: var(--ink);
+}
+.track-header__sub {
+  margin: 2px 0 0; font-size: 13px; color: var(--muted);
+}
+
+/* Status */
+.track-status {
+  margin: 10px 16px 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #EF9F27, #e8890f);
+  color: #fff;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.track-status__left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.track-status__icon {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  display: flex; align-items: center; justify-content: center; flex: none;
+}
+.track-status__title { font-size: 14px; font-weight: 700; }
+.track-status__sub { font-size: 12px; opacity: 0.9; margin-top: 1px; }
+.track-status__eta {
+  flex: none;
+  background: rgba(255,255,255,0.25);
+  padding: 6px 10px; border-radius: 20px;
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; gap: 4px;
+}
+
+/* Restoran */
+.track-rest {
+  margin: 10px 16px 0;
+  padding: 10px 12px;
+  background: var(--surface, #fff);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  border: 1px solid var(--line, #eee);
+}
+.track-rest__info { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.track-rest__img {
+  width: 40px; height: 40px; border-radius: 10px; object-fit: cover; flex: none;
+}
+.track-rest__img--ph {
+  background: var(--brand-tint, #FAEEDA);
+  display: flex; align-items: center; justify-content: center;
+}
+.track-rest__name { font-size: 14px; font-weight: 700; color: var(--ink); }
+.track-rest__meta { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+.track-rest__dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--success, #22c55e);
+}
+.track-rest__nav {
+  flex: none;
+  display: flex; align-items: center; gap: 4px;
+  padding: 8px 12px; border-radius: 20px;
+  border: 1px solid var(--line); background: var(--surface);
+  font-size: 12.5px; font-weight: 600; color: var(--brand);
+}
+
+/* Map */
+.track-map {
+  position: relative;
+  margin: 10px 0 0;
+  height: 220px;
+  min-height: 180px;
+  flex: 0 0 auto;
+}
+.track-map__box {
+  width: 100%; height: 100%;
+  background: #e8eef5;
+}
+.track-map__overlay {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.7);
+  font-size: 13px; color: var(--muted);
+}
+.track-map__item-chip {
+  position: absolute; left: 50%; top: 12px; transform: translateX(-50%);
+  background: #fff; border-radius: 20px;
+  padding: 6px 12px; font-size: 12px; font-weight: 600;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+  white-space: nowrap; max-width: 80%; overflow: hidden; text-overflow: ellipsis;
+  z-index: 2;
+}
+
+/* Sheet */
+.track-sheet {
+  background: var(--surface, #fff);
+  border-radius: 20px 20px 0 0;
+  margin-top: -12px;
+  position: relative; z-index: 3;
+  padding: 16px 16px 24px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+  flex: 1;
+}
+
+.track-courier {
+  display: flex; align-items: center; gap: 12px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--line);
+  margin-bottom: 12px;
+}
+.track-courier__avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--brand); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 700; flex: none;
+}
+.track-courier__name { font-size: 15px; font-weight: 700; }
+.track-courier__meta { font-size: 12px; color: var(--muted); }
+.track-courier__btn {
+  margin-left: auto;
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid var(--line); background: var(--surface-2, #f5f5f5);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.track-live {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  background: #ecfdf5; border-radius: 12px; padding: 10px 12px;
+  margin-bottom: 14px;
+}
+.track-live__title { font-size: 13px; font-weight: 600; color: #065f46; }
+.track-live__sub { font-size: 12px; color: #047857; }
+.track-live__badge {
+  flex: none;
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 700; color: var(--success);
+  border: 1px solid #a7f3d0; padding: 6px 10px; border-radius: 20px;
+  background: #fff;
+}
+
+/* Timeline */
+.track-timeline {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin: 8px 0 16px;
+  padding: 0 4px;
+}
+.track-tl {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center;
+  position: relative; text-align: center;
+}
+.track-tl__dot {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--surface-2, #e5e5e5);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1;
+}
+.track-tl.is-done .track-tl__dot,
+.track-tl.is-active .track-tl__dot { background: var(--success, #22c55e); }
+.track-tl.is-active .track-tl__dot { background: var(--brand); }
+.track-tl__line {
+  position: absolute; top: 13px; left: 50%; width: 100%; height: 3px;
+  background: var(--line); z-index: 0;
+}
+.track-tl__line.is-done { background: var(--success, #22c55e); }
+.track-tl__label {
+  margin-top: 6px; font-size: 10px; color: var(--muted); line-height: 1.2;
+  max-width: 64px;
+}
+.track-tl.is-active .track-tl__label { color: var(--brand); font-weight: 600; }
+.track-tl.is-done .track-tl__label { color: var(--ink); }
+.track-tl__time { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* Sum */
+.track-sum {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+.track-sum__item {
+  display: flex; justify-content: space-between; gap: 8px;
+  margin-bottom: 8px; font-size: 13px;
+}
+.track-sum__name { display: flex; flex-direction: column; gap: 2px; color: var(--muted); }
+.track-sum__name strong { color: var(--ink); font-weight: 600; }
+.track-sum__price { font-weight: 600; color: var(--ink); white-space: nowrap; }
+.track-sum__row {
+  display: flex; justify-content: space-between;
+  font-size: 13px; color: var(--muted); padding: 3px 0;
+}
+.track-sum__row--total {
+  font-size: 15px; font-weight: 700; color: var(--ink);
+  border-top: 1px solid var(--line); margin-top: 6px; padding-top: 8px;
+}
+
+/* Actions */
+.track-actions {
+  display: flex; gap: 10px; margin-top: 16px;
+}
+.track-actions__sec,
+.track-actions__pri {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 13px 10px; border-radius: 14px;
+  font-size: 13.5px; font-weight: 600; border: none;
+}
+.track-actions__sec {
+  background: var(--surface-2, #f3f3f3); color: var(--ink);
+  border: 1px solid var(--line);
+}
+.track-actions__pri {
+  background: var(--brand, #EF9F27); color: #fff;
+}
+.track-actions__pri:disabled { opacity: 0.5; }
+
+.order-track-empty {
+  align-items: center; justify-content: center; text-align: center; padding: 32px;
+}
