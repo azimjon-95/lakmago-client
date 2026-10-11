@@ -2,9 +2,6 @@ import { create } from 'zustand';
 import { api } from '@/api';
 import { calcDeliveryFee, calcServiceFee } from '@/lib/pricing';
 
-// Kuryer nomlari (backend courierName bermasa ehtiyot uchun)
-const courierNames = ['Aziz', 'Bek', 'Dilshod', 'Jasur', 'Sardor', "Ulug'bek"];
-
 // Backenddan kelgan Order'larni mijoz ekranidagi "subOrder" formatiga o'giradi.
 function toSubOrder(o, i) {
   return {
@@ -31,9 +28,10 @@ function toSubOrder(o, i) {
     subtotal: o.subtotal,
     deliveryFee: o.deliveryFee ?? 0,
     total: o.total,
-    etaMinutes: o.etaMinutes ?? 30,
+    // Soxta qiymat yo'q: kuryer ismi va taxminiy vaqt faqat serverdan (OrderTrack — /orders/:id/track)
+    etaMinutes: o.etaMinutes ?? null,
     status: o.status === 'pending' ? 'accepted' : o.status,
-    courierName: o.courierName || courierNames[i % courierNames.length],
+    courierName: o.courierName || '',
     rated: !!o.rating,
     // Xarita + timeline
     addressLat: o.addressLat ?? null,
@@ -137,7 +135,8 @@ export const useOrders = create((set, get) => ({
         // ma'lumot uchun. Mantiq lib/pricing.js da.
         deliveryFee: calcDeliveryFee(g.subtotal, g.restaurant, opts.fulfillment === 'pickup'),
         serviceFee: calcServiceFee(g.subtotal, g.restaurant),
-        etaMinutes: g.restaurant.deliveryMin + Math.round(Math.random() * (g.restaurant.deliveryMax - g.restaurant.deliveryMin)),
+        // Taxminiy vaqt: restoran oralig'ining O'RTASI (tasodifiy emas); haqiqiy ETA serverda hisoblanadi
+        etaMinutes: Math.round((g.restaurant.deliveryMin + g.restaurant.deliveryMax) / 2),
       })),
     };
 
@@ -169,9 +168,9 @@ export const useOrders = create((set, get) => ({
         restaurant: g?.restaurant || { id: o.restaurantId, name: o.restaurantName },
         items: g?.items || [],
         subtotal: o.subtotal,
-        etaMinutes: o.etaMinutes ?? 30,
+        etaMinutes: o.etaMinutes ?? null,
         status: o.status === 'pending' ? 'accepted' : o.status,
-        courierName: o.courierName || courierNames[i % courierNames.length],
+        courierName: o.courierName || '',
         rated: false,
       };
     });

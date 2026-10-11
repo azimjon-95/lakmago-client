@@ -22,3 +22,10 @@ ios/App/Pods/
 ios/App/build/
 ios/App/DerivedData/
 ios/.build/
+
+# Imzo parollari — HECH QACHON repoga
+android/keystore.properties
+
+# macOS
+.DS_Store
+**/.DS_Store

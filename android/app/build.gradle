@@ -15,18 +15,35 @@ android {
         }
     }
 
+    /*
+     * RELEASE IMZOSI — parollar KODDA EMAS.
+     * Qiymatlar `android/keystore.properties` faylidan (git'ga TUSHMAYDI, .gitignore'da)
+     * yoki muhit o'zgaruvchilaridan (LOKMAGO_STORE_PASSWORD, LOKMAGO_KEY_PASSWORD,
+     * LOKMAGO_KEY_ALIAS, LOKMAGO_STORE_FILE) olinadi. Namuna: keystore.properties.example.
+     * Ikkalasi ham bo'lmasa — release imzosiz yig'iladi (debug ishlayveradi).
+     */
+    def keystoreProps = new Properties()
+    def keystoreFile = rootProject.file('keystore.properties')
+    if (keystoreFile.exists()) { keystoreFile.withInputStream { keystoreProps.load(it) } }
+    def signVal = { String key, String env -> keystoreProps.getProperty(key) ?: System.getenv(env) }
+    def storePass = signVal('storePassword', 'LOKMAGO_STORE_PASSWORD')
+    def keyPass = signVal('keyPassword', 'LOKMAGO_KEY_PASSWORD')
+    def hasSigning = storePass && keyPass
+
     signingConfigs {
-        release {
-            storeFile file('lokmago-release.keystore')
-            storePassword 'quyosh95'
-            keyAlias 'lokmago'
-            keyPassword 'quyosh95'
+        if (hasSigning) {
+            release {
+                storeFile file(signVal('storeFile', 'LOKMAGO_STORE_FILE') ?: 'lokmago-release.keystore')
+                storePassword storePass
+                keyAlias signVal('keyAlias', 'LOKMAGO_KEY_ALIAS') ?: 'lokmago'
+                keyPassword keyPass
+            }
         }
     }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.release
+            if (hasSigning) signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

@@ -11,9 +11,18 @@ import { useModalBackClose } from '@/hooks/useModalBackClose';
 
 // Bottom-right animatsiyali chat tugmasi + oyna.
 // Mijoz sayt adminlari (yordam xizmati) bilan gaplashadi.
-export function SupportChat() {
+/*
+ * hideFab — suzuvchi tugmasiz (boshqa sahifa o'zi ochadi: kuzatuv sahifasidagi "Savol berish").
+ * Ochish: window.dispatchEvent(new Event('lokma:open-support')) — pastdagi tinglovchi.
+ */
+export function SupportChat({ hideFab = false } = {}) {
   const t = useT();
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const onOpen = () => setOpen(true);
+    window.addEventListener('lokma:open-support', onOpen);
+    return () => window.removeEventListener('lokma:open-support', onOpen);
+  }, []);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
   const bodyRef = useRef(null);
@@ -142,7 +151,7 @@ export function SupportChat() {
 
   return (
     <>
-      {!open && (
+      {!open && !hideFab && (
         <button className="support-fab" onClick={() => setOpen(true)} aria-label={t('chatTitle')}>
           <span className="support-fab__ring" />
           <span className="support-fab__ring support-fab__ring--2" />

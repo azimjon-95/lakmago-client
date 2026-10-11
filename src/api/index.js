@@ -376,6 +376,8 @@ export const api = {
   getActiveOrders: (opts) => apiFetch('/orders/active', { method: 'GET', ...opts }),
   // Bitta buyurtma — karta to'lovi tasdiqlanganini tekshirish uchun
   getOrder: (id) => apiFetch(`/orders/${id}`, { method: 'GET' }),
+  // Kuzatuv sahifasi uchun HAQIQIY ma'lumot (vaqt chizig'i, ETA, kuryer, joylashuv) — server: services/orderTrack.js
+  getOrderTrack: (id, opts) => apiFetch(`/orders/${id}/track`, { method: 'GET', ...opts }),
 
   getOrderGroup: (groupId) => apiFetch(`/orders/group/${groupId}`, { method: 'GET' }),
 
