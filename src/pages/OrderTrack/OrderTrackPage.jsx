@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { SupportChat } from '@/components/SupportChat/SupportChat';
 import { useOrders } from '@/store/orders';
@@ -36,6 +36,7 @@ const TXT = {
     etaLine: 'Taxminiy yetib kelish vaqti', call: 'Qo‘ng‘iroq', message: 'Xabar',
     steps: { accepted: 'Qabul qilindi', preparing: 'Tayyorlanmoqda', delivering: 'Kuryer yo‘lda', arrived: 'Yetib keldi', ready: 'Tayyor', delivered: 'Tugadi' },
     delivery: 'Yetkazib berish', total: 'Jami', ask: 'Savol berish', callRest: 'Restoran bilan bog‘lanish',
+    callAfterAccept: 'Restoran buyurtmani qabul qilgach qo‘ng‘iroq qilishingiz mumkin', noPhone: 'Restoran telefoni ko‘rsatilmagan',
     noOrder: 'Faol buyurtma yo‘q', home: 'Bosh sahifa', retry: 'Qayta urinish', loadFail: 'Ma’lumot yuklanmadi', reason: 'Sabab', fit: 'Hammasi', noMap: 'Xarita ma’lumoti yo‘q',
     vehicles: { Skuter: 'Skuter', Velosiped: 'Velosiped', Mashina: 'Mashina', Piyoda: 'Piyoda' },
   },
@@ -55,6 +56,7 @@ const TXT = {
     etaLine: 'Тахминий етиб келиш вақти', call: 'Қўнғироқ', message: 'Хабар',
     steps: { accepted: 'Қабул қилинди', preparing: 'Тайёрланмоқда', delivering: 'Курьер йўлда', arrived: 'Етиб келди', ready: 'Тайёр', delivered: 'Тугади' },
     delivery: 'Етказиб бериш', total: 'Жами', ask: 'Савол бериш', callRest: 'Ресторан билан боғланиш',
+    callAfterAccept: 'Ресторан буюртмани қабул қилгач қўнғироқ қилишингиз мумкин', noPhone: 'Ресторан телефони кўрсатилмаган',
     noOrder: 'Фаол буюртма йўқ', home: 'Бош саҳифа', retry: 'Қайта уриниш', loadFail: 'Маълумот юкланмади', reason: 'Сабаб', fit: 'Ҳаммаси', noMap: 'Харита маълумоти йўқ',
     vehicles: { Skuter: 'Скутер', Velosiped: 'Велосипед', Mashina: 'Машина', Piyoda: 'Пиёда' },
   },
@@ -74,6 +76,7 @@ const TXT = {
     etaLine: 'Примерное время прибытия', call: 'Позвонить', message: 'Сообщение',
     steps: { accepted: 'Принят', preparing: 'Готовится', delivering: 'Курьер в пути', arrived: 'Прибыл', ready: 'Готов', delivered: 'Завершён' },
     delivery: 'Доставка', total: 'Итого', ask: 'Задать вопрос', callRest: 'Связаться с рестораном',
+    callAfterAccept: 'Позвонить можно после того, как ресторан примет заказ', noPhone: 'Телефон ресторана не указан',
     noOrder: 'Нет активных заказов', home: 'На главную', retry: 'Повторить', loadFail: 'Не удалось загрузить', reason: 'Причина', fit: 'Всё', noMap: 'Нет данных карты',
     vehicles: { Skuter: 'Скутер', Velosiped: 'Велосипед', Mashina: 'Машина', Piyoda: 'Пешком' },
   },
@@ -84,8 +87,10 @@ const STEP_ICON = { accepted: 'check', preparing: 'flame', delivering: 'scooter'
 const CITY_UZ = { 'Ташкент': 'Toshkent', 'Самарканд': 'Samarqand', 'Бухара': 'Buxoro', 'Андижан': 'Andijon', 'Наманган': 'Namangan', 'Фергана': 'Farg‘ona', 'Нукус': 'Nukus', 'Карши': 'Qarshi', 'Навои': 'Navoiy', 'Джизак': 'Jizzax', 'Гулистан': 'Guliston', 'Термез': 'Termiz', 'Ургенч': 'Urganch', 'Коканд': 'Qo‘qon', 'Чирчик': 'Chirchiq', 'Ангрен': 'Angren', 'Алмалык': 'Olmaliq' };
 function cityFrom(address, lang) {
   const parts = String(address || '').split(',').map((s) => s.trim()).filter(Boolean);
-  if (!parts.length) return '';
-  const city = /Узбекистан|Oʻzbekiston|Uzbekistan/i.test(parts[0]) ? parts[1] || '' : parts[0];
+  // "Узбекистан, Наманганская область, Наманган, ..." → mamlakat, viloyat, tumanni o'tkazib, birinchi aholi punkti
+  const skip = /Узбекистан|Oʻzbekiston|Uzbekistan|област|вилоят|viloyat|Республика|район|tuman|^улица|^проспект|массив|махалля/i;
+  const city = parts.find((x) => !skip.test(x)) || '';
+  if (!city || /\d/.test(city)) return '';
   const clean = city.replace(/^(город|г\.)\s*/i, '');
   return lang === 'ru' ? clean : (CITY_UZ[clean] || clean);
 }
@@ -105,7 +110,9 @@ export function OrderTrackPage() {
   const applyBackendStatus = useOrders((s) => s.applyBackendStatus);
   const finishOrder = useOrders((s) => s.finishOrder);
   const loadActive = useOrders((s) => s.loadActive);
-  const [pickedId, setPickedId] = useState(null);
+  const params = useParams();
+  const [pickedId, setPickedId] = useState(params.orderId || null);
+  useEffect(() => { if (params.orderId) setPickedId(params.orderId); }, [params.orderId]);
   const [full, setFull] = useState(false);
   const [city, setCity] = useState('');
   // Telegram ichida o'zining "Назад" tugmasi bor (useTelegramBack) — sahifadagi "Orqaga" takrorlanmasin
@@ -114,10 +121,47 @@ export function OrderTrackPage() {
   useEffect(() => { if (!order) loadActive?.(); }, [order, loadActive]);
   useOrderTracking(order?.subOrders.map((s) => s.backendId).filter(Boolean) ?? [], (backendId, status) => applyBackendStatus(backendId, status));
 
+  /*
+   * Qaysi buyurtma: URL'dagi ID (/order/track/:orderId — ro'yxat, nishon) yoki
+   * tanlangan tab; bo'lmasa faol guruhdagi birinchi yakunlanmagan buyurtma.
+   * URL'dagi buyurtma store'dagi faol guruhda bo'lmasa ham ochiladi (ma'lumot serverdan).
+   */
   const subs = order?.subOrders || [];
-  const sub = subs.find((s) => s.backendId === pickedId)
-    || subs.find((s) => !['delivered', 'cancelled'].includes(s.status)) || subs[0];
-  const { data: tr, error, etaMinutes, refresh } = useOrderTrack(sub?.backendId);
+  const storeSub = subs.find((s) => s.backendId === pickedId)
+    || (!pickedId ? (subs.find((s) => !['delivered', 'cancelled'].includes(s.status)) || subs[0]) : null);
+  const trackId = pickedId || storeSub?.backendId;
+  const { data: tr, error, etaMinutes, refresh } = useOrderTrack(trackId);
+  const sub = storeSub || (tr ? { backendId: tr.id, status: tr.status, orderNumber: tr.label, items: [] } : null);
+
+  // Xaritani yopib turgan qatlamlar balandligi (yuqori kartalar, pastki varaq) — o'lchanadi.
+  // Callback-ref + bitta ResizeObserver; o'lchash keyingi kadrda (sinxron setState sikli bo'lmasin).
+  const topEl = useRef(null);
+  const sheetEl = useRef(null);
+  const roRef = useRef(null);
+  const rafRef = useRef(0);
+  const [insets, setInsets] = useState({ top: 260, bottom: 320 });
+  const measure = useCallback(() => {
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      const top = topEl.current ? Math.round(topEl.current.getBoundingClientRect().bottom) : 260;
+      const bottom = sheetEl.current ? Math.round(window.innerHeight - sheetEl.current.getBoundingClientRect().top) : 320;
+      setInsets((p) => (Math.abs(p.top - top) > 4 || Math.abs(p.bottom - bottom) > 4 ? { top, bottom } : p));
+    });
+  }, []);
+  const observe = useCallback((el) => {
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    if (!roRef.current) roRef.current = new ResizeObserver(measure);
+    roRef.current.observe(el);
+    measure();
+  }, [measure]);
+  const topRef = useCallback((el) => { topEl.current = el; observe(el); }, [observe]);
+  const sheetRef = useCallback((el) => { sheetEl.current = el; observe(el); }, [observe]);
+  useEffect(() => {
+    window.addEventListener('resize', measure);
+    return () => { window.removeEventListener('resize', measure); roRef.current?.disconnect(); cancelAnimationFrame(rafRef.current); };
+  }, [measure]);
+  const [hint, setHint] = useState('');
+  useEffect(() => { if (!hint) return undefined; const id = setTimeout(() => setHint(''), 3500); return () => clearTimeout(id); }, [hint]);
 
   // Xaritadagi shahar nomi — mijoz nuqtasidan (bir marta)
   const cp = tr?.customer?.point;
@@ -133,7 +177,10 @@ export function OrderTrackPage() {
     [tr, sub],
   );
 
-  if (!order || !sub) {
+  if (!sub && trackId && !error) {
+    return <div className="app-shell ot-empty"><span className="spinner" /></div>;
+  }
+  if (!sub) {
     return (
       <div className="app-shell ot-empty">
         <div className="text-muted">{T.noOrder}</div>
@@ -150,6 +197,8 @@ export function OrderTrackPage() {
   const rest = tr?.restaurant;
   const courier = tr?.courier;
   const finished = status === 'delivered' || status === 'cancelled';
+  // Restoranga qo'ng'iroq — restoran buyurtmani QABUL QILGANIDAN keyin (naqd buyurtmani u o'zi tasdiqlaydi)
+  const canCallRest = !finished && status !== 'pending' && Boolean(rest?.phone);
   const showEta = etaMinutes != null && !finished;
   const etaScheduled = tr?.eta?.basis === 'scheduled';
   const itemLabel = tr?.items?.[0]?.name || '';
@@ -174,9 +223,13 @@ export function OrderTrackPage() {
         etaMinutes={etaMinutes}
         labels={{ you: T.you, courierOnWay: T.courierOnWay, min: T.min, fit: T.fit, noMap: T.noMap }}
         cityLabel={city}
+        insets={insets}
       />
 
-      <div className="ot-top">
+      {/* Yuqoridagi yozuvlar xarita ustida o'qilishi uchun yengil oq tuman */}
+      <div className="ot-fade" aria-hidden="true" />
+
+      <div className="ot-top" ref={topRef}>
         {!inTelegram && (
           <button className="ot-back" onClick={() => navigate(-1)} aria-label={T.back}>
             <Icon name="chevronLeft" size={20} color="var(--ink)" /><span>{T.back}</span>
@@ -191,7 +244,7 @@ export function OrderTrackPage() {
           </div>
         </div>
 
-        {subs.length > 1 && (
+        {subs.length > 1 && storeSub && (
           <div className="ot-tabs">
             {subs.map((s) => (
               <button key={s.backendId} className={s.backendId === sub.backendId ? 'is-on' : ''} onClick={() => setPickedId(s.backendId)}>{s.restaurant?.name}</button>
@@ -236,7 +289,7 @@ export function OrderTrackPage() {
       </div>
 
       {/* Pastki varaq */}
-      <div className={`ot-sheet${full ? ' is-full' : ''}`}>
+      <div className={`ot-sheet${full ? ' is-full' : ''}`} ref={sheetRef}>
         <button className="ot-sheet__grip" onClick={() => setFull((v) => !v)} aria-label="sheet"><span /></button>
         <div className="ot-sheet__scroll">
           {!tr && !error && <div className="ot-skel"><i /><i /><i /></div>}
@@ -310,6 +363,7 @@ export function OrderTrackPage() {
           )}
         </div>
 
+        {hint && <div className="ot-hint" role="status">{hint}</div>}
         <div className="ot-actions">
           <button type="button" className="ot-actions__sec" onClick={() => { haptic(); window.dispatchEvent(new Event('lokma:open-support')); }}>
             <Icon name="headphones" size={18} color="#111" />{T.ask}
@@ -317,7 +371,15 @@ export function OrderTrackPage() {
           {finished ? (
             <button type="button" className="ot-actions__pri" onClick={() => { finishOrder(); navigate('/'); }}>{T.home}</button>
           ) : (
-            <a className={`ot-actions__pri${rest?.phone ? '' : ' is-disabled'}`} href={rest?.phone ? telHref(rest.phone) : undefined} onClick={() => haptic()}>
+            <a
+              className={`ot-actions__pri${canCallRest ? '' : ' is-off'}`}
+              href={canCallRest ? telHref(rest.phone) : undefined}
+              aria-disabled={!canCallRest}
+              onClick={(e) => {
+                haptic();
+                if (!canCallRest) { e.preventDefault(); setHint(rest?.phone || status === 'pending' ? T.callAfterAccept : T.noPhone); }
+              }}
+            >
               <Icon name="phone" size={17} color="#fff" />{T.callRest}
             </a>
           )}

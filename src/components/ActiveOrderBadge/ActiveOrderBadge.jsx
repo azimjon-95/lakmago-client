@@ -31,10 +31,20 @@ export function ActiveOrderBadge() {
     const i = statusOrder.indexOf(s.status);
     return i < acc ? i : acc;
   }, statusOrder.length - 1);
-  const statusKey = ['orderAccepted', 'orderPreparing', 'orderDelivering', 'orderDelivered'][minStatus] || 'orderAccepted';
+  // Restoran hali tasdiqlamagan bo'lsa — "Tasdiq kutilmoqda" (avval "Qabul qilindi" deb noto'g'ri ko'rsatardi)
+  const anyPending = subs.some((s) => s.rawStatus === 'pending');
+  const statusKey = anyPending ? 'orderPending'
+    : (['orderAccepted', 'orderPreparing', 'orderDelivering', 'orderDelivered'][minStatus] || 'orderAccepted');
 
   return (
-    <button className="active-order-badge" onClick={() => navigate('/order/track')}>
+    <button
+      className="active-order-badge"
+      onClick={() => {
+        // Eng birinchi yakunlanmagan buyurtmaning kuzatuv sahifasi
+        const s = subs.find((x) => !['delivered', 'cancelled'].includes(x.status)) || subs[0];
+        navigate(s?.backendId ? `/order/track/${s.backendId}` : '/order/track');
+      }}
+    >
       <span className="active-order-badge__pulse" />
       <span className="active-order-badge__icon"><Icon name="scooter" size={20} color="var(--brand-text)" /></span>
       <span className="active-order-badge__text">

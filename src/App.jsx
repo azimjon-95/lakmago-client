@@ -231,6 +231,8 @@ function AppInner({ authMode = 'telegram' }) {
             <Route path="/restaurant/:id/reserve" element={<ReservationPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/order/track" element={<OrderTrackPage />} />
+            {/* Aniq buyurtma (Buyurtmalar ro'yxati, bosh sahifa nishoni) */}
+            <Route path="/order/track/:orderId" element={<OrderTrackPage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/discover/:type" element={<DiscoverDishesPage />} />
             <Route path="/market" element={<MarketPage />} />

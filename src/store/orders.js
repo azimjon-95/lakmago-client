@@ -31,6 +31,8 @@ function toSubOrder(o, i) {
     // Soxta qiymat yo'q: kuryer ismi va taxminiy vaqt faqat serverdan (OrderTrack — /orders/:id/track)
     etaMinutes: o.etaMinutes ?? null,
     status: o.status === 'pending' ? 'accepted' : o.status,
+    // Haqiqiy holat ("kutilmoqda" ham) — nishon va kuzatuv to'g'ri ko'rsatishi uchun
+    rawStatus: o.status,
     courierName: o.courierName || '',
     rated: !!o.rating,
     // Xarita + timeline
@@ -170,6 +172,9 @@ export const useOrders = create((set, get) => ({
         subtotal: o.subtotal,
         etaMinutes: o.etaMinutes ?? null,
         status: o.status === 'pending' ? 'accepted' : o.status,
+        rawStatus: o.status,
+    // Haqiqiy holat ("kutilmoqda" ham) — nishon va kuzatuv to'g'ri ko'rsatishi uchun
+    rawStatus: o.status,
         courierName: o.courierName || '',
         rated: false,
       };
@@ -245,7 +250,7 @@ export const useOrders = create((set, get) => ({
         activeOrder: {
           ...state.activeOrder,
           subOrders: state.activeOrder.subOrders.map((s) =>
-            s.backendId === backendId ? { ...s, status: mapped } : s,
+            s.backendId === backendId ? { ...s, status: mapped, rawStatus: status } : s,
           ),
         },
       };

@@ -166,8 +166,9 @@ export function OrdersPage() {
               <OrderCard
                 key={o._id}
                 order={o}
-                open={openId === o._id}
-                onToggle={() => toggle(o._id)}
+                open={false}
+                // Faol buyurtma bosilsa — shu buyurtmaning kuzatuv sahifasi (xarita, kuryer, vaqt)
+                onToggle={() => navigate(`/order/track/${o._id}`)}
                 highlight
               />
             ))}

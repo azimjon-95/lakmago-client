@@ -37,35 +37,62 @@ const markup = {
   courier: (title, sub) => `<div class="tm-pin"><span class="tm-cour__halo"></span><span class="tm-cour__core">${svg('scooter', 22, ORANGE, 2.2)}</span><span class="tm-chip tm-chip--cour"><span class="tm-chip__shield">${svg('shieldCheck', 14, '#fff', 2.4)}</span><span class="tm-chip__txt"><b>${esc(title)}</b>${sub ? `<small>${esc(sub)}</small>` : ''}</span></span></div>`,
 };
 
-/** Yo'l chizig'i: serverdan (haqiqiy ko'chalar), kuryer 40 m dan ko'p siljiganda qayta so'raladi */
-function useRoute(orderId, from, to, status) {
+/*
+ * Yo'l chizig'i — HAQIQIY AVTOMOBIL YO'LLARI bo'ylab:
+ *   1) Yandex JS API (ymaps.route, routingMode 'auto') — xaritani chizayotgan kalitning o'zi;
+ *   2) server GET /orders/:id/route (Yandex Router → OSRM);
+ *   3) hech biri bo'lmasa — to'g'ri nuqtali chiziq (source 'straight').
+ * Kuryer 40 m dan ko'p siljigandagina qayta quriladi (kvota).
+ */
+async function yandexRoute(ymaps, from, to) {
+  const r = await ymaps.route([from, to], { routingMode: 'auto', multiRoute: false, mapStateAutoApply: false });
+  const pts = [];
+  r.getPaths().each((path) => { pts.push(...path.geometry.getCoordinates()); });
+  return pts.length > 1 ? { points: pts, source: 'yandex-js' } : null;
+}
+
+function useRoute(orderId, from, to, status, ymapsRef) {
   const [route, setRoute] = useState(null);
   const lastFrom = useRef(null);
-  const fromKey = from ? from.join(',') : '';
-  const toKey = to ? to.join(',') : '';
+  const fromKey = from ? from.map((n) => n.toFixed(5)).join(',') : '';
+  const toKey = to ? to.map((n) => n.toFixed(5)).join(',') : '';
+  const ymaps = ymapsRef?.current;
   useEffect(() => {
-    if (!orderId || !from || !to || ['delivered', 'cancelled'].includes(status)) { setRoute(null); return; }
-    if (lastFrom.current && route && meters(lastFrom.current, from) < 40) return;
+    if (!orderId || !from || !to || ['delivered', 'cancelled'].includes(status)) { setRoute(null); lastFrom.current = null; return undefined; }
+    // Qayta qurish shart emas: nuqta 40 m dan kam siljigan VA yo'l allaqachon eng yaxshi manbadan
+    // (Yandex JS) yoki Yandex yo'q bo'lsa — serverning haqiqiy yo'li bor
+    const best = route && (route.source === 'yandex-js' || (!ymaps?.route && route.source !== 'straight'));
+    if (lastFrom.current && best && meters(lastFrom.current, from) < 40) return undefined;
     let dead = false;
     lastFrom.current = from;
-    api.getOrderRoute(orderId).then((r) => { if (!dead && r?.points?.length > 1) setRoute(r); }).catch(() => {});
+    (async () => {
+      let r = null;
+      if (ymaps?.route) { try { r = await yandexRoute(ymaps, from, to); } catch { r = null; } }
+      if (!r) { try { const s = await api.getOrderRoute(orderId); if (s?.points?.length > 1) r = s; } catch { r = null; } }
+      if (!dead) setRoute(r || { points: [from, to], source: 'straight' });
+    })();
     return () => { dead = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderId, fromKey, toKey, status]);
+  }, [orderId, fromKey, toKey, status, ymaps]);
   return route;
 }
 
-export function TrackMap({ orderId, status, restaurant, customer, courier, itemLabel = '', etaMinutes = null, labels = {}, cityLabel = '' }) {
+/*
+ * insets — xaritani yopib turgan qatlamlar (px): top — yuqoridagi kartalar, bottom — pastki varaq.
+ * Ko'rinish chegarasi, sxematik zona va tugmalar shunga qarab joylashadi (hech narsa ostida qolmaydi).
+ */
+export function TrackMap({ orderId, status, restaurant, customer, courier, itemLabel = '', etaMinutes = null, labels = {}, cityLabel = '', insets = { top: 260, bottom: 320 } }) {
   const boxRef = useRef(null);
   const mapRef = useRef(null);
   const st = useRef(null);
   const [mode, setMode] = useState('loading'); // loading | yandex | schematic
+  const ymapsRef = useRef(null);
   const rPoint = pt(restaurant?.point);
   const cPoint = pt(customer?.point);
   const kPoint = pt(courier?.location);
   const L = labels;
   const etaText = etaMinutes != null ? `${etaMinutes} ${L.min || 'daqiqa'}` : '';
-  const route = useRoute(orderId, kPoint || rPoint, cPoint, status);
+  const route = useRoute(orderId, kPoint || rPoint, cPoint, status, mode === 'yandex' ? ymapsRef : null);
 
   /* Yandex xaritasi — bir marta, ma'lumotni kutmasdan */
   useEffect(() => {
@@ -80,6 +107,7 @@ export function TrackMap({ orderId, status, restaurant, customer, courier, itemL
         const map = new ymaps.Map(boxRef.current, { center: DEFAULT_CENTER, zoom: 13, controls: [] }, { suppressMapOpenBlock: true, yandexMapDisablePoiInteractivity: true });
         map.behaviors.disable(['scrollZoom', 'dblClickZoom']);
         mapRef.current = map;
+        ymapsRef.current = ymaps;
         st.current = { ymaps, markers: {}, line: null, fitted: false };
         setMode('yandex');
       } catch {
@@ -99,11 +127,11 @@ export function TrackMap({ orderId, status, restaurant, customer, courier, itemL
     if (!map || !pts.length) return;
     if (pts.length === 1) { map.setCenter(pts[0], 15, { duration: 250 }); return; }
     const lats = pts.map((p) => p[0]); const lngs = pts.map((p) => p[1]);
-    const h = window.innerHeight;
+    // Zaxira: tepada kartalar + restoran markeri (~90 px yuqoriga chiqadi), pastda varaq,
+    // o'ngda yozuvlar ("Kuryer yo'lda", "Sizning joylashuvingiz") sig'ishi uchun
     map.setBounds([[Math.min(...lats), Math.min(...lngs)], [Math.max(...lats), Math.max(...lngs)]],
-      // O'ngda yozuvlar ("Kuryer yo'lda", "Sizning joylashuvingiz") sig'ishi uchun kattaroq zaxira
-      { checkZoomRange: true, zoomMargin: [Math.round(h * 0.34), 170, Math.round(h * 0.48), 56], duration: 300 });
-  }, [rPoint, cPoint, kPoint, route]);
+      { checkZoomRange: true, zoomMargin: [insets.top + 96, 150, insets.bottom + 36, 48], duration: 300 });
+  }, [rPoint, cPoint, kPoint, route, insets.top, insets.bottom]);
 
   /* Markerlar va yo'l chizig'i */
   useEffect(() => {
@@ -129,6 +157,7 @@ export function TrackMap({ orderId, status, restaurant, customer, courier, itemL
     put('customer', cPoint, markup.customer(L.you || 'Sizning joylashuvingiz'), 20);
     put('restaurant', rPoint, markup.restaurant(itemLabel), 25);
     put('courier', kPoint, markup.courier(L.courierOnWay || "Kuryer yo'lda", etaText), 30);
+    // Birinchi marta — yo'l kelgach (yoki nuqtalar bitta bo'lsa) hammasi ko'rinadigan qilib
     if (!st.current.fitted && (rPoint || cPoint)) { fit(); st.current.fitted = Boolean(route || !(rPoint && cPoint)); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, rPoint?.[0], rPoint?.[1], cPoint?.[0], cPoint?.[1], kPoint?.[0], kPoint?.[1], etaText, itemLabel, route]);
@@ -138,10 +167,10 @@ export function TrackMap({ orderId, status, restaurant, customer, courier, itemL
   return (
     <div className="tm">
       <div ref={boxRef} className="tm__box" style={{ visibility: mode === 'yandex' ? 'visible' : 'hidden' }} />
-      {mode === 'schematic' && <SchematicMap rPoint={rPoint} cPoint={cPoint} kPoint={kPoint} route={route} itemLabel={itemLabel} etaText={etaText} L={L} />}
+      {mode === 'schematic' && <SchematicMap rPoint={rPoint} cPoint={cPoint} kPoint={kPoint} route={route} itemLabel={itemLabel} etaText={etaText} L={L} insets={insets} />}
       {mode === 'loading' && <div className="tm__loading"><span className="spinner" /></div>}
 
-      <div className="tm-ctrl">
+      <div className="tm-ctrl" style={{ bottom: insets.bottom + 12 }}>
         {mode === 'yandex' && (
           <div className="tm-zoom">
             <button type="button" onClick={() => zoom(1)} aria-label="+"><Icon name="plus" size={22} color="#111" /></button>
@@ -155,14 +184,14 @@ export function TrackMap({ orderId, status, restaurant, customer, courier, itemL
         )}
       </div>
       {cityLabel && (
-        <div className="tm-city"><Icon name="pin" size={17} color="#111" /><span>{cityLabel}</span><Icon name="chevronDown" size={16} color="#111" /></div>
+        <div className="tm-city" style={{ bottom: insets.bottom + 12 }}><Icon name="pin" size={17} color="#111" /><span>{cityLabel}</span><Icon name="chevronDown" size={16} color="#111" /></div>
       )}
     </div>
   );
 }
 
 /* ───────── Sxematik xarita (Yandex yo'q bo'lganda) — xuddi shu yo'l nuqtalari bilan ───────── */
-function SchematicMap({ rPoint, cPoint, kPoint, route, itemLabel, etaText, L }) {
+function SchematicMap({ rPoint, cPoint, kPoint, route, itemLabel, etaText, L, insets }) {
   const ref = useRef(null);
   const [size, setSize] = useState({ w: 390, h: 844 });
   useEffect(() => {
@@ -174,7 +203,7 @@ function SchematicMap({ rPoint, cPoint, kPoint, route, itemLabel, etaText, L }) 
   }, []);
   const { w: W, h: H } = size;
   const all = [rPoint, cPoint, kPoint, ...(route?.points || [])].filter(Boolean);
-  const key = `${all.length}|${all[0]}|${all[all.length - 1]}|${W}x${H}|${kPoint}`;
+  const key = `${all.length}|${all[0]}|${all[all.length - 1]}|${W}x${H}|${kPoint}|${insets.top}|${insets.bottom}`;
   const proj = useMemo(() => {
     if (!all.length) return () => [W / 2, H / 2];
     const lats = all.map((p) => p[0]); const lngs = all.map((p) => p[1]);
@@ -182,8 +211,9 @@ function SchematicMap({ rPoint, cPoint, kPoint, route, itemLabel, etaText, L }) 
     const minLng = Math.min(...lngs); const maxLng = Math.max(...lngs);
     const cosLat = Math.cos(((minLat + maxLat) / 2) * Math.PI / 180);
     const spanX = Math.max((maxLng - minLng) * cosLat, 1e-4); const spanY = Math.max(maxLat - minLat, 1e-4);
-    const x0 = Math.max(56, W * 0.15); const x1 = W - Math.max(170, W * 0.42); // o'ngda yozuvlarga joy
-    const y0 = H * 0.36; const y1 = H * 0.52;
+    const x0 = Math.max(48, W * 0.12); const x1 = W - Math.max(150, W * 0.38); // o'ngda yozuvlarga joy
+    // Ko'rinadigan oraliq: yuqori kartalar + restoran markeri ostidan, pastki varaqdan yuqorigacha
+    const y0 = Math.min(H * 0.6, insets.top + 96); const y1 = Math.max(y0 + 40, H - insets.bottom - 56);
     const scale = Math.min((x1 - x0) / spanX, (y1 - y0) / spanY);
     const offX = x0 + ((x1 - x0) - spanX * scale) / 2; const offY = y0 + ((y1 - y0) - spanY * scale) / 2;
     return (p) => [offX + (p[1] - minLng) * cosLat * scale, offY + (maxLat - p[0]) * scale];
