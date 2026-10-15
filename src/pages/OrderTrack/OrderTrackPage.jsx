@@ -10,6 +10,7 @@ import { formatSom } from '@/lib/utils';
 import { haptic, getTelegram } from '@/lib/telegram';
 import { api } from '@/api';
 import { TrackMap } from './TrackMap';
+import { CallSheet, tryDial, normPhone } from './CallSheet';
 import './OrderTrack.css';
 
 /*
@@ -37,6 +38,9 @@ const TXT = {
     steps: { accepted: 'Qabul qilindi', preparing: 'Tayyorlanmoqda', delivering: 'Kuryer yo‘lda', arrived: 'Yetib keldi', ready: 'Tayyor', delivered: 'Tugadi' },
     delivery: 'Yetkazib berish', total: 'Jami', ask: 'Savol berish', callRest: 'Restoran bilan bog‘lanish',
     callAfterAccept: 'Restoran buyurtmani qabul qilgach qo‘ng‘iroq qilishingiz mumkin', noPhone: 'Restoran telefoni ko‘rsatilmagan',
+    callNow: 'Qo‘ng‘iroq qilish', callCopy: 'Nusxalash', callToTg: 'Telegramga yuborish', callCopied: 'Raqam nusxalandi', callCopyFail: 'Nusxalab bo‘lmadi — raqamni qo‘lda yozib oling',
+    callSentTg: 'Raqam Telegram botga yuborildi — botdagi kontaktni bosing', callSendFail: 'Yuborib bo‘lmadi. Raqamni nusxalang', callNoPhone: 'Restoran raqami',
+    callNoPhoneAlt: 'Savolingiz bo‘lsa, LokmaGo qo‘llab-quvvatlash xizmati restoran bilan bog‘lanib yordam beradi.',
     gotQ: 'Buyurtmangizni qabul qildingizmi?', gotYes: 'Ha, oldim', gotWait: 'Kutyapman', gotThanks: 'Rahmat! Buyurtma yakunlandi', gotFail: 'Saqlanmadi, qayta urinib ko‘ring',
     noOrder: 'Faol buyurtma yo‘q', home: 'Bosh sahifa', retry: 'Qayta urinish', loadFail: 'Ma’lumot yuklanmadi', reason: 'Sabab', fit: 'Hammasi', noMap: 'Xarita ma’lumoti yo‘q',
     vehicles: { Skuter: 'Skuter', Velosiped: 'Velosiped', Mashina: 'Mashina', Piyoda: 'Piyoda' },
@@ -58,6 +62,9 @@ const TXT = {
     steps: { accepted: 'Қабул қилинди', preparing: 'Тайёрланмоқда', delivering: 'Курьер йўлда', arrived: 'Етиб келди', ready: 'Тайёр', delivered: 'Тугади' },
     delivery: 'Етказиб бериш', total: 'Жами', ask: 'Савол бериш', callRest: 'Ресторан билан боғланиш',
     callAfterAccept: 'Ресторан буюртмани қабул қилгач қўнғироқ қилишингиз мумкин', noPhone: 'Ресторан телефони кўрсатилмаган',
+    callNow: 'Қўнғироқ қилиш', callCopy: 'Нусхалаш', callToTg: 'Telegram’га юбориш', callCopied: 'Рақам нусхаланди', callCopyFail: 'Нусхалаб бўлмади — рақамни қўлда ёзиб олинг',
+    callSentTg: 'Рақам Telegram ботга юборилди — ботдаги контактни босинг', callSendFail: 'Юбориб бўлмади. Рақамни нусхаланг', callNoPhone: 'Ресторан рақами',
+    callNoPhoneAlt: 'Саволингиз бўлса, LokmaGo қўллаб-қувватлаш хизмати ресторан билан боғланиб ёрдам беради.',
     gotQ: 'Буюртмангизни қабул қилдингизми?', gotYes: 'Ҳа, олдим', gotWait: 'Кутяпман', gotThanks: 'Раҳмат! Буюртма якунланди', gotFail: 'Сақланмади, қайта уриниб кўринг',
     noOrder: 'Фаол буюртма йўқ', home: 'Бош саҳифа', retry: 'Қайта уриниш', loadFail: 'Маълумот юкланмади', reason: 'Сабаб', fit: 'Ҳаммаси', noMap: 'Харита маълумоти йўқ',
     vehicles: { Skuter: 'Скутер', Velosiped: 'Велосипед', Mashina: 'Машина', Piyoda: 'Пиёда' },
@@ -79,6 +86,9 @@ const TXT = {
     steps: { accepted: 'Принят', preparing: 'Готовится', delivering: 'Курьер в пути', arrived: 'Прибыл', ready: 'Готов', delivered: 'Завершён' },
     delivery: 'Доставка', total: 'Итого', ask: 'Задать вопрос', callRest: 'Связаться с рестораном',
     callAfterAccept: 'Позвонить можно после того, как ресторан примет заказ', noPhone: 'Телефон ресторана не указан',
+    callNow: 'Позвонить', callCopy: 'Копировать', callToTg: 'Отправить в Telegram', callCopied: 'Номер скопирован', callCopyFail: 'Не удалось скопировать — запишите номер вручную',
+    callSentTg: 'Номер отправлен в Telegram-бот — нажмите на контакт', callSendFail: 'Не удалось отправить. Скопируйте номер', callNoPhone: 'Номер ресторана',
+    callNoPhoneAlt: 'Если есть вопросы, служба поддержки LokmaGo свяжется с рестораном и поможет.',
     gotQ: 'Вы получили заказ?', gotYes: 'Да, получил', gotWait: 'Ещё жду', gotThanks: 'Спасибо! Заказ завершён', gotFail: 'Не удалось сохранить, повторите',
     noOrder: 'Нет активных заказов', home: 'На главную', retry: 'Повторить', loadFail: 'Не удалось загрузить', reason: 'Причина', fit: 'Всё', noMap: 'Нет данных карты',
     vehicles: { Skuter: 'Скутер', Velosiped: 'Велосипед', Mashina: 'Машина', Piyoda: 'Пешком' },
@@ -112,35 +122,6 @@ const shortName = (n = '') => {
   for (const w of words) { if ((out + ' ' + w).trim().length > 14) break; out = (out + ' ' + w).trim(); }
   return out || clean.slice(0, 13) + '…';
 };
-/*
- * Telefon raqamini tel: uchun tozalash. Bo'shliq, tire, qavs olib tashlanadi;
- * 9 xonali mahalliy raqam bo'lsa +998 qo'shiladi.
- */
-const normPhone = (p) => {
-  const d = String(p || '').replace(/[^\d+]/g, '');
-  if (!d) return '';
-  const digits = d.replace(/\D/g, '');
-  if (digits.length === 9) return `+998${digits}`;
-  if (digits.length === 12 && digits.startsWith('998')) return `+${digits}`;
-  return d.startsWith('+') ? d : `+${digits}`;
-};
-const telHref = (p) => `tel:${normPhone(p)}`;
-
-/*
- * Telegram Mini App ichida <a href="tel:"> ishlamaydi (WebView tel: havolani jim bloklaydi).
- * Shuning uchun qo'ng'iroq Telegram WebApp.openLink orqali ochiladi; WebApp bo'lmasa — oddiy tel:.
- */
-function callPhone(phone) {
-  const url = telHref(phone);
-  const tg = getTelegram();
-  haptic();
-  try {
-    if (tg?.openLink) { tg.openLink(url); return true; }
-  } catch { /* pastda */ }
-  window.location.href = url;
-  return true;
-}
-
 export function OrderTrackPage() {
   const navigate = useNavigate();
   const { lang } = useI18n();
@@ -200,6 +181,7 @@ export function OrderTrackPage() {
     return () => { window.removeEventListener('resize', measure); roRef.current?.disconnect(); cancelAnimationFrame(rafRef.current); };
   }, [measure]);
   const [hint, setHint] = useState('');
+  const [callInfo, setCallInfo] = useState(null);   // qo'ng'iroq oynasi: { name, phone, orderId, restaurant }
   const [answering, setAnswering] = useState(false);
   const applyBackendStatus2 = useOrders((s) => s.applyBackendStatus);
   useEffect(() => { if (!hint) return undefined; const id = setTimeout(() => setHint(''), 3500); return () => clearTimeout(id); }, [hint]);
@@ -239,7 +221,17 @@ export function OrderTrackPage() {
   const courier = tr?.courier;
   const finished = status === 'delivered' || status === 'cancelled';
   // Restoranga qo'ng'iroq — restoran buyurtmani QABUL QILGANIDAN keyin (naqd buyurtmani u o'zi tasdiqlaydi)
-  const canCallRest = !finished && status !== 'pending' && Boolean(rest?.phone);
+  // Restoran buyurtmani QABUL QILGANIDAN keyin faol (naqd buyurtmani u o'zi tasdiqlaydi).
+  // Raqam bo'lmasa ham faol: u holda boshqa oyna (qo'llab-quvvatlash orqali bog'lanish) ochiladi.
+  const canCallRest = !finished && status !== 'pending';
+  const openSupport = () => window.dispatchEvent(new Event('lokma:open-support'));
+  const startCall = (who) => {
+    haptic();
+    const info = { ...who, phone: normPhone(who.phone) };
+    if (!info.phone) { setCallInfo(info); return; }          // raqam yo'q — boshqa holat
+    // Avval to'g'ridan-to'g'ri qo'ng'iroq; ochilmasa (Mini App jim bloklaydi) — oyna chiqadi
+    tryDial(info.phone, () => setCallInfo(info));
+  };
   // 1 soatdan keyin: "Qabul qildingizmi?" — server hisoblaydi (track.confirm)
   const askGot = Boolean(tr?.confirm?.available) && !finished;
 
@@ -378,7 +370,7 @@ export function OrderTrackPage() {
                   </div>
                   {courier.phone && (
                     <div className="ot-courier__btns">
-                      <button type="button" className="ot-circle" aria-label={T.call} onClick={() => callPhone(courier.phone)}><Icon name="phone" size={19} color="#111" strokeWidth={2.2} /></button>
+                      <button type="button" className="ot-circle" aria-label={T.call} onClick={() => startCall({ name: courier.name, phone: courier.phone, orderId: tr.id, restaurant: false })}><Icon name="phone" size={19} color="#111" strokeWidth={2.2} /></button>
                       <a href={`sms:${courier.phone.replace(/[^\d+]/g, '')}`} className="ot-circle" aria-label={T.message} onClick={() => haptic()}><Icon name="messageCircle" size={19} color="#111" strokeWidth={2.2} /></a>
                     </div>
                   )}
@@ -455,8 +447,8 @@ export function OrderTrackPage() {
               className={`ot-actions__pri${canCallRest ? '' : ' is-off'}`}
               aria-disabled={!canCallRest}
               onClick={() => {
-                if (!canCallRest) { haptic(); setHint(!rest?.phone ? T.noPhone : T.callAfterAccept); return; }
-                callPhone(rest.phone);
+                if (!canCallRest) { haptic(); setHint(T.callAfterAccept); return; }
+                startCall({ name: rest?.name || '', phone: rest?.phone, orderId: tr?.id, restaurant: true });
               }}
             >
               <Icon name="phone" size={17} color="#fff" />{T.callRest}
@@ -464,6 +456,8 @@ export function OrderTrackPage() {
           )}
         </div>
       </div>
+
+      {callInfo && <CallSheet info={callInfo} T={T} onClose={() => setCallInfo(null)} onSupport={openSupport} />}
 
       {/* Savol berish — qo'llab-quvvatlash chati (suzuvchi tugmasiz) */}
       <SupportChat hideFab />

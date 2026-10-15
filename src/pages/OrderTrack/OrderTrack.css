@@ -175,3 +175,21 @@
 .ot-got__yes { background: linear-gradient(150deg, #3DDC84, #14B45C); color: #fff; box-shadow: 0 8px 18px -10px rgba(20, 180, 92, 0.9); }
 .ot-got__wait { background: #FFF3DF; color: #7A4B00; border: 1px solid #F6D9A8; }
 .ot-got__yes:disabled, .ot-got__wait:disabled { opacity: 0.6; }
+
+/* Qo'ng'iroq oynasi (Mini App'da tel: ochilmasa) */
+.ot-call { position: absolute; inset: 0; z-index: 8; display: flex; align-items: flex-end; background: rgba(0, 0, 0, 0.42); animation: ot-fade 160ms ease-out; }
+@keyframes ot-fade { from { opacity: 0; } to { opacity: 1; } }
+.ot-call__panel { position: relative; width: 100%; padding: 22px 18px calc(var(--ot-bottom) + 18px); border-radius: 26px 26px 0 0; background: #fff; text-align: center; box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.18); animation: ot-up 240ms cubic-bezier(.2, .9, .3, 1); }
+@keyframes ot-up { from { transform: translateY(40px); } to { transform: none; } }
+.ot-call__x { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: #F2F2EF; }
+.ot-call__ico { display: grid; place-items: center; width: 56px; height: 56px; margin: 0 auto 10px; border-radius: 50%; background: linear-gradient(150deg, #3DDC84, #14B45C); box-shadow: 0 10px 22px -10px rgba(20, 180, 92, 0.9); }
+.ot-call__name { font-size: 15px; font-weight: 700; color: #111; }
+.ot-call__num { margin: 6px 0 14px; font-size: 26px; font-weight: 800; letter-spacing: 0.3px; color: #111; user-select: all; -webkit-user-select: all; }
+.ot-call__go { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 50px; border-radius: 16px; background: linear-gradient(150deg, #3DDC84, #14B45C); color: #fff; font-size: 15px; font-weight: 700; text-decoration: none; box-shadow: 0 10px 22px -10px rgba(20, 180, 92, 0.9); }
+.ot-call__go--green { margin-top: 6px; }
+.ot-call__row { display: flex; gap: 8px; margin-top: 10px; }
+.ot-call__row button { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 44px; border-radius: 14px; background: #F2F2EF; font-size: 13px; font-weight: 600; color: #111; }
+.ot-call__row button:disabled { opacity: 0.6; }
+.ot-call__msg { margin-top: 10px; padding: 9px 12px; border-radius: 12px; background: #E8F8EE; color: #11643A; font-size: 12.5px; line-height: 1.35; }
+.ot-call__nophone { margin: 8px 0 4px; font-size: 16px; font-weight: 700; color: #111; }
+.ot-call__alt { margin: 0 0 14px; font-size: 13px; line-height: 1.45; color: #6B6B66; }

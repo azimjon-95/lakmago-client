@@ -378,6 +378,8 @@ export const api = {
   getOrder: (id) => apiFetch(`/orders/${id}`, { method: 'GET' }),
   // Kuzatuv sahifasi uchun HAQIQIY ma'lumot (vaqt chizig'i, ETA, kuryer, joylashuv) — server: services/orderTrack.js
   getOrderTrack: (id, opts) => apiFetch(`/orders/${id}/track`, { method: 'GET', ...opts }),
+  // Restoran raqamini botdan Telegram kontakt kartasi sifatida yuboradi (server: services/restaurantContact.js)
+  callRestaurant: (id) => apiFetch(`/orders/${id}/call-restaurant`, { method: 'POST' }),
   // "Kutyapman" — tasdiqlash tugmalari 15 daqiqaga yashiriladi (server: POST /orders/:id/delivery-wait)
   deliveryWait: (id) => apiFetch(`/orders/${id}/delivery-wait`, { method: 'POST' }),
   // Xaritadagi yo'l chizig'i — haqiqiy ko'chalar bo'ylab (server: services/routeGeometry.js)
