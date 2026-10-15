@@ -31,7 +31,7 @@ const TXT = {
     delivered: ['Yetkazildi', 'Yoqimli ishtaha!'],
     readyPickup: ['Buyurtma tayyor', 'Restorandan olib ketishingiz mumkin'],
     cancelled: ['Bekor qilindi', ''],
-    min: 'daqiqa', restaurant: 'Restoran', route: 'Yo‘nalish', you: 'Sizning joylashuvingiz', courierOnWay: 'Kuryer yo‘lda',
+    min: 'daqiqa', restaurant: 'Restoran', route: 'Yo‘nalish', you: 'Siz', courierOnWay: 'Kuryer yo‘lda',
     deliveries: 'ta yetkazib berish', orders: 'buyurtma', live: 'Jonli kuzatish', locWait: 'Joylashuv kutilmoqda',
     etaLine: 'Taxminiy yetib kelish vaqti', call: 'Qo‘ng‘iroq', message: 'Xabar',
     steps: { accepted: 'Qabul qilindi', preparing: 'Tayyorlanmoqda', delivering: 'Kuryer yo‘lda', arrived: 'Yetib keldi', ready: 'Tayyor', delivered: 'Tugadi' },
@@ -51,7 +51,7 @@ const TXT = {
     delivered: ['Етказилди', 'Ёқимли иштаҳа!'],
     readyPickup: ['Буюртма тайёр', 'Ресторандан олиб кетишингиз мумкин'],
     cancelled: ['Бекор қилинди', ''],
-    min: 'дақиқа', restaurant: 'Ресторан', route: 'Йўналиш', you: 'Сизнинг жойлашувингиз', courierOnWay: 'Курьер йўлда',
+    min: 'дақиқа', restaurant: 'Ресторан', route: 'Йўналиш', you: 'Сиз', courierOnWay: 'Курьер йўлда',
     deliveries: 'та етказиб бериш', orders: 'буюртма', live: 'Жонли кузатиш', locWait: 'Жойлашув кутилмоқда',
     etaLine: 'Тахминий етиб келиш вақти', call: 'Қўнғироқ', message: 'Хабар',
     steps: { accepted: 'Қабул қилинди', preparing: 'Тайёрланмоқда', delivering: 'Курьер йўлда', arrived: 'Етиб келди', ready: 'Тайёр', delivered: 'Тугади' },
@@ -71,7 +71,7 @@ const TXT = {
     delivered: ['Доставлено', 'Приятного аппетита!'],
     readyPickup: ['Заказ готов', 'Можно забирать в ресторане'],
     cancelled: ['Отменён', ''],
-    min: 'мин', restaurant: 'Ресторан', route: 'Маршрут', you: 'Ваше местоположение', courierOnWay: 'Курьер в пути',
+    min: 'мин', restaurant: 'Ресторан', route: 'Маршрут', you: 'Вы', courierOnWay: 'Курьер в пути',
     deliveries: 'доставок', orders: 'заказов', live: 'Онлайн-отслеживание', locWait: 'Ожидаем геопозицию',
     etaLine: 'Примерное время прибытия', call: 'Позвонить', message: 'Сообщение',
     steps: { accepted: 'Принят', preparing: 'Готовится', delivering: 'Курьер в пути', arrived: 'Прибыл', ready: 'Готов', delivered: 'Завершён' },
@@ -99,6 +99,15 @@ const fmtTime = (iso) => {
   if (!iso) return '';
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? '' : d.toLocaleTimeString('ru-RU', { timeZone: 'Asia/Tashkent', hour: '2-digit', minute: '2-digit', hour12: false });
+};
+/* Marker yozuvi uchun qisqa restoran nomi: 14 belgigacha, so'zlar kesilmaydi */
+const shortName = (n = '') => {
+  const clean = String(n).trim();
+  if (clean.length <= 14) return clean;
+  const words = clean.split(/\s+/);
+  let out = '';
+  for (const w of words) { if ((out + ' ' + w).trim().length > 14) break; out = (out + ' ' + w).trim(); }
+  return out || clean.slice(0, 13) + '…';
 };
 const telHref = (p) => `tel:${String(p || '').replace(/[^\d+]/g, '')}`;
 
@@ -219,9 +228,9 @@ export function OrderTrackPage() {
         restaurant={rest}
         customer={tr?.customer}
         courier={courier}
-        itemLabel={itemLabel}
         etaMinutes={etaMinutes}
         labels={{ you: T.you, courierOnWay: T.courierOnWay, min: T.min, fit: T.fit, noMap: T.noMap }}
+        restaurantLabel={shortName(rest?.name)}
         cityLabel={city}
         insets={insets}
       />

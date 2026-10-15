@@ -81,7 +81,7 @@ function useRoute(orderId, from, to, status, ymapsRef) {
  * insets — xaritani yopib turgan qatlamlar (px): top — yuqoridagi kartalar, bottom — pastki varaq.
  * Ko'rinish chegarasi, sxematik zona va tugmalar shunga qarab joylashadi (hech narsa ostida qolmaydi).
  */
-export function TrackMap({ orderId, status, restaurant, customer, courier, itemLabel = '', etaMinutes = null, labels = {}, cityLabel = '', insets = { top: 260, bottom: 320 } }) {
+export function TrackMap({ orderId, status, restaurant, customer, courier, restaurantLabel = '', etaMinutes = null, labels = {}, cityLabel = '', insets = { top: 260, bottom: 320 } }) {
   const boxRef = useRef(null);
   const mapRef = useRef(null);
   const st = useRef(null);
@@ -154,20 +154,20 @@ export function TrackMap({ orderId, status, restaurant, customer, courier, itemL
       st.current.line = new ymaps.Polyline(pts, {}, { strokeColor: ORANGE, strokeWidth: 5, strokeStyle: { style: [0.1, 2.4], offset: 0 }, strokeOpacity: 0.95, zIndex: 5 });
       map.geoObjects.add(st.current.line);
     }
-    put('customer', cPoint, markup.customer(L.you || 'Sizning joylashuvingiz'), 20);
-    put('restaurant', rPoint, markup.restaurant(itemLabel), 25);
+    put('customer', cPoint, markup.customer(L.you || 'Siz'), 20);
+    put('restaurant', rPoint, markup.restaurant(restaurantLabel), 25);
     put('courier', kPoint, markup.courier(L.courierOnWay || "Kuryer yo'lda", etaText), 30);
     // Birinchi marta — yo'l kelgach (yoki nuqtalar bitta bo'lsa) hammasi ko'rinadigan qilib
     if (!st.current.fitted && (rPoint || cPoint)) { fit(); st.current.fitted = Boolean(route || !(rPoint && cPoint)); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, rPoint?.[0], rPoint?.[1], cPoint?.[0], cPoint?.[1], kPoint?.[0], kPoint?.[1], etaText, itemLabel, route]);
+  }, [mode, rPoint?.[0], rPoint?.[1], cPoint?.[0], cPoint?.[1], kPoint?.[0], kPoint?.[1], etaText, restaurantLabel, route]);
 
   const zoom = (d) => { const m = mapRef.current; if (m) m.setZoom(Math.max(3, Math.min(19, m.getZoom() + d)), { duration: 200 }); };
 
   return (
     <div className="tm">
       <div ref={boxRef} className="tm__box" style={{ visibility: mode === 'yandex' ? 'visible' : 'hidden' }} />
-      {mode === 'schematic' && <SchematicMap rPoint={rPoint} cPoint={cPoint} kPoint={kPoint} route={route} itemLabel={itemLabel} etaText={etaText} L={L} insets={insets} />}
+      {mode === 'schematic' && <SchematicMap rPoint={rPoint} cPoint={cPoint} kPoint={kPoint} route={route} restaurantLabel={restaurantLabel} etaText={etaText} L={L} insets={insets} />}
       {mode === 'loading' && <div className="tm__loading"><span className="spinner" /></div>}
 
       <div className="tm-ctrl" style={{ bottom: insets.bottom + 12 }}>
@@ -191,7 +191,7 @@ export function TrackMap({ orderId, status, restaurant, customer, courier, itemL
 }
 
 /* ───────── Sxematik xarita (Yandex yo'q bo'lganda) — xuddi shu yo'l nuqtalari bilan ───────── */
-function SchematicMap({ rPoint, cPoint, kPoint, route, itemLabel, etaText, L, insets }) {
+function SchematicMap({ rPoint, cPoint, kPoint, route, restaurantLabel, etaText, L, insets }) {
   const ref = useRef(null);
   const [size, setSize] = useState({ w: 390, h: 844 });
   useEffect(() => {
@@ -223,8 +223,8 @@ function SchematicMap({ rPoint, cPoint, kPoint, route, itemLabel, etaText, L, in
   const linePts = route?.points?.length > 1 ? route.points : (from && cPoint ? [from, cPoint] : []);
   const d = linePts.map((p, i) => { const [x, y] = proj(p); return `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`; }).join(' ');
   const items = [
-    ['restaurant', rPoint && proj(rPoint), markup.restaurant(itemLabel)],
-    ['customer', cPoint && proj(cPoint), markup.customer(L.you || 'Sizning joylashuvingiz')],
+    ['restaurant', rPoint && proj(rPoint), markup.restaurant(restaurantLabel)],
+    ['customer', cPoint && proj(cPoint), markup.customer(L.you || 'Siz')],
     ['courier', kPoint && proj(kPoint), markup.courier(L.courierOnWay || "Kuryer yo'lda", etaText)],
   ];
   return (

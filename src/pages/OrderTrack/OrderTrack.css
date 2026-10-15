@@ -146,9 +146,14 @@
 
 .ot-actions { flex: none; display: flex; gap: 10px; padding: 6px 16px calc(var(--ot-bottom) + 12px); background: #fff; }
 .ot-actions__sec, .ot-actions__pri { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 46px; padding: 0 10px; border-radius: 15px; font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; overflow: hidden; }
-.ot-actions__sec { flex: 1; min-width: 0; background: #F2F2EF; color: #111; }
+.ot-actions__sec { flex: 1; min-width: 0; background: #E8F8EE; color: #0F7A3C; box-shadow: 0 6px 16px -10px rgba(34, 177, 90, 0.7); }
+.ot-actions__sec svg { stroke: #0F7A3C; }
 .ot-actions__pri { flex: 1.35; background: linear-gradient(150deg, #FF8A3D, #FF6A13); color: #fff; box-shadow: 0 8px 18px -10px rgba(255, 106, 19, 0.8); }
-.ot-actions__pri.is-off { background: #F2F2EF; color: #A3A39D; box-shadow: none; }
+/* Yashil — chiroyli, yorqin: "Savol berish" doim faol, asosiy yashil tugma */
+.ot-actions__sec { background: linear-gradient(150deg, #3DDC84, #14B45C); color: #fff; box-shadow: 0 10px 22px -10px rgba(20, 180, 92, 0.85), inset 0 1px 0 rgba(255,255,255,.35); }
+.ot-actions__sec svg { stroke: #fff; }
+.ot-actions__sec:active, .ot-actions__pri:active { transform: scale(0.98); }
+.ot-actions__pri.is-off { background: #EFEFEB; color: #A3A39D; box-shadow: none; }
 .ot-actions__pri.is-off svg { stroke: #A3A39D; }
 .ot-hint { margin: 0 16px 6px; padding: 9px 12px; border-radius: 12px; background: #FFF4E5; color: #8A4B00; font-size: 12px; line-height: 1.35; text-align: center; animation: ot-in 180ms ease-out; }
 @keyframes ot-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
