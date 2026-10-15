@@ -166,3 +166,12 @@
 
 @media (max-width: 360px) { .ot-step__label { font-size: 9.5px; } .ot-actions__sec, .ot-actions__pri { font-size: 12.5px; } }
 @media (prefers-reduced-motion: reduce) { .tm-cour__halo, .ot-live__badge svg, .ot-skel i { animation: none; } .ot-sheet { transition: none; } }
+
+/* "Qabul qildingizmi?" — 1 soatdan keyin pastda ikkita tugma */
+.ot-got { margin: 0 16px 8px; padding: 10px; border-radius: 18px; background: #F1FBF5; border: 1px solid #BFE9CF; animation: ot-in 220ms ease-out; }
+.ot-got__q { font-size: 13px; font-weight: 700; color: #11643A; text-align: center; margin-bottom: 8px; }
+.ot-got__btns { display: flex; gap: 8px; }
+.ot-got__yes, .ot-got__wait { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 44px; border-radius: 14px; font-size: 13.5px; font-weight: 700; }
+.ot-got__yes { background: linear-gradient(150deg, #3DDC84, #14B45C); color: #fff; box-shadow: 0 8px 18px -10px rgba(20, 180, 92, 0.9); }
+.ot-got__wait { background: #FFF3DF; color: #7A4B00; border: 1px solid #F6D9A8; }
+.ot-got__yes:disabled, .ot-got__wait:disabled { opacity: 0.6; }

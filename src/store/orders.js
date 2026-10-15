@@ -172,9 +172,8 @@ export const useOrders = create((set, get) => ({
         subtotal: o.subtotal,
         etaMinutes: o.etaMinutes ?? null,
         status: o.status === 'pending' ? 'accepted' : o.status,
+        // Haqiqiy holat ("kutilmoqda" ham) — nishon va kuzatuv to'g'ri ko'rsatishi uchun
         rawStatus: o.status,
-    // Haqiqiy holat ("kutilmoqda" ham) — nishon va kuzatuv to'g'ri ko'rsatishi uchun
-    rawStatus: o.status,
         courierName: o.courierName || '',
         rated: false,
       };
@@ -216,10 +215,21 @@ export const useOrders = create((set, get) => ({
   activateOrder: (order) => set({ activeOrder: order }),
 
   // Faol buyurtmani backenddan tiklash (sahifa yangilanганda)
+  /*
+   * Server — HAQIQAT MANBAI. Sahifa yangilanganda ham, davriy sinxronizatsiyada ham chaqiriladi.
+   * Serverda faol buyurtma YO'Q bo'lsa (yakunlangan/bekor qilingan) — mahalliy nishon ham tozalanadi.
+   * Istisno: faqat karta to'lovi kutilayotgan buyurtma (activateOrder hali chaqirilmagan) — tegilmaydi.
+   */
   loadActive: async () => {
     try {
       const orders = await api.getActiveOrders();
-      if (!orders || orders.length === 0) return;
+      if (!orders || orders.length === 0) {
+        const cur = get().activeOrder;
+        if (cur && !cur.subOrders?.some((s) => s.rawStatus === 'awaiting_payment')) {
+          set((state) => ({ pastOrders: [cur, ...state.pastOrders], activeOrder: null }));
+        }
+        return;
+      }
       const groupId = orders[0].groupId;
       const sameGroup = orders.filter((o) => o.groupId === groupId);
       const subOrders = sameGroup.map(toSubOrder);

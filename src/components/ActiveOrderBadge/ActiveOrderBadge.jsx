@@ -1,57 +1,92 @@
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrders } from '@/store/orders';
 import { useT } from '@/i18n';
-import './ActiveOrderBadge.css';
 import { Icon } from '@/components/Icon';
+import './ActiveOrderBadge.css';
 
 /*
- * Mijoz buyurtma bergач bosh sahifada chekkada ko'rinadigan
- * kichik tugma. Bosilsa — faol buyurtmalar sahifasiga o'tadi.
+ * ═══ "SIZNING BUYURTMANGIZ" NISHONI ═══
+ * Buyurtma berilgach bosh sahifada chiqadi; bosilsa shu buyurtmaning kuzatuv sahifasi ochiladi.
  *
- * FAQAT BOSH SAHIFADA: qaysi sahifada ko'rinishini App.jsx
- * (FloatingLayer) hal qiladi — bu yerda ikkinchi marta
- * pathname tekshirilmaydi. Bitta haqiqat manbai bo'lsin deb
- * ataylab shunday: ilgari bu yerda "faqat /order/track va
- * /orders'da YASHIRIN" (qora ro'yxat) mantig'i bor edi va u
- * qolgan HAMMA sahifada (restoran, savat, qidiruv, profil...)
- * ko'rinib turardi — mijoz taom sahifasida ham, savatda ham
- * bu bannerni ko'rardi.
+ *  • Holat JONLI almashadi (soket + davriy so'rov — hooks/useActiveOrderSync): Tasdiq kutilmoqda →
+ *    Qabul qilindi → Tayyorlanmoqda → Tayyor → Yo'lda. Almashganda matn tepaga siljib o'zgaradi,
+ *    ikonka sakraydi, nishon bir lahza yaltirab oladi, pastdagi 5 bosqichli chiziq to'lib boradi.
+ *  • Buyurtma YAKUNLANSA yoki bekor qilinsa — nishon ko'rinmaydi (qaytib chiqmaydi).
+ *  • Sahifa yangilansa ham chiqib turadi — faol buyurtma serverdan tiklanadi.
+ *  Ko'rinish joyi (faqat bosh sahifa) — App.jsx FloatingLayer.
  */
+const STAGES = [
+  { key: 'pending', i18n: 'orderPending', icon: 'clock' },
+  { key: 'accepted', i18n: 'orderAccepted', icon: 'check' },
+  { key: 'preparing', i18n: 'orderPreparing', icon: 'flame' },
+  { key: 'ready', i18n: 'orderReady', icon: 'bag' },
+  { key: 'delivering', i18n: 'orderDelivering', icon: 'scooter' },
+];
+const FINISHED = ['delivered', 'cancelled'];
+
+/** Sub-buyurtmaning bosqichi (haqiqiy holatdan) */
+function stageOf(sub) {
+  const raw = sub.rawStatus || sub.status;
+  const i = STAGES.findIndex((s) => s.key === raw);
+  if (i >= 0) return i;
+  if (sub.status === 'accepted') return 1;
+  return 1;
+}
+
 export function ActiveOrderBadge() {
   const navigate = useNavigate();
   const activeOrder = useOrders((s) => s.activeOrder);
   const t = useT();
+  const subs = activeOrder?.subOrders || [];
+  const open = subs.filter((s) => !FINISHED.includes(s.rawStatus || s.status));
 
-  if (!activeOrder) return null;
+  // Bir nechta restoran bo'lsa — eng "orqada" turgani ko'rsatiladi
+  const stage = open.length ? Math.min(...open.map(stageOf)) : -1;
+  const prev = useRef(stage);
+  const [changed, setChanged] = useState(0);
+  useEffect(() => {
+    if (stage >= 0 && prev.current >= 0 && stage !== prev.current) {
+      setChanged((n) => n + 1);          // key o'zgaradi → animatsiya qayta ishga tushadi
+    }
+    prev.current = stage;
+  }, [stage]);
 
-  // Umumiy holat: eng "orqada" turgan sub-buyurtma statusi
-  const statusOrder = ['accepted', 'preparing', 'delivering', 'delivered'];
-  const subs = activeOrder.subOrders || [];
-  const minStatus = subs.reduce((acc, s) => {
-    const i = statusOrder.indexOf(s.status);
-    return i < acc ? i : acc;
-  }, statusOrder.length - 1);
-  // Restoran hali tasdiqlamagan bo'lsa — "Tasdiq kutilmoqda" (avval "Qabul qilindi" deb noto'g'ri ko'rsatardi)
-  const anyPending = subs.some((s) => s.rawStatus === 'pending');
-  const statusKey = anyPending ? 'orderPending'
-    : (['orderAccepted', 'orderPreparing', 'orderDelivering', 'orderDelivered'][minStatus] || 'orderAccepted');
+  // Hammasi yakunlangan / buyurtma yo'q — nishon yo'q
+  if (!activeOrder || !open.length) return null;
+
+  const cur = STAGES[stage];
+  const goTrack = () => {
+    const s = open[0];
+    navigate(s?.backendId ? `/order/track/${s.backendId}` : '/order/track');
+  };
 
   return (
     <button
-      className="active-order-badge"
-      onClick={() => {
-        // Eng birinchi yakunlanmagan buyurtmaning kuzatuv sahifasi
-        const s = subs.find((x) => !['delivered', 'cancelled'].includes(x.status)) || subs[0];
-        navigate(s?.backendId ? `/order/track/${s.backendId}` : '/order/track');
-      }}
+      type="button"
+      className={`aob${changed ? ' aob--flash' : ''}`}
+      key={`aob-${changed}`}
+      onClick={goTrack}
+      aria-live="polite"
     >
-      <span className="active-order-badge__pulse" />
-      <span className="active-order-badge__icon"><Icon name="scooter" size={20} color="var(--brand-text)" /></span>
-      <span className="active-order-badge__text">
-        <span className="active-order-badge__title">{t('yourOrder')}</span>
-        <span className="active-order-badge__status">{t(statusKey)}</span>
+      <span className="aob__row">
+        <span className="aob__icon" key={cur.key}>
+          <Icon name={cur.icon} size={20} color="#fff" strokeWidth={2.4} />
+        </span>
+        <span className="aob__text">
+          <span className="aob__title">{t('yourOrder')}</span>
+          <span className="aob__status" key={cur.key}>
+            <i className="aob__live" aria-hidden="true" />
+            {t(cur.i18n)}
+          </span>
+        </span>
+        <span className="aob__arrow" aria-hidden="true">›</span>
       </span>
-      <span className="active-order-badge__arrow">›</span>
+      <span className="aob__bar" aria-hidden="true">
+        {STAGES.map((s, i) => (
+          <span key={s.key} className={`aob__seg${i < stage ? ' is-done' : ''}${i === stage ? ' is-now' : ''}`} />
+        ))}
+      </span>
     </button>
   );
 }

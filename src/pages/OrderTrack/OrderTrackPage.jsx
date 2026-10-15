@@ -37,6 +37,7 @@ const TXT = {
     steps: { accepted: 'Qabul qilindi', preparing: 'Tayyorlanmoqda', delivering: 'Kuryer yo‘lda', arrived: 'Yetib keldi', ready: 'Tayyor', delivered: 'Tugadi' },
     delivery: 'Yetkazib berish', total: 'Jami', ask: 'Savol berish', callRest: 'Restoran bilan bog‘lanish',
     callAfterAccept: 'Restoran buyurtmani qabul qilgach qo‘ng‘iroq qilishingiz mumkin', noPhone: 'Restoran telefoni ko‘rsatilmagan',
+    gotQ: 'Buyurtmangizni qabul qildingizmi?', gotYes: 'Ha, oldim', gotWait: 'Kutyapman', gotThanks: 'Rahmat! Buyurtma yakunlandi', gotFail: 'Saqlanmadi, qayta urinib ko‘ring',
     noOrder: 'Faol buyurtma yo‘q', home: 'Bosh sahifa', retry: 'Qayta urinish', loadFail: 'Ma’lumot yuklanmadi', reason: 'Sabab', fit: 'Hammasi', noMap: 'Xarita ma’lumoti yo‘q',
     vehicles: { Skuter: 'Skuter', Velosiped: 'Velosiped', Mashina: 'Mashina', Piyoda: 'Piyoda' },
   },
@@ -57,6 +58,7 @@ const TXT = {
     steps: { accepted: 'Қабул қилинди', preparing: 'Тайёрланмоқда', delivering: 'Курьер йўлда', arrived: 'Етиб келди', ready: 'Тайёр', delivered: 'Тугади' },
     delivery: 'Етказиб бериш', total: 'Жами', ask: 'Савол бериш', callRest: 'Ресторан билан боғланиш',
     callAfterAccept: 'Ресторан буюртмани қабул қилгач қўнғироқ қилишингиз мумкин', noPhone: 'Ресторан телефони кўрсатилмаган',
+    gotQ: 'Буюртмангизни қабул қилдингизми?', gotYes: 'Ҳа, олдим', gotWait: 'Кутяпман', gotThanks: 'Раҳмат! Буюртма якунланди', gotFail: 'Сақланмади, қайта уриниб кўринг',
     noOrder: 'Фаол буюртма йўқ', home: 'Бош саҳифа', retry: 'Қайта уриниш', loadFail: 'Маълумот юкланмади', reason: 'Сабаб', fit: 'Ҳаммаси', noMap: 'Харита маълумоти йўқ',
     vehicles: { Skuter: 'Скутер', Velosiped: 'Велосипед', Mashina: 'Машина', Piyoda: 'Пиёда' },
   },
@@ -77,6 +79,7 @@ const TXT = {
     steps: { accepted: 'Принят', preparing: 'Готовится', delivering: 'Курьер в пути', arrived: 'Прибыл', ready: 'Готов', delivered: 'Завершён' },
     delivery: 'Доставка', total: 'Итого', ask: 'Задать вопрос', callRest: 'Связаться с рестораном',
     callAfterAccept: 'Позвонить можно после того, как ресторан примет заказ', noPhone: 'Телефон ресторана не указан',
+    gotQ: 'Вы получили заказ?', gotYes: 'Да, получил', gotWait: 'Ещё жду', gotThanks: 'Спасибо! Заказ завершён', gotFail: 'Не удалось сохранить, повторите',
     noOrder: 'Нет активных заказов', home: 'На главную', retry: 'Повторить', loadFail: 'Не удалось загрузить', reason: 'Причина', fit: 'Всё', noMap: 'Нет данных карты',
     vehicles: { Skuter: 'Скутер', Velosiped: 'Велосипед', Mashina: 'Машина', Piyoda: 'Пешком' },
   },
@@ -197,6 +200,8 @@ export function OrderTrackPage() {
     return () => { window.removeEventListener('resize', measure); roRef.current?.disconnect(); cancelAnimationFrame(rafRef.current); };
   }, [measure]);
   const [hint, setHint] = useState('');
+  const [answering, setAnswering] = useState(false);
+  const applyBackendStatus2 = useOrders((s) => s.applyBackendStatus);
   useEffect(() => { if (!hint) return undefined; const id = setTimeout(() => setHint(''), 3500); return () => clearTimeout(id); }, [hint]);
 
   // Xaritadagi shahar nomi — mijoz nuqtasidan (bir marta)
@@ -235,6 +240,31 @@ export function OrderTrackPage() {
   const finished = status === 'delivered' || status === 'cancelled';
   // Restoranga qo'ng'iroq — restoran buyurtmani QABUL QILGANIDAN keyin (naqd buyurtmani u o'zi tasdiqlaydi)
   const canCallRest = !finished && status !== 'pending' && Boolean(rest?.phone);
+  // 1 soatdan keyin: "Qabul qildingizmi?" — server hisoblaydi (track.confirm)
+  const askGot = Boolean(tr?.confirm?.available) && !finished;
+
+  const answerGot = async () => {
+    if (answering) return;
+    setAnswering(true); haptic();
+    try {
+      // Yagona yakunlash yo'li: pul hisobi, restoran, admin, bot — hammasi serverda
+      await api.confirmDelivery(tr.id);
+      applyBackendStatus2(tr.id, 'delivered');   // nishon darhol yo'qoladi
+      setHint(T.gotThanks);
+      await refresh();
+      useOrders.getState().loadActive?.();
+    } catch (e) {
+      setHint(e?.message && e.code !== 'WRONG_STATE' ? e.message : T.gotFail);
+      refresh();
+    } finally { setAnswering(false); }
+  };
+  const answerWait = async () => {
+    if (answering) return;
+    setAnswering(true); haptic();
+    try { await api.deliveryWait(tr.id); } catch { /* jim: baribir yashiriladi */ }
+    await refresh();
+    setAnswering(false);
+  };
   const showEta = etaMinutes != null && !finished;
   const etaScheduled = tr?.eta?.basis === 'scheduled';
   const itemLabel = tr?.items?.[0]?.name || '';
@@ -400,6 +430,19 @@ export function OrderTrackPage() {
         </div>
 
         {hint && <div className="ot-hint" role="status">{hint}</div>}
+        {askGot && (
+          <div className="ot-got" role="group" aria-label={T.gotQ}>
+            <div className="ot-got__q">{T.gotQ}</div>
+            <div className="ot-got__btns">
+              <button type="button" className="ot-got__yes" onClick={answerGot} disabled={answering}>
+                <Icon name="circleCheck" size={18} color="#fff" strokeWidth={2.4} />{T.gotYes}
+              </button>
+              <button type="button" className="ot-got__wait" onClick={answerWait} disabled={answering}>
+                <Icon name="clock" size={17} color="#7A4B00" strokeWidth={2.3} />{T.gotWait}
+              </button>
+            </div>
+          </div>
+        )}
         <div className="ot-actions">
           <button type="button" className="ot-actions__sec" onClick={() => { haptic(); window.dispatchEvent(new Event('lokma:open-support')); }}>
             <Icon name="headphones" size={18} color="#111" />{T.ask}

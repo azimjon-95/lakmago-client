@@ -24,6 +24,7 @@ import { api, getAuthToken, hasRefreshToken, restoreSession } from '@/api';
 import { joinUserRoom } from '@/lib/socket';
 import { syncGuestAddresses } from '@/lib/syncGuestAddresses';
 import { I18nProvider } from '@/i18n';
+import { useActiveOrderSync } from '@/hooks/useActiveOrderSync';
 import { ActiveOrderBadge } from '@/components/ActiveOrderBadge/ActiveOrderBadge';
 import { SupportChat } from '@/components/SupportChat/SupportChat';
 import { Splash } from '@/components/Splash/Splash';
@@ -49,6 +50,7 @@ const queryClient = new QueryClient({
 // bosh sahifada ko'rinadi, ichki sahifalarda (restoran, savat,
 // bron, qidiruv va h.k.) umuman chiqmaydi.
 function FloatingLayer() {
+  useActiveOrderSync(); // faol buyurtmani tiklash + jonli holat (har sahifada, nishon uchun)
   const location = useLocation();
   const isHome = location.pathname === '/';
   return (

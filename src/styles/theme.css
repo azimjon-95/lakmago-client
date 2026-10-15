@@ -445,7 +445,8 @@ ul { list-style: none; }
     right: calc(12px + env(safe-area-inset-right, 0px));
     width: 48px; height: 48px;
   }
-  .active-order-badge {
+  .active-order-badge,
+  .aob {
     /* Markazda qoladi (left:50% + transform), faqat balandlik ixchamlashadi */
     bottom: calc(var(--bottom-nav-h, 62px) + var(--tg-bottom-offset, 0px));
   }
