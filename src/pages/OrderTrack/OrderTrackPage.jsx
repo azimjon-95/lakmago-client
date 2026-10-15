@@ -109,7 +109,34 @@ const shortName = (n = '') => {
   for (const w of words) { if ((out + ' ' + w).trim().length > 14) break; out = (out + ' ' + w).trim(); }
   return out || clean.slice(0, 13) + '…';
 };
-const telHref = (p) => `tel:${String(p || '').replace(/[^\d+]/g, '')}`;
+/*
+ * Telefon raqamini tel: uchun tozalash. Bo'shliq, tire, qavs olib tashlanadi;
+ * 9 xonali mahalliy raqam bo'lsa +998 qo'shiladi.
+ */
+const normPhone = (p) => {
+  const d = String(p || '').replace(/[^\d+]/g, '');
+  if (!d) return '';
+  const digits = d.replace(/\D/g, '');
+  if (digits.length === 9) return `+998${digits}`;
+  if (digits.length === 12 && digits.startsWith('998')) return `+${digits}`;
+  return d.startsWith('+') ? d : `+${digits}`;
+};
+const telHref = (p) => `tel:${normPhone(p)}`;
+
+/*
+ * Telegram Mini App ichida <a href="tel:"> ishlamaydi (WebView tel: havolani jim bloklaydi).
+ * Shuning uchun qo'ng'iroq Telegram WebApp.openLink orqali ochiladi; WebApp bo'lmasa — oddiy tel:.
+ */
+function callPhone(phone) {
+  const url = telHref(phone);
+  const tg = getTelegram();
+  haptic();
+  try {
+    if (tg?.openLink) { tg.openLink(url); return true; }
+  } catch { /* pastda */ }
+  window.location.href = url;
+  return true;
+}
 
 export function OrderTrackPage() {
   const navigate = useNavigate();
@@ -321,7 +348,7 @@ export function OrderTrackPage() {
                   </div>
                   {courier.phone && (
                     <div className="ot-courier__btns">
-                      <a href={telHref(courier.phone)} className="ot-circle" aria-label={T.call} onClick={() => haptic()}><Icon name="phone" size={19} color="#111" strokeWidth={2.2} /></a>
+                      <button type="button" className="ot-circle" aria-label={T.call} onClick={() => callPhone(courier.phone)}><Icon name="phone" size={19} color="#111" strokeWidth={2.2} /></button>
                       <a href={`sms:${courier.phone.replace(/[^\d+]/g, '')}`} className="ot-circle" aria-label={T.message} onClick={() => haptic()}><Icon name="messageCircle" size={19} color="#111" strokeWidth={2.2} /></a>
                     </div>
                   )}
@@ -380,17 +407,17 @@ export function OrderTrackPage() {
           {finished ? (
             <button type="button" className="ot-actions__pri" onClick={() => { finishOrder(); navigate('/'); }}>{T.home}</button>
           ) : (
-            <a
+            <button
+              type="button"
               className={`ot-actions__pri${canCallRest ? '' : ' is-off'}`}
-              href={canCallRest ? telHref(rest.phone) : undefined}
               aria-disabled={!canCallRest}
-              onClick={(e) => {
-                haptic();
-                if (!canCallRest) { e.preventDefault(); setHint(rest?.phone || status === 'pending' ? T.callAfterAccept : T.noPhone); }
+              onClick={() => {
+                if (!canCallRest) { haptic(); setHint(!rest?.phone ? T.noPhone : T.callAfterAccept); return; }
+                callPhone(rest.phone);
               }}
             >
               <Icon name="phone" size={17} color="#fff" />{T.callRest}
-            </a>
+            </button>
           )}
         </div>
       </div>
