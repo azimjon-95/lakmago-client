@@ -378,6 +378,8 @@ export const api = {
   getOrder: (id) => apiFetch(`/orders/${id}`, { method: 'GET' }),
   // Kuzatuv sahifasi uchun HAQIQIY ma'lumot (vaqt chizig'i, ETA, kuryer, joylashuv) — server: services/orderTrack.js
   getOrderTrack: (id, opts) => apiFetch(`/orders/${id}/track`, { method: 'GET', ...opts }),
+  // Xaritadagi yo'l chizig'i — haqiqiy ko'chalar bo'ylab (server: services/routeGeometry.js)
+  getOrderRoute: (id, opts) => apiFetch(`/orders/${id}/route`, { method: 'GET', ...opts }),
 
   getOrderGroup: (groupId) => apiFetch(`/orders/group/${groupId}`, { method: 'GET' }),
 

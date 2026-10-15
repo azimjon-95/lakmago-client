@@ -7,7 +7,8 @@ import { useOrderTracking } from '@/hooks/useOrderTracking';
 import { useOrderTrack } from '@/hooks/useOrderTrack';
 import { useI18n } from '@/i18n';
 import { formatSom } from '@/lib/utils';
-import { haptic } from '@/lib/telegram';
+import { haptic, getTelegram } from '@/lib/telegram';
+import { api } from '@/api';
 import { TrackMap } from './TrackMap';
 import './OrderTrack.css';
 
@@ -79,6 +80,16 @@ const TXT = {
 };
 const STEP_ICON = { accepted: 'check', preparing: 'flame', delivering: 'scooter', arrived: 'pin', ready: 'bag', delivered: 'circleCheck' };
 
+// Reverse geocode ("Узбекистан, Ташкент, ...") → shahar nomi; o'zbekcha yozilishi
+const CITY_UZ = { 'Ташкент': 'Toshkent', 'Самарканд': 'Samarqand', 'Бухара': 'Buxoro', 'Андижан': 'Andijon', 'Наманган': 'Namangan', 'Фергана': 'Farg‘ona', 'Нукус': 'Nukus', 'Карши': 'Qarshi', 'Навои': 'Navoiy', 'Джизак': 'Jizzax', 'Гулистан': 'Guliston', 'Термез': 'Termiz', 'Ургенч': 'Urganch', 'Коканд': 'Qo‘qon', 'Чирчик': 'Chirchiq', 'Ангрен': 'Angren', 'Алмалык': 'Olmaliq' };
+function cityFrom(address, lang) {
+  const parts = String(address || '').split(',').map((s) => s.trim()).filter(Boolean);
+  if (!parts.length) return '';
+  const city = /Узбекистан|Oʻzbekiston|Uzbekistan/i.test(parts[0]) ? parts[1] || '' : parts[0];
+  const clean = city.replace(/^(город|г\.)\s*/i, '');
+  return lang === 'ru' ? clean : (CITY_UZ[clean] || clean);
+}
+
 const fmtTime = (iso) => {
   if (!iso) return '';
   const d = new Date(iso);
@@ -96,6 +107,9 @@ export function OrderTrackPage() {
   const loadActive = useOrders((s) => s.loadActive);
   const [pickedId, setPickedId] = useState(null);
   const [full, setFull] = useState(false);
+  const [city, setCity] = useState('');
+  // Telegram ichida o'zining "Назад" tugmasi bor (useTelegramBack) — sahifadagi "Orqaga" takrorlanmasin
+  const inTelegram = Boolean(getTelegram()?.initData);
 
   useEffect(() => { if (!order) loadActive?.(); }, [order, loadActive]);
   useOrderTracking(order?.subOrders.map((s) => s.backendId).filter(Boolean) ?? [], (backendId, status) => applyBackendStatus(backendId, status));
@@ -104,6 +118,15 @@ export function OrderTrackPage() {
   const sub = subs.find((s) => s.backendId === pickedId)
     || subs.find((s) => !['delivered', 'cancelled'].includes(s.status)) || subs[0];
   const { data: tr, error, etaMinutes, refresh } = useOrderTrack(sub?.backendId);
+
+  // Xaritadagi shahar nomi — mijoz nuqtasidan (bir marta)
+  const cp = tr?.customer?.point;
+  useEffect(() => {
+    if (!cp) return undefined;
+    let dead = false;
+    api.reverseGeocodeYandex(cp.lat, cp.lng).then((r) => { if (!dead) setCity(cityFrom(r?.address, lang)); }).catch(() => {});
+    return () => { dead = true; };
+  }, [cp?.lat, cp?.lng, lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const itemsText = useMemo(
     () => (tr?.items || sub?.items?.map((i) => ({ name: i.dish?.name || i.name, quantity: i.quantity })) || []).map((i) => `${i.name} ×${i.quantity || 1}`).join(', '),
@@ -142,19 +165,23 @@ export function OrderTrackPage() {
     <div className="ot">
       {/* Xarita — butun ekran orqasida */}
       <TrackMap
+        orderId={sub.backendId}
+        status={status}
         restaurant={rest}
         customer={tr?.customer}
         courier={courier}
         itemLabel={itemLabel}
         etaMinutes={etaMinutes}
         labels={{ you: T.you, courierOnWay: T.courierOnWay, min: T.min, fit: T.fit, noMap: T.noMap }}
-        cityLabel={tr?.customer?.address ? tr.customer.address.slice(0, 26) : ''}
+        cityLabel={city}
       />
 
       <div className="ot-top">
-        <button className="ot-back" onClick={() => navigate(-1)} aria-label={T.back}>
-          <Icon name="arrowLeft" size={20} color="var(--ink)" /><span>{T.back}</span>
-        </button>
+        {!inTelegram && (
+          <button className="ot-back" onClick={() => navigate(-1)} aria-label={T.back}>
+            <Icon name="chevronLeft" size={20} color="var(--ink)" /><span>{T.back}</span>
+          </button>
+        )}
 
         <div className="ot-title">
           <button className="ot-title__x" onClick={() => navigate('/')} aria-label={T.close}><Icon name="x" size={24} color="var(--ink)" /></button>
@@ -174,14 +201,14 @@ export function OrderTrackPage() {
 
         {/* Holat */}
         <div className={`ot-status${status === 'cancelled' ? ' is-cancelled' : ''}`}>
-          <span className="ot-status__icon"><Icon name={status === 'delivered' ? 'circleCheck' : 'clock'} size={22} color="#fff" /></span>
+          <span className="ot-status__icon"><Icon name={status === 'delivered' ? 'circleCheck' : 'clock'} size={18} color="#fff" strokeWidth={2.4} /></span>
           <div className="ot-status__text">
             <b>{title}</b>
             <span>{status === 'cancelled' && tr?.cancelReason ? `${T.reason}: ${tr.cancelReason}` : subtitle}</span>
           </div>
           {showEta && (
             <span className="ot-status__eta">
-              <Icon name="clock" size={15} color="#fff" />
+              <Icon name="clock" size={14} color="#fff" strokeWidth={2.4} />
               {etaScheduled ? fmtTime(tr.eta.at) : `${etaMinutes} ${T.min}`}
             </span>
           )}
@@ -195,13 +222,13 @@ export function OrderTrackPage() {
               <div className="ot-rest__body">
                 <b>{rest.name}</b>
                 <span><i className="ot-dot" /> {T.restaurant}</span>
-                {tr.distanceKm != null && <span className="ot-rest__km"><Icon name="scooter" size={14} color="var(--muted)" /> {Number(tr.distanceKm).toFixed(1)} km</span>}
+                {tr.distanceKm != null && <span className="ot-rest__km"><Icon name="bike" size={13} color="#6F6F69" /> {Number(tr.distanceKm).toFixed(1)} km</span>}
               </div>
-              <Icon name="chevronRight" size={18} color="var(--muted)" />
+              <Icon name="chevronRight" size={16} color="#9A9A94" />
             </div>
             {rest.point && (
               <button type="button" className="ot-route" onClick={openRoute}>
-                <Icon name="navigation" size={18} color="var(--brand)" />{T.route}
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#2563EB" aria-hidden="true"><path d="M3 11 22 2l-9 19-2-8-8-2z" /></svg>{T.route}
               </button>
             )}
           </div>
@@ -225,15 +252,15 @@ export function OrderTrackPage() {
                   <div className="ot-courier__info">
                     <b>{courier.name}</b>
                     <span className="ot-courier__rate">
-                      {courier.rating != null && <><Icon name="star" size={14} color="#F5A524" /><em>{courier.rating.toFixed(1)}</em></>}
+                      {courier.rating != null && <><svg width="14" height="14" viewBox="0 0 24 24" fill="#FF8A00" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.5L12 17.3l-5.9 3.2 1.3-6.5-4.9-4.6 6.6-.8z" /></svg><em>{courier.rating.toFixed(1)}</em></>}
                       <small>{courier.rating != null ? `(${courier.deliveries} ${T.orders})` : `${courier.deliveries} ${T.deliveries}`}</small>
                     </span>
-                    {courier.vehicleLabel && <span className="ot-courier__veh"><Icon name={courier.vehicle === 'car' ? 'truck' : 'scooter'} size={16} color="var(--ink)" /> {T.vehicles[courier.vehicleLabel] || courier.vehicleLabel}</span>}
+                    {courier.vehicleLabel && <span className="ot-courier__veh"><Icon name={courier.vehicle === 'car' ? 'truck' : 'bike'} size={15} color="#111" /> {T.vehicles[courier.vehicleLabel] || courier.vehicleLabel}</span>}
                   </div>
                   {courier.phone && (
                     <div className="ot-courier__btns">
-                      <a href={telHref(courier.phone)} className="ot-circle" aria-label={T.call} onClick={() => haptic()}><Icon name="phone" size={20} color="var(--ink)" /></a>
-                      <a href={`sms:${courier.phone.replace(/[^\d+]/g, '')}`} className="ot-circle" aria-label={T.message} onClick={() => haptic()}><Icon name="messageCircle" size={20} color="var(--ink)" /></a>
+                      <a href={telHref(courier.phone)} className="ot-circle" aria-label={T.call} onClick={() => haptic()}><Icon name="phone" size={19} color="#111" strokeWidth={2.2} /></a>
+                      <a href={`sms:${courier.phone.replace(/[^\d+]/g, '')}`} className="ot-circle" aria-label={T.message} onClick={() => haptic()}><Icon name="messageCircle" size={19} color="#111" strokeWidth={2.2} /></a>
                     </div>
                   )}
                 </div>
@@ -241,7 +268,7 @@ export function OrderTrackPage() {
 
               {status === 'delivering' && (
                 <div className="ot-live">
-                  <span className="ot-live__icon"><Icon name="scooter" size={26} color="var(--success)" /></span>
+                  <span className="ot-live__icon"><Icon name="scooter" size={20} color="#17803F" strokeWidth={2.3} /></span>
                   <div className="ot-live__text">
                     <b>{T.delivering[1]}</b>
                     {etaMinutes != null && <span>{T.etaLine}: {etaMinutes} {T.min}</span>}
@@ -257,7 +284,7 @@ export function OrderTrackPage() {
               <div className="ot-steps">
                 {tr.steps.map((s, i) => (
                   <div key={s.key} className={`ot-step${s.done ? ' is-done' : ''}${s.active ? ' is-active' : ''}`}>
-                    <span className="ot-step__dot"><Icon name={STEP_ICON[s.key] || 'check'} size={16} color={s.done || s.active ? '#fff' : 'var(--muted)'} /></span>
+                    <span className="ot-step__dot"><Icon name={STEP_ICON[s.key] || 'check'} size={14} color={s.done || s.active ? '#fff' : '#9A9A94'} strokeWidth={2.6} /></span>
                     {i < tr.steps.length - 1 && <span className={`ot-step__line${s.done ? ' is-done' : ''}`} />}
                     <span className="ot-step__label">{T.steps[s.key]}</span>
                     <span className="ot-step__time">{fmtTime(s.at)}</span>
@@ -275,7 +302,7 @@ export function OrderTrackPage() {
                   </div>
                 ))}
                 {tr.deliveryFee > 0 && (
-                  <div className="ot-sum__row"><span><Icon name="scooter" size={16} color="var(--muted)" /> {T.delivery}</span><span>{formatSom(tr.deliveryFee)}</span></div>
+                  <div className="ot-sum__row"><span><Icon name="bike" size={14} color="#7A7A74" /> {T.delivery}</span><span>{formatSom(tr.deliveryFee)}</span></div>
                 )}
                 <div className="ot-sum__row ot-sum__row--total"><span>{T.total}</span><span>{formatSom(tr.total)}</span></div>
               </div>
@@ -285,13 +312,13 @@ export function OrderTrackPage() {
 
         <div className="ot-actions">
           <button type="button" className="ot-actions__sec" onClick={() => { haptic(); window.dispatchEvent(new Event('lokma:open-support')); }}>
-            <Icon name="headphones" size={20} color="var(--ink)" />{T.ask}
+            <Icon name="headphones" size={18} color="#111" />{T.ask}
           </button>
           {finished ? (
             <button type="button" className="ot-actions__pri" onClick={() => { finishOrder(); navigate('/'); }}>{T.home}</button>
           ) : (
             <a className={`ot-actions__pri${rest?.phone ? '' : ' is-disabled'}`} href={rest?.phone ? telHref(rest.phone) : undefined} onClick={() => haptic()}>
-              <Icon name="phone" size={20} color="#fff" />{T.callRest}
+              <Icon name="phone" size={17} color="#fff" />{T.callRest}
             </a>
           )}
         </div>
