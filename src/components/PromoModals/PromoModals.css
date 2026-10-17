@@ -1,0 +1,40 @@
+/* ═══ Reklama oynalari qatlami: fon, sahna, "genie" animatsiyasi ═══ */
+.pmx { position: fixed; inset: 0; z-index: 1200; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); }
+.pmx-backdrop { position: absolute; inset: 0; background: rgba(12, 6, 2, 0.52); backdrop-filter: blur(10px) saturate(1.1); -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  animation: pmx-fade-in 0.35s ease-out both; }
+.pmx--leaving .pmx-backdrop { animation: pmx-fade-out 0.42s ease-in both; }
+@keyframes pmx-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pmx-fade-out { from { opacity: 1; } to { opacity: 0; } }
+
+/* Karta o'lchami: eni ekran va balandlikka sig'adi (nisbat 2:3) */
+.pmx-stage { position: relative; width: min(88vw, 380px, calc((100dvh - 96px) * 2 / 3)); transform-origin: 50% 100%; will-change: transform, clip-path, opacity, filter; }
+
+/*
+ * GENIE (macOS): karta pastdagi nuqtadan "voronka" shaklida cho'zilib chiqadi —
+ * clip-path trapetsiyasi pastda tor, yuqorida keng; keyin to'liq to'rtburchakka yoyiladi va yumshoq "sakraydi".
+ */
+.pmx-stage--in { animation: pmx-genie-in 0.64s cubic-bezier(0.22, 0.9, 0.25, 1) both; }
+.pmx-stage--out { animation: pmx-genie-out 0.42s cubic-bezier(0.55, 0, 0.8, 0.35) both; pointer-events: none; }
+@keyframes pmx-genie-in {
+  0%   { transform: translateY(48vh) scale(0.14, 0.04); clip-path: polygon(46% 0, 54% 0, 50.5% 100%, 49.5% 100%); opacity: 0; filter: blur(8px); }
+  30%  { transform: translateY(26vh) scale(0.42, 0.5);  clip-path: polygon(18% 0, 82% 0, 58% 100%, 42% 100%); opacity: 1; filter: blur(3px); }
+  62%  { transform: translateY(-1.5vh) scale(1.02, 0.985); clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); filter: blur(0); }
+  82%  { transform: translateY(0.6vh) scale(0.995, 1.008); }
+  100% { transform: none; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); opacity: 1; filter: none; }
+}
+@keyframes pmx-genie-out {
+  0%   { transform: none; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); opacity: 1; filter: none; }
+  35%  { transform: translateY(3vh) scale(0.94, 0.9); clip-path: polygon(6% 0, 94% 0, 76% 100%, 24% 100%); }
+  100% { transform: translateY(50vh) scale(0.12, 0.03); clip-path: polygon(46% 0, 54% 0, 50.5% 100%, 49.5% 100%); opacity: 0; filter: blur(6px); }
+}
+
+/* Navbat ko'rsatkichi (bir nechta oyna bo'lsa) */
+.pmx-dots { position: relative; display: flex; gap: 6px; }
+.pmx-dots i { width: 7px; height: 7px; border-radius: 99px; background: rgba(255, 255, 255, 0.35); transition: width 0.3s ease, background 0.3s ease; }
+.pmx-dots i.is-done { background: rgba(255, 255, 255, 0.7); }
+.pmx-dots i.is-on { width: 20px; background: #fff; }
+
+/* Kamroq harakat rejimi: oddiy so'nish */
+.pmx--calm .pmx-stage--in { animation: pmx-fade-in 0.2s ease-out both; }
+.pmx--calm .pmx-stage--out { animation: pmx-fade-out 0.16s ease-in both; }

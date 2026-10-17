@@ -242,6 +242,9 @@ export const api = {
 
   // ===== Katalog =====
   getBanners: (opts) => apiFetch('/banners', opts),
+  // Reklama oynalari (admin boshqaradi): faol ro'yxat va ko'rildi/bosildi soni
+  getPromoModals: () => apiFetch('/promo-modals/active'),
+  trackPromoModal: (id, kind) => apiFetch(`/promo-modals/${id}/track`, { method: 'POST', body: JSON.stringify({ kind }) }),
   // Lokma Market sahifasi bannerlari (admin: Bannerlar → "Lokma Market")
   getMarketBanners: (opts) => apiFetch('/banners?placement=market', opts),
   // Restoran/taom reklamalari — admin tasdiqlagan, bosh sahifa banneriga qo'shiladi

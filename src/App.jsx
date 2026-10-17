@@ -28,6 +28,7 @@ import { useActiveOrderSync } from '@/hooks/useActiveOrderSync';
 import { ActiveOrderBadge } from '@/components/ActiveOrderBadge/ActiveOrderBadge';
 import { SupportChat } from '@/components/SupportChat/SupportChat';
 import { Splash } from '@/components/Splash/Splash';
+import { PromoModals } from '@/components/PromoModals/PromoModals';
 import { useTelegramBack } from '@/hooks/useTelegramBack';
 import { WeddingHost } from '@/components/WeddingHost/WeddingHost';
 import { BlockedGate } from '@/components/Restrictions/Restrictions';
@@ -224,6 +225,8 @@ function AppInner({ authMode = 'telegram' }) {
         <Suspense fallback={<div className="app-shell" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="spinner" /></div>}>
           <StartParamHandler />
           <TelegramBackHandler />
+          {/* Reklama oynalari: splash tugagach, bosh sahifada (kuniga bir marta, navbat bilan) */}
+          {!showSplash && <PromoModals />}
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/restaurant/:id" element={<RestaurantPage />} />
