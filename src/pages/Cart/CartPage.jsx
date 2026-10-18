@@ -26,6 +26,7 @@ import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useRequireSubscription } from '@/hooks/useRequireSubscription';
 import { useModalBackClose } from '@/hooks/useModalBackClose';
 import { hasValidCoords, deliveryAddressCheck } from '@/lib/addressCoords';
+import { GiftBonusBanner, GiftLines, useGiftQuote } from '@/components/GiftBonus/GiftBonus';
 import './Cart.css';
 
 
@@ -653,6 +654,13 @@ export function CartPage() {
       .filter((g) => g !== null && g > 0);
     return gaps.length ? Math.min(...gaps) : 0;
   }, [pricing]);
+
+  // LokmaGo sovg'a-bonusi (masalan 100 000 so'mdan 1 l Coca-Cola): server hisoblaydi, mijoz ko'radi
+  const giftQuote = useGiftQuote(pricing.perRestaurant, isPickup, paymentMethod);
+  const giftItems = useMemo(
+    () => Object.values(giftQuote).flatMap((q) => q.gifts || []),
+    [giftQuote],
+  );
 
   const effectiveDeliveryFee = pricing.deliveryFee;
   const orderSum = pricing.orderSum;
@@ -1526,10 +1534,14 @@ export function CartPage() {
         </button>
       )}
 
+      {/* LokmaGo sovg'a-bonusi: olingan sovg'a yoki "yana X so'm" */}
+      <GiftBonusBanner perRestaurant={pricing.perRestaurant} quote={giftQuote} />
+
       {/* Hisob */}
       <div className="cart-section-label">{t('accountLabel')}</div>
       <div className="cart-summary">
         <Row label={t('productsLabel')} value={formatSom(pricing.subtotal)} />
+        {giftItems.length > 0 && <GiftLines items={giftItems} />}
         {!isPickup && (
           <Row
             label={

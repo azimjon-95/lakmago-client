@@ -6,6 +6,7 @@ import { useOrders } from '@/store/orders';
 import { useOrderTracking } from '@/hooks/useOrderTracking';
 import { useOrderTrack } from '@/hooks/useOrderTrack';
 import { useI18n } from '@/i18n';
+import { GiftLines } from '@/components/GiftBonus/GiftBonus';
 import { formatSom } from '@/lib/utils';
 import { haptic, getTelegram } from '@/lib/telegram';
 import { api } from '@/api';
@@ -412,6 +413,7 @@ export function OrderTrackPage() {
                     <b className="ot-sum__price">{formatSom(it.total)}</b>
                   </div>
                 ))}
+                <GiftLines items={tr.bonusItems} className="ot-gift" />
                 {tr.deliveryFee > 0 && (
                   <div className="ot-sum__row"><span><Icon name="bike" size={14} color="#7A7A74" /> {T.delivery}</span><span>{formatSom(tr.deliveryFee)}</span></div>
                 )}
