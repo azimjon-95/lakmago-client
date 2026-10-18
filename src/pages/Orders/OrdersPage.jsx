@@ -6,7 +6,6 @@ import { api } from '@/api';
 import { getSocket, joinUserRoom } from '@/lib/socket';
 import { useUser } from '@/store/user';
 import { formatSom, formatUzDate } from '@/lib/utils';
-import { GiftLines } from '@/components/GiftBonus/GiftBonus';
 import { useT } from '@/i18n';
 import { haptic } from '@/lib/telegram';
 import './Orders.css';
@@ -261,8 +260,6 @@ function OrderCard({ order: o, open, onToggle, onRepeat, highlight }) {
                 <span className="ord-item__price">{formatSom(it.unitPrice * it.quantity)}</span>
               </div>
             ))}
-            {/* LokmaGo sovg'a-bonusi: mijozga bepul */}
-            <GiftLines items={o.bonusItems} className="ord-gift" />
           </div>
 
           <div className="ord-sum">

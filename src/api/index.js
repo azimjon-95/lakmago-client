@@ -242,8 +242,6 @@ export const api = {
 
   // ===== Katalog =====
   getBanners: (opts) => apiFetch('/banners', opts),
-  // LokmaGo sovg'a-bonusi: savatdagi har restoran uchun "sovg'a bor / yana X so'm"
-  quoteGifts: (body) => apiFetch('/gift-bonus/quote', { method: 'POST', body: JSON.stringify(body) }),
   // Reklama oynalari (admin boshqaradi): faol ro'yxat va ko'rildi/bosildi soni
   getPromoModals: () => apiFetch('/promo-modals/active'),
   trackPromoModal: (id, kind) => apiFetch(`/promo-modals/${id}/track`, { method: 'POST', body: JSON.stringify({ kind }) }),
