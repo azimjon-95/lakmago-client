@@ -1,8 +1,9 @@
 // Joylashuv olish va manzilга aylantirish (reverse geocoding).
 // Telegram Mini App'да LocationManager, aks holда brauzer geolocation.
-
 import { getTelegram } from './telegram';
 import { api } from '@/api';
+import { Capacitor } from '@capacitor/core';
+import { Geolocation } from '@capacitor/geolocation';
 
 // 1) Joriy koordinatani olish
 // Qaytaradi: { lat, lng } yoki xato tashlaydi
@@ -123,6 +124,109 @@ export function openLocationSettings() {
 }
 
 /**
+ * Capacitor orqali Android/iOS qurilmasining joylashuvini olish.
+ * Runtime permission so'raladi va ruxsat berilmasa aniq xato qaytariladi.
+ */
+async function nativePosition() {
+  let permissions;
+
+  try {
+    permissions = await Geolocation.checkPermissions();
+
+    if (
+      permissions.location !== 'granted' &&
+      permissions.coarseLocation !== 'granted'
+    ) {
+      permissions = await Geolocation.requestPermissions();
+    }
+  } catch (error) {
+    throw new LocationError(
+      'denied',
+      'Joylashuv ruxsatini olish muvaffaqiyatsiz tugadi'
+    );
+  }
+
+  if (
+    permissions.location !== 'granted' &&
+    permissions.coarseLocation !== 'granted'
+  ) {
+    throw new LocationError(
+      'denied',
+      'Joylashuvga ruxsat berilmadi. Telefon sozlamalaridan ruxsat bering.'
+    );
+  }
+
+  let timer;
+
+  try {
+    const position = await Promise.race([
+      Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: LOC.browserMs,
+        maximumAge: 30000,
+      }),
+
+      new Promise((_, reject) => {
+        timer = setTimeout(() => {
+          reject(
+            new LocationError(
+              'timeout',
+              'GPS joylashuvini aniqlash uchun vaqt tugadi'
+            )
+          );
+        }, LOC.browserMs + 2000);
+      }),
+    ]);
+
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+    const accuracy = position.coords.accuracy;
+
+    if (!validCoords(lat, lng)) {
+      throw new LocationError(
+        'unavailable',
+        'Qurilma noto‘g‘ri koordinatalarni qaytardi'
+      );
+    }
+
+    return { lat, lng, accuracy };
+  } catch (error) {
+    if (error instanceof LocationError) {
+      throw error;
+    }
+
+    const message = String(error?.message || '').toLowerCase();
+
+    if (
+      message.includes('permission') ||
+      message.includes('denied')
+    ) {
+      throw new LocationError(
+        'denied',
+        'Joylashuvga ruxsat berilmadi'
+      );
+    }
+
+    if (
+      message.includes('timeout') ||
+      message.includes('timed out')
+    ) {
+      throw new LocationError(
+        'timeout',
+        'GPS joylashuvini aniqlash uchun vaqt tugadi'
+      );
+    }
+
+    throw new LocationError(
+      'unavailable',
+      'Qurilma joylashuvini aniqlab bo‘lmadi'
+    );
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
  * Brauzer geolokatsiyasi — bir necha o'lchovdan ENG ANIQINI tanlaydi.
  *
  * watchPosition ishlatiladi, getCurrentPosition emas: u birinchi
@@ -133,8 +237,19 @@ export function openLocationSettings() {
  * tasdiqlatadi); hech narsa bo'lmasa — sababi bilan LocationError.
  */
 function browserPosition() {
+  // Android/iOS ilovasida Capacitor geolokatsiyasidan foydalanamiz.
+  if (Capacitor.isNativePlatform()) {
+    return nativePosition();
+  }
+
+  // Web va brauzerda mavjud geolokatsiya usuli saqlanadi.
   if (!navigator.geolocation) {
-    return Promise.reject(new LocationError('unsupported', 'Qurilma joylashuvni qo‘llab-quvvatlamaydi'));
+    return Promise.reject(
+      new LocationError(
+        'unsupported',
+        'Qurilma joylashuvni qo‘llab-quvvatlamaydi'
+      )
+    );
   }
 
   return new Promise((resolve, reject) => {
