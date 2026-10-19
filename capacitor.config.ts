@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'uz.lokmago.app',
-  appName: 'LokmaGo',
+  appName: 'Lokma Go',
   webDir: 'dist'
 };
 
