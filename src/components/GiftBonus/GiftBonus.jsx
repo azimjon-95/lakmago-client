@@ -12,9 +12,9 @@ import './GiftBonus.css';
  *  • Server javob bermasa — blok ko'rinmaydi (savat va buyurtma bunga bog'liq emas).
  */
 const TXT = {
-  uz: { title: 'Sovg‘a sizga!', free: 'Bepul', add: 'Yana', addPost: 'so‘mlik taom qo‘shing — sovg‘a oling', paid: 'chegirmalardan keyin hisoblanadi', note: 'Restoran taomga qo‘shib beradi', gift: 'Sovg‘a' },
-  uzc: { title: 'Совға сизга!', free: 'Бепул', add: 'Яна', addPost: 'сўмлик таом қўшинг — совға олинг', paid: 'чегирмалардан кейин ҳисобланади', note: 'Ресторан таомга қўшиб беради', gift: 'Совға' },
-  ru: { title: 'Подарок вам!', free: 'Бесплатно', add: 'Добавьте ещё', addPost: 'сум — и получите подарок', paid: 'считается после скидок', note: 'Ресторан добавит к заказу', gift: 'Подарок' },
+  uz: { title: 'Sovg‘a sizga!', free: 'Bepul', add: 'Yana', addPost: 'so‘mlik taom qo‘shing — sovg‘a oling', paid: 'chegirmalardan keyin hisoblanadi', gift: 'Sovg‘a' },
+  uzc: { title: 'Совға сизга!', free: 'Бепул', add: 'Яна', addPost: 'сўмлик таом қўшинг — совға олинг', paid: 'чегирмалардан кейин ҳисобланади', gift: 'Совға' },
+  ru: { title: 'Подарок вам!', free: 'Бесплатно', add: 'Добавьте ещё', addPost: 'сум — и получите подарок', paid: 'считается после скидок', gift: 'Подарок' },
 };
 export const useGiftText = () => TXT[useI18n().lang] || TXT.uz;
 
@@ -70,7 +70,7 @@ export function GiftBonusBanner({ perRestaurant, quote }) {
               <div className="gb__body">
                 <div className="gb__title">🎁 {T.title}</div>
                 <div className="gb__name">{g.quantity} × {g.itemName}</div>
-                <div className="gb__sub">{multi ? `${r.restaurant.name} · ` : ''}{T.note}</div>
+                {multi && <div className="gb__sub">{r.restaurant.name}</div>}
               </div>
               <span className="gb__free">{T.free}</span>
             </div>

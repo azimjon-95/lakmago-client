@@ -17,7 +17,7 @@ import { formatSom } from '@/lib/utils';
 import { calcDeliveryFee, calcServiceFee, checkMinOrder, freeDeliveryGap, calcPickupDiscount } from '@/lib/pricing';
 import { isOpenNow, isOffToday, workDaysLabel } from '@/lib/workHours';
 import { useCartCleanup } from '@/hooks/useCartCleanup';
-import { api } from '@/api';
+import { api, getAuthToken } from '@/api';
 import { haptic, getTelegram } from '@/lib/telegram';
 import { useDishes, useRestaurants } from '@/hooks/queries';
 import { savePendingPayment, getPendingPayments, clearPendingPayment } from '@/lib/pendingPayment';
@@ -103,6 +103,7 @@ export function CartPage() {
   const navigate = useNavigate();
   const t = useT();
   const { ensureAuth, AuthGate } = useRequireAuth();
+  const placeOrderRef = useRef(null);
   const { ensureSubscription, SubscriptionGate } = useRequireSubscription();
   // Selectorlar alohida — useCart() to'liq obyekt qaytaradi va
   // har store o'zgarishida qayta render bo'ladi.
@@ -875,7 +876,25 @@ export function CartPage() {
     openAddressFix();
   }
 
+  /*
+   * "To'lov summasi" bosilganda TARTIB: 1) KIRISH (ro'yxatdan o'tish), 2) manzil, 3) telefon, 4) obuna, 5) tasdiq.
+   *
+   * ILGARI avval manzil so'ralardi — yangi mijoz hech narsa bilmay turib xaritadan manzil tanlashga majbur bo'lardi,
+   * keyin esa baribir kirish so'rardi. Endi mehmon AVVAL bir bosishda kiradi; serverda manzillari bor mijoz
+   * (avval buyurtma bergan) manzil so'ralmasdan davom etadi, yo'q bo'lsa — SHUNDAN KEYIN so'raladi.
+   *
+   * Kirishdan keyin store (manzillar, telefon) yangilanadi, lekin bu funksiyaning yopilgan `selectedAddress` va h.k.
+   * eski qiymatlarda qoladi — shuning uchun kirish tugagach funksiya YANGI holat bilan QAYTA chaqiriladi
+   * (placeOrderRef: har renderda eng so'nggi versiya).
+   */
   async function handlePlaceOrder() {
+    if (!getAuthToken()) {
+      setPendingIntent({ type: 'order', returnPath: '/cart' });
+      const authed = await ensureAuth({ reason: 'order' });
+      if (!authed) { clearPendingIntent(); return; }
+      setTimeout(() => placeOrderRef.current?.(), 150); // React yangi holatni (manzil/telefon) chizib bo'lsin
+      return;
+    }
     // Manzil faqat yetkazishda majburiy
     if (!isPickup && !selectedAddress) { setShowAddressSheet(true); return; }
     /*
@@ -923,6 +942,8 @@ export function CartPage() {
      */
     setShowConfirm(true);
   }
+
+  placeOrderRef.current = handlePlaceOrder; // kirishdan keyin eng so'nggi (yangi holatli) versiya chaqiriladi
 
   function confirmAndSubmit() {
     if (submitLock.current) return;

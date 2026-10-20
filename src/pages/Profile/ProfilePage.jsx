@@ -7,6 +7,8 @@ import { useUser } from '@/store/user';
 import { useT } from '@/i18n';
 import { api } from '@/api';
 import { getTelegram, haptic } from '@/lib/telegram';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { GuestHero } from '@/components/AuthGate/LokmaSignIn';
 import './Profile.css';
 
 export function ProfilePage() {
@@ -20,6 +22,23 @@ export function ProfilePage() {
   const addAddress = useUser((s) => s.addAddress);
   const removeAddress = useUser((s) => s.removeAddress);
   const setDefaultAddress = useUser((s) => s.setDefaultAddress);
+
+  /*
+   * MEHMON (hali ro'yxatdan o'tmagan): Profil'ga kirganda kirish oynasi O'ZI ochiladi (sessiyada BIR marta —
+   * yopib qo'ysa qayta bezovta qilinmaydi), sahifada esa "Profilingizni yarating" kartochkasi turadi.
+   * authStatus 'failed' = tokeni yo'q mehmon (App.jsx); Telegram ichida bu holat deyarli uchramaydi.
+   */
+  const { ensureAuth, AuthGate } = useRequireAuth();
+  const isGuest = useUser((s) => s.authStatus) === 'failed';
+  useEffect(() => {
+    if (!isGuest) return undefined;
+    try { if (sessionStorage.getItem('lokma_profile_auth_prompt') === '1') return undefined; } catch { /* maxfiy rejim */ }
+    const id = setTimeout(() => {
+      try { sessionStorage.setItem('lokma_profile_auth_prompt', '1'); } catch { /* */ }
+      ensureAuth({ reason: 'profile' });
+    }, 500); // sahifa avval chizilsin
+    return () => clearTimeout(id);
+  }, [isGuest, ensureAuth]);
 
   const [editingField, setEditingField] = useState(null);
   const [firstName, setFirstName] = useState(user.firstName);
@@ -43,43 +62,49 @@ export function ProfilePage() {
         <h1>{t('profile')}</h1>
       </header>
 
+      {isGuest ? (
+        <GuestHero onSignIn={() => ensureAuth({ reason: 'profile' })} />
+      ) : (
+        <>
       {/* Hero — gradient fon, Telegram rasmi */}
-      <div className="profile-hero">
-        <div className="profile-hero__glow" />
-        <div className="profile-hero__avatar">
-          {user.photoUrl ? (
-            <img
-              src={user.photoUrl}
-              alt=""
-              onError={(e) => { e.currentTarget.style.display = 'none'; }}
-            />
-          ) : (
-            <span>{user.photoInitials}</span>
-          )}
-        </div>
-        <div className="profile-hero__name">
-          {user.firstName} {user.lastName}
-        </div>
-        <div className="profile-hero__id">
-          {user.username ? `@${user.username}` : `ID: ${user.telegramId ?? '—'}`}
-        </div>
-
-        {/* Tez statistika */}
-        <div className="profile-hero__stats">
-          <div className="profile-stat">
-            <span className="profile-stat__value">{user.addresses?.length || 0}</span>
-            <span className="profile-stat__label">{t('address')}</span>
+        <div className="profile-hero">
+          <div className="profile-hero__glow" />
+          <div className="profile-hero__avatar">
+            {user.photoUrl ? (
+              <img
+                src={user.photoUrl}
+                alt=""
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            ) : (
+              <span>{user.photoInitials}</span>
+            )}
           </div>
-          <span className="profile-stat__sep" />
-          <div className="profile-stat">
-            <span className="profile-stat__value">{favCount}</span>
-            <span className="profile-stat__label">{t('favorites')}</span>
+          <div className="profile-hero__name">
+            {user.firstName} {user.lastName}
+          </div>
+          <div className="profile-hero__id">
+            {user.username ? `@${user.username}` : `ID: ${user.telegramId ?? '—'}`}
+          </div>
+  
+          {/* Tez statistika */}
+          <div className="profile-hero__stats">
+            <div className="profile-stat">
+              <span className="profile-stat__value">{user.addresses?.length || 0}</span>
+              <span className="profile-stat__label">{t('address')}</span>
+            </div>
+            <span className="profile-stat__sep" />
+            <div className="profile-stat">
+              <span className="profile-stat__value">{favCount}</span>
+              <span className="profile-stat__label">{t('favorites')}</span>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Do'stlarni taklif qilish (referral) */}
-      <ReferralCard />
+  
+        {/* Do'stlarni taklif qilish (referral) */}
+        <ReferralCard />
+        </>
+      )}
 
       {/* Til tanlash */}
       <div className="profile-section">
@@ -200,6 +225,7 @@ export function ProfilePage() {
 
       <div style={{ flex: 1 }} />
       <BottomNav />
+      {AuthGate}
     </div>
   );
 }
