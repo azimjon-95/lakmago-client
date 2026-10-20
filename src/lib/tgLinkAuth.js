@@ -1,6 +1,8 @@
 import { Capacitor } from '@capacitor/core';
 import { API_BASE, setAuthToken, setRefreshToken } from '@/api';
 import { getDeviceId } from '@/lib/telegramWebAuth';
+import { Browser } from '@capacitor/browser';
+
 
 /*
  * ═══ TELEGRAM BOT HAVOLASI ORQALI KIRISH (native ilova va brauzer) ═══
@@ -55,10 +57,28 @@ export async function pollTgLogin({ code, pollSecret }, signal) {
  * Android'da Intent, iOS'da UIApplication.open orqali ochiladi (Capacitor); https — tizim brauzerida.
  * Faqat foydalanuvchi bosishi ichida chaqiring.
  */
-export function openExternal(url) {
+export async function openExternal(url) {
+  if (!url) {
+    throw new Error('Telegram havolasi mavjud emas');
+  }
+
+  if (Capacitor.isNativePlatform()) {
+    if (url.startsWith('tg://')) {
+      window.location.href = url;
+      return;
+    }
+
+    await Browser.open({ url });
+    return;
+  }
+
   const a = document.createElement('a');
-  a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.style.display = 'none';
-  document.body.appendChild(a); a.click(); a.remove();
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
 }
 
 /** Server javobidagi tokenlarni saqlaydi (telegramWebAuth bilan bir xil) */
