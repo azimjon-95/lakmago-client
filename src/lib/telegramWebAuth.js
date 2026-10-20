@@ -33,7 +33,7 @@ const cleanName = (v, fallback = '') => {
  */
 const BOT_USERNAME = cleanName(import.meta.env.VITE_BOT_USERNAME, 'lokmaGobot');
 
-function getDeviceId() {
+export function getDeviceId() {
   try {
     let id = localStorage.getItem('lokmago_device_id');
     if (!id) {

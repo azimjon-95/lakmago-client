@@ -8,6 +8,7 @@ import { isTelegramEnv, authenticateWithTelegram } from '@/lib/telegram';
 import { joinUserRoom } from '@/lib/socket';
 import { syncGuestAddresses } from '@/lib/syncGuestAddresses';
 import { TelegramLoginCard } from './TelegramLoginCard';
+import { LokmaSignIn } from './LokmaSignIn';
 import './AuthGateModal.css';
 
 function initialsOf(first, last) {
@@ -39,7 +40,7 @@ function initialsOf(first, last) {
  * Browser (Safari) holatida — TelegramLoginCard (Login Widget,
  * mavjud, o'zgartirilmagan) ko'rsatiladi.
  */
-export function AuthGateModal({ open, onSuccess, onClose }) {
+export function AuthGateModal({ open, onSuccess, onClose, reason = 'order' }) {
   const t = useT();
   useLockScroll(open);
   useModalBackClose(open, onClose);
@@ -49,6 +50,8 @@ export function AuthGateModal({ open, onSuccess, onClose }) {
   const authStatus = useUser((s) => s.authStatus);
   const currentUser = useUser((s) => s.user);
 
+  // Brauzer/native: asosiy yo'l — bot havolasi (LokmaSignIn); "Boshqa usul" — eski Telegram Login Widget
+  const [useWidget, setUseWidget] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const [retryError, setRetryError] = useState(null);
 
@@ -215,8 +218,15 @@ export function AuthGateModal({ open, onSuccess, onClose }) {
               <h2 className="authgate-telegram__title">{t('savingAddress')}</h2>
               <div className="authgate-telegram__spinner" aria-hidden="true" />
             </div>
+          ) : useWidget ? (
+            <>
+              <TelegramLoginCard onLoggedIn={applyProfile} />
+              <button type="button" className="lsi-link-btn lsi-link-btn--muted" style={{ display: 'block', margin: '0 auto' }} onClick={() => setUseWidget(false)}>
+                {t('lsi_back_main')}
+              </button>
+            </>
           ) : (
-            <TelegramLoginCard onLoggedIn={applyProfile} />
+            <LokmaSignIn reason={reason} onLoggedIn={applyProfile} onOtherMethod={() => setUseWidget(true)} />
           )}
         </div>
       </div>

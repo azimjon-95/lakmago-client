@@ -20,6 +20,7 @@ import { AuthGateModal } from '@/components/AuthGate/AuthGateModal';
  */
 export function useRequireAuth() {
   const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState('order'); // 'order' | 'profile' — oynadagi sarlavha matni
   const resolverRef = useRef(null);
   const sharedPromiseRef = useRef(null);
 
@@ -29,8 +30,9 @@ export function useRequireAuth() {
    * so'rasa), IKKINCHI chaqiriq YANGI modal OCHMAYDI — birinchisi
    * bilan BIR XIL, hali hal bo'lmagan promise'ni qaytaradi.
    */
-  const ensureAuth = useCallback(() => {
+  const ensureAuth = useCallback((opts) => {
     if (getAuthToken()) return Promise.resolve(true);
+    setReason(opts?.reason === 'profile' ? 'profile' : 'order');
 
     if (sharedPromiseRef.current) return sharedPromiseRef.current;
 
@@ -58,7 +60,7 @@ export function useRequireAuth() {
   }, []);
 
   const AuthGate = (
-    <AuthGateModal open={open} onSuccess={handleSuccess} onClose={handleClose} />
+    <AuthGateModal open={open} onSuccess={handleSuccess} onClose={handleClose} reason={reason} />
   );
 
   return { ensureAuth, AuthGate };

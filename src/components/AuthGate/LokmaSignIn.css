@@ -1,0 +1,132 @@
+/* ═══ LOKMA GO — KREATIV KIRISH (LokmaSignIn.jsx) ═══ */
+.lsi { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 6px 4px 4px; }
+.lsi--center { padding-top: 14px; }
+
+/* ── Boshlang'ich: hero ── */
+.lsi-hero { position: relative; width: 168px; height: 150px; margin: 6px 0 8px; }
+.lsi-logo {
+  position: absolute; left: 50%; top: 50%; width: 92px; height: 92px; margin: -46px 0 0 -46px;
+  border-radius: 22px; box-shadow: 0 14px 30px -10px rgba(255, 92, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.08);
+  animation: lsi-bob 3.6s ease-in-out infinite;
+}
+.lsi-ring {
+  position: absolute; left: 50%; top: 50%; width: 92px; height: 92px; margin: -46px 0 0 -46px;
+  border-radius: 26px; border: 2px solid rgba(var(--brand-rgb), 0.35); opacity: 0;
+  animation: lsi-pulse 3s ease-out infinite;
+}
+.lsi-ring--2 { animation-delay: 1.5s; }
+.lsi-orbit {
+  position: absolute; width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface); box-shadow: 0 8px 18px -8px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(var(--brand-rgb), 0.12);
+  animation: lsi-float 4s ease-in-out infinite;
+}
+.lsi-orbit--a { left: 2px; top: 14px; }
+.lsi-orbit--b { right: 0; top: 4px; animation-delay: -1.3s; }
+.lsi-orbit--c { right: 14px; bottom: 6px; animation-delay: -2.6s; }
+
+.lsi-title { margin: 6px 0 6px; font-size: 24px; line-height: 1.15; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
+.lsi-title--sm { font-size: 21px; }
+.lsi-sub { margin: 0 0 14px; max-width: 330px; font-size: 14px; line-height: 1.45; color: var(--muted); }
+
+.lsi-chips { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; margin: 0 0 18px; padding: 0; }
+.lsi-chips--left { justify-content: flex-start; margin-bottom: 14px; }
+.lsi-chips li {
+  display: inline-flex; align-items: center; gap: 5px; padding: 7px 11px; border-radius: 999px;
+  background: var(--brand-50); color: var(--ink); font-size: 12.5px; font-weight: 600;
+  border: 1px solid rgba(var(--brand-rgb), 0.14);
+}
+
+/* ── Asosiy tugma ── */
+.lsi-cta {
+  position: relative; overflow: hidden; width: 100%; min-height: 56px; padding: 0 20px;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  border: 0; border-radius: 18px; color: #fff; font-size: 17px; font-weight: 800; letter-spacing: -0.01em;
+  background: linear-gradient(135deg, #FF8A2A 0%, var(--brand) 55%, #F04E00 100%);
+  box-shadow: 0 16px 30px -12px rgba(var(--brand-rgb), 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  transition: transform 0.15s ease, filter 0.15s ease; cursor: pointer;
+}
+.lsi-cta:active { transform: scale(0.98); filter: brightness(0.96); }
+.lsi-cta::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: -40%; width: 30%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.38), transparent);
+  transform: skewX(-18deg); animation: lsi-shine 3.4s ease-in-out infinite;
+}
+.lsi-secure { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 10px 0 2px; font-size: 11.5px; color: var(--muted); }
+
+.lsi-link-btn { margin-top: 8px; padding: 10px 12px; font-size: 13.5px; font-weight: 600; color: var(--brand-100); background: none; border: 0; cursor: pointer; }
+.lsi-link-btn--muted { color: var(--muted); font-weight: 500; }
+.lsi-ghost {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 46px; padding: 0 18px; margin-top: 4px;
+  border-radius: 14px; border: 1.5px solid rgba(var(--brand-rgb), 0.3); background: var(--brand-50); color: var(--brand-100);
+  font-size: 14.5px; font-weight: 700; cursor: pointer;
+}
+
+/* ── Kutish: ilova ↔ Telegram ── */
+.lsi-link { display: flex; align-items: center; justify-content: center; gap: 0; width: 100%; max-width: 300px; margin: 6px 0 14px; }
+.lsi-link__logo { width: 64px; height: 64px; border-radius: 16px; box-shadow: 0 10px 22px -10px rgba(255, 92, 0, 0.6); }
+.lsi-link__tg {
+  width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #37BBFE, #229ED9); box-shadow: 0 10px 22px -10px rgba(34, 158, 217, 0.7);
+  animation: lsi-bob 3s ease-in-out infinite;
+}
+.lsi-track { position: relative; flex: 1; height: 36px; display: flex; align-items: center; justify-content: space-evenly; padding: 0 6px; }
+.lsi-track__dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(var(--brand-rgb), 0.35); animation: lsi-dots 1.4s ease-in-out infinite; }
+.lsi-track__dot:nth-child(2) { animation-delay: 0.18s; } .lsi-track__dot:nth-child(3) { animation-delay: 0.36s; } .lsi-track__dot:nth-child(4) { animation-delay: 0.54s; }
+.lsi-plane {
+  position: absolute; left: 0; top: 50%; width: 30px; height: 30px; margin-top: -15px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; background: var(--brand);
+  box-shadow: 0 6px 14px -4px rgba(var(--brand-rgb), 0.7); animation: lsi-fly 2.2s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+
+.lsi-steps { list-style: none; width: 100%; max-width: 330px; margin: 4px 0 8px; padding: 0; display: grid; gap: 9px; text-align: left; }
+.lsi-step { display: flex; align-items: center; gap: 11px; font-size: 14px; color: var(--muted); }
+.lsi-step__dot {
+  flex: none; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: var(--surface-2); color: var(--muted); font-size: 12px; font-weight: 700; border: 1.5px solid var(--line);
+}
+.lsi-step.is-done { color: var(--ink); } .lsi-step.is-done .lsi-step__dot { background: #22A55B; border-color: #22A55B; }
+.lsi-step.is-active { color: var(--ink); font-weight: 700; }
+.lsi-step.is-active .lsi-step__dot { background: var(--brand); border-color: var(--brand); color: #fff; animation: lsi-beat 1.4s ease-in-out infinite; }
+.lsi-step.is-hot .lsi-step__dot { animation-duration: 0.9s; }
+.lsi-count { margin: 6px 0 10px; font-variant-numeric: tabular-nums; font-size: 12.5px; color: var(--muted-2); }
+
+/* ── Muvaffaqiyat ── */
+.lsi-win { position: relative; width: 96px; height: 96px; margin: 6px 0 10px; }
+.lsi-win__svg { width: 100%; height: 100%; animation: lsi-pop 0.5s cubic-bezier(0.3, 1.5, 0.5, 1) both; }
+.lsi-win__circle { fill: #E9FBEF; stroke: #22A55B; stroke-width: 2.4; }
+.lsi-win__tick { fill: none; stroke: #22A55B; stroke-width: 3.6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 40; stroke-dashoffset: 40; animation: lsi-draw 0.45s 0.25s ease forwards; }
+.lsi-confetti {
+  position: absolute; left: 50%; top: 50%; width: 7px; height: 11px; margin: -5px 0 0 -3px; border-radius: 2px; opacity: 0;
+  background: var(--brand); transform: rotate(var(--a)) translateY(-30px);
+  animation: lsi-burst 0.9s 0.2s ease-out forwards;
+}
+.lsi-confetti:nth-child(3n) { background: #FFB347; } .lsi-confetti:nth-child(3n + 1) { background: #22A55B; }
+.lsi-oops { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--brand-50); margin: 6px 0 8px; }
+
+/* ── Profil: mehmon kartochkasi ── */
+.lsi-guest {
+  position: relative; overflow: hidden; margin: 14px 16px 6px; padding: 18px 16px 16px; border-radius: 22px;
+  background: linear-gradient(160deg, var(--brand-50) 0%, #fff 70%); border: 1px solid rgba(var(--brand-rgb), 0.18);
+}
+.lsi-guest__glow { position: absolute; right: -50px; top: -50px; width: 160px; height: 160px; border-radius: 50%; background: radial-gradient(circle, rgba(var(--brand-rgb), 0.2), transparent 70%); }
+.lsi-guest__logo { position: relative; width: 56px; height: 56px; border-radius: 15px; box-shadow: 0 10px 20px -10px rgba(255, 92, 0, 0.6); }
+.lsi-guest__title { position: relative; margin: 12px 0 4px; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
+.lsi-guest__sub { position: relative; margin: 0 0 12px; font-size: 13.5px; line-height: 1.45; color: var(--muted); }
+
+@keyframes lsi-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes lsi-pulse { 0% { transform: scale(1); opacity: 0.55; } 100% { transform: scale(1.9); opacity: 0; } }
+@keyframes lsi-float { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-9px) rotate(5deg); } }
+@keyframes lsi-shine { 0%, 55% { left: -40%; } 100% { left: 140%; } }
+@keyframes lsi-dots { 0%, 100% { opacity: 0.25; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.25); } }
+@keyframes lsi-fly { 0% { left: 0; opacity: 0; transform: scale(0.6) rotate(-10deg); } 15% { opacity: 1; transform: scale(1) rotate(0); } 85% { opacity: 1; } 100% { left: calc(100% - 30px); opacity: 0; transform: scale(0.7) rotate(8deg); } }
+@keyframes lsi-beat { 0%, 100% { box-shadow: 0 0 0 0 rgba(var(--brand-rgb), 0.45); } 50% { box-shadow: 0 0 0 7px rgba(var(--brand-rgb), 0); } }
+@keyframes lsi-pop { 0% { transform: scale(0.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes lsi-draw { to { stroke-dashoffset: 0; } }
+@keyframes lsi-burst { 0% { opacity: 1; transform: rotate(var(--a)) translateY(-30px); } 100% { opacity: 0; transform: rotate(var(--a)) translateY(-74px) scale(0.6); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .lsi-logo, .lsi-orbit, .lsi-ring, .lsi-cta::after, .lsi-plane, .lsi-track__dot, .lsi-link__tg, .lsi-step.is-active .lsi-step__dot { animation: none; }
+  .lsi-plane { left: calc(50% - 15px); opacity: 1; }
+  .lsi-confetti { display: none; }
+}
