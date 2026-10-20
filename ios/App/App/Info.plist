@@ -24,6 +24,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>LokmaGo sizga yaqin restoranlarni topish va buyurtmani manzilingizga yetkazish uchun joylashuvdan foydalanadi.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
