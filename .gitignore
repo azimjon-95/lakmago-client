@@ -29,3 +29,6 @@ android/keystore.properties
 # macOS
 .DS_Store
 **/.DS_Store
+
+# Python keshi (scripts/make-app-icons.py)
+__pycache__/
