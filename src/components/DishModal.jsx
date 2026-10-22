@@ -161,8 +161,13 @@ export function DishModal({ dish, restaurant, onClose, onClosedAlert }) {
         <div className="dish-modal__body">
           <div className="dish-modal__head">
             <div className="dish-modal__name">{dish.name}</div>
-            <div className="dish-modal__price">
-              {formatSom(dish.price)}
+            {/*
+              Tanlangan variant (masalan "6 Kishilik Set") narxi — pastdagi "Savatga" bilan BIR XIL hisob (dishUnitPrice).
+              Avval doim asosiy narx (dish.price) turardi va variant almashganda tepada hech narsa o'zgarmasdi.
+              key — narx o'zgarganda yengil "pulse" animatsiyasi qayta ishlaydi (o'zgarganini mijoz sezsin).
+            */}
+            <div className="dish-modal__price" key={unitPrice} aria-live="polite">
+              {formatSom(unitPrice)}
               {dish.unit && <span className="dish-modal__unit"> {unitSuffix(dish.unit, lang)}</span>}
             </div>
           </div>

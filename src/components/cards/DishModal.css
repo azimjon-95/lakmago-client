@@ -65,7 +65,10 @@
 }
 .dish-modal__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .dish-modal__name { font-size: 20px; font-weight: 600; color: var(--ink); }
-.dish-modal__price { font-size: 18px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.dish-modal__price { font-size: 18px; font-weight: 600; color: var(--ink); white-space: nowrap; animation: dm-price-pulse 0.45s ease; transform-origin: 100% 50%; }
+/* Variant almashganda narx yengil "sakraydi" va bir lahza brend rangida bo'ladi */
+@keyframes dm-price-pulse { 0% { transform: scale(1); color: var(--ink); } 35% { transform: scale(1.08); color: var(--brand); } 100% { transform: scale(1); color: var(--ink); } }
+@media (prefers-reduced-motion: reduce) { .dish-modal__price { animation: none; } }
 .dish-modal__desc { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
 .dish-modal__nutrition {
   display: flex; gap: 14px; margin-top: 12px; padding: 10px 0;
