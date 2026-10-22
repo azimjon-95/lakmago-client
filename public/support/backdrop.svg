@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1738" height="874" viewBox="0 0 1738 874">
+  <defs>
+    <linearGradient id="cream" x1="0" y1="0" x2="1" y2="0.7">
+      <stop offset="0" stop-color="#fff7e8"/>
+      <stop offset="0.52" stop-color="#fff8eb"/>
+      <stop offset="1" stop-color="#fffaf1"/>
+    </linearGradient>
+    <linearGradient id="peach" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#ffe2ad" stop-opacity=".72"/>
+      <stop offset="1" stop-color="#ffd28d" stop-opacity=".52"/>
+    </linearGradient>
+    <radialGradient id="warmGlow" cx="35%" cy="55%" r="65%">
+      <stop offset="0" stop-color="#ffe0a6" stop-opacity=".48"/>
+      <stop offset="1" stop-color="#ffe0a6" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soften" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="1.2"/>
+    </filter>
+  </defs>
+  <!-- Main flowing cream backdrop; transparent outside the shape -->
+  <path d="M35 350
+           C20 300 45 250 95 225
+           C155 194 222 180 265 133
+           C325 67 409 37 500 67
+           C592 97 645 150 741 161
+           C862 175 960 182 1085 220
+           C1204 256 1281 272 1384 247
+           C1498 219 1578 173 1647 188
+           C1706 201 1732 245 1728 302
+           L1728 700
+           C1727 760 1685 794 1622 798
+           C1512 804 1455 833 1349 832
+           C1219 831 1117 792 1001 761
+           C871 726 767 693 652 669
+           C538 645 429 638 326 659
+           C231 678 148 714 83 701
+           C36 692 11 654 12 602
+           C13 529 35 482 35 430 Z"
+        fill="url(#cream)"/>
+  <path d="M18 641
+           C60 569 117 541 179 520
+           C238 499 253 467 239 424
+           C220 367 249 328 309 297
+           C380 260 448 241 516 239
+           C602 236 659 263 697 307
+           C734 349 765 394 802 423
+           C841 454 905 470 978 493
+           C1074 522 1154 559 1185 616
+           C1217 675 1188 730 1136 756
+           C1077 786 1000 777 915 751
+           C793 713 695 682 591 661
+           C478 638 383 635 291 651
+           C202 667 117 704 67 700
+           C28 697 7 674 18 641 Z"
+        fill="url(#peach)"/>
+  <path d="M0 0 H1738 V874 H0 Z" fill="url(#warmGlow)" opacity=".28"/>
+</svg>

@@ -30,115 +30,6 @@
 }
 .support-fab__ring--2 { animation-delay: 1s; }
 
-/* ===== Chat oynasi ===== */
-.support-chat {
-  position: fixed;
-  right: 12px;
-  bottom: 12px;
-  z-index: 50;
-  width: calc(var(--app-width) - 24px);
-  max-width: calc(100vw - 24px);
-  height: 460px;
-  max-height: 72vh;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  animation: slide-up 0.28s var(--ease);
-}
-.support-chat__header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 14px;
-  background: var(--brand-tint);
-  border-bottom: 1px solid var(--line);
-}
-.support-chat__header-info { display: flex; align-items: center; gap: 10px; }
-.support-chat__avatar {
-  display: flex; align-items: center; justify-content: center;
-  flex: none;
-}
-.support-chat__avatar svg { display: block; border-radius: 50%; }
-.support-chat__title { font-size: 14px; font-weight: 600; color: var(--ink); }
-.support-chat__online { font-size: 11px; color: var(--success); }
-.support-chat__offline { font-size: 11px; color: var(--muted); }
-.support-chat__close { font-size: 16px; color: var(--muted); width: 28px; height: 28px; }
-
-.support-chat__body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.support-msg {
-  max-width: 78%;
-  padding: 9px 13px;
-  border-radius: 14px;
-  font-size: 14px;
-  line-height: 1.4;
-  animation: fade-in 0.2s var(--ease);
-}
-.support-msg--support {
-  align-self: flex-start;
-  background: var(--surface-2);
-  color: var(--ink);
-  border-bottom-left-radius: 4px;
-}
-.support-msg--user {
-  align-self: flex-end;
-  background: var(--brand);
-  color: var(--brand-text);
-  border-bottom-right-radius: 4px;
-}
-.support-chat__input {
-  display: flex; gap: 8px;
-  padding: 10px 12px;
-  border-top: 1px solid var(--line);
-}
-.support-chat__input input {
-  flex: 1;
-  background: var(--canvas);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 10px 12px;
-  color: var(--ink);
-  font-size: 14px;
-  outline: none;
-}
-.support-chat__input input:focus { border-color: var(--brand); }
-.support-chat__input button {
-  width: 40px; height: 40px;
-  border-radius: 12px;
-  background: var(--brand);
-  color: var(--brand-text);
-  font-size: 16px;
-  display: flex; align-items: center; justify-content: center;
-}
-
-/* Yuborish tugmasi — Telegram uslubida to'ldirilgan doira */
-.support-chat__send {
-  width: 42px; height: 42px;
-  flex: none;
-  border-radius: 50%;
-  background: var(--brand);
-  display: flex; align-items: center; justify-content: center;
-  transition: transform 0.12s var(--ease), opacity 0.15s;
-}
-.support-chat__send:active { transform: scale(0.92); }
-.support-chat__send:disabled { opacity: 0.5; }
-
-/* Input qatori — chap va o'ngni to'liq egallaydi */
-.support-chat__input {
-  padding: 10px 12px calc(10px + var(--tg-bottom-offset, 0px));
-  align-items: center;
-}
-.support-chat__input input { min-width: 0; }
-
-/* Chat orqa foni — hiralashadi, bosilganda yopiladi */
 .support-overlay {
   position: fixed; inset: 0; z-index: 49;
   background: rgba(0, 0, 0, 0.45);
@@ -146,12 +37,161 @@
   -webkit-backdrop-filter: blur(6px);
   animation: fade-in 0.2s var(--ease);
 }
+.support-overlay { z-index: 101; }
+.support-overlay.is-closing { animation: sc-fade-out 0.26s ease forwards; }
+.support-fab__badge {
+  position: absolute; top: -3px; right: -3px; z-index: 3; min-width: 19px; height: 19px; padding: 0 5px;
+  border-radius: 10px; background: #E5383B; color: #fff; font-size: 11px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px #fff;
+}
 
-/* Admin javobni tahrirlagan bo'lsa — kichik belgi */
-.support-msg__edited {
-  display: block;
-  margin-top: 2px;
-  font-size: 10.5px;
-  opacity: 0.6;
-  text-align: right;
+/* ═══════════════════════ YORDAM XIZMATI (maket bo'yicha) ═══════════════════════ */
+.sc {
+  --sc-ink: #222A3B; --sc-text: #3D4253; --sc-muted: #A4A9BC; --sc-orange: #F7741F; --sc-heart: #FA6509;
+  --sc-card: #FDF9F8; --sc-card-2: #FEF5F0;
+  --sc-top: calc(var(--tg-top-offset, 0px) + 18px);
+  /* .app-shell::before (z 100, Telegram tugmalari ostidagi qopqoq) dan YUQORIDA — maketdagidek butun ekran qoraysin */
+  position: fixed; z-index: 102; left: 0; right: 0; margin: 0 auto;
+  width: 100%; max-width: var(--app-width, 480px);
+  top: var(--sc-top);
+  height: calc(var(--sc-vh, var(--tg-viewport-height, 100dvh)) - var(--sc-top));
+  display: flex; flex-direction: column;
+  font-family: inherit;
+  animation: sc-up 0.46s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.sc.is-closing { animation: sc-down 0.26s cubic-bezier(0.4, 0, 1, 1) forwards; }
+
+/* ── Qahramon: krem fon + operator ── */
+.sc-hero {
+  position: relative; flex: none; height: 192px; z-index: 1;
+  transition: height 0.42s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+}
+.sc-back {
+  position: absolute; left: -14%; top: 18px; width: 128%; max-width: none; height: auto;
+  user-select: none; pointer-events: none;
+}
+.sc-girl {
+  position: absolute; left: 0; top: 0; width: 94%; height: auto; user-select: none; pointer-events: none;
+  filter: drop-shadow(0 18px 22px rgba(200, 110, 40, 0.10));
+  animation: sc-pop 0.7s 0.12s cubic-bezier(0.3, 1.35, 0.5, 1) both;
+  transform-origin: 38% 100%;
+}
+.sc-x {
+  position: absolute; z-index: 5; top: 64px; right: 10px; width: 34px; height: 34px; border: 0; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; color: #4F4F57; background: #fff;
+  box-shadow: 0 6px 18px -6px rgba(60, 40, 20, 0.28); cursor: pointer;
+  transition: top 0.42s cubic-bezier(0.22, 1, 0.36, 1), transform 0.15s ease;
+}
+.sc-x:active { transform: scale(0.92); }
+
+/* ── Kontent kartasi (yuqorisi to'lqin) ── */
+.sc-card {
+  position: relative; z-index: 2; flex: 1; min-height: 0; margin-top: -12px;
+  display: flex; flex-direction: column;
+  padding: 2px 34px calc(18px + max(var(--tg-bottom-offset, 0px), env(safe-area-inset-bottom, 0px)));
+  background: linear-gradient(180deg, var(--sc-card) 0%, #FFFBF8 55%, var(--sc-card-2) 100%);
+  border-radius: 0 0 28px 28px;
+}
+.sc-wave { position: absolute; left: 0; right: 0; bottom: 100%; width: 100%; height: 34px; margin-bottom: -1px; display: block; }
+.sc-wave path { fill: var(--sc-card); }
+
+.sc-title { position: relative; z-index: 1; margin: -10px 0 10px 4px; font-family: 'Inter Tight', system-ui, sans-serif; font-weight: 800; font-size: 23px; line-height: 1.08; letter-spacing: -0.025em; transition: opacity 0.25s ease, max-height 0.4s ease, margin 0.4s ease; max-height: 120px; overflow: hidden; }
+.sc-title__brand { display: block; color: var(--sc-ink); }
+.sc-title__accent { display: block; color: var(--sc-orange); white-space: pre-line; }
+
+.sc-mini { display: none; align-items: center; gap: 10px; margin: 2px 0 8px; }
+.sc-mini__ava { flex: none; display: flex; border-radius: 50%; box-shadow: 0 4px 12px -4px rgba(247, 116, 31, 0.5); }
+.sc-mini__ava svg { display: block; border-radius: 50%; }
+.sc-mini__title { font-family: 'Inter Tight', system-ui, sans-serif; font-weight: 800; font-size: 17px; letter-spacing: -0.02em; color: var(--sc-ink); }
+.sc-mini__title span { color: var(--sc-orange); }
+.sc-mini__sub { font-size: 12px; color: var(--sc-muted); }
+.sc-mini__sub.is-online { color: #1FA35A; }
+
+/* ── Chat ── */
+.sc-body {
+  flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  display: flex; flex-direction: column; gap: 8px; padding: 4px 2px 6px; margin: 0 -2px;
+  scrollbar-width: none;
+}
+.sc-body::-webkit-scrollbar { display: none; }
+.sc-presence { align-self: center; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; margin-bottom: 2px; border-radius: 999px; background: rgba(247, 116, 31, 0.07); color: #9A8F88; font-size: 11.5px; font-weight: 600; }
+.sc-presence i { width: 7px; height: 7px; border-radius: 50%; background: #C9C2BC; }
+.sc-presence.is-online { color: #1FA35A; background: rgba(31, 163, 90, 0.08); }
+.sc-presence.is-online i { background: #1FA35A; box-shadow: 0 0 0 3px rgba(31, 163, 90, 0.18); }
+.sc-day { align-self: center; margin: 4px 0; }
+.sc-day span { display: inline-block; padding: 3px 10px; border-radius: 999px; background: #F6ECE6; color: #9A8F88; font-size: 11px; font-weight: 700; letter-spacing: 0.02em; }
+
+.sc-row { display: flex; flex-direction: column; animation: sc-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.sc-row--user { align-items: flex-end; }
+.sc-row--support { align-items: flex-start; }
+.sc-msg {
+  position: relative; max-width: 84%; padding: 10px 13px 8px; border-radius: 18px;
+  font-size: 15px; line-height: 1.42; overflow-wrap: anywhere; white-space: pre-wrap;
+}
+.sc-msg--support {
+  color: var(--sc-text); background: #fff; border-bottom-left-radius: 6px;
+  box-shadow: 0 6px 18px -10px rgba(120, 70, 30, 0.35), 0 0 0 1px rgba(242, 226, 215, 0.9);
+}
+.sc-msg--user {
+  color: #fff; background: linear-gradient(135deg, #FF8A3D 0%, var(--sc-orange) 60%, #F2620E 100%);
+  border-bottom-right-radius: 6px; box-shadow: 0 8px 18px -10px rgba(247, 116, 31, 0.8);
+}
+.sc-msg--failed { opacity: 0.75; }
+.sc-msg--typing { padding: 12px 15px; }
+.sc-msg__meta { float: right; display: inline-flex; align-items: center; gap: 5px; margin: 6px 0 -3px 10px; font-size: 11px; line-height: 1; color: var(--sc-muted); opacity: 0; transform: translateY(2px); transition: opacity 0.3s ease, transform 0.3s ease; font-variant-numeric: tabular-nums; }
+.sc-msg__meta.is-on { opacity: 1; transform: none; }
+.sc-msg--user .sc-msg__meta { color: rgba(255, 255, 255, 0.82); }
+.sc-msg__edited { font-style: italic; }
+.sc-caret { display: inline-block; width: 2px; height: 1.05em; margin-left: 1px; vertical-align: -2px; background: var(--sc-orange); border-radius: 1px; animation: sc-caret 0.9s steps(2) infinite; }
+.sc-dots { display: inline-flex; gap: 4px; }
+.sc-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--sc-orange); opacity: 0.35; animation: sc-dot 1.1s ease-in-out infinite; }
+.sc-dots i:nth-child(2) { animation-delay: 0.15s; } .sc-dots i:nth-child(3) { animation-delay: 0.3s; }
+.sc-retry { margin-top: 4px; padding: 2px 4px; border: 0; background: none; color: #D9402B; font-size: 12px; cursor: pointer; }
+.sc-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ── Pastki qism ── */
+.sc-happy { display: flex; align-items: center; gap: 9px; margin: 10px 0 13px 8px; font-size: clamp(12.5px, 3.6vw, 14px); font-weight: 600; line-height: 1.3; color: var(--sc-text); letter-spacing: -0.005em; }
+.sc-happy svg { flex: none; }
+
+.sc-pill {
+  position: relative; flex: none; display: flex; align-items: center; gap: 11px; height: 46px; padding: 0 5px 0 17px;
+  border-radius: 999px; background: linear-gradient(90deg, #F76C19 0%, #FF731C 100%);
+  box-shadow: 0 14px 26px -12px rgba(247, 108, 25, 0.75);
+}
+.sc-pill__icon { flex: none; display: flex; }
+.sc-pill input {
+  flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent;
+  color: #fff; caret-color: #fff; font-size: 16px; font-weight: 500;
+}
+.sc-pill input::placeholder { color: rgba(255, 255, 255, 0.95); }
+.sc-send {
+  flex: none; width: 36px; height: 36px; border: 0; border-radius: 50%; background: #fff;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  box-shadow: 0 4px 10px -4px rgba(120, 50, 10, 0.4); transition: transform 0.15s ease, opacity 0.2s ease;
+}
+.sc-send:active { transform: scale(0.9); }
+.sc-send:disabled { cursor: default; }
+.sc-spark { position: absolute; right: -2px; top: -30px; width: 34px; height: 30px; fill: none; stroke: #FB9A5C; stroke-width: 3; stroke-linecap: round; opacity: 0.85; }
+
+/* ── Ixcham rejim: klaviatura ochiq yoki yozishmalar ko'p ── */
+.sc--compact .sc-hero { height: 0; opacity: 0; }
+.sc--compact .sc-girl { animation: none; }
+.sc--compact .sc-title { max-height: 0; opacity: 0; margin: 0; }
+.sc--compact .sc-mini { display: flex; animation: sc-in 0.32s ease both; }
+.sc--compact .sc-card { padding-top: 14px; border-radius: 26px 26px 0 0; }
+.sc--compact .sc-wave { display: none; }
+.sc--compact .sc-x { top: 18px; right: 18px; box-shadow: none; background: rgba(247, 116, 31, 0.08); }
+.sc--compact .sc-happy { display: none; }
+
+@keyframes sc-up { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes sc-down { to { transform: translateY(100%); } }
+@keyframes sc-fade-out { to { opacity: 0; } }
+@keyframes sc-pop { from { transform: translateY(26px) scale(0.92); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes sc-in { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes sc-caret { 50% { opacity: 0; } }
+@keyframes sc-dot { 0%, 100% { transform: translateY(0); opacity: 0.35; } 40% { transform: translateY(-4px); opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .sc, .sc.is-closing, .sc-girl, .sc-row, .support-overlay.is-closing { animation: none; }
+  .sc-hero, .sc-title, .sc-x { transition: none; }
 }
