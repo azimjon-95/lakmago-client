@@ -1,0 +1,60 @@
+/* ═══ Yetkazish marshruti xaritasi (DeliveryRouteMap.jsx) ═══ */
+.drm { position: relative; width: 100%; height: 100%; min-height: 240px; background: #EEF1EC; overflow: hidden; touch-action: none; }
+.drm__box { position: absolute; inset: 0; }
+.drm__overlay {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  color: var(--muted); font-size: 13.5px; font-weight: 600; background: linear-gradient(180deg, #F1F4EF, #E8ECE6);
+}
+.drm__overlay--fail { color: var(--ink); text-align: center; padding: 0 24px; }
+.drm-retry { padding: 8px 16px; border-radius: 999px; border: 1.5px solid rgba(var(--brand-rgb), 0.35); background: #fff; color: var(--brand); font-weight: 700; font-size: 13px; }
+.drm-spin { width: 22px; height: 22px; border-radius: 50%; border: 3px solid rgba(var(--brand-rgb), 0.2); border-top-color: var(--brand); animation: drm-rot 0.8s linear infinite; }
+.drm-spin--sm { width: 14px; height: 14px; border-width: 2px; }
+
+.drm-banner {
+  position: absolute; z-index: 3; left: 50%; top: 12px; transform: translateX(-50%); max-width: calc(100% - 32px);
+  display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96); box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.35);
+  font-size: 12.5px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.drm-banner--warn { color: #B45309; }
+
+.drm-locate {
+  position: absolute; z-index: 3; right: 12px; bottom: 14px; width: 46px; height: 46px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; background: #fff; border: 0;
+  box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0, 0, 0, 0.04); cursor: pointer;
+}
+.drm-locate:active { transform: scale(0.94); }
+
+/* ── Markerlar (Yandex templateLayout ichida) ── */
+.drm-pin { position: relative; width: 0; height: 0; }
+.drm-chip {
+  position: absolute; left: 22px; top: -54px; white-space: nowrap; padding: 6px 11px; border-radius: 999px;
+  background: #fff; color: #111; font: 700 13px/1.1 Inter, system-ui, sans-serif; box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.4);
+}
+.drm-chip--me { top: -14px; left: 16px; }
+
+.drm-rest { position: absolute; left: -20px; top: -50px; width: 40px; height: 50px; }
+.drm-rest__core {
+  position: absolute; left: 0; top: 0; width: 40px; height: 40px; border-radius: 50% 50% 50% 4px; transform: rotate(-45deg);
+  background: linear-gradient(135deg, #FF8A3D, #F2620E); box-shadow: 0 8px 16px -6px rgba(242, 98, 14, 0.75);
+  display: flex; align-items: center; justify-content: center;
+}
+.drm-rest__core svg { transform: rotate(45deg); }
+
+.drm-dest { position: absolute; left: -17px; top: -44px; width: 34px; height: 44px; }
+.drm-dest__core {
+  position: absolute; left: 0; top: 0; width: 34px; height: 34px; border-radius: 50% 50% 50% 4px; transform: rotate(-45deg);
+  background: linear-gradient(135deg, #3B82F6, #1D4ED8); box-shadow: 0 8px 16px -6px rgba(29, 78, 216, 0.7);
+}
+.drm-dest__core::after { content: ''; position: absolute; left: 11px; top: 11px; width: 12px; height: 12px; border-radius: 50%; background: #fff; }
+
+.drm-me__dot { position: absolute; left: -8px; top: -8px; width: 16px; height: 16px; border-radius: 50%; background: #2563EB; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.6); }
+.drm-me__halo { position: absolute; left: -22px; top: -22px; width: 44px; height: 44px; border-radius: 50%; background: rgba(37, 99, 235, 0.22); animation: drm-pulse 2s ease-out infinite; }
+
+.drm-eta { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 8px 6px; border-radius: 12px; background: #fff; box-shadow: 0 8px 22px -10px rgba(0, 0, 0, 0.45); }
+.drm-eta__pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 8px; background: #1E3A8A; color: #fff; font: 800 13.5px/1 Inter, system-ui, sans-serif; white-space: nowrap; }
+.drm-eta__time { font: 600 12px/1.1 Inter, system-ui, sans-serif; color: #111; white-space: nowrap; }
+
+@keyframes drm-rot { to { transform: rotate(360deg); } }
+@keyframes drm-pulse { 0% { transform: scale(0.6); opacity: 0.9; } 100% { transform: scale(1.6); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .drm-me__halo, .drm-spin { animation: none; } }

@@ -578,6 +578,17 @@ export function CartPage() {
     // taom sonini o'zgartirish so'rov yubormasin
   }, [groups.map((g) => g.restaurant.id).sort().join(',')]);
 
+  /*
+   * Manzil tasdiqlash xaritasi uchun restoranlarning HAQIQIY koordinatalari (serverdan: freshRest, zaxira —
+   * restoranlar ro'yxati). Koordinatasi yo'q restoran xaritaga chiqmaydi (taxminiy nuqta qo'yilmaydi).
+   */
+  const mapRestaurants = useMemo(() => groups.map((g) => {
+    const r = freshRest[g.restaurant.id] || allRestaurants.find((x) => String(x.id || x._id) === String(g.restaurant.id));
+    const lat = Number(r?.lat); const lng = Number(r?.lng);
+    return Number.isFinite(lat) && Number.isFinite(lng) && !(lat === 0 && lng === 0)
+      ? { id: g.restaurant.id, name: r.name || g.restaurant.name, lat, lng } : null;
+  }).filter(Boolean), [groups, freshRest, allRestaurants]);
+
   // ===== HISOB-KITOB =====
   // Har restoran uchun alohida: yetkazish, xizmat haqi, minimal summa.
   // Mantiq serverdagi bilan bir xil (lib/pricing.js ↔ orderPricing.js)
@@ -1747,6 +1758,7 @@ export function CartPage() {
           addressBlock={addressBlock}
           onChooseAddress={() => setShowAddressSheet(true)}
           onEditAddress={() => setShowAddressEdit(true)}
+          restaurants={mapRestaurants}
         />
       )}
       {AuthGate}

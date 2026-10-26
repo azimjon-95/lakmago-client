@@ -5,6 +5,9 @@ import { useModalBackClose } from '@/hooks/useModalBackClose';
 import { haptic } from '@/lib/telegram';
 import { formatSom } from '@/lib/utils';
 import { useT } from '@/i18n';
+import { DeliveryRouteMap, formatDistance } from './DeliveryRouteMap';
+import { useAddressGpsCheck } from '@/hooks/useAddressGpsCheck';
+import { canOpenLocationSettings, openLocationSettings } from '@/lib/location';
 import './OrderConfirmModal.css';
 
 /**
@@ -20,6 +23,8 @@ export function OrderConfirmModal({
   groups, pricing, total, onClose, onConfirm, submitting,
   // Yetkazishda: 2-qadam — manzilni tasdiqlash. Olib ketishda `address` yo'q.
   address = null, addressBlock = null, onChooseAddress, onEditAddress,
+  // Xarita uchun restoranlar koordinatasi: [{ id, name, lat, lng }]
+  restaurants = [],
 }) {
   const t = useT();
   // Pastga tortib yopish (ikkala qadamda ham butun oynani yopadi)
@@ -47,6 +52,9 @@ export function OrderConfirmModal({
   };
   const goCheck = () => { haptic(); setStep('check'); };
 
+  // Joriy GPS ↔ saqlangan manzil (faqat manzil qadamida so'raladi)
+  const [gps, recheckGps] = useAddressGpsCheck(address, step === 'address');
+
   // Android "orqaga": 2-qadamda avval chekka qaytadi, keyingisi oynani yopadi
   useModalBackClose(step === 'address' && !submitting, goCheck);
 
@@ -71,7 +79,7 @@ export function OrderConfirmModal({
 
   return (
     <div className="ocm-overlay" onClick={onClose} style={overlayStyle}>
-      <div className="ocm-sheet" onClick={(e) => e.stopPropagation()} {...dragProps}>
+      <div className={`ocm-sheet${step === 'address' ? ' ocm-sheet--map' : ''}`} onClick={(e) => e.stopPropagation()} {...dragProps}>
         <div className="ocm-handle" />
 
         {/* Qadam ko'rsatkichi — mijoz "yana qancha qoldi" ni biladi */}
@@ -184,17 +192,43 @@ export function OrderConfirmModal({
               </button>
             </div>
 
+            {/* Haqiqiy xarita: restoran(lar), manzil, joriy GPS va HAQIQIY marshrut (joyida turadi, ostidagi qism aylanadi) */}
+            <div className="ocm-map">
+              <DeliveryRouteMap
+                restaurants={restaurants}
+                destination={{ lat: address.lat, lng: address.lng, label: address.title || t('address') }}
+                me={gps.pos ? { lat: gps.pos.lat, lng: gps.pos.lng, accuracy: gps.pos.accuracy } : null}
+                onLocate={recheckGps}
+              />
+            </div>
+
             <div className="ocm-addr__scroll">
-              <div className="ocm-addr-card">
-                <div className="ocm-addr-card__art" aria-hidden="true" />
-                <div className="ocm-addr-card__body">
+
+              <GpsCheck gps={gps} onRetry={recheckGps} t={t} />
+
+              {gps.state === 'far' && (
+                <div className="ocm-gps-warn" role="alert" data-testid="gps-far">
+                  <svg className="ocm-gps-warn__icon" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" /><path d="M12 9v4M12 17h.01" /></svg>
+                  <div>
+                    <b>{t('addrGpsFar').replace('{d}', formatDistance(gps.d, t))}</b>
+                    <span>{t('addrGpsFarSub')}</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="ocm-addr-card2">
+                <div className="ocm-addr-card2__top">
                   <div className="ocm-addr-chip">
-                    <Icon name={labelIcon} size={16} color="var(--brand)" />
+                    <Icon name={labelIcon} size={18} color="var(--brand)" />
                     <span>{address.title || t('address')}</span>
                   </div>
-                  <div className="ocm-addr-text" data-testid="addr-text">{address.address || address.street}</div>
-                  {address.city && <div className="ocm-addr-city">{address.city}</div>}
+                  <button type="button" className="ocm-addr-edit" onClick={onEditAddress} disabled={submitting}>
+                    <Icon name="edit" size={16} color="var(--ink)" />
+                    <span>{t('addrEditThis')}</span>
+                  </button>
                 </div>
+                <div className="ocm-addr-text" data-testid="addr-text">{address.address || address.street}</div>
+                {address.city && <div className="ocm-addr-city">{address.city}</div>}
                 {address.note && (
                   <div className="ocm-addr-note">
                     <Icon name="info" size={16} color="var(--brand)" />
@@ -226,10 +260,12 @@ export function OrderConfirmModal({
                 </div>
               )}
 
-              <div className="ocm-addr-total">
-                <span>{t('total')}</span>
-                <b>{formatSom(total)}</b>
-              </div>
+            </div>
+
+            {/* Maketdagidek: "Jami" doim ko'rinadi — tasdiqlash tugmasi ustida, aylanmaydi */}
+            <div className="ocm-addr-total">
+              <span>{t('total')}</span>
+              <b>{formatSom(total)}</b>
             </div>
 
             <button
@@ -261,6 +297,42 @@ export function OrderConfirmModal({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+/*
+ * Joriy GPS ↔ saqlangan manzil holati kartasi. Har holat aniq aytadi: nima bo'ldi va nima qilish mumkin.
+ */
+function GpsCheck({ gps, onRetry, t }) {
+  const st = gps.state;
+  if (st === 'idle' || st === 'nopoint') return null;
+  const dist = Number.isFinite(gps.d) ? formatDistance(gps.d, t) : '';
+  const acc = Number.isFinite(gps.acc) ? formatDistance(gps.acc, t) : '';
+  const view = {
+    checking: { tone: 'idle', title: t('addrGpsSavedTitle'), sub: t('addrGpsChecking') },
+    ok: { tone: 'ok', title: t('addrGpsOkTitle'), sub: t('addrGpsOkSub').replace('{d}', dist) },
+    far: { tone: 'idle', title: t('addrGpsSavedTitle'), sub: t('addrGpsFarShort').replace('{d}', dist) },
+    lowacc: { tone: 'warn', title: t('addrGpsLowTitle'), sub: t('addrGpsLowSub').replace('{a}', acc), retry: true },
+    denied: { tone: 'warn', title: t('addrGpsDeniedTitle'), sub: t('addrGpsDeniedSub'), retry: true, settings: canOpenLocationSettings() },
+    unavailable: { tone: 'warn', title: t('addrGpsNoSignalTitle'), sub: t('addrGpsNoSignalSub'), retry: true },
+    unsupported: { tone: 'warn', title: t('addrGpsUnsupportedTitle'), sub: t('addrGpsDeniedSub') },
+  }[st];
+  if (!view) return null;
+  return (
+    <div className={`ocm-gps ocm-gps--${view.tone}`} role="status" aria-live="polite" data-testid={`gps-${st}`}>
+      <span className="ocm-gps__icon" aria-hidden="true">
+        {view.tone === 'ok'
+          ? <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+          : <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" /></svg>}
+      </span>
+      <div className="ocm-gps__txt">
+        <b>{view.title}</b>
+        <span>{view.sub}</span>
+      </div>
+      {st === 'checking' && <span className="ocm-gps__spin" aria-hidden="true" />}
+      {view.settings && <button type="button" className="ocm-gps__btn" onClick={openLocationSettings}>{t('addrGpsSettings')}</button>}
+      {!view.settings && view.retry && <button type="button" className="ocm-gps__btn" onClick={onRetry}>{t('addrGpsRetry')}</button>}
     </div>
   );
 }

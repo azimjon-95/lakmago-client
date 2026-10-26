@@ -363,3 +363,57 @@
   .ocm-addr-yes[data-loading='true'],
   .ocm-addr-alt__btn.is-attention { animation: none; }
 }
+
+/* ═══ Manzil qadami: haqiqiy xarita + GPS solishtirish (maket: "Shu manzilga yetkazamizmi?") ═══ */
+.ocm-sheet--map { max-height: 94vh; max-height: 94dvh; }
+.ocm-map {
+  height: clamp(200px, 30vh, 280px); margin: 0 -18px 12px; overflow: hidden; flex: none;
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+/* Maketdagidek: sarlavha BIR qatorda, markazda; chapda "orqaga", o'ngda "yopish" */
+.ocm-sheet--map .ocm-head--addr { margin-bottom: 12px; }
+.ocm-sheet--map .ocm-head__title--big {
+  flex: 1; min-width: 0; text-align: center; font-size: clamp(15.5px, 4.4vw, 18px); line-height: 1.2;
+}
+.ocm-sheet--map .ocm-close { width: 40px; height: 40px; flex: none; }
+.ocm-sheet--map .ocm-addr__scroll { gap: 0; }
+.ocm-sheet--map .ocm-addr-text { margin-top: 0; font-size: 18px; line-height: 1.3; }
+.ocm-sheet--map .ocm-addr-city { font-size: 14px; }
+.ocm-sheet--map .ocm-addr-total { flex: none; margin: 4px 4px 10px; }
+.ocm-sheet--map .ocm-addr-yes { min-height: 54px; font-size: 18px; }
+.ocm-sheet--map .ocm-addr-alt__btn { min-height: 50px; }
+
+.ocm-gps {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 14px; margin-bottom: 10px; border-radius: 16px;
+  background: #F4F6FA; border: 1px solid #E6EAF2;
+}
+.ocm-gps__icon {
+  flex: none; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: #DCFCE7; color: #16A34A;
+}
+.ocm-gps--ok .ocm-gps__icon { background: #22A55B; }
+.ocm-gps--warn { background: #FFF8EC; border-color: #FBE3B8; }
+.ocm-gps--warn .ocm-gps__icon { background: #FEF0D7; color: #D97706; }
+.ocm-gps__txt { flex: 1 1 180px; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ocm-gps__txt b { font-size: 15px; font-weight: 700; color: var(--ink); }
+.ocm-gps__txt span { font-size: 13px; line-height: 1.35; color: var(--muted); }
+.ocm-gps__spin { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 3px solid rgba(var(--brand-rgb), 0.18); border-top-color: var(--brand); animation: drm-rot 0.8s linear infinite; }
+.ocm-gps__btn { flex: none; margin-left: auto; padding: 8px 12px; border-radius: 12px; border: 1.5px solid rgba(var(--brand-rgb), 0.35); background: #fff; color: var(--brand); font-size: 13px; font-weight: 700; }
+
+.ocm-gps-warn {
+  display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; margin-bottom: 12px; border-radius: 16px;
+  background: #FDEEE7; border: 1px solid #F8D5C4; color: #E4570E;
+}
+.ocm-gps-warn__icon { flex: none; margin-top: 1px; }
+.ocm-gps-warn div { display: flex; flex-direction: column; gap: 3px; }
+.ocm-gps-warn b { font-size: 14.5px; line-height: 1.3; font-weight: 700; color: #E4570E; }
+.ocm-gps-warn span { font-size: 13px; color: #6B7280; }
+
+.ocm-addr-card2 { padding: 12px 14px; margin-bottom: 10px; border-radius: 18px; background: #fff; border: 1.5px solid var(--line); }
+.ocm-addr-card2__top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.ocm-addr-card2 .ocm-addr-chip { margin: 0; }
+.ocm-addr-edit {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 12px;
+  background: #F3F4F6; color: var(--ink); font-size: 13.5px; font-weight: 600; border: 0;
+}
+@media (prefers-reduced-motion: reduce) { .ocm-gps__spin { animation: none; } }

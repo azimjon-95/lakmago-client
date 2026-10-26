@@ -125,7 +125,8 @@ export function useSheetDrag(onClose) {
         x: t.clientX,
         y: t.clientY,
         time: Date.now(),
-        allowed: scrollAtTop(e.target),
+        // Xarita kabi o'z tortish harakatiga ega joylar (data-sheet-nodrag) varaqni yopmasin
+        allowed: scrollAtTop(e.target) && !e.target.closest?.('[data-sheet-nodrag]'),
         decided: false,
         dragging: false,
       };
