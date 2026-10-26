@@ -277,7 +277,7 @@ export function SupportChat({ hideFab = false } = {}) {
         <button className="support-fab" onClick={() => setOpen(true)} aria-label={t('chatTitle')}>
           <span className="support-fab__ring" />
           <span className="support-fab__ring support-fab__ring--2" />
-          <span className="support-fab__icon"><OperatorAvatar size={44} /></span>
+          <span className="support-fab__icon"><OperatorAvatar size={56} /></span>
           {unread > 0 && <span className="support-fab__badge">{unread}</span>}
         </button>
       )}
@@ -305,7 +305,7 @@ export function SupportChat({ hideFab = false } = {}) {
 
               {/* Ixcham sarlavha (klaviatura/uzun yozishma) */}
               <div className="sc-mini">
-                <span className="sc-mini__ava"><OperatorAvatar size={38} /></span>
+                <span className="sc-mini__ava"><OperatorAvatar size={40} online={presence.online} /></span>
                 <div className="sc-mini__txt">
                   <div className="sc-mini__title">Lokma Go <span>{t('chatTitle')}</span></div>
                   <div className={`sc-mini__sub${presence.online ? ' is-online' : ''}`}>{presenceLabel()}</div>
