@@ -236,7 +236,7 @@ async function nativePosition() {
  * Vaqt tugaganda ENG YAXSHI olingan natija qaytadi (noaniq bo'lsa ham — chaqiruvchi xaritada
  * tasdiqlatadi); hech narsa bo'lmasa — sababi bilan LocationError.
  */
-function browserPosition() {
+function browserPosition(signal) {
   // Android/iOS ilovasida Capacitor geolokatsiyasidan foydalanamiz.
   if (Capacitor.isNativePlatform()) {
     return nativePosition();
@@ -275,6 +275,11 @@ function browserPosition() {
       }
     };
 
+    // Ixtiyoriy bekor qilish (lib/gpsSource.js): oyna yopilganda GPS kuzatuvi 15 s davom etmasin (batareya)
+    if (signal) {
+      if (signal.aborted) { finish(new LocationError('timeout', 'Bekor qilindi')); return; }
+      signal.addEventListener('abort', () => finish(new LocationError('timeout', 'Bekor qilindi')), { once: true });
+    }
     watchId = navigator.geolocation.watchPosition(
       (pos) => {
         const { latitude, longitude, accuracy } = pos.coords;
@@ -308,7 +313,7 @@ function browserPosition() {
   });
 }
 
-export async function getCurrentPosition() {
+export async function getCurrentPosition({ signal } = {}) {
   const { pos: tg, denied } = await telegramPosition();
 
   // Telegram yetarlicha aniq natija berdi
@@ -321,7 +326,7 @@ export async function getCurrentPosition() {
    * baribir qaytadi (hech bo'lmasa taxminiy joy).
    */
   try {
-    const br = await browserPosition();
+    const br = await browserPosition(signal);
     if (!tg) return br;
     const tgAcc = tg.accuracy ?? Infinity;
     return br.accuracy < tgAcc ? br : tg;
@@ -342,6 +347,40 @@ export async function getCurrentPosition() {
  * Natija aniq deb hisoblanadimi.
  * Undan yomon bo'lsa mijozdan xaritada tasdiqlash so'raladi.
  */
+/**
+ * YANGI (har bir) o'lchovlar OQIMI — takroriy o'lchov va barqarorlashni kutish uchun (lib/gpsSource.js).
+ * `getCurrentPosition()` maximumAge: 30000 bilan ESKI (keshdagi) nuqtani qaytarishi mumkin, shuning uchun uni
+ * takror chaqirish mustaqil o'lchov bermaydi. Bu yerda maximumAge: 0 — har bir javob haqiqatan yangi.
+ * Qaytaradi: to'xtatish funksiyasi yoki null (qurilma oqimni qo'llamaydi). Mavjud kodga TEGMAYDI.
+ */
+export function watchFixes(onFix, onError) {
+  const emit = (coords, ts) => {
+    if (!coords || !validCoords(coords.latitude, coords.longitude)) return;
+    onFix({ lat: coords.latitude, lng: coords.longitude, accuracy: Number.isFinite(coords.accuracy) ? coords.accuracy : null, ts: ts || Date.now() });
+  };
+  if (Capacitor.isNativePlatform()) {
+    let id = null;
+    let stopped = false;
+    Geolocation.watchPosition(
+      { enableHighAccuracy: true, timeout: LOC.browserMs, maximumAge: 0 },
+      (pos, err) => {
+        if (stopped) return;
+        if (err || !pos) { onError?.(err); return; }
+        emit(pos.coords, pos.timestamp);
+      },
+    ).then((cid) => { if (stopped) Geolocation.clearWatch({ id: cid }).catch(() => {}); else id = cid; })
+      .catch((e) => onError?.(e));
+    return () => { stopped = true; if (id !== null) Geolocation.clearWatch({ id }).catch(() => {}); };
+  }
+  if (!navigator.geolocation) return null;
+  const wid = navigator.geolocation.watchPosition(
+    (pos) => emit(pos.coords, pos.timestamp),
+    (err) => onError?.(err),
+    { enableHighAccuracy: true, maximumAge: 0, timeout: LOC.browserMs + 5000 },
+  );
+  return () => navigator.geolocation.clearWatch(wid);
+}
+
 export const PRECISE_LOCATION_M = 80;
 export function isPrecise(pos) {
   return Number.isFinite(pos?.accuracy) && pos.accuracy <= PRECISE_LOCATION_M;

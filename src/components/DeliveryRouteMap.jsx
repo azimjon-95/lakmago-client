@@ -65,6 +65,9 @@ export function DeliveryRouteMap({ restaurants = [], destination, me = null, onR
   const [mode, setMode] = useState('loading'); // loading | ready | failed
   const [route, setRoute] = useState({ state: 'idle' }); // idle | loading | ok | failed
   const [attempt, setAttempt] = useState(0);
+  const [routeAttempt, setRouteAttempt] = useState(0);
+  const modeRef = useRef('loading');
+  const routeRef = useRef('idle');
   const dest = pt(destination);
   const rests = restaurants.map((r) => ({ ...r, p: pt(r) })).filter((r) => r.p);
   const mePt = pt(me);
@@ -72,6 +75,18 @@ export function DeliveryRouteMap({ restaurants = [], destination, me = null, onR
   const destKey = dest ? dest.join(',') : '';
   const onRouteRef = useRef(onRoute);
   onRouteRef.current = onRoute;
+  modeRef.current = mode;
+  routeRef.current = route.state;
+
+  /* Internet qaytganda — xarita yoki marshrut yuklanmagan bo'lsa O'ZI qayta urinadi (mijoz bosmasa ham) */
+  useEffect(() => {
+    const back = () => {
+      if (modeRef.current === 'failed') setAttempt((n) => n + 1);
+      else if (routeRef.current === 'failed') setRouteAttempt((n) => n + 1);
+    };
+    window.addEventListener('online', back);
+    return () => window.removeEventListener('online', back);
+  }, []);
 
   /* Xarita — bir marta */
   useEffect(() => {
@@ -158,7 +173,7 @@ export function DeliveryRouteMap({ restaurants = [], destination, me = null, onR
     })();
     return () => { dead = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, restKey, destKey, destination?.label]);
+  }, [mode, restKey, destKey, destination?.label, routeAttempt]);
 
   /* Joriy GPS — ko'k nuqta va aniqlik doirasi */
   useEffect(() => {
@@ -188,12 +203,17 @@ export function DeliveryRouteMap({ restaurants = [], destination, me = null, onR
       {mode === 'loading' && <div className="drm__overlay"><span className="drm-spin" /><span>{t('addrMapLoading')}</span></div>}
       {mode === 'failed' && (
         <div className="drm__overlay drm__overlay--fail" role="status">
-          <span>{t('addrMapFailed')}</span>
+          <span>{typeof navigator !== 'undefined' && navigator.onLine === false ? t('addrMapOffline') : t('addrMapFailed')}</span>
           <button type="button" className="drm-retry" onClick={() => setAttempt((n) => n + 1)}>{t('addrGpsRetry')}</button>
         </div>
       )}
       {mode === 'ready' && route.state === 'loading' && <div className="drm-banner" role="status"><span className="drm-spin drm-spin--sm" />{t('addrRouteLoading')}</div>}
-      {mode === 'ready' && route.state === 'failed' && <div className="drm-banner drm-banner--warn" role="status">{t('addrRouteFailed')}</div>}
+      {mode === 'ready' && route.state === 'failed' && (
+        <div className="drm-banner drm-banner--warn" role="status">
+          <span>{t('addrRouteFailed')}</span>
+          <button type="button" className="drm-banner__btn" onClick={() => setRouteAttempt((n) => n + 1)}>{t('addrGpsRetry')}</button>
+        </div>
+      )}
       {mode === 'ready' && (
         <button type="button" className="drm-locate" onClick={locate} aria-label={t('addrMapLocate')}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="7" /><circle cx="12" cy="12" r="2.5" fill="#111" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg>

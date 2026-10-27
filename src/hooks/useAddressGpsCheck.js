@@ -1,67 +1,84 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getCurrentPosition } from '@/lib/location';
+import { runGpsCheck } from '@/lib/gpsCheck';
+import { createFixSource } from '@/lib/gpsSource';
 
 /*
- * ═══ JORIY GPS ↔ SAQLANGAN MANZIL ═══
+ * ═══ JORIY GPS ↔ SAQLANGAN MANZIL (yumshoq tekshiruv) ═══
+ *
+ * Mantiq — lib/gpsCheck.js (takroriy o'lchovlar, xato hisobga olinadi, barqarorlashishni kutadi, 30–50 m tebranish
+ * ogohlantirmaydi). Bu hook faqat uni interfeysga ulaydi va quyidagilarni KAFOLATLAYDI:
+ *
+ *  • Interfeys HECH QACHON qotmaydi: tekshiruv fonda; har bir holat cheklangan vaqtda yakunlanadi
+ *    (birinchi o'lchovga FIRST_FIX_CAP_MS, so'ng barqarorlashga BUDGET_MS).
+ *  • 8 s dan ko'p GPS topilmasa — `slow: true` (karta "qo'lda tanlang" ni taklif qiladi).
+ *  • Bekor qilish / qayta urinish / oyna yopilishi — eskirgan javob holatni buzmaydi, GPS oqimi YOPILADI (batareya).
  *
  * Holatlar (state):
- *   checking    — GPS so'ralmoqda
- *   ok          — mijoz saqlangan manzilda (100 m dan yaqin)
- *   far         — 100 m yoki undan UZOQDA → ogohlantirish
- *   lowacc      — GPS aniqligi past: xulosa chiqarib bo'lmaydi (yolg'on ogohlantirish bermaymiz)
- *   denied      — joylashuvga ruxsat berilmagan
- *   unavailable — signal yo'q / vaqt tugadi / joylashuv xizmati o'chiq
- *   unsupported — qurilma joylashuvni bilmaydi
+ *   checking    — o'lchanmoqda (pos/U/n — joriy baho; slow — uzoq kutilmoqda)
+ *   ok          — manzilda            near — xato hisobga olinganda ham ogohlantirishga yetmaydi (yumshoq)
+ *   far         — sezilarli uzoqda (xatodan keyin ham ≥ 100 m, ≥ 2 o'lchov)
+ *   lowacc      — barqarorlashmadi (aniqlik past) — ogohlantirish EMAS
+ *   denied / unsupported / unavailable — ruxsat yo'q / qo'llanmaydi / signal yo'q (vaqt tugadi)
  *   nopoint     — saqlangan manzilda koordinata yo'q
- *
- * Masofa — haqiqiy koordinatalar orasidagi geodezik (haversine) masofa, metrda.
  */
-export const FAR_M = 100;       // TZ: 100 m yoki undan uzoq — ogohlantirish
-export const MAX_ACC_M = 100;   // GPS xatosi shundan katta bo'lsa — natija ishonchsiz
+export const FIRST_FIX_CAP_MS = 36000; // Telegram ruxsat oynasini o'qish vaqti (30 s) + zaxira
+export const SLOW_MS = 8000;
 
-export function distanceM(a, b) {
-  const R = 6371000; const rad = (d) => (d * Math.PI) / 180;
-  const dLat = rad(b.lat - a.lat); const dLng = rad(b.lng - a.lng);
-  const s = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(s));
-}
-
-/**
- * Aniqlik past bo'lsa ham XULOSA aniq bo'lishi mumkin: masofadan xatoni ayirganda ham ≥ 100 m qolsa —
- * mijoz baribir uzoqda. Aks holda (xato ichida 100 m chegarasi kesishadi) — "lowacc".
- */
-export function classify(d, acc) {
-  if (!Number.isFinite(acc) || acc <= MAX_ACC_M) return d >= FAR_M ? 'far' : 'ok';
-  return d - acc >= FAR_M ? 'far' : 'lowacc';
-}
+const capped = (promise, ms) => new Promise((resolve, reject) => {
+  const t = setTimeout(() => reject(Object.assign(new Error('GPS vaqti tugadi'), { code: 'timeout' })), ms);
+  promise.then((v) => { clearTimeout(t); resolve(v); }, (e) => { clearTimeout(t); reject(e); });
+});
 
 export function useAddressGpsCheck(address, active) {
   const [res, setRes] = useState({ state: 'idle' });
-  const run = useRef(0);
+  const run = useRef({ id: 0, source: null, slow: null });
   const lat = Number(address?.lat); const lng = Number(address?.lng);
 
+  const stop = useCallback(() => {
+    run.current.id += 1;                       // eskirgan javoblar e'tiborsiz
+    clearTimeout(run.current.slow);
+    run.current.source?.close();               // GPS oqimi yopiladi
+    run.current.source = null;
+  }, []);
+
   const check = useCallback(async () => {
-    const id = ++run.current;
+    stop();
+    const id = run.current.id;
+    const cancelled = () => run.current.id !== id;
     if (!Number.isFinite(lat) || !Number.isFinite(lng) || (lat === 0 && lng === 0)) { setRes({ state: 'nopoint' }); return; }
-    // Avvalgi joylashuv (marker) qayta tekshirish paytida yo'qolib qolmasin
-    setRes((r) => ({ ...r, state: 'checking' }));
+
+    const source = createFixSource();
+    run.current.source = source;
+    // Qayta urinishda oldingi marker yo'qolib qolmasin
+    setRes((r) => ({ state: 'checking', pos: r.pos, U: r.U, d: r.d }));
+    run.current.slow = setTimeout(() => {
+      if (!cancelled()) setRes((r) => (r.state === 'checking' && !r.pos ? { ...r, slow: true } : r));
+    }, SLOW_MS);
+
     try {
-      const pos = await getCurrentPosition();
-      if (id !== run.current) return;
-      const d = distanceM(pos, { lat, lng });
-      const acc = Number.isFinite(pos.accuracy) ? pos.accuracy : null;
-      setRes({ state: classify(d, acc), pos, d, acc });
+      const out = await runGpsCheck({
+        target: { lat, lng },
+        source: { first: () => capped(source.first(), FIRST_FIX_CAP_MS), next: (ms) => source.next(ms) },
+        isCancelled: cancelled,
+        onUpdate: (u) => { if (!cancelled()) setRes({ state: 'checking', pos: { ...u.pos, accuracy: u.U }, U: u.U, d: u.d, n: u.n }); },
+      });
+      if (!out || cancelled()) return;
+      // pos.accuracy — BARQARORLASHGAN xato: xaritadagi aniqlik doirasi shuni ko'rsatadi
+      setRes({ state: out.state, pos: { ...out.pos, accuracy: out.U }, d: out.d, acc: out.U, n: out.n });
     } catch (e) {
-      if (id !== run.current) return;
+      if (cancelled()) return;
       const c = e?.code;
       setRes({ state: c === 'denied' ? 'denied' : c === 'unsupported' ? 'unsupported' : 'unavailable' });
+    } finally {
+      clearTimeout(run.current.slow);
+      if (!cancelled()) { source.close(); run.current.source = null; }
     }
-  }, [lat, lng]);
+  }, [lat, lng, stop]);
 
   useEffect(() => {
     if (active) check();
-    return () => { run.current += 1; };   // eskirgan javob holatni buzmasin
-  }, [active, check]);
+    return stop;
+  }, [active, check, stop]);
 
   return [res, check];
 }
