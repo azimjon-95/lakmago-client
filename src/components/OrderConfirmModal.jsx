@@ -207,40 +207,35 @@ export function OrderConfirmModal({
 
             <div className="ocm-addr__scroll">
 
-              <GpsCheck gps={gps} onRetry={recheckGps} onChoose={onChooseAddress} t={t} />
-
-              {gps.state === 'far' && !farAcked && (
-                <div className="ocm-gps-warn" role="status" aria-live="polite" data-testid="gps-far">
-                  <svg className="ocm-gps-warn__icon" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" /><path d="M12 9v4M12 17h.01" /></svg>
-                  <div>
-                    <b>{t('addrGpsFar').replace('{d}', formatDistance(gps.d, t))}</b>
-                    <span>{t('addrGpsFarSub')}</span>
-                    {/* Ogohlantirish to'smaydi: mijoz manzil to'g'riligini tasdiqlashi yoki o'zgartirishi mumkin */}
-                    <div className="ocm-gps-warn__actions">
-                      <button type="button" className="ocm-gps__btn ocm-gps__btn--solid" onClick={() => { haptic(); setFarAcked(true); }}>{t('addrGpsFarKeep')}</button>
-                      <button type="button" className="ocm-gps__btn" onClick={onChooseAddress} disabled={submitting}>{t('addrGpsFarChange')}</button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* GPS holati va ogohlantirish — BITTA ixcham blok (avval ikki karta edi: biri aylanishda xarita tagiga yashirinardi) */}
+              <GpsCheck
+                gps={gps}
+                acked={farAcked}
+                onKeep={() => { haptic(); setFarAcked(true); }}
+                onRetry={recheckGps}
+                onChoose={onChooseAddress}
+                busy={submitting}
+                t={t}
+              />
 
               <div className="ocm-addr-card2">
                 <div className="ocm-addr-card2__top">
                   <div className="ocm-addr-chip">
-                    <Icon name={labelIcon} size={18} color="var(--brand)" />
+                    <Icon name={labelIcon} size={17} color="var(--brand)" />
                     <span>{address.title || t('address')}</span>
                   </div>
                   <button type="button" className="ocm-addr-edit" onClick={onEditAddress} disabled={submitting}>
-                    <Icon name="edit" size={16} color="var(--ink)" />
+                    <Icon name="edit" size={15} color="var(--ink)" />
                     <span>{t('addrEditThis')}</span>
                   </button>
                 </div>
                 <div className="ocm-addr-text" data-testid="addr-text">{address.address || address.street}</div>
-                {address.city && <div className="ocm-addr-city">{address.city}</div>}
-                {address.note && (
-                  <div className="ocm-addr-note">
-                    <Icon name="info" size={16} color="var(--brand)" />
-                    <span><b>{t('courierNoteLabel')}:</b> {address.note}</span>
+                {/* Shahar va kuryerga izoh — bitta ixcham qator (2 qatorgacha), alohida katta quti emas */}
+                {(address.city || address.note) && (
+                  <div className="ocm-addr-sub">
+                    {address.city}
+                    {address.city && address.note ? ' · ' : ''}
+                    {address.note && <><b>{t('courierNoteLabel')}:</b> {address.note}</>}
                   </div>
                 )}
               </div>
@@ -310,15 +305,33 @@ export function OrderConfirmModal({
 }
 
 /*
- * Joriy GPS ↔ saqlangan manzil holati kartasi. Har holat aniq aytadi: nima bo'ldi va nima qilish mumkin.
+ * Joriy GPS ↔ saqlangan manzil holati — BITTA ixcham blok. Har holat aniq aytadi: nima bo'ldi va nima qilish mumkin.
  * Muammoli holatlarda (GPS yo'q / aniqlik past / uzoq kutilmoqda) doim ikki yo'l bor: qayta urinish VA manzilni
- * qo'lda tanlash — interfeys hech qachon "boshi berk" bo'lmaydi.
+ * qo'lda tanlash — interfeys hech qachon "boshi berk" bo'lmaydi. Sezilarli uzoqlikda esa ogohlantirish shu blokning
+ * o'zi bo'lib, "Manzil to'g'ri" / "O'zgartirish" amallarini beradi (buyurtmani to'smaydi).
  */
-function GpsCheck({ gps, onRetry, onChoose, t }) {
+function GpsCheck({ gps, acked, onKeep, onRetry, onChoose, busy, t }) {
   const st = gps.state;
   if (st === 'idle' || st === 'nopoint') return null;
   const dist = Number.isFinite(gps.d) ? formatDistance(gps.d, t) : '';
   const accM = Number.isFinite(gps.acc ?? gps.U) ? formatDistance(gps.acc ?? gps.U, t) : '';
+
+  if (st === 'far' && !acked) {
+    return (
+      <div className="ocm-gps-warn" role="status" aria-live="polite" data-testid="gps-far">
+        <svg className="ocm-gps-warn__icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" /><path d="M12 9v4M12 17h.01" /></svg>
+        <div className="ocm-gps-warn__body">
+          <b>{t('addrGpsFar').replace('{d}', dist)}</b>
+          <span>{t('addrGpsFarSub')}</span>
+          <div className="ocm-gps-warn__actions">
+            <button type="button" className="ocm-gps__btn ocm-gps__btn--solid" onClick={onKeep}>{t('addrGpsFarKeep')}</button>
+            <button type="button" className="ocm-gps__btn" onClick={onChoose} disabled={busy}>{t('addrGpsFarChange')}</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const stabilizing = st === 'checking' && Number.isFinite(gps.U) && gps.U > 50;
   const view = {
     checking: gps.slow
@@ -337,8 +350,8 @@ function GpsCheck({ gps, onRetry, onChoose, t }) {
     <div className={`ocm-gps ocm-gps--${view.tone}`} role="status" aria-live="polite" data-testid={`gps-${st}${gps.slow ? '-slow' : ''}`}>
       <span className="ocm-gps__icon" aria-hidden="true">
         {view.tone === 'ok'
-          ? <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
-          : <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" /></svg>}
+          ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+          : <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" /></svg>}
       </span>
       <div className="ocm-gps__txt">
         <b>{view.title}</b>

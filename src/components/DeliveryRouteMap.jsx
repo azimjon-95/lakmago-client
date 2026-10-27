@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '@/api';
 import { loadYmaps } from '@/lib/yandexMaps';
+import { distanceM } from '@/lib/gpsCheck';
 import { useT } from '@/i18n';
 import './DeliveryRouteMap.css';
 
@@ -16,6 +17,9 @@ import './DeliveryRouteMap.css';
  * • Xarita yuklanmasa (kalit yo'q / tarmoq) — "Xarita yuklanmadi" (sxematik soxta xarita yo'q).
  */
 const DEFAULT_CENTER = [41.311081, 69.240562];
+// Mijozning GPS nuqtasi manzildan shundan uzoq bo'lsa — ko'rinish chegarasiga KIRITILMAYDI: aks holda (masalan 2000 km)
+// xarita butun qit'aga kichrayib, restoran, manzil va marshrut ko'rinmay qoladi. Uzoqlik ogohlantirishda aytiladi.
+const FIT_ME_MAX_M = 3000;
 const ORANGE = '#FF6A13';
 const BLUE = '#2563EB';
 const ok = (p) => p && Number.isFinite(Number(p.lat)) && Number.isFinite(Number(p.lng));
@@ -38,6 +42,8 @@ const markup = {
   dest: (label) => `<div class="drm-pin"><span class="drm-dest"><span class="drm-dest__core"></span></span>${label ? `<span class="drm-chip">${esc(label)}</span>` : ''}</div>`,
   me: (label) => `<div class="drm-pin"><span class="drm-me__halo"></span><span class="drm-me__dot"></span><span class="drm-chip drm-chip--me">${esc(label)}</span></div>`,
   route: (dist, time) => `<div class="drm-pin"><div class="drm-eta"><span class="drm-eta__pill">${CAR}<b>${esc(dist)}</b></span>${time ? `<span class="drm-eta__time">${esc(time)}</span>` : ''}</div></div>`,
+  // Past (ixcham) xaritada: yorliq chiziq ustida emas, burchakda — markerlarni yopmaydi
+  routeFixed: (dist, time) => `<div class="drm-eta drm-eta--row"><span class="drm-eta__pill">${CAR}<b>${esc(dist)}</b>${time ? `<i>·</i><span>${esc(time)}</span>` : ''}</span></div>`,
 };
 
 /** Haqiqiy avtomobil marshruti (Yandex Router). Muvaffaqiyatsiz bo'lsa — xato (zaxira chiziq YO'Q). */
@@ -66,6 +72,7 @@ export function DeliveryRouteMap({ restaurants = [], destination, me = null, onR
   const [route, setRoute] = useState({ state: 'idle' }); // idle | loading | ok | failed
   const [attempt, setAttempt] = useState(0);
   const [routeAttempt, setRouteAttempt] = useState(0);
+  const [compact, setCompact] = useState(false);   // xarita balandligi < 230 px: yorliq burchakda
   const modeRef = useRef('loading');
   const routeRef = useRef('idle');
   const dest = pt(destination);
@@ -126,17 +133,46 @@ export function DeliveryRouteMap({ restaurants = [], destination, me = null, onR
     map.geoObjects.add(objs[key]);
   }, []);
 
-  const fit = useCallback((extra = []) => {
+  const lastFit = useRef('');
+  /*
+   * Ko'rinish chegarasi: manzil, restoran(lar), HAQIQIY marshrut va (yaqin bo'lsa) mijozning GPS nuqtasi.
+   * Zaxira (zoomMargin) xarita o'lchamiga mos: kichik xaritada ham markerlar va yozuvlar kesilmaydi.
+   * force=false bo'lsa — chegara o'zgarmagan bo'lsa qayta chizmaydi (GPS har yangilanganda xarita "sakramasin").
+   */
+  const fit = useCallback((force = true) => {
     const s = st.current; if (!s) return;
-    const pts = [dest, mePt, ...rests.map((r) => r.p), ...s.lines.flatMap((l) => l.points), ...extra].filter(Boolean);
+    const meNear = mePt && dest && distanceM({ lat: mePt[0], lng: mePt[1] }, { lat: dest[0], lng: dest[1] }) <= FIT_ME_MAX_M;
+    const pts = [dest, meNear ? mePt : null, ...rests.map((r) => r.p), ...s.lines.flatMap((l) => l.points)].filter(Boolean);
     if (!pts.length) return;
-    if (pts.length === 1) { s.map.setCenter(pts[0], 15, { duration: 250 }); return; }
     const lats = pts.map((p) => p[0]); const lngs = pts.map((p) => p[1]);
-    // Zaxira: tepada marker va yozuvlar (~70 px), o'ngda "Restoran"/"Siz" yozuvlari
+    const key = [Math.min(...lats), Math.min(...lngs), Math.max(...lats), Math.max(...lngs)].map((n) => n.toFixed(5)).join(',');
+    if (!force && key === lastFit.current) return;
+    lastFit.current = key;
+    if (pts.length === 1) { s.map.setCenter(pts[0], 15, { duration: 250 }); return; }
+    const w = boxRef.current?.clientWidth || 390; const h = boxRef.current?.clientHeight || 240;
+    const top = Math.round(Math.min(64, Math.max(46, h * 0.27)));      // marker boshi + yozuv
+    const bottom = Math.round(Math.min(40, Math.max(26, h * 0.15)));   // Yandex logotipi/shartlar
+    const right = Math.round(Math.min(104, Math.max(70, w * 0.27)));   // "Restoran"/"Siz" yozuvlari
     s.map.setBounds([[Math.min(...lats), Math.min(...lngs)], [Math.max(...lats), Math.max(...lngs)]],
-      { checkZoomRange: true, zoomMargin: [72, 96, 40, 48], duration: 300 });
+      { checkZoomRange: true, zoomMargin: [top, right, bottom, 40], duration: 250 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [destKey, restKey, mePt?.[0], mePt?.[1]]);
+  const fitRef = useRef(fit);
+  fitRef.current = fit;
+
+  /* Xarita o'lchami o'zgarsa (klaviatura, pastdagi blok balandligi, burilish) — qayta moslash */
+  useEffect(() => {
+    if (mode !== 'ready' || !boxRef.current || typeof ResizeObserver === 'undefined') return undefined;
+    let timer = null;
+    setCompact(boxRef.current.clientHeight < 230);
+    const ro = new ResizeObserver(() => {
+      setCompact((boxRef.current?.clientHeight || 999) < 230);
+      clearTimeout(timer);
+      timer = setTimeout(() => { try { st.current?.map?.container?.fitToViewport?.(); } catch { /* */ } fitRef.current(true); }, 140);
+    });
+    ro.observe(boxRef.current);
+    return () => { clearTimeout(timer); ro.disconnect(); };
+  }, [mode]);
 
   /* Restoran va manzil markerlari + HAQIQIY marshrut */
   useEffect(() => {
@@ -166,14 +202,24 @@ export function DeliveryRouteMap({ restaurants = [], destination, me = null, onR
       const main = good.reduce((a, b) => (b.meters > a.meters ? b : a));
       const mid = main.points[Math.floor(main.points.length / 2)];
       const mins = main.seconds != null ? Math.max(1, Math.round(main.seconds / 60)) : null;
-      put('eta', mid, markup.route(formatDistance(main.meters, t), mins != null ? `${mins} ${t('addrMapMin')}` : ''), 40, 30);
-      setRoute({ state: 'ok', meters: main.meters, seconds: main.seconds, partial: good.length < rests.length });
+      setRoute({
+        state: 'ok', meters: main.meters, seconds: main.seconds, partial: good.length < rests.length,
+        mid, distText: formatDistance(main.meters, t), timeText: mins != null ? `${mins} ${t('addrMapMin')}` : '',
+      });
       onRouteRef.current?.({ meters: main.meters, seconds: main.seconds });
       fit();
     })();
     return () => { dead = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, restKey, destKey, destination?.label, routeAttempt]);
+
+  /* Marshrut yorlig'i: oddiy xaritada chiziq ustida (maket), past xaritada burchakdagi qatorda */
+  useEffect(() => {
+    if (mode !== 'ready' || !st.current) return;
+    if (route.state === 'ok' && !compact && route.mid) put('eta', route.mid, markup.route(route.distText, route.timeText), 40, 30);
+    else put('eta', null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, route, compact]);
 
   /* Joriy GPS — ko'k nuqta va aniqlik doirasi */
   useEffect(() => {
@@ -187,7 +233,7 @@ export function DeliveryRouteMap({ restaurants = [], destination, me = null, onR
       });
       s.map.geoObjects.add(s.objs.acc);
     }
-    if (mePt) fit();
+    if (mePt) fit(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, mePt?.[0], mePt?.[1], me?.accuracy]);
 
@@ -206,6 +252,9 @@ export function DeliveryRouteMap({ restaurants = [], destination, me = null, onR
           <span>{typeof navigator !== 'undefined' && navigator.onLine === false ? t('addrMapOffline') : t('addrMapFailed')}</span>
           <button type="button" className="drm-retry" onClick={() => setAttempt((n) => n + 1)}>{t('addrGpsRetry')}</button>
         </div>
+      )}
+      {mode === 'ready' && route.state === 'ok' && compact && (
+        <div className="drm-eta-fixed" dangerouslySetInnerHTML={{ __html: markup.routeFixed(route.distText, route.timeText) }} />
       )}
       {mode === 'ready' && route.state === 'loading' && <div className="drm-banner" role="status"><span className="drm-spin drm-spin--sm" />{t('addrRouteLoading')}</div>}
       {mode === 'ready' && route.state === 'failed' && (

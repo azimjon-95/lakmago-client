@@ -364,62 +364,126 @@
   .ocm-addr-alt__btn.is-attention { animation: none; }
 }
 
-/* ═══ Manzil qadami: haqiqiy xarita + GPS solishtirish (maket: "Shu manzilga yetkazamizmi?") ═══ */
-.ocm-sheet--map { max-height: 94vh; max-height: 94dvh; }
+/* ═══ Manzil qadami: haqiqiy xarita + GPS solishtirish — IXCHAM (hamma narsa aylanmasdan ko'rinadi) ═══
+ *
+ * Tuzilma (yuqoridan pastga):  sarlavha · XARITA (qolgan balandlikni o'zi egallaydi) · GPS/ogohlantirish bloki ·
+ * manzil kartasi · Jami · "Ha, shu manzilga" · [Boshqa manzil | Tahrirlash].
+ * Sig'masa avval XARITA kichrayadi (min 170 px), kontent emas; kontent baribir sig'masa (juda past ekran) pastdagi
+ * soya "yana bor" deb ko'rsatadi — hech narsa jimgina yashirinib qolmaydi.
+ */
+.ocm-sheet--map {
+  /* Telegram tugmalari ostidan boshlanadi (handle va qadam nuqtalari yopilmaydi) — boshqa oynalar kabi */
+  height: calc(100dvh - var(--tg-top-offset, 0px) - 6px);
+  max-height: 860px;
+  padding: 8px 18px calc(10px + var(--tg-bottom-offset, 0px));
+}
+.ocm-sheet--map .ocm-handle { margin: 0 auto 6px; }
+.ocm-sheet--map .ocm-steps { margin: -2px 0 6px; }
+.ocm-sheet--map .ocm-head--addr { margin-bottom: 8px; gap: 8px; }
+.ocm-sheet--map .ocm-head__title--big {
+  flex: 1; min-width: 0; text-align: center; font-size: clamp(15px, 4.2vw, 17px); line-height: 1.2;
+}
+.ocm-sheet--map .ocm-close { width: 36px; height: 36px; flex: none; }
+
+/* Xarita: qolgan joyni egallaydi (flex 1 1 0), faqat kerak bo'lsa 170 px gacha kichrayadi */
 .ocm-map {
-  height: clamp(200px, 30vh, 280px); margin: 0 -18px 12px; overflow: hidden; flex: none;
+  flex: 1 1 0; min-height: 170px; margin: 0 -18px 8px; overflow: hidden; position: relative;
   border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
 }
-/* Maketdagidek: sarlavha BIR qatorda, markazda; chapda "orqaga", o'ngda "yopish" */
-.ocm-sheet--map .ocm-head--addr { margin-bottom: 12px; }
-.ocm-sheet--map .ocm-head__title--big {
-  flex: 1; min-width: 0; text-align: center; font-size: clamp(15.5px, 4.4vw, 18px); line-height: 1.2;
-}
-.ocm-sheet--map .ocm-close { width: 40px; height: 40px; flex: none; }
-.ocm-sheet--map .ocm-addr__scroll { gap: 0; }
-.ocm-sheet--map .ocm-addr-text { margin-top: 0; font-size: 18px; line-height: 1.3; }
-.ocm-sheet--map .ocm-addr-city { font-size: 14px; }
-.ocm-sheet--map .ocm-addr-total { flex: none; margin: 4px 4px 10px; }
-.ocm-sheet--map .ocm-addr-yes { min-height: 54px; font-size: 18px; }
-.ocm-sheet--map .ocm-addr-alt__btn { min-height: 50px; }
 
+/* Pastki aylanuvchi qism: odatda AYLANMAYDI (hammasi sig'adi); sig'masa pastda soya ko'rsatadi */
+.ocm-sheet--map .ocm-addr__scroll {
+  flex: 0 1 auto; min-height: 0; gap: 0; padding-bottom: 2px; overflow-y: auto; overscroll-behavior: contain;
+  background:
+    linear-gradient(var(--surface) 30%, rgba(255, 255, 255, 0)) center top / 100% 22px no-repeat local,
+    linear-gradient(rgba(255, 255, 255, 0), var(--surface) 70%) center bottom / 100% 22px no-repeat local,
+    radial-gradient(farthest-side at 50% 0, rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0)) center top / 100% 9px no-repeat scroll,
+    radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0)) center bottom / 100% 9px no-repeat scroll;
+}
+
+/* GPS holati kartasi (ixcham) */
 .ocm-gps {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 14px; margin-bottom: 10px; border-radius: 16px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 8px 12px; margin-bottom: 8px; border-radius: 14px;
   background: #F4F6FA; border: 1px solid #E6EAF2;
 }
 .ocm-gps__icon {
-  flex: none; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  flex: none; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
   background: #DCFCE7; color: #16A34A;
 }
 .ocm-gps--ok .ocm-gps__icon { background: #22A55B; }
 .ocm-gps--warn { background: #FFF8EC; border-color: #FBE3B8; }
 .ocm-gps--warn .ocm-gps__icon { background: #FEF0D7; color: #D97706; }
-.ocm-gps__txt { flex: 1 1 180px; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.ocm-gps__txt b { font-size: 15px; font-weight: 700; color: var(--ink); }
-.ocm-gps__txt span { font-size: 13px; line-height: 1.35; color: var(--muted); }
-.ocm-gps__spin { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 3px solid rgba(var(--brand-rgb), 0.18); border-top-color: var(--brand); animation: drm-rot 0.8s linear infinite; }
+.ocm-gps__txt { flex: 1 1 150px; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.ocm-gps__txt b { font-size: 14px; font-weight: 700; color: var(--ink); line-height: 1.25; }
+.ocm-gps__txt span { font-size: 12.5px; line-height: 1.3; color: var(--muted); }
+.ocm-gps__spin { flex: none; width: 20px; height: 20px; border-radius: 50%; border: 3px solid rgba(var(--brand-rgb), 0.18); border-top-color: var(--brand); animation: drm-rot 0.8s linear infinite; }
 .ocm-gps__actions { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
-.ocm-gps__btn { flex: none; padding: 8px 12px; border-radius: 12px; border: 1.5px solid rgba(var(--brand-rgb), 0.35); background: #fff; color: var(--brand); font-size: 13px; font-weight: 700; }
+.ocm-gps__btn {
+  flex: none; min-height: 34px; padding: 6px 12px; border-radius: 11px; border: 1.5px solid rgba(var(--brand-rgb), 0.35);
+  background: #fff; color: var(--brand); font-size: 13px; font-weight: 700;
+}
+.ocm-gps__btn--solid { background: var(--brand); color: var(--brand-text); border-color: var(--brand); }
+.ocm-gps__btn:disabled { opacity: 0.5; }
 
+/* Ogohlantirish (sezilarli uzoqlik) — o'sha blokning o'zi, maketdagi to'q sariq-pushti fon */
 .ocm-gps-warn {
-  display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; margin-bottom: 12px; border-radius: 16px;
+  display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; margin-bottom: 8px; border-radius: 14px;
   background: #FDEEE7; border: 1px solid #F8D5C4; color: #E4570E;
 }
 .ocm-gps-warn__icon { flex: none; margin-top: 1px; }
-.ocm-gps-warn div { display: flex; flex-direction: column; gap: 3px; }
-.ocm-gps-warn b { font-size: 14.5px; line-height: 1.3; font-weight: 700; color: #E4570E; }
-.ocm-gps-warn span { font-size: 13px; color: #6B7280; }
+.ocm-gps-warn__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ocm-gps-warn__body b { font-size: 14px; line-height: 1.3; font-weight: 700; color: #E4570E; }
+.ocm-gps-warn__body > span { font-size: 12.5px; color: #6B7280; }
+.ocm-gps-warn .ocm-gps-warn__actions { display: flex; flex-direction: row; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.ocm-gps-warn__actions .ocm-gps__btn { flex: 1 1 auto; text-align: center; }
 
-.ocm-addr-card2 { padding: 12px 14px; margin-bottom: 10px; border-radius: 18px; background: #fff; border: 1.5px solid var(--line); }
-.ocm-addr-card2__top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
-.ocm-addr-card2 .ocm-addr-chip { margin: 0; }
+/* Manzil kartasi (ixcham): belgi + "Tahrirlash" bir qatorda, manzil, ostida shahar · izoh */
+.ocm-addr-card2 { padding: 10px 12px; margin-bottom: 8px; border-radius: 16px; background: #fff; border: 1.5px solid var(--line); }
+.ocm-addr-card2__top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.ocm-addr-card2 .ocm-addr-chip { margin: 0; padding: 4px 10px; font-size: 14px; }
 .ocm-addr-edit {
-  flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 12px;
-  background: #F3F4F6; color: var(--ink); font-size: 13.5px; font-weight: 600; border: 0;
+  flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 11px;
+  background: #F3F4F6; color: var(--ink); font-size: 13px; font-weight: 600; border: 0;
+}
+.ocm-sheet--map .ocm-addr-text { margin-top: 0; font-size: 17px; line-height: 1.3; }
+.ocm-addr-sub {
+  margin-top: 3px; font-size: 13px; line-height: 1.35; color: var(--muted);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere;
+}
+.ocm-addr-sub b { color: var(--ink); font-weight: 600; }
+
+/* Jami, asosiy tugma va ikkinchi darajali tugmalar — pastda, doim ko'rinadi, ixcham */
+.ocm-sheet--map .ocm-addr-total { flex: none; margin: 2px 4px 6px; }
+.ocm-sheet--map .ocm-addr-total b { font-size: 18px; }
+.ocm-sheet--map .ocm-addr-yes { min-height: 52px; font-size: 17px; border-radius: 16px; }
+.ocm-sheet--map .ocm-addr-alt { margin-top: 8px; gap: 8px; }
+.ocm-sheet--map .ocm-addr-alt__btn { min-height: 44px; padding: 8px; font-size: 14.5px; border-radius: 14px; }
+.ocm-sheet--map .ocm-notice { margin: 0 0 8px; padding: 8px 12px; font-size: 13px; }
+
+/* ── PAST EKRANLAR (iPhone SE, kichik Android): hamma narsa aylanmasdan sig'ishi uchun yana ixchamroq ── */
+@media (max-height: 720px) {
+  .ocm-sheet--map .ocm-head__title--big { font-size: clamp(14.5px, 4.1vw, 16.5px); }
+  .ocm-sheet--map .ocm-close { width: 32px; height: 32px; }
+  .ocm-sheet--map .ocm-head--addr { margin-bottom: 6px; }
+  .ocm-map { min-height: 132px; margin-bottom: 6px; }
+  .ocm-gps, .ocm-gps-warn { padding: 7px 10px; margin-bottom: 6px; }
+  .ocm-gps__icon { width: 30px; height: 30px; }
+  .ocm-gps-warn__icon { width: 24px; height: 24px; }
+  .ocm-gps-warn__body b { font-size: 13.5px; }
+  .ocm-gps-warn .ocm-gps-warn__actions { margin-top: 4px; }
+  .ocm-gps__btn { min-height: 32px; padding: 5px 10px; }
+  .ocm-addr-card2 { padding: 8px 10px; margin-bottom: 6px; }
+  .ocm-addr-card2__top { margin-bottom: 4px; }
+  .ocm-sheet--map .ocm-addr-text { font-size: 16px; }
+  .ocm-addr-sub { -webkit-line-clamp: 1; margin-top: 2px; }
+  .ocm-sheet--map .ocm-addr-total { margin: 0 4px 4px; }
+  .ocm-sheet--map .ocm-addr-total b { font-size: 17px; }
+  .ocm-sheet--map .ocm-addr-yes { min-height: 48px; font-size: 16px; }
+  .ocm-sheet--map .ocm-addr-alt { margin-top: 6px; }
+  .ocm-sheet--map .ocm-addr-alt__btn { min-height: 40px; font-size: 14px; }
+}
+@media (max-width: 380px) {
+  .ocm-sheet--map .ocm-addr-alt__btn { font-size: 13.5px; gap: 6px; padding: 8px 6px; }
+  .ocm-sheet--map .ocm-addr-alt__btn span { white-space: nowrap; }
 }
 @media (prefers-reduced-motion: reduce) { .ocm-gps__spin { animation: none; } }
-
-.ocm-gps__btn--solid { background: var(--brand); color: var(--brand-text); border-color: var(--brand); }
-.ocm-gps__btn:disabled { opacity: 0.5; }
-.ocm-gps-warn .ocm-gps-warn__actions { display: flex; flex-direction: row; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-.ocm-gps-warn__actions .ocm-gps__btn { flex: 1 1 auto; text-align: center; }
