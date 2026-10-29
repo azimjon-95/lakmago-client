@@ -1,0 +1,24 @@
+.cdlg-overlay {
+  position: fixed; inset: 0; z-index: 1200; background: rgba(0, 0, 0, 0.5);
+  display: flex; align-items: flex-end; justify-content: center;
+  padding: 0 12px calc(14px + var(--tg-bottom-offset, 0px) + env(safe-area-inset-bottom, 0px));
+  animation: cdlg-fade 0.18s ease-out;
+}
+.cdlg {
+  width: 100%; max-width: 440px; background: var(--surface, #fff); border-radius: 22px; padding: 20px 18px 16px;
+  box-shadow: 0 -10px 40px -12px rgba(0, 0, 0, 0.35); animation: cdlg-up 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.cdlg__title { margin: 0 0 8px; font-size: 18px; font-weight: 800; color: var(--ink); }
+.cdlg__body { margin: 0 0 14px; font-size: 14px; line-height: 1.5; color: var(--muted); }
+.cdlg__error { margin: -4px 0 12px; padding: 9px 12px; border-radius: 12px; background: #FEF2F2; color: #B91C1C; font-size: 13px; font-weight: 600; }
+.cdlg__actions { display: flex; gap: 10px; }
+.cdlg__btn {
+  flex: 1; min-height: 48px; border-radius: 14px; border: 1.5px solid var(--line); background: #fff; color: var(--ink);
+  font-size: 15px; font-weight: 700; cursor: pointer;
+}
+.cdlg__btn--primary { flex: 1.3; border-color: var(--brand); background: var(--brand); color: var(--brand-text, #fff); }
+.cdlg__btn--danger { border-color: #DC2626; background: #DC2626; color: #fff; }
+.cdlg__btn:disabled { opacity: 0.6; }
+@keyframes cdlg-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cdlg-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .cdlg-overlay, .cdlg { animation: none; } }

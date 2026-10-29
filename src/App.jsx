@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
 import { HomePage } from '@/pages/Home/HomePage'; // asosiy sahifa — darhol yuklanadi
 // Qolgan sahifalar lazy — kerak bo'lganda yuklanadi (bundle kichrayadi, tez ochiladi)
 const RestaurantPage = lazy(() => import('@/pages/Restaurant/RestaurantPage').then((m) => ({ default: m.RestaurantPage })));
@@ -34,18 +35,6 @@ import { WeddingHost } from '@/components/WeddingHost/WeddingHost';
 import { BlockedGate } from '@/components/Restrictions/Restrictions';
 import { initSectionTheme } from '@/store/section';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60_000,        // 5 daqiqa "yangi" — keraksiz refetch bo'lmaydi
-      gcTime: 30 * 60_000,          // 30 daqiqa cache saqlanadi (tez qaytish)
-      refetchOnWindowFocus: false,   // fokusda qayta so'ramaydi
-      refetchOnReconnect: true,      // internet tiklanganda yangilaydi
-      retry: 2,                      // xatoda 2 marta qayta urinadi
-      retryDelay: (n) => Math.min(1000 * 2 ** n, 8000),
-    },
-  },
-});
 
 // Global suzuvchi elementlar (buyurtma nishoni + chat) — faqat
 // bosh sahifada ko'rinadi, ichki sahifalarda (restoran, savat,
@@ -156,6 +145,7 @@ function AppInner({ authMode = 'telegram' }) {
         phone: latest.phone ?? profile.phone ?? null,
         addresses: latest.addresses.length ? latest.addresses : profile.addresses ?? [],
         verified: true,
+        isDemo: Boolean(profile.isDemo),   // App Store demo hisobi (server /users/me beradi)
         // Admin naqd to'lovni o'chirgan bo'lsa — savatda faqat karta (sababi bilan)
         cashDisabled: profile.cashDisabled?.active
           ? { active: true, reason: profile.cashDisabled.reason || '', at: profile.cashDisabled.at || null }

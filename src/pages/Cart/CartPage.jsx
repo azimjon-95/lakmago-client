@@ -499,7 +499,7 @@ export function CartPage() {
     const load = (retry = true) => api.getPaymentStatus()
       .then((st) => {
         if (cancelled) return;
-        setProviders(Array.isArray(st?.available) ? st.available : []);
+        setProviders(!user?.isDemo && Array.isArray(st?.available) ? st.available : []);   // demo hisob: faqat naqd (hech narsa olinmaydi)
         setProvidersFailed(false);
         setProvidersLoaded(true);
       })
@@ -512,7 +512,7 @@ export function CartPage() {
 
     load();
     return () => { cancelled = true; };
-  }, []);
+  }, [user?.isDemo]);   // demo belgisi keyinroq (auth tugagach) aniqlansa — qayta hisoblanadi
 
   /*
    * ═══ SAQLANGAN KARTALAR OLIB TASHLANDI ═══

@@ -9,6 +9,9 @@ import { api } from '@/api';
 import { getTelegram, haptic } from '@/lib/telegram';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { GuestHero } from '@/components/AuthGate/LokmaSignIn';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { useCapabilities } from '@/lib/capabilities';
+import { signOut } from '@/lib/session';
 import './Profile.css';
 
 export function ProfilePage() {
@@ -47,6 +50,33 @@ export function ProfilePage() {
   const [showAddAddress, setShowAddAddress] = useState(false);
   const [addrTitle, setAddrTitle] = useState('Uy');
   const [addrText, setAddrText] = useState('');
+
+  /*
+   * HISOB: chiqish (HAMMA mijoz uchun) va hisobni o'chirish (App Store 5.1.1(v)). O'chirish tugmasi FAQAT server
+   * `capabilities.accountDeletion` desa va demo hisob bo'lmasa ko'rinadi (eski serverda yashirin — haqiqiy mijozlarga ta'sir yo'q).
+   */
+  const caps = useCapabilities();
+  const isAuthed = useUser((s) => s.authStatus) === 'done';
+  const [confirm, setConfirm] = useState(null);   // 'logout' | 'delete' | null
+  const [busy, setBusy] = useState(false);
+  const [accErr, setAccErr] = useState('');
+  const closeConfirm = () => { if (!busy) { setConfirm(null); setAccErr(''); } };
+  async function doLogout() {
+    setBusy(true);
+    try { await signOut(); } finally { setBusy(false); setConfirm(null); }
+    navigate('/');
+  }
+  async function doDelete() {
+    setBusy(true); setAccErr('');
+    try {
+      await api.deleteAccount();
+      await signOut();
+      setConfirm(null);
+      navigate('/');
+    } catch (e) {
+      setAccErr(e?.status === 409 ? t('acc_delete_active') : t('acc_delete_fail'));
+    } finally { setBusy(false); }
+  }
 
   function saveName() { updateUser({ firstName, lastName }); setEditingField(null); }
   function savePhone() { updateUser({ phone }); setEditingField(null); }
@@ -222,6 +252,39 @@ export function ProfilePage() {
           </button>
         )}
       </div>
+
+      {isAuthed && (
+        <div className="profile-section">
+          <div className="profile-section__label">{t('acc_title')}</div>
+          {user.isDemo && <p className="profile-demo-note" data-testid="profile-demo-note">{t('demo_profile_note')}</p>}
+          <div className="profile-list">
+            <button type="button" onClick={() => setConfirm('logout')} className="profile-row" data-testid="logout-row">
+              <Icon name="logout" size={18} color="var(--brand)" />
+              <div className="profile-row__body"><div className="profile-row__value">{t('logout')}</div></div>
+              <Icon name="chevronRight" size={17} color="var(--muted)" />
+            </button>
+            {caps.accountDeletion && !user.isDemo && (
+              <button type="button" onClick={() => setConfirm('delete')} className="profile-row" data-testid="delete-row">
+                <Icon name="trash" size={18} color="#DC2626" />
+                <div className="profile-row__body">
+                  <div className="profile-row__value" style={{ color: '#DC2626' }}>{t('acc_delete')}</div>
+                  <div className="profile-row__label">{t('acc_delete_hint')}</div>
+                </div>
+                <Icon name="chevronRight" size={17} color="var(--muted)" />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {confirm === 'logout' && (
+        <ConfirmDialog title={t('acc_logout_title')} body={t('acc_logout_sub')} confirmLabel={t('logout')} cancelLabel={t('cancel')}
+          busy={busy} onConfirm={doLogout} onCancel={closeConfirm} />
+      )}
+      {confirm === 'delete' && (
+        <ConfirmDialog danger title={t('acc_delete_title')} body={t('acc_delete_body')} confirmLabel={t('acc_delete_yes')} cancelLabel={t('cancel')}
+          busy={busy} error={accErr} onConfirm={doDelete} onCancel={closeConfirm} />
+      )}
 
       <div style={{ flex: 1 }} />
       <BottomNav />

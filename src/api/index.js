@@ -368,6 +368,10 @@ export const api = {
   // profilni shu orqali olamiz (Mini App'dagi kabi Telegram.WebApp
   // obyekti mavjud emas, undan lokal o'qib bo'lmaydi).
   getMe: () => apiFetch('/users/me', { method: 'GET' }),
+  // Hisobni o'chirish (App Store 5.1.1(v)) — faqat server qo'llasa (capabilities.accountDeletion)
+  deleteAccount: () => apiFetch('/users/me', { method: 'DELETE', body: JSON.stringify({ confirm: true }) }),
+  // Demo hisob uchun demo restoran kartochkasi
+  getDemoRestaurant: () => apiFetch('/demo/restaurant', { method: 'GET' }),
   updateMe: (patch) => apiFetch('/users/me', { method: 'PATCH', body: JSON.stringify(patch) }),
 
   // ===== Buyurtma =====

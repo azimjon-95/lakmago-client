@@ -6,6 +6,8 @@ import {
   applyLoginTokens, clearTgLoginCache, openExternal, pollTgLogin, prefetchTgLogin, profileFromLogin,
 } from '@/lib/tgLinkAuth';
 import './LokmaSignIn.css';
+import { DemoLoginForm } from './DemoLoginForm';
+import { useCapabilities, isNativeApp } from '@/lib/capabilities';
 
 /*
  * ═══ LOKMA GO — KREATIV KIRISH (native ilova va brauzer) ═══
@@ -32,6 +34,10 @@ export function LokmaSignIn({ reason = 'order', onLoggedIn, onOtherMethod }) {
   const [left, setLeft] = useState(0);
   const [name, setName] = useState('');
   const [showReopen, setShowReopen] = useState(false);
+  // App Store tekshiruvi uchun demo kirish: faqat iOS/Android ilova VA server yoqqanda (capabilities); haqiqiy mijozlar ko'rmaydi
+  const [showDemo, setShowDemo] = useState(false);
+  const caps = useCapabilities();
+  const demoAvailable = caps.demoLogin && isNativeApp();
 
   const req = useRef(null);
   const alive = useRef(true);
@@ -139,6 +145,17 @@ export function LokmaSignIn({ reason = 'order', onLoggedIn, onOtherMethod }) {
   const sub = t(reason === 'profile' ? 'lsi_sub_profile' : 'lsi_sub_order');
 
   /* ───────────── Muvaffaqiyat ───────────── */
+  const onDemoOk = (data) => {
+    applyLoginTokens(data);
+    clearTgLoginCache();
+    const profile = profileFromLogin(data);
+    setName(profile.firstName || '');
+    setShowDemo(false);
+    setPhase('success');
+    haptic?.('success');
+    setTimeout(() => { if (alive.current) doneRef.current?.(profile); }, 900);
+  };
+
   if (phase === 'success') {
     return (
       <div className="lsi lsi--center" role="status">
@@ -203,6 +220,9 @@ export function LokmaSignIn({ reason = 'order', onLoggedIn, onOtherMethod }) {
     );
   }
 
+  /* ───────────── Demo kirish formasi ───────────── */
+  if (showDemo && phase === 'idle') return <DemoLoginForm onBack={() => setShowDemo(false)} onSuccess={onDemoOk} />;
+
   /* ───────────── Boshlang'ich ───────────── */
   return (
     <div className="lsi">
@@ -228,6 +248,7 @@ export function LokmaSignIn({ reason = 'order', onLoggedIn, onOtherMethod }) {
       </button>
       <p className="lsi-secure"><Icon name="shieldCheck" size={14} color="var(--muted)" /> {t('lsi_secure')}</p>
       {onOtherMethod && <button type="button" className="lsi-link-btn lsi-link-btn--muted" onClick={onOtherMethod}>{t('lsi_other')}</button>}
+      {demoAvailable && <button type="button" className="lsi-link-btn lsi-link-btn--muted lsi-link-btn--demo" onClick={() => setShowDemo(true)} data-testid="demo-enter">{t('demo_enter')}</button>}
     </div>
   );
 }

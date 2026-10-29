@@ -12,6 +12,8 @@ import { CartBar } from '@/components/CartBar';
 import { LangSwitch } from '@/components/LangSwitch/LangSwitch';
 import { RestaurantCardSkeleton, DishScrollCardSkeleton } from '@/components/Skeleton/Skeleton';
 import { useUser } from '@/store/user';
+import { DemoBanner } from '@/components/DemoBanner';
+import { useDemoRestaurant } from '@/hooks/useDemoRestaurant';
 import { useT } from '@/i18n';
 import { useOpenPartition, useClosedAlert } from '@/hooks/useOpenStatus';
 import { ClosedAlert } from '@/components/ClosedAlert';
@@ -365,6 +367,10 @@ export function HomePage() {
     [filtered, shuffleSeed],
   );
 
+  // Demo hisob (App Store tekshiruvi): demo restoran umumiy ro'yxatda YO'Q — faqat shu foydalanuvchiga ro'yxat BOSHIDA chiqadi.
+  // Ro'yxatdan MUSTAQIL (yuklanmoqda/xato bo'lsa ham ko'rinadi): tekshiruvchi uni doim topa olishi kerak.
+  const demoRestaurant = useDemoRestaurant(user.isDemo);
+
   // Market rejimi — yo'naltirish ketmoqda, Lokma Go sahifasini chizmaymiz
   if (inMarket) return null;
 
@@ -494,8 +500,10 @@ export function HomePage() {
       )}
 
       {/* Barcha restoranlar */}
+      {user.isDemo && <DemoBanner />}
       <h2 className="home-restaurants-title">{t('allRestaurants')}</h2>
       <div className="home-restaurants">
+        {demoRestaurant && <RestaurantCard key={`demo-${demoRestaurant._id}`} restaurant={demoRestaurant} showPin />}
         {restLoading ? (
           Array.from({ length: 4 }).map((_, i) => <RestaurantCardSkeleton key={i} />)
         ) : restError ? (

@@ -29,6 +29,7 @@ function getInitialUser() {
       phone: null,
       addresses: [],
       defaultAddressId: null,
+      isDemo: false,
       verified: false
     };
   }
@@ -46,6 +47,7 @@ function getInitialUser() {
     addresses: [],
     defaultAddressId: null,
     favorites: { restaurants: [], dishes: [] },
+    isDemo: false,
     verified: false
   };
 }
@@ -238,20 +240,16 @@ export const useUser = create(
   setAuthStatus: (authStatus) => set({ authStatus }),
 
   /*
-   * logout() — Auth fundamenti (2-bosqich): serverdagi Session'ni
-   * bekor qiladi (Session.revokedAt), mahalliy tokenlarni va
-   * foydalanuvchi holatini tozalaydi. Client UI'da hozircha
-   * "Chiqish" tugmasi yo'q (Telegram Mini App'da odatiy holat —
-   * Telegram o'zi identifikatsiyani boshqaradi), lekin brauzer
-   * (Login Widget) orqali kirgan foydalanuvchi uchun kelajakda
-   * kerak bo'ladi — shu funksiya tayyor.
+   * logout() — serverdagi Session'ni bekor qiladi (Session.revokedAt), mahalliy tokenlarni va foydalanuvchi holatini
+   * tozalaydi. Chiqishdan keyin holat 'failed' (MEHMON) — 'pending' emas: 'pending' kirish tekshirilayotganini bildirib,
+   * ilovani "kutish"da qoldirardi. Savat, kesh va boshqalarni tozalash — lib/session.js (signOut).
    */
   logout: async () => {
     try {
       await api.logoutSession().catch(() => {}); // server bilan bog'lanmasa ham lokal tozalash davom etadi
       clearAuthTokens();
     } finally {
-      set({ user: getInitialUser(), authStatus: 'pending' });
+      set({ user: getInitialUser(), authStatus: 'failed' });
     }
   },
   setLastPaymentMethod: (lastPaymentMethod) => set({ lastPaymentMethod })
