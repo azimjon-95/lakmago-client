@@ -28,6 +28,7 @@ import { useModalBackClose } from '@/hooks/useModalBackClose';
 import { hasValidCoords, deliveryAddressCheck } from '@/lib/addressCoords';
 import { GiftBonusBanner, GiftLines, useGiftQuote } from '@/components/GiftBonus/GiftBonus';
 import './Cart.css';
+import { CARD_PAYMENT_ENABLED } from '@/config/features';
 
 
 /*
@@ -388,6 +389,7 @@ export function CartPage() {
   // Faqat BITTA provayder bo'lsa mijoz ortiqcha tanlov
   // ko'rmaydi — to'g'ridan-to'g'ri o'shanga o'tadi.
   const pickCardProvider = () => {
+    if (!CARD_PAYMENT_ENABLED) return;   // vaqtincha o'chirilgan (config/features.js)
     haptic();
     if (providers.length > 0) setPaymentMethod(providers[0].name);
   };
@@ -499,7 +501,7 @@ export function CartPage() {
     const load = (retry = true) => api.getPaymentStatus()
       .then((st) => {
         if (cancelled) return;
-        setProviders(!user?.isDemo && Array.isArray(st?.available) ? st.available : []);   // demo hisob: faqat naqd (hech narsa olinmaydi)
+        setProviders(CARD_PAYMENT_ENABLED && !user?.isDemo && Array.isArray(st?.available) ? st.available : []);   // demo hisob: faqat naqd (hech narsa olinmaydi)
         setProvidersFailed(false);
         setProvidersLoaded(true);
       })
@@ -1499,7 +1501,7 @@ export function CartPage() {
             onClick={pickCardProvider}
             media={<CardArt />}
             title={t('byCard')}
-            sub={t('cardSub')}
+            sub={CARD_PAYMENT_ENABLED ? t('cardSub') : t('cardTemporarilyOffShort')}
           />
         </div>
 
@@ -1516,7 +1518,7 @@ export function CartPage() {
         */}
         {!onlineAvailable && (
           <p className="cart-payment__note">
-            {providersFailed ? t('paymentConnectionFailed') : t('cardPaymentUnavailable')}
+            {!CARD_PAYMENT_ENABLED ? t('cardTemporarilyOff') : providersFailed ? t('paymentConnectionFailed') : t('cardPaymentUnavailable')}
           </p>
         )}
 
