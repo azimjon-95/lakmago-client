@@ -8,7 +8,7 @@ import { haptic, shareDish } from '@/lib/telegram';
 import { useT } from '@/i18n';
 import './cards/DishRow.css';
 
-// Yandex Eda uslubidagi menyu qatori.
+// Yetkazish ilovalari uslubidagi menyu qatori.
 export const DishRow = memo(function DishRow({ dish, onOpen, restaurant, onClosedAlert }) {
   const t = useT();
   const items = useCart((s) => s.items);

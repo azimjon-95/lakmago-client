@@ -78,7 +78,7 @@ export function RestaurantPage() {
    * ═══ RESTORANGACHA YO'NALISH ═══
    *
    * Koordinatalar bo'lmasa tugma UMUMAN ko'rsatilmaydi. Sabab:
-   * koordinatasiz Yandex faqat qidiruv oynasini ochardi va
+   * koordinatasiz xarita faqat qidiruv oynasini ochardi va
    * mijozda "bosdim, hech narsa bo'lmadi" degan taassurot
    * qolardi. Ishlamaydigan tugmadan ko'ra yo'q tugma yaxshi.
    */
@@ -91,18 +91,18 @@ export function RestaurantPage() {
     const dest = `${restaurant.lat},${restaurant.lng}`;
 
     /*
-     * `rtext=~` — boshlanish nuqtasi BO'SH qoldiriladi.
+     * Google Maps yo'nalishi (navigator): `origin` BERILMAYDI.
      *
      * Mijozning joylashuvini o'zimiz so'rab, uzatishimiz ham
      * mumkin edi, lekin bu yomonroq: brauzer ruxsat so'raydi,
      * mijoz kutadi, rad etsa esa umuman ishlamaydi. Bo'sh
-     * qoldirilsa Yandex O'ZI joriy joylashuvni oladi — u
+     * qoldirilsa Google O'ZI joriy joylashuvni oladi — u
      * allaqachon ruxsatga ega va aniqroq ishlaydi.
      *
-     * `rtt=auto` — avtomobil yo'nalishi (kuryer emas, mijoz
-     * o'zi borishi uchun).
+     * `travelmode=driving` — avtomobil yo'nalishi (kuryer emas,
+     * mijoz o'zi borishi uchun).
      */
-    const url = `https://yandex.uz/maps/?rtext=~${dest}&rtt=auto&z=16`;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}&travelmode=driving`;
 
     const tg = getTelegram();
     try {
@@ -239,7 +239,7 @@ export function RestaurantPage() {
   }
 
   /**
-   * Aylantirilganda joriy bo'lim o'zi belgilanadi (Yandex Eda kabi).
+   * Aylantirilganda joriy bo'lim o'zi belgilanadi (yetkazish ilovalari kabi).
    * Avval faol tab faqat bosilganda o'zgarardi — pastga surilganda
    * yuqorida noto'g'ri bo'lim yonib turardi.
    */
@@ -373,7 +373,7 @@ export function RestaurantPage() {
           {/*
             ═══ YO'NALISH ═══
             Faqat restoran koordinatalari bo'lsa ko'rinadi.
-            Koordinatasiz Yandex faqat qidiruv oynasini ochardi
+            Koordinatasiz xarita faqat qidiruv oynasini ochardi
             va mijoz "nega ishlamadi?" deb o'ylardi — tugma
             umuman bo'lmagani afzal.
           */}

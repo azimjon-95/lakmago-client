@@ -192,7 +192,8 @@ export function OrderTrackPage() {
   useEffect(() => {
     if (!cp) return undefined;
     let dead = false;
-    api.reverseGeocodeYandex(cp.lat, cp.lng).then((r) => { if (!dead) setCity(cityFrom(r?.address, lang)); }).catch(() => {});
+    // Google shahar nomini tilda beradi (city); bo'lmasa manzil matnidan ajratiladi
+    api.reverseGeocode(cp.lat, cp.lng, lang).then((r) => { if (!dead) setCity(r?.city || cityFrom(r?.address, lang)); }).catch(() => {});
     return () => { dead = true; };
   }, [cp?.lat, cp?.lng, lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -266,7 +267,7 @@ export function OrderTrackPage() {
     const p = rest?.point;
     if (!p) return;
     haptic();
-    window.open(`https://yandex.com/maps/?rtext=~${p.lat},${p.lng}&rtt=auto`, '_blank', 'noopener');
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}&travelmode=driving`, '_blank', 'noopener');   // Google navigator (boshlanish — joriy joylashuv)
   };
 
   return (
