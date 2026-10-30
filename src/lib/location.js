@@ -445,24 +445,32 @@ export async function searchAddress(query, signal) {
 }
 
 /**
- * Koordinatadan manzil — Google Geocoding orqali (server proksi, kalit serverda qoladi).
+ * Koordinatadan manzil — Yandex Geocoder orqali (server proksi).
  *
- * Server { address, street, city } beradi (Google tarkibiy qismlaridan, til bo'yicha). Karta orqali tanlashda shu
- * ishlatiladi. Xato/bo'sh javob bo'lsa Nominatim'ga o'tiladi — xarita baribir ishlashda davom etadi.
+ * Nominatim'дан farqi: O'zbekiston manzillarini ancha aniqroq
+ * biladi (ko'cha-uy darajasida). Karta orqali tanlashda shu
+ * ishlatiladi. Xato bo'lsa Nominatim'ga o'tiladi — xarita
+ * baribir ishlashda davom etadi.
  */
-export async function reverseGeocodeViaServer(lat, lng, lang = '') {
+export async function reverseGeocodeViaYandex(lat, lng) {
   try {
     // Server proksi ham sust tarmoqda osilib qolmasin — chegara tugasa Nominatim'ga o'tamiz
-    const res = await withTimeout(api.reverseGeocode(lat, lng, lang), LOC.geocodeMs, null);
-    if (res?.address || res?.street) return formatServerAddress(res);
+    const res = await withTimeout(api.reverseGeocodeYandex(lat, lng), LOC.geocodeMs, null);
+    if (res?.address) return formatYandexAddress(res.address);
   } catch { /* Nominatim'ga o'tamiz */ }
   return reverseGeocode(lat, lng);
 }
 
-/** Server javobini bizning { street, city, full } shakliga keltiradi. */
-function formatServerAddress({ address = '', street = '', city = '' }) {
-  const st = street || address.split(',')[0]?.trim() || address;
-  return { street: st, city: city && city !== st ? city : '', full: address || [st, city].filter(Boolean).join(', ') };
+/**
+ * Yandex "Toshkent shahri, Chilonzor tumani, ko'cha, 5" kabi
+ * bitta qatorni bizning { street, city, full } shakliga bo'ladi.
+ */
+function formatYandexAddress(text) {
+  const parts = text.split(',').map((p) => p.trim()).filter(Boolean);
+  // Odatda oxirgi bo'lak eng aniq (ko'cha/uy), birinchisi shahar
+  const street = parts.length > 1 ? parts[parts.length - 1] : text;
+  const city = parts.find((p) => /shahri|shahar|tuman|viloyat/i.test(p)) || parts[0] || '';
+  return { street, city: city === street ? '' : city, full: text };
 }
 
 // Nominatim javobини chiroyли manzilga aylantirish

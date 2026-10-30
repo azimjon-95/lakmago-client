@@ -4,7 +4,7 @@ import { AddressDetails } from './AddressDetails';
 import { MapAddressPicker } from './MapAddressPicker';
 import { useModalBackClose } from '@/hooks/useModalBackClose';
 import { api } from '@/api';
-import { loadGoogleMaps, googleKeyFrom } from '@/lib/googleMaps';
+import { loadYmaps } from '@/lib/yandexMaps';
 import './AddressFlow.css';
 
 /*
@@ -40,12 +40,12 @@ export function AddressFlow({ onSave, onClose, startStep = 'permission' }) {
    * MUAMMO: mijoz "Kartadan tanlang" bosgach, ekranda bo'sh
    * aylanuvchi belgi uzoq turardi. Sabab — ketma-ket ish:
    *   1) O'Z SERVERIMIZDAN mapsKey so'raladi;
-   *   2) SHUNDAN KEYIN Google Maps JS skripti yuklanadi
+   *   2) SHUNDAN KEYIN Yandex'ning og'ir JS skripti yuklanadi
    *      (tashqi, sekin tarmoqda ayniqsa sezilarli);
    *   3) shundan keyingina xarita chizila boshlaydi.
    * Bu ish FAQAT mijoz xarita bosqichiga YETGANDA boshlanardi.
    *
-   * YECHIM: shu ikki qadam (server so'rovi + Google skripti) OQIM
+   * YECHIM: shu ikki qadam (server so'rovi + Yandex skripti) OQIM
    * ochilishi bilan — ruxsat ekranida, mijoz hali "Kartadan
    * tanlang"ni ko'rmasdan — FONDA boshlanadi. Xarita bosqichiga
    * yetganda skript ko'pincha allaqachon tayyor yoki deyarli
@@ -61,7 +61,7 @@ export function AddressFlow({ onSave, onClose, startStep = 'permission' }) {
    */
   useEffect(() => {
     api.getMapsConfig()
-      .then((cfg) => { const key = googleKeyFrom(cfg); if (key) loadGoogleMaps(key).catch(() => {}); })
+      .then((cfg) => { if (cfg?.enabled && cfg?.mapsKey) loadYmaps(cfg.mapsKey); })
       .catch(() => {});
   }, []);
 

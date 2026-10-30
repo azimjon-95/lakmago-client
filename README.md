@@ -28,7 +28,7 @@ src/
 ├── hooks/queries.js  # TanStack Query hook'lari
 ├── lib/utils.js  # narx formatlash, Telegram integratsiyasi
 ├── pages/
-│   ├── HomePage.jsx         # bosh sahifa (yetkazish ilovalari uslubi)
+│   ├── HomePage.jsx         # bosh sahifa (Yandex Eda uslubi)
 │   ├── RestaurantPage.jsx   # to'liq menyu
 │   ├── CartPage.jsx         # savatcha + rasmiylashtirish
 │   ├── OrderTrackPage.jsx   # real-time status
@@ -53,13 +53,7 @@ shu tufayli frontend backend tayyor bo'lishini kutmasdan ishlaydi.
 `.env`:
 ```
 VITE_API_URL=https://api.lokmago.uz/api
-# Google Maps BRAUZER kaliti (HTTP referrer bilan cheklangan, FAQAT Maps JavaScript API). Bo'lmasa serverning
-# GET /api/maps/config javobidagi kalit (GOOGLE_MAPS_BROWSER_KEY) ishlatiladi.
-VITE_GOOGLE_MAPS_KEY=
 ```
-
-Xarita: Google Maps. Brauzerda faqat xarita ko'rsatiladi; marshrut (km, daqiqa, yo'l chizig'i) va manzil aniqlash
-server orqali (`/api/maps/route`, `/api/maps/reverse`) — Google Routes/Geocoding kalitlari brauzerga chiqmaydi.
 
 ## Keyingi qadamlar
 

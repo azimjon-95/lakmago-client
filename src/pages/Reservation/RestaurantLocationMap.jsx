@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Icon } from '@/components/Icon';
 import { api } from '@/api';
-import { loadGoogleMaps, googleKeyFrom, createMap, disposeMap } from '@/lib/googleMaps';
+import { loadYmaps } from '@/lib/yandexMaps';
 import { useT } from '@/i18n';
 import { useModalBackClose } from '@/hooks/useModalBackClose';
 
@@ -63,7 +63,7 @@ export function RestaurantLocationMap({ restaurant }) {
 }
 
 /**
- * Google xaritaning o'zi.
+ * Yandex xaritaning o'zi.
  *
  * Preview holatida bosilganda kattalashadi (onExpand), o'zi
  * suriladigan/kattalashadigan emas — chunki bu FIXED joylashuv,
@@ -73,7 +73,6 @@ export function RestaurantLocationMap({ restaurant }) {
 function MapBox({ lat, lng, name, height, interactive = false, onExpand, t }) {
   const boxRef = useRef(null);
   const mapRef = useRef(null);
-  const mapsRef = useRef(null);
   const [status, setStatus] = useState('loading');   // loading | ready | error
 
   useEffect(() => {
@@ -83,19 +82,24 @@ function MapBox({ lat, lng, name, height, interactive = false, onExpand, t }) {
       try {
         const cfg = await api.getMapsConfig();
         if (dead) return;
-        const key = googleKeyFrom(cfg);
-        if (!key) { setStatus('error'); return; }
+        if (!cfg.enabled || !cfg.mapsKey) { setStatus('error'); return; }
 
-        const maps = await loadGoogleMaps(key);
+        const ymaps = await loadYmaps(cfg.mapsKey);
         if (dead || !boxRef.current) return;
 
-        const map = createMap(maps, boxRef.current, { center: [lat, lng], zoom: interactive ? 16 : 15, zoomControl: interactive, interactive });
-        // Restoran belgisi: to'q sariq nuqta (oq hoshiya bilan)
-        new maps.Marker({
-          position: { lat, lng }, map, title: name, clickable: false,
-          icon: { path: maps.SymbolPath.CIRCLE, scale: 9, fillColor: '#FF6A13', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 3 },
+        const map = new ymaps.Map(boxRef.current, {
+          center: [lat, lng],
+          zoom: interactive ? 16 : 15,
+          controls: interactive ? ['zoomControl'] : [],
         });
-        mapsRef.current = maps;
+        // Preview'da imo-ishora kartani surmasin — faqat bosish
+        // orqali katta xaritaga o'tadi
+        if (!interactive) {
+          map.behaviors.disable(['scrollZoom', 'drag', 'multiTouch']);
+        }
+        map.geoObjects.add(new ymaps.Placemark([lat, lng], { hintContent: name }, {
+          preset: 'islands#orangeDotIcon',
+        }));
         mapRef.current = map;
         setStatus('ready');
       } catch {
@@ -105,7 +109,7 @@ function MapBox({ lat, lng, name, height, interactive = false, onExpand, t }) {
 
     return () => {
       dead = true;
-      if (mapRef.current) disposeMap(mapsRef.current, mapRef.current, boxRef.current);
+      mapRef.current?.destroy();
       mapRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '@/api';
-import { loadGoogleMaps, googleKeyFrom, createMap, htmlMarkerClass, fitPoints, routeLine, disposeMap, ll } from '@/lib/googleMaps';
+import { loadYmaps } from '@/lib/yandexMaps';
 import { distanceM } from '@/lib/gpsCheck';
 import { useT } from '@/i18n';
 import './DeliveryRouteMap.css';
@@ -8,10 +8,10 @@ import './DeliveryRouteMap.css';
 /*
  * ═══ YETKAZISH MARSHRUTI XARITASI ("Shu manzilga yetkazamizmi?") ═══
  *
- * • Haqiqiy Google xaritasi (brauzer kaliti: VITE_GOOGLE_MAPS_KEY yoki serverdan GET /maps/config).
+ * • Haqiqiy Yandex xaritasi (kalit serverdan: GET /maps/config).
  * • Markerlar: restoran(lar) — to'q sariq; yetkazish manzili — ko'k pin; mijozning JORIY GPS
  *   joylashuvi — ko'k nuqta + aniqlik doirasi ("Siz").
- * • Marshrut — FAQAT haqiqiy: server marshruti (GET /maps/route: Google Routes → OSRM, avtomobil). Masofa = distanceM,
+ * • Marshrut — FAQAT haqiqiy: Yandex Router (ymaps.route, avtomobil). Masofa = route.getLength(),
  *   vaqt = tirbandlik bilan (getJamsTime) yoki oddiy (getTime). Marshrut topilmasa — SOXTA chiziq
  *   yoki taxminiy raqam CHIZILMAYDI, ochiq xabar ko'rsatiladi.
  * • Xarita yuklanmasa (kalit yo'q / tarmoq) — "Xarita yuklanmadi" (sxematik soxta xarita yo'q).
@@ -46,14 +46,15 @@ const markup = {
   routeFixed: (dist, time) => `<div class="drm-eta drm-eta--row"><span class="drm-eta__pill">${CAR}<b>${esc(dist)}</b>${time ? `<i>·</i><span>${esc(time)}</span>` : ''}</span></div>`,
 };
 
-/** Haqiqiy avtomobil marshruti (server: Google Routes → OSRM). Muvaffaqiyatsiz bo'lsa — xato (zaxira chiziq YO'Q). */
-async function buildRoute(from, to) {
-  const r = await api.getRoute(from, to);            // server: Google Routes → OSRM (kesh, bitta kalit)
-  const meters = Number(r?.distanceM);
-  const seconds = Number(r?.durationS);
-  // 'straight' = hech qaysi xizmat marshrut topa olmadi → xato (soxta chiziq va raqam ko'rsatilmaydi)
-  if (r?.source === 'straight' || !Array.isArray(r?.points) || r.points.length < 2 || !(meters > 0)) throw new Error('empty-route');
-  return { points: r.points, meters, seconds: Number.isFinite(seconds) && seconds > 0 ? seconds : null };
+/** Haqiqiy avtomobil marshruti (Yandex Router). Muvaffaqiyatsiz bo'lsa — xato (zaxira chiziq YO'Q). */
+async function buildRoute(ymaps, from, to) {
+  const r = await ymaps.route([from, to], { routingMode: 'auto', multiRoute: false, mapStateAutoApply: false });
+  const points = [];
+  r.getPaths().each((path) => { points.push(...path.geometry.getCoordinates()); });
+  const meters = Number(r.getLength?.());
+  const seconds = Number(r.getJamsTime?.() ?? r.getTime?.());
+  if (points.length < 2 || !(meters > 0)) throw new Error('empty-route');
+  return { points, meters, seconds: Number.isFinite(seconds) ? seconds : null };
 }
 
 /**
@@ -102,12 +103,13 @@ export function DeliveryRouteMap({ restaurants = [], destination, me = null, onR
       try {
         const cfg = await api.getMapsConfig();
         if (dead) return;
-        const key = googleKeyFrom(cfg);
-        if (!key) throw new Error('no-key');
-        const maps = await loadGoogleMaps(key);
+        if (!cfg?.enabled || !cfg?.mapsKey) throw new Error('no-key');
+        const ymaps = await loadYmaps(cfg.mapsKey);
         if (dead || !boxRef.current) return;
-        const map = createMap(maps, boxRef.current, { center: dest || DEFAULT_CENTER, zoom: 14, clean: true });
-        st.current = { maps, map, Marker: htmlMarkerClass(maps), objs: {}, lines: [] };
+        const map = new ymaps.Map(boxRef.current, { center: dest || DEFAULT_CENTER, zoom: 14, controls: [] },
+          { suppressMapOpenBlock: true, yandexMapDisablePoiInteractivity: true });
+        map.behaviors.disable(['scrollZoom', 'dblClickZoom']);
+        st.current = { ymaps, map, objs: {}, lines: [] };
         setMode('ready');
       } catch {
         if (!dead) setMode('failed');
@@ -115,18 +117,20 @@ export function DeliveryRouteMap({ restaurants = [], destination, me = null, onR
     })();
     return () => {
       dead = true;
-      if (st.current) disposeMap(st.current.maps, st.current.map, boxRef.current);
+      try { st.current?.map?.destroy(); } catch { /* */ }
       st.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attempt]);
 
-  const put = useCallback((key, point, html, z) => {
+  const put = useCallback((key, point, html, z, shape = 22) => {
     const s = st.current; if (!s) return;
-    const { map, objs, Marker } = s;
-    if (!point) { if (objs[key]) { objs[key].setMap(null); objs[key] = null; } return; }
-    if (objs[key]) { objs[key].update(point, html); return; }
-    objs[key] = new Marker({ position: point, html, zIndex: z, map });
+    const { ymaps, map, objs } = s;
+    if (!point) { if (objs[key]) { map.geoObjects.remove(objs[key]); objs[key] = null; } return; }
+    const Layout = ymaps.templateLayoutFactory.createClass(html);
+    if (objs[key]) { objs[key].geometry.setCoordinates(point); objs[key].options.set('iconLayout', Layout); return; }
+    objs[key] = new ymaps.Placemark(point, {}, { iconLayout: Layout, iconShape: { type: 'Circle', coordinates: [0, 0], radius: shape }, zIndex: z });
+    map.geoObjects.add(objs[key]);
   }, []);
 
   const lastFit = useRef('');
@@ -144,11 +148,13 @@ export function DeliveryRouteMap({ restaurants = [], destination, me = null, onR
     const key = [Math.min(...lats), Math.min(...lngs), Math.max(...lats), Math.max(...lngs)].map((n) => n.toFixed(5)).join(',');
     if (!force && key === lastFit.current) return;
     lastFit.current = key;
+    if (pts.length === 1) { s.map.setCenter(pts[0], 15, { duration: 250 }); return; }
     const w = boxRef.current?.clientWidth || 390; const h = boxRef.current?.clientHeight || 240;
     const top = Math.round(Math.min(64, Math.max(46, h * 0.27)));      // marker boshi + yozuv
-    const bottom = Math.round(Math.min(40, Math.max(26, h * 0.15)));   // Google logotipi/shartlar
+    const bottom = Math.round(Math.min(40, Math.max(26, h * 0.15)));   // Yandex logotipi/shartlar
     const right = Math.round(Math.min(104, Math.max(70, w * 0.27)));   // "Restoran"/"Siz" yozuvlari
-    fitPoints(s.maps, s.map, pts, { top, right, bottom, left: 40 }, { maxZoom: 17 });
+    s.map.setBounds([[Math.min(...lats), Math.min(...lngs)], [Math.max(...lats), Math.max(...lngs)]],
+      { checkZoomRange: true, zoomMargin: [top, right, bottom, 40], duration: 250 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [destKey, restKey, mePt?.[0], mePt?.[1]]);
   const fitRef = useRef(fit);
@@ -162,7 +168,7 @@ export function DeliveryRouteMap({ restaurants = [], destination, me = null, onR
     const ro = new ResizeObserver(() => {
       setCompact((boxRef.current?.clientHeight || 999) < 230);
       clearTimeout(timer);
-      timer = setTimeout(() => { try { st.current?.maps?.event?.trigger(st.current.map, 'resize'); } catch { /* */ } fitRef.current(true); }, 140);
+      timer = setTimeout(() => { try { st.current?.map?.container?.fitToViewport?.(); } catch { /* */ } fitRef.current(true); }, 140);
     });
     ro.observe(boxRef.current);
     return () => { clearTimeout(timer); ro.disconnect(); };
@@ -174,7 +180,7 @@ export function DeliveryRouteMap({ restaurants = [], destination, me = null, onR
     const s = st.current;
     rests.forEach((r, i) => put(`rest${i}`, r.p, markup.restaurant(rests.length > 1 ? r.name : t('addrMapRestaurant')), 30, 20));
     put('dest', dest, markup.dest(destination?.label || ''), 25, 20);
-    s.lines.forEach((l) => l.obj.setMap(null)); s.lines = [];
+    s.lines.forEach((l) => s.map.geoObjects.remove(l.obj)); s.lines = [];
     put('eta', null);
     if (!dest || !rests.length) { setRoute({ state: 'failed' }); onRouteRef.current?.(null); fit(); return undefined; }
 
@@ -182,13 +188,15 @@ export function DeliveryRouteMap({ restaurants = [], destination, me = null, onR
     setRoute({ state: 'loading' });
     fit();
     (async () => {
-      const results = await Promise.all(rests.map((r) => buildRoute(r.p, dest).catch(() => null)));
+      const results = await Promise.all(rests.map((r) => buildRoute(s.ymaps, r.p, dest).catch(() => null)));
       if (dead || !st.current) return;
       const good = results.filter(Boolean);
       if (!good.length) { setRoute({ state: 'failed' }); onRouteRef.current?.(null); fit(); return; }
       good.forEach((g) => {
-        const obj = routeLine(s.maps, s.map, g.points, { color: ORANGE, weight: 5, style: 'dash', zIndex: 5 });
-        s.lines.push({ obj, points: g.points });
+        const obj = new s.ymaps.Polyline(g.points, {}, {
+          strokeColor: ORANGE, strokeWidth: 5, strokeOpacity: 0.95, strokeStyle: { style: [1.6, 1.8], offset: 0 }, zIndex: 5,
+        });
+        s.map.geoObjects.add(obj); s.lines.push({ obj, points: g.points });
       });
       // Yetkazish vaqtini eng uzoq yo'l belgilaydi (bitta kuryer hammasini olib keladi)
       const main = good.reduce((a, b) => (b.meters > a.meters ? b : a));
@@ -218,12 +226,12 @@ export function DeliveryRouteMap({ restaurants = [], destination, me = null, onR
     if (mode !== 'ready' || !st.current) return;
     const s = st.current;
     put('me', mePt, markup.me(t('addrMapYou')), 35, 14);
-    if (s.objs.acc) { s.objs.acc.setMap(null); s.objs.acc = null; }
+    if (s.objs.acc) { s.map.geoObjects.remove(s.objs.acc); s.objs.acc = null; }
     if (mePt && Number.isFinite(me?.accuracy) && me.accuracy > 0) {
-      s.objs.acc = new s.maps.Circle({
-        map: s.map, center: ll(mePt), radius: Math.min(me.accuracy, 1500), clickable: false, zIndex: 2,
-        fillColor: BLUE, fillOpacity: 0.14, strokeColor: BLUE, strokeOpacity: 0.35, strokeWeight: 1,
+      s.objs.acc = new s.ymaps.Circle([mePt, Math.min(me.accuracy, 1500)], {}, {
+        fillColor: 'rgba(37,99,235,0.14)', strokeColor: 'rgba(37,99,235,0.35)', strokeWidth: 1, zIndex: 2, interactivityModel: 'default#transparent',
       });
+      s.map.geoObjects.add(s.objs.acc);
     }
     if (mePt) fit(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -231,7 +239,7 @@ export function DeliveryRouteMap({ restaurants = [], destination, me = null, onR
 
   const locate = () => {
     const s = st.current;
-    if (mePt && s) { s.map.panTo(ll(mePt)); s.map.setZoom(16); }
+    if (mePt && s) s.map.setCenter(mePt, 16, { duration: 300 });
     onLocate?.();
   };
 

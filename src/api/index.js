@@ -233,15 +233,12 @@ function fetchMapsConfig(opts) {
 
 export const api = {
   // ===== Xarita =====
-  // Xarita sozlamasi: { provider: 'google', enabled, mapsKey } — BRAUZER kaliti (HTTP referrer bilan cheklangan).
-  // Kesh: fetchMapsConfig (yuqorida).
+  // Yandex JS API kaliti — server domenga cheklab beradi,
+  // kodda saqlanmaydi. Kesh: fetchMapsConfig (yuqorida).
   getMapsConfig: (opts) => fetchMapsConfig(opts),
-  // Koordinatadan manzil: { address, street, city } (kalit serverda qoladi — proksi). lang: 'uz' | 'ru'
-  reverseGeocode: (lat, lng, lang = '', opts) =>
-    apiFetch(`/maps/reverse?lat=${lat}&lng=${lng}${lang ? `&lang=${lang}` : ''}`, opts),
-  // Haqiqiy yo'l marshruti: { points: [[lat,lng],…], distanceM, durationS, source } — source 'straight' = topilmadi
-  getRoute: (from, to, opts) =>
-    apiFetch(`/maps/route?fromLat=${from[0]}&fromLng=${from[1]}&toLat=${to[0]}&toLng=${to[1]}`, opts),
+  // Koordinatadan manzil (kalit serverda qoladi — proksi)
+  reverseGeocodeYandex: (lat, lng, opts) =>
+    apiFetch(`/maps/reverse?lat=${lat}&lng=${lng}`, opts),
 
   // ===== Katalog =====
   getBanners: (opts) => apiFetch('/banners', opts),

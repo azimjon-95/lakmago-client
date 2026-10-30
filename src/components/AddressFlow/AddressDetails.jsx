@@ -3,7 +3,7 @@ import { Icon } from '@/components/Icon';
 import { haptic } from '@/lib/telegram';
 import { useT } from '@/i18n';
 
-// Manzil turlari (yetkazish ilovalari uslubida)
+// Manzil turlari (Yandex Eda uslubида)
 const LABELS = [
   { id: 'home', icon: 'house', labelKey: 'addrLabelHome' },
   { id: 'work', icon: 'briefcase', labelKey: 'addrLabelWork' },

@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Icon } from '@/components/Icon';
 import { api } from '@/api';
-import { getCurrentPosition, reverseGeocodeViaServer } from '@/lib/location';
-import { loadGoogleMaps, googleKeyFrom, createMap, centerOf, ll, disposeMap } from '@/lib/googleMaps';
+import { getCurrentPosition, reverseGeocodeViaYandex } from '@/lib/location';
+import { loadYmaps } from '@/lib/yandexMaps';
 import { haptic } from '@/lib/telegram';
 import { useT } from '@/i18n';
 
@@ -13,9 +13,9 @@ const DEFAULT_CENTER = [41.311081, 69.240562];
  * 2-bosqichdan kirilgan karta orqali manzil tanlash.
  *
  * Mijoz kartani surib, markazdagi ignani xohlagan nuqtaga
- * to'g'rilaydi (Taksi ilovalari uslubi — igna qotib turadi,
+ * to'g'rilaydi (Yandex Taxi/Uber uslubi — igna qotib turadi,
  * karta suriladi). Markaz o'zgarganda manzil server orqali
- * (Google Geocoding, kalit serverda qoladi) aniqlanadi.
+ * (Yandex Geocoder, kalit serverda qoladi) aniqlanadi.
  */
 /*
  * Tashqi xarita havolalari — tanlangan nuqtani ko'rish uchun.
@@ -25,6 +25,8 @@ const DEFAULT_CENTER = [41.311081, 69.240562];
  */
 const MAP_APPS = [
   { id: 'google', label: 'Google', url: (la, ln) => `https://www.google.com/maps/search/?api=1&query=${la},${ln}` },
+  // Yandex'da tartib: LONGITUDE,LATITUDE
+  { id: 'yandex', label: 'Yandex', url: (la, ln) => `https://yandex.com/maps/?ll=${ln},${la}&z=17&pt=${ln},${la},pm2rdm` },
   { id: 'apple', label: 'Apple', url: (la, ln) => `https://maps.apple.com/?ll=${la},${ln}&q=${la},${ln}` },
 ];
 
@@ -32,10 +34,8 @@ export function MapAddressPicker({ start = null, onPick, onBack }) {
   const t = useT();
   const boxRef = useRef(null);
   const mapRef = useRef(null);
-  const mapsRef = useRef(null);
   const debounceRef = useRef(null);
   const reqIdRef = useRef(0);
-  const lastKeyRef = useRef('');
 
   const [status, setStatus] = useState('loading');   // loading | ready | error
   const [error, setError] = useState('');
@@ -49,17 +49,13 @@ export function MapAddressPicker({ start = null, onPick, onBack }) {
   const [appsOpen, setAppsOpen] = useState(false);
 
   const resolveAddress = useCallback(async (lat, lng) => {
-    // Xuddi shu nuqta allaqachon aniqlangan bo'lsa qayta so'ramaymiz (Google xarita yaratilishi bilan 'idle' yuboradi)
-    const key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
-    if (key === lastKeyRef.current) return;
     const myReq = ++reqIdRef.current;
     setResolving(true);
     try {
-      const addr = await reverseGeocodeViaServer(lat, lng);
+      const addr = await reverseGeocodeViaYandex(lat, lng);
       // Foydalanuvchi kartani yana surgan bo'lsa eski javob e'tiborsiz
       if (myReq !== reqIdRef.current) return;
       setAddress(addr);
-      lastKeyRef.current = key;
     } catch {
       if (myReq === reqIdRef.current) setAddress(null);
     } finally {
@@ -71,12 +67,12 @@ export function MapAddressPicker({ start = null, onPick, onBack }) {
   const onBoundsChange = useCallback(() => {
     if (!mapRef.current) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    // Taxminiy joy izohi 'dragstart' da (mijoz kartani O'ZI surganda) yo'qoladi — bu yerda EMAS: Google xarita yaratilishi bilan
-    // ham 'idle' yuboradi va izoh darhol yo'qolib qolardi
+    // Mijoz kartani surdi — ogohlantirish vazifasini bajardi
+    setApproxM(null);
     debounceRef.current = setTimeout(() => {
-      const [lat, lng] = centerOf(mapRef.current);
+      const [lat, lng] = mapRef.current.getCenter();
       resolveAddress(lat, lng);
-    }, 150);   // 'idle' — harakat to'xtagach keladi, shuning uchun qisqa kutish yetarli
+    }, 350);
   }, [resolveAddress]);
 
   useEffect(() => {
@@ -86,14 +82,13 @@ export function MapAddressPicker({ start = null, onPick, onBack }) {
       try {
         const cfg = await api.getMapsConfig();
         if (dead) return;
-        const key = googleKeyFrom(cfg);
-        if (!key) {
+        if (!cfg.enabled || !cfg.mapsKey) {
           setStatus('error');
           setError('Xarita hozircha sozlanmagan');
           return;
         }
 
-        const maps = await loadGoogleMaps(key);
+        const ymaps = await loadYmaps(cfg.mapsKey);
         if (dead || !boxRef.current) return;
 
         /*
@@ -120,12 +115,20 @@ export function MapAddressPicker({ start = null, onPick, onBack }) {
         }
         if (dead) return;
 
-        const map = createMap(maps, boxRef.current, { center, zoom: 17, zoomControl: true });
+        const map = new ymaps.Map(boxRef.current, {
+          center,
+          zoom: 17,
+          controls: ['zoomControl'],
+        }, {
+          /*
+           * Yandex'ning o'z "Yandex Xaritada ochish" bloki
+           * yashiriladi — o'rniga uchta xarita tanlovi bor.
+           */
+          suppressMapOpenBlock: true,
+        });
+        map.behaviors.disable('scrollZoom');
         mapRef.current = map;
-        mapsRef.current = maps;
-        // Foydalanuvchi xaritani surishni boshlaganda "taxminiy joy" izohi yo'qoladi; harakat to'xtagach ('idle') manzil aniqlanadi
-        maps.event.addListener(map, 'dragstart', () => setApproxM(null));
-        maps.event.addListener(map, 'idle', onBoundsChange);
+        map.events.add('boundschange', onBoundsChange);
 
         setStatus('ready');
         resolveAddress(center[0], center[1]);
@@ -137,7 +140,7 @@ export function MapAddressPicker({ start = null, onPick, onBack }) {
     return () => {
       dead = true;
       if (debounceRef.current) clearTimeout(debounceRef.current);
-      if (mapRef.current) disposeMap(mapsRef.current, mapRef.current, boxRef.current);
+      mapRef.current?.destroy();
       mapRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -148,7 +151,7 @@ export function MapAddressPicker({ start = null, onPick, onBack }) {
     setLocating(true);
     try {
       const { lat, lng, accuracy } = await getCurrentPosition();
-      if (mapRef.current) { mapRef.current.panTo(ll([lat, lng])); mapRef.current.setZoom(17); }
+      mapRef.current?.setCenter([lat, lng], 17, { duration: 300 });
       resolveAddress(lat, lng);
       if (Number.isFinite(accuracy) && accuracy > 80) setApproxM(Math.round(accuracy));
     } catch { /* ruxsat berilmadi — jim */ }
@@ -158,7 +161,7 @@ export function MapAddressPicker({ start = null, onPick, onBack }) {
   const confirm = () => {
     if (!mapRef.current || resolving) return;
     haptic();
-    const [lat, lng] = centerOf(mapRef.current);
+    const [lat, lng] = mapRef.current.getCenter();
     onPick({ lat, lng, ...(address || {}) });
   };
 
@@ -215,7 +218,7 @@ export function MapAddressPicker({ start = null, onPick, onBack }) {
                   {MAP_APPS.map((a) => (
                     <button key={a.id} type="button" className="map-picker__app"
                       onClick={() => {
-                        const [la, ln] = mapRef.current ? centerOf(mapRef.current) : [];
+                        const [la, ln] = mapRef.current?.getCenter() || [];
                         if (!Number.isFinite(la)) return;
                         haptic();
                         window.open(a.url(la.toFixed(6), ln.toFixed(6)), '_blank', 'noopener');
