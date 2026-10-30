@@ -195,7 +195,7 @@
 .cart-summary__row--bonus { color: var(--success); font-weight: 600; }
 .cart-summary__row--bonus span { color: var(--success); }
 
-/* ===== Savat sarlavhasi (Yandex Eda uslubi) ===== */
+/* ===== Savat sarlavhasi (yetkazish ilovalari uslubi) ===== */
 /* Header — tepada qotib turadi, kontent ostidan o'tadi */
 .cart-header {
   position: sticky;

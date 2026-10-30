@@ -12,7 +12,7 @@
   background: var(--surface);
   border-radius: 22px 22px 0 0;
   overflow: hidden;
-  /* Yandex Eda uslubida — deyarli to'liq ekran, rasm to'liq ko'rinadi */
+  /* Yetkazish ilovalari uslubida — deyarli to'liq ekran, rasm to'liq ko'rinadi */
   max-height: 94vh;
   display: flex; flex-direction: column;
   animation: slide-up 0.28s var(--ease);
@@ -111,7 +111,7 @@
   cursor: default;
 }
 .dish-modal__mandatory-badge { color: var(--brand); font-size: 11px; font-weight: 500; }
-/* Pastda qotirilган (Yandex Eda uslubida) — doim ko'rinadi */
+/* Pastda qotirilган (yetkazish ilovalari uslubida) — doim ko'rinadi */
 .dish-modal__footer {
   display: flex; align-items: center; gap: 12px;
   margin-top: 16px;

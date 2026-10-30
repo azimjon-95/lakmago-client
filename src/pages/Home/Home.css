@@ -43,7 +43,7 @@
 margin-left: 13px;
   scroll-snap-type: x proximity;
 }
-/* Kategoriya — rasm tepada, nom pastda (Uzum/Yandex uslubi) */
+/* Kategoriya — rasm tepada, nom pastda (Uzum kabi uslub) */
 .home-cat {
   flex: none;
   display: flex; flex-direction: column; align-items: center; gap: 6px;

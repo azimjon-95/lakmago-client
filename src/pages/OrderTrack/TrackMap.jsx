@@ -1,18 +1,18 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { api } from '@/api';
-import { loadYmaps } from '@/lib/yandexMaps';
+import { loadGoogleMaps, googleKeyFrom, createMap, htmlMarkerClass, fitPoints, routeLine, disposeMap, ll } from '@/lib/googleMaps';
 import { Icon } from '@/components/Icon';
 import { ICONS } from '@/components/icons-data';
 
 /*
- * ═══ KUZATUV XARITASI (Yandex Go uslubida) ═══
- * • Haqiqiy Yandex xaritasi (kalit sozlangan bo'lsa) — ma'lumot kelishini kutmasdan yaratiladi
+ * ═══ KUZATUV XARITASI ═══
+ * • Haqiqiy Google xaritasi (brauzer kaliti sozlangan bo'lsa) — ma'lumot kelishini kutmasdan yaratiladi
  *   (avval nuqtalar hali kelmagan paytda xato bilan sxematik rejimga o'tib qolardi).
  * • Yo'l chizig'i — HAQIQIY KO'CHALAR bo'ylab: server GET /orders/:id/route
- *   (Yandex Router → OSRM → to'g'ri chiziq). Kuryer bo'lsa kuryerdan, aks holda restorandan mijozgacha.
+ *   (Google Routes → OSRM → to'g'ri chiziq). Kuryer bo'lsa kuryerdan, aks holda restorandan mijozgacha.
  * • Markerlar: restoran (to'q sariq), kuryer (skuter, pulsatsiya, "Kuryer yo'lda · N daqiqa"),
  *   mijoz (ko'k nuqta, aniqlik doirasi, "Sizning joylashuvingiz").
- * • Yandex yo'q bo'lsa — xuddi shu ma'lumot va xuddi shu yo'l nuqtalaridan sxematik xarita.
+ * • Google xaritasi yo'q/ruxsatsiz bo'lsa — xuddi shu ma'lumot va xuddi shu yo'l nuqtalaridan sxematik xarita.
  */
 const DEFAULT_CENTER = [41.311081, 69.240562];
 const ORANGE = '#FF6A13';
@@ -25,7 +25,7 @@ const meters = (a, b) => {
 };
 const esc = (s = '') => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-/** Icon ma'lumotidan SVG satr (Yandex marker shablonlari uchun) */
+/** Icon ma'lumotidan SVG satr (xarita marker shablonlari uchun) */
 function svg(name, size, color, sw = 2) {
   const parts = (ICONS[name] || []).map(([tag, attrs]) => `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(' ')}/>`).join('');
   return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${parts}</svg>`;
@@ -38,42 +38,29 @@ const markup = {
 };
 
 /*
- * Yo'l chizig'i — HAQIQIY AVTOMOBIL YO'LLARI bo'ylab:
- *   1) Yandex JS API (ymaps.route, routingMode 'auto') — xaritani chizayotgan kalitning o'zi;
- *   2) server GET /orders/:id/route (Yandex Router → OSRM);
- *   3) hech biri bo'lmasa — to'g'ri nuqtali chiziq (source 'straight').
- * Kuryer 40 m dan ko'p siljigandagina qayta quriladi (kvota).
+ * Yo'l chizig'i — HAQIQIY AVTOMOBIL YO'LLARI bo'ylab: server GET /orders/:id/route (Google Routes → OSRM; tirbandlik bilan).
+ * Hech biri bo'lmasa — to'g'ri nuqtali chiziq (source 'straight'). Kuryer 40 m dan ko'p siljigandagina qayta so'raladi (kvota).
  */
-async function yandexRoute(ymaps, from, to) {
-  const r = await ymaps.route([from, to], { routingMode: 'auto', multiRoute: false, mapStateAutoApply: false });
-  const pts = [];
-  r.getPaths().each((path) => { pts.push(...path.geometry.getCoordinates()); });
-  return pts.length > 1 ? { points: pts, source: 'yandex-js' } : null;
-}
-
-function useRoute(orderId, from, to, status, ymapsRef) {
+function useRoute(orderId, from, to, status) {
   const [route, setRoute] = useState(null);
   const lastFrom = useRef(null);
   const fromKey = from ? from.map((n) => n.toFixed(5)).join(',') : '';
   const toKey = to ? to.map((n) => n.toFixed(5)).join(',') : '';
-  const ymaps = ymapsRef?.current;
   useEffect(() => {
     if (!orderId || !from || !to || ['delivered', 'cancelled'].includes(status)) { setRoute(null); lastFrom.current = null; return undefined; }
-    // Qayta qurish shart emas: nuqta 40 m dan kam siljigan VA yo'l allaqachon eng yaxshi manbadan
-    // (Yandex JS) yoki Yandex yo'q bo'lsa — serverning haqiqiy yo'li bor
-    const best = route && (route.source === 'yandex-js' || (!ymaps?.route && route.source !== 'straight'));
+    // Qayta so'rash shart emas: nuqta 40 m dan kam siljigan VA serverning haqiqiy yo'li allaqachon bor
+    const best = route && route.source !== 'straight';
     if (lastFrom.current && best && meters(lastFrom.current, from) < 40) return undefined;
     let dead = false;
     lastFrom.current = from;
     (async () => {
       let r = null;
-      if (ymaps?.route) { try { r = await yandexRoute(ymaps, from, to); } catch { r = null; } }
-      if (!r) { try { const s = await api.getOrderRoute(orderId); if (s?.points?.length > 1) r = s; } catch { r = null; } }
+      try { const s = await api.getOrderRoute(orderId); if (s?.points?.length > 1) r = s; } catch { r = null; }
       if (!dead) setRoute(r || { points: [from, to], source: 'straight' });
     })();
     return () => { dead = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderId, fromKey, toKey, status, ymaps]);
+  }, [orderId, fromKey, toKey, status]);
   return route;
 }
 
@@ -85,38 +72,36 @@ export function TrackMap({ orderId, status, restaurant, customer, courier, resta
   const boxRef = useRef(null);
   const mapRef = useRef(null);
   const st = useRef(null);
-  const [mode, setMode] = useState('loading'); // loading | yandex | schematic
-  const ymapsRef = useRef(null);
+  const [mode, setMode] = useState('loading'); // loading | google | schematic
   const rPoint = pt(restaurant?.point);
   const cPoint = pt(customer?.point);
   const kPoint = pt(courier?.location);
   const L = labels;
   const etaText = etaMinutes != null ? `${etaMinutes} ${L.min || 'daqiqa'}` : '';
-  const route = useRoute(orderId, kPoint || rPoint, cPoint, status, mode === 'yandex' ? ymapsRef : null);
+  const route = useRoute(orderId, kPoint || rPoint, cPoint, status);
 
-  /* Yandex xaritasi — bir marta, ma'lumotni kutmasdan */
+  /* Google xaritasi — bir marta, ma'lumotni kutmasdan */
   useEffect(() => {
     let dead = false;
     (async () => {
       try {
         const cfg = await api.getMapsConfig();
         if (dead) return;
-        if (!cfg?.enabled || !cfg?.mapsKey) { setMode('schematic'); return; }
-        const ymaps = await loadYmaps(cfg.mapsKey);
+        const key = googleKeyFrom(cfg);
+        if (!key) { setMode('schematic'); return; }
+        const maps = await loadGoogleMaps(key);
         if (dead || !boxRef.current) return;
-        const map = new ymaps.Map(boxRef.current, { center: DEFAULT_CENTER, zoom: 13, controls: [] }, { suppressMapOpenBlock: true, yandexMapDisablePoiInteractivity: true });
-        map.behaviors.disable(['scrollZoom', 'dblClickZoom']);
+        const map = createMap(maps, boxRef.current, { center: DEFAULT_CENTER, zoom: 13, clean: true });
         mapRef.current = map;
-        ymapsRef.current = ymaps;
-        st.current = { ymaps, markers: {}, line: null, fitted: false };
-        setMode('yandex');
+        st.current = { maps, Marker: htmlMarkerClass(maps), markers: {}, line: null, fitted: false };
+        setMode('google');
       } catch {
         if (!dead) setMode('schematic');
       }
     })();
     return () => {
       dead = true;
-      try { mapRef.current?.destroy(); } catch { /* */ }
+      if (st.current) disposeMap(st.current.maps, mapRef.current, boxRef.current);
       mapRef.current = null; st.current = null;
     };
   }, []);
@@ -124,35 +109,27 @@ export function TrackMap({ orderId, status, restaurant, customer, courier, resta
   const fit = useCallback(() => {
     const map = mapRef.current;
     const pts = [rPoint, cPoint, kPoint, ...(route?.points || [])].filter(Boolean);
-    if (!map || !pts.length) return;
-    if (pts.length === 1) { map.setCenter(pts[0], 15, { duration: 250 }); return; }
-    const lats = pts.map((p) => p[0]); const lngs = pts.map((p) => p[1]);
+    if (!map || !st.current || !pts.length) return;
     // Zaxira: tepada kartalar + restoran markeri (~90 px yuqoriga chiqadi), pastda varaq,
     // o'ngda yozuvlar ("Kuryer yo'lda", "Sizning joylashuvingiz") sig'ishi uchun
-    map.setBounds([[Math.min(...lats), Math.min(...lngs)], [Math.max(...lats), Math.max(...lngs)]],
-      { checkZoomRange: true, zoomMargin: [insets.top + 96, 150, insets.bottom + 36, 48], duration: 300 });
+    fitPoints(st.current.maps, map, pts, { top: insets.top + 96, right: 150, bottom: insets.bottom + 36, left: 48 }, { maxZoom: 17 });
   }, [rPoint, cPoint, kPoint, route, insets.top, insets.bottom]);
 
   /* Markerlar va yo'l chizig'i */
   useEffect(() => {
-    if (mode !== 'yandex' || !st.current) return;
-    const { ymaps, markers } = st.current; const map = mapRef.current;
+    if (mode !== 'google' || !st.current) return;
+    const { maps, Marker, markers } = st.current; const map = mapRef.current;
     const put = (key, point, html, z) => {
-      if (!point) { if (markers[key]) { map.geoObjects.remove(markers[key]); markers[key] = null; } return; }
-      const Layout = ymaps.templateLayoutFactory.createClass(html);
-      if (markers[key]) { markers[key].geometry.setCoordinates(point); markers[key].options.set('iconLayout', Layout); }
-      else {
-        markers[key] = new ymaps.Placemark(point, {}, { iconLayout: Layout, iconShape: { type: 'Circle', coordinates: [0, 0], radius: 22 }, zIndex: z });
-        map.geoObjects.add(markers[key]);
-      }
+      if (!point) { if (markers[key]) { markers[key].setMap(null); markers[key] = null; } return; }
+      if (markers[key]) markers[key].update(point, html);
+      else markers[key] = new Marker({ position: point, html, zIndex: z, map });
     };
-    // Yo'l: haqiqiy ko'chalar (server) — bo'lmasa to'g'ri nuqtali chiziq
+
     const from = kPoint || rPoint;
     const pts = route?.points?.length > 1 ? route.points : (from && cPoint ? [from, cPoint] : null);
-    if (st.current.line) { map.geoObjects.remove(st.current.line); st.current.line = null; }
+    if (st.current.line) { st.current.line.setMap(null); st.current.line = null; }
     if (pts) {
-      st.current.line = new ymaps.Polyline(pts, {}, { strokeColor: ORANGE, strokeWidth: 5, strokeStyle: { style: [0.1, 2.4], offset: 0 }, strokeOpacity: 0.95, zIndex: 5 });
-      map.geoObjects.add(st.current.line);
+      st.current.line = routeLine(maps, map, pts, { color: ORANGE, weight: 5, style: 'dot', zIndex: 5 });
     }
     put('customer', cPoint, markup.customer(L.you || 'Siz'), 20);
     put('restaurant', rPoint, markup.restaurant(restaurantLabel), 25);
@@ -162,22 +139,22 @@ export function TrackMap({ orderId, status, restaurant, customer, courier, resta
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, rPoint?.[0], rPoint?.[1], cPoint?.[0], cPoint?.[1], kPoint?.[0], kPoint?.[1], etaText, restaurantLabel, route]);
 
-  const zoom = (d) => { const m = mapRef.current; if (m) m.setZoom(Math.max(3, Math.min(19, m.getZoom() + d)), { duration: 200 }); };
+  const zoom = (d) => { const m = mapRef.current; if (m) m.setZoom(Math.max(3, Math.min(19, m.getZoom() + d))); };
 
   return (
     <div className="tm">
-      <div ref={boxRef} className="tm__box" style={{ visibility: mode === 'yandex' ? 'visible' : 'hidden' }} />
+      <div ref={boxRef} className="tm__box" style={{ visibility: mode === 'google' ? 'visible' : 'hidden' }} />
       {mode === 'schematic' && <SchematicMap rPoint={rPoint} cPoint={cPoint} kPoint={kPoint} route={route} restaurantLabel={restaurantLabel} etaText={etaText} L={L} insets={insets} />}
       {mode === 'loading' && <div className="tm__loading"><span className="spinner" /></div>}
 
       <div className="tm-ctrl" style={{ bottom: insets.bottom + 12 }}>
-        {mode === 'yandex' && (
+        {mode === 'google' && (
           <div className="tm-zoom">
             <button type="button" onClick={() => zoom(1)} aria-label="+"><Icon name="plus" size={22} color="#111" /></button>
             <button type="button" onClick={() => zoom(-1)} aria-label="−"><Icon name="minus" size={22} color="#111" /></button>
           </div>
         )}
-        {mode === 'yandex' && (
+        {mode === 'google' && (
           <button type="button" className="tm-locate" onClick={fit} aria-label={L.fit || 'Hammasi'}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="7" /><circle cx="12" cy="12" r="2.5" fill="#111" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg>
           </button>
@@ -190,7 +167,7 @@ export function TrackMap({ orderId, status, restaurant, customer, courier, resta
   );
 }
 
-/* ───────── Sxematik xarita (Yandex yo'q bo'lganda) — xuddi shu yo'l nuqtalari bilan ───────── */
+/* ───────── Sxematik xarita (Google xaritasi yo'q bo'lganda) — xuddi shu yo'l nuqtalari bilan ───────── */
 function SchematicMap({ rPoint, cPoint, kPoint, route, restaurantLabel, etaText, L, insets }) {
   const ref = useRef(null);
   const [size, setSize] = useState({ w: 390, h: 844 });
