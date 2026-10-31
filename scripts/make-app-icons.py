@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """
+⚠️ ESKIRGAN: ikonkalar endi scripts/make-seasonal-icons.py bilan (mavsumiy, yangi logotip) yaratiladi — APP-ICONS.md.
+Bu skript ESKI logotipdan asosiy ikonkani qayta yozib yuboradi — ishlatmang.
+
 LokmaGo — Android va iOS ilova ikonkalarini manba logotipdan (resources/lokma-go-logo-source.jpeg) yaratadi.
 
   python3 scripts/make-app-icons.py          (Pillow va numpy kerak)
