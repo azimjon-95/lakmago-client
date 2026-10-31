@@ -263,7 +263,8 @@ export function ProfilePage() {
               <div className="profile-row__body"><div className="profile-row__value">{t('logout')}</div></div>
               <Icon name="chevronRight" size={17} color="var(--muted)" />
             </button>
-            {caps.accountDeletion && !user.isDemo && (
+            {/* Demo hisobda ham (App Store tekshiruvi): server buni qo'llasagina (eski serverda demoAccountDeletion yo'q → yashirin) */}
+            {caps.accountDeletion && (!user.isDemo || caps.demoAccountDeletion) && (
               <button type="button" onClick={() => setConfirm('delete')} className="profile-row" data-testid="delete-row">
                 <Icon name="trash" size={18} color="#DC2626" />
                 <div className="profile-row__body">
@@ -282,7 +283,7 @@ export function ProfilePage() {
           busy={busy} onConfirm={doLogout} onCancel={closeConfirm} />
       )}
       {confirm === 'delete' && (
-        <ConfirmDialog danger title={t('acc_delete_title')} body={t('acc_delete_body')} confirmLabel={t('acc_delete_yes')} cancelLabel={t('cancel')}
+        <ConfirmDialog danger title={t('acc_delete_title')} body={user.isDemo ? t('acc_delete_body_demo') : t('acc_delete_body')} confirmLabel={t('acc_delete_yes')} cancelLabel={t('cancel')}
           busy={busy} error={accErr} onConfirm={doDelete} onCancel={closeConfirm} />
       )}
 
