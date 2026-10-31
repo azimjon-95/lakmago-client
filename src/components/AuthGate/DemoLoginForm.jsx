@@ -11,6 +11,7 @@ export function DemoLoginForm({ onBack, onSuccess }) {
   const t = useT();
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
+  const [showPw, setShowPw] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
 
@@ -27,17 +28,25 @@ export function DemoLoginForm({ onBack, onSuccess }) {
 
   return (
     <form className="lsi lsi-demo" onSubmit={submit} autoComplete="off" data-testid="demo-form">
-      <img className="lsi-logo lsi-demo__logo" src="/brand/lokma-go-icon.png" alt="" />
       <h2 className="lsi-title lsi-title--sm">{t('demo_title')}</h2>
       <p className="lsi-sub">{t('demo_sub')}</p>
       <input
         className="lsi-input" value={login} onChange={(e) => setLogin(e.target.value)} placeholder={t('demo_login')} aria-label={t('demo_login')}
         autoCapitalize="none" autoCorrect="off" spellCheck={false} autoComplete="username" inputMode="text" data-testid="demo-login"
       />
-      <input
-        className="lsi-input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t('demo_password')} aria-label={t('demo_password')}
-        autoCapitalize="none" autoCorrect="off" spellCheck={false} autoComplete="current-password" data-testid="demo-password"
-      />
+      <div className="lsi-pw">
+        <input
+          className="lsi-input lsi-input--pw" type={showPw ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t('demo_password')} aria-label={t('demo_password')}
+          autoCapitalize="none" autoCorrect="off" spellCheck={false} autoComplete="current-password" data-testid="demo-password"
+        />
+        {/* Ko'z: parolni ko'rsatish/yashirish. mousedown/touchstart'da fokus inputdan KETMAYDI (klaviatura yopilmaydi) */}
+        <button
+          type="button" className="lsi-eye" onClick={() => setShowPw((v) => !v)} onMouseDown={(e) => e.preventDefault()} onTouchStart={(e) => e.preventDefault()}
+          aria-label={showPw ? t('demo_pw_hide') : t('demo_pw_show')} aria-pressed={showPw} data-testid="demo-eye"
+        >
+          <Icon name={showPw ? 'eyeOff' : 'eye'} size={20} color="currentColor" />
+        </button>
+      </div>
       {err && <p className="lsi-demo__err" role="alert" data-testid="demo-error">{err}</p>}
       <button type="submit" className="lsi-cta" disabled={busy || !login.trim() || !password} data-testid="demo-submit">
         <Icon name="check" size={18} color="#fff" /><span>{busy ? '…' : t('demo_submit')}</span>
