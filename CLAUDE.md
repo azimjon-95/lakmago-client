@@ -108,6 +108,23 @@ chegaralarini hisobga oladigan usul ishlatiladi.
 
 ---
 
+## 6-QOIDA — Bir martalik GPS manzil saqlangan manzillarga ARALASHMASIN
+
+«Hozirgi joyimga yetkazish» (`CurrentLocationStep`, `lib/currentFix.js`, `lib/oneTimeAddress.js`) — **faqat shu buyurtma uchun**:
+
+- Manzil faqat xotirada: `store/oneTimeAddress.js` (**`persist` YO'Q**, localStorage'ga yozilmaydi).
+- U `user.addresses`, serverdagi manzillar va `defaultAddressId` ga **HECH QACHON** qo'shilmaydi.
+  `addAddress` / `setDefaultAddress` / `updateAddress` unga **chaqirilmaydi** (CartPage'da `AddressEditSheet` ham bir martalikka ochilmaydi).
+- Buyurtma yaratilgach (`placeOrder` `.then`) **`clearOneTime()`** — keyingi buyurtmada avtomatik tanlanmaydi.
+  Buyurtma xato bo'lsa tozalanmaydi (mijoz qayta urina oladi).
+- Saqlangan manzil tanlansa yoki yangisi qo'shilsa — bir martalik o'chadi (ikkalasi bir vaqtda faol bo'lmaydi).
+- GPS faqat mijoz tugmani bosganda so'raladi (2-qoida: ilova ochilishida hech narsa so'ralmaydi).
+- Server buyurtmada `address` matni + `addressLat/addressLng` ni saqlangan manzilsiz qabul qiladi (server o'zgarmagan).
+
+Tekshiruv: `npm run test:once` (mantiq + aralashmaslik kafolatlari), `npm run test:once:render` (interfeys render).
+
+---
+
 ## Repolar
 
 | Repo | Vazifa |

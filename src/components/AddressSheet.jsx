@@ -4,7 +4,7 @@ import { Icon } from './Icon';
 import { useT } from '@/i18n';
 import './cards/AddressSheet.css';
 
-export function AddressSheet({ addresses, selectedId, onSelect, onAdd, onClose }) {
+export function AddressSheet({ addresses, selectedId, onSelect, onAdd, onClose, onCurrent }) {
   const t = useT();
   const [adding, setAdding] = useState(false);
   const [title, setTitle] = useState('Uy');
@@ -32,6 +32,14 @@ export function AddressSheet({ addresses, selectedId, onSelect, onAdd, onClose }
 
         {!adding ? (
           <div className="addr-sheet__body">
+            {/* Bir martalik GPS manzil (faqat savatda beriladi): saqlanmaydi, faqat shu buyurtma uchun */}
+            {onCurrent && (
+              <button type="button" onClick={onCurrent} className="addr-sheet__current" data-testid="addr-sheet-current">
+                <span className="addr-sheet__current-ic"><Icon name="navigation" size={20} color="#2563EB" /></span>
+                <span className="addr-sheet__current-txt"><b>{t('onceTitle')}</b><small>{t('onceSub')}</small></span>
+                <Icon name="chevronRight" size={18} color="var(--muted)" />
+              </button>
+            )}
             <div className="addr-sheet__list">
               {addresses.map((a) => (
                 <button key={a.id} onClick={() => onSelect(a.id)} className={`addr-item ${a.id === selectedId ? 'is-selected' : ''}`}>

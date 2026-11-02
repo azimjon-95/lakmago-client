@@ -9,6 +9,9 @@ import { CoCard, CoOption, ScooterBadge, CashArt, CardArt } from './CheckoutPart
 import { CashLockedSheet } from '@/components/Restrictions/Restrictions';
 import './CheckoutSections.css';
 import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
+import { CurrentLocationSheet } from '@/components/CurrentLocationSheet';
+import { useOneTimeAddress } from '@/store/oneTimeAddress';
+import { orderAddressFields } from '@/lib/oneTimeAddress';
 import { useCart } from '@/store/cart';
 import { useUser } from '@/store/user';
 import { useOrders } from '@/store/orders';
@@ -130,6 +133,10 @@ export function CartPage() {
   const addAddress = useUser((s) => s.addAddress);
   const setDefaultAddress = useUser((s) => s.setDefaultAddress);
   const updateAddress = useUser((s) => s.updateAddress);
+  // Bir martalik "Hozirgi joyim" manzili: xotirada, FAQAT shu buyurtma uchun (lib/oneTimeAddress.js). Saqlangan manzillarga aralashmaydi.
+  const oneTimeAddress = useOneTimeAddress((s) => s.address);
+  const setOneTime = useOneTimeAddress((s) => s.set);
+  const clearOneTime = useOneTimeAddress((s) => s.clear);
   const lastPaymentMethod = useUser((s) => s.lastPaymentMethod);
   const setLastPaymentMethod = useUser((s) => s.setLastPaymentMethod);
   const placeOrder = useOrders((s) => s.placeOrder);
@@ -344,6 +351,7 @@ export function CartPage() {
   const [retrying, setRetrying] = useState(false);
   const [showAddressSheet, setShowAddressSheet] = useState(false);
   const [showAddressFlow, setShowAddressFlow] = useState(false);
+  const [showOnceSheet, setShowOnceSheet] = useState(false);
 
   // Yetkazish turi va vaqt
   const [fulfillment, setFulfillment] = useState('delivery'); // 'delivery' | 'pickup'
@@ -741,7 +749,13 @@ export function CartPage() {
    */
   const bonusApplied = 0;
   const total = orderSum;
-  const selectedAddress = user.addresses.find((a) => a.id === user.defaultAddressId) ?? user.addresses[0];
+  const savedAddress = user.addresses.find((a) => a.id === user.defaultAddressId) ?? user.addresses[0];
+  /*
+   * YETKAZISH MANZILI: bir martalik "Hozirgi joyim" tanlangan bo'lsa — o'sha (faqat shu buyurtma uchun), aks holda saqlangan manzil.
+   * Quyidagi hamma narsa (narx, blok, yuborish) shu manzil bilan ishlaydi. Bir martalik manzil `user.addresses` ga
+   * HECH QACHON qo'shilmaydi va saqlangan-manzil funksiyalariga (update/setDefault/add) berilmaydi.
+   */
+  const selectedAddress = oneTimeAddress ?? savedAddress;
   /*
    * Tanlangan manzilda xarita nuqtasi (lat/lng) yo'qmi — faqat yetkazishda.
    * Manzil maydoni shu bilan ogohlantirish ko'rsatadi va buyurtma
@@ -1025,9 +1039,8 @@ export function CartPage() {
      */
     setPaying(true);
     setLastPaymentMethod(paymentMethod);
-    const addrLabel = isPickup
-      ? ''
-      : `${selectedAddress.title} — ${selectedAddress.address}`;
+    const addrFields = isPickup ? { label: '', note: '' } : orderAddressFields(selectedAddress, { onceTitle: t('onceChip') });
+    const addrLabel = addrFields.label;
     const paymentLabel = paymentMethod === 'cash'
       ? t('cash')
       : (PROVIDER_LABEL[paymentMethod] || t('cash'));
@@ -1046,12 +1059,7 @@ export function CartPage() {
       // Podez, qavat, xonadon
       ...(!isPickup && selectedAddress
         ? {
-            addressNote: [
-              selectedAddress.entrance && `${selectedAddress.entrance}-kirish`,
-              selectedAddress.floor && `${selectedAddress.floor}-qavat`,
-              selectedAddress.flat && `xon. ${selectedAddress.flat}`,
-              selectedAddress.note,
-            ].filter(Boolean).join(', '),
+            addressNote: addrFields.note,
           }
         : {}),
     })
@@ -1064,6 +1072,8 @@ export function CartPage() {
          * order yaratish uchun avtoritet emas, TTL o'zi tozalaydi).
          */
         clearPendingIntent();
+        // Bir martalik manzil faqat shu buyurtma uchun edi: keyingi buyurtmada avtomatik tanlanmasin (xato bo'lsa — qoladi, qayta urinish mumkin)
+        clearOneTime();
 
         // NAQD — buyurtma darhol restoranga boradi
         if (paymentMethod === 'cash') {
@@ -1381,21 +1391,36 @@ export function CartPage() {
               <div className="co-addr">
                 <Icon name="pin" size={26} color="var(--brand)" />
                 <div className="co-addr__body">
-                  <div className="co-addr__title">{selectedAddress.title} · {selectedAddress.address}</div>
+                  <div className="co-addr__title">{oneTimeAddress ? t('onceChip') : selectedAddress.title} · {selectedAddress.address}</div>
                   {needsPoint
                     ? <div className="co-addr__warn">{t('addressPointMissing')}</div>
-                    : <div className="co-sub">{t('deliveryAddress')}</div>}
+                    : <div className="co-sub">{oneTimeAddress ? t('onceSub') : t('deliveryAddress')}</div>}
                 </div>
-                {/* Xarita: tanlangan manzilni xaritada ko'rish/nuqtasini to'g'rilash (mavjud AddressEditSheet) */}
-                <button
-                  type="button"
-                  data-testid="co-addr-map"
-                  onClick={() => { haptic(); setShowAddressEdit(true); }}
-                  className="co-pill"
-                >
-                  <Icon name="map" size={16} color="var(--ink)" />
-                  {t('mapBtn')}
-                </button>
+                {oneTimeAddress ? (
+                  /* Bir martalik: saqlangan manzilga qaytish (saqlangan manzil tahrirlash oynasi unga mos EMAS); saqlangani yo'q bo'lsa — tugma yo'q */
+                  savedAddress && (
+                    <button
+                      type="button"
+                      data-testid="co-addr-back-saved"
+                      onClick={() => { haptic(); clearOneTime(); }}
+                      className="co-pill"
+                    >
+                      <Icon name="pin" size={16} color="var(--ink)" />
+                      {t('onceBackShort')}
+                    </button>
+                  )
+                ) : (
+                  /* Xarita: tanlangan manzilni xaritada ko'rish/nuqtasini to'g'rilash (mavjud AddressEditSheet) */
+                  <button
+                    type="button"
+                    data-testid="co-addr-map"
+                    onClick={() => { haptic(); setShowAddressEdit(true); }}
+                    className="co-pill"
+                  >
+                    <Icon name="map" size={16} color="var(--ink)" />
+                    {t('mapBtn')}
+                  </button>
+                )}
               </div>
               <button
                 type="button"
@@ -1695,9 +1720,10 @@ export function CartPage() {
       {showAddressSheet && (
         <AddressSheet
           addresses={user.addresses}
-          selectedId={selectedAddress?.id}
-          onSelect={(id) => { setDefaultAddress(id); setShowAddressSheet(false); }}
+          selectedId={oneTimeAddress ? null : selectedAddress?.id}
+          onSelect={(id) => { clearOneTime(); setDefaultAddress(id); setShowAddressSheet(false); }}
           onAdd={() => { setShowAddressSheet(false); setShowAddressFlow(true); }}
+          onCurrent={() => { setShowAddressSheet(false); setShowOnceSheet(true); }}
           onClose={() => setShowAddressSheet(false)}
         />
       )}
@@ -1705,13 +1731,23 @@ export function CartPage() {
       {/* Yangi manzil qo'shish oqimi (joylashuv → qidiruv → tafsilotlar) */}
       {showAddressFlow && (
         <AddressFlow
-          onSave={(addr) => addAddress(addr)}
+          onSave={(addr) => { clearOneTime(); addAddress(addr); }}
           onClose={() => setShowAddressFlow(false)}
         />
       )}
 
+      {/* Hozirgi joyimga yetkazish — mustaqil oyna (saqlangan manzili yo'q mijoz ham buyurtma bera oladi) */}
+      {showOnceSheet && (
+        <CurrentLocationSheet
+          restaurants={mapRestaurants}
+          initial={oneTimeAddress}
+          onConfirm={(addr) => { setOneTime(addr); setShowOnceSheet(false); }}
+          onClose={() => setShowOnceSheet(false)}
+        />
+      )}
+
       {/* Tanlangan manzilni tahrirlash (tasdiqlash qadamidan) */}
-      {showAddressEdit && selectedAddress && (
+      {showAddressEdit && selectedAddress && !oneTimeAddress && (
         <AddressEditSheet
           address={selectedAddress}
           onSave={(patch) => updateAddress(selectedAddress.id, patch)}
@@ -1760,6 +1796,9 @@ export function CartPage() {
           addressBlock={addressBlock}
           onChooseAddress={() => setShowAddressSheet(true)}
           onEditAddress={() => setShowAddressEdit(true)}
+          onUseOneTime={setOneTime}
+          onClearOneTime={clearOneTime}
+          hasSavedAddress={Boolean(savedAddress)}
           restaurants={mapRestaurants}
         />
       )}

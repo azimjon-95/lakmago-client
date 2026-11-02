@@ -8,6 +8,7 @@ import { useT } from '@/i18n';
 import { DeliveryRouteMap, formatDistance } from './DeliveryRouteMap';
 import { useAddressGpsCheck } from '@/hooks/useAddressGpsCheck';
 import { canOpenLocationSettings, openLocationSettings } from '@/lib/location';
+import { CurrentLocationStep } from './CurrentLocationStep';
 import './OrderConfirmModal.css';
 
 /**
@@ -23,6 +24,10 @@ export function OrderConfirmModal({
   groups, pricing, total, onClose, onConfirm, submitting,
   // Yetkazishda: 2-qadam — manzilni tasdiqlash. Olib ketishda `address` yo'q.
   address = null, addressBlock = null, onChooseAddress, onEditAddress,
+  // Bir martalik "Hozirgi joyim" manzili (faqat shu buyurtma uchun; saqlangan manzillarga QO'SHILMAYDI): tanlash / saqlangan manzilga qaytish
+  onUseOneTime, onClearOneTime,
+  // Saqlangan manzil bormi: yo'q bo'lsa "Saqlangan manzilga qaytish" ko'rsatilmaydi (qaytadigan joy yo'q — oyna bo'sh qolardi)
+  hasSavedAddress = true,
   // Xarita uchun restoranlar koordinatasi: [{ id, name, lat, lng }]
   restaurants = [],
 }) {
@@ -33,7 +38,8 @@ export function OrderConfirmModal({
   /*
    * ═══ IKKI QADAM ═══
    *   'check'   — chek: taomlar va summa (avvalgidek);
-   *   'address' — "Shu manzilga yetkazamizmi?" (faqat yetkazishda).
+   *   'address' — "Shu manzilga yetkazamizmi?" (faqat yetkazishda);
+   *   'gps'     — "Hozirgi joyimga yetkazish": bir martalik GPS manzil (address qadamidan ochiladi, orqaga — address).
    *
    * Nega alohida oyna emas, shu oyna ichida: yuborish holati
    * (`submitting`), yopilish va xatolar mantig'i CartPage'da shu
@@ -51,15 +57,20 @@ export function OrderConfirmModal({
     setStep('address');
   };
   const goCheck = () => { haptic(); setStep('check'); };
+  const goGps = () => { haptic(); setStep('gps'); };
+  const backFromGps = () => setStep('address');
 
-  // Joriy GPS ↔ saqlangan manzil (faqat manzil qadamida so'raladi)
-  const [gps, recheckGps] = useAddressGpsCheck(address, step === 'address');
+  // Bir martalik manzil — joriy joyning o'zi: "saqlangan manzilga uzoqmi?" tekshiruvi unga kerak emas
+  const isOnce = address?.isOneTime === true;
+  // Joriy GPS ↔ saqlangan manzil (faqat manzil qadamida va faqat SAQLANGAN manzil uchun so'raladi)
+  const [gps, recheckGps] = useAddressGpsCheck(address, step === 'address' && !isOnce);
   // "Manzil to'g'ri" bosilsa ogohlantirish yig'iladi; GPS qayta tekshirilib holat o'zgarsa — yana ko'rinishi mumkin
   const [farAcked, setFarAcked] = useState(false);
   useEffect(() => { if (gps.state !== 'far') setFarAcked(false); }, [gps.state]);
 
   // Android "orqaga": 2-qadamda avval chekka qaytadi, keyingisi oynani yopadi
   useModalBackClose(step === 'address' && !submitting, goCheck);
+  useModalBackClose(step === 'gps' && !submitting, backFromGps);
 
   const handleYes = () => {
     if (needsAddressStep) goAddress();
@@ -68,7 +79,8 @@ export function OrderConfirmModal({
 
 
   // Manzil turiga mos belgi (Uy / Ish / Boshqa)
-  const labelIcon = address?.labelId === 'home' ? 'house'
+  const labelIcon = isOnce ? 'navigation'
+    : address?.labelId === 'home' ? 'house'
     : address?.labelId === 'work' ? 'briefcase' : 'pin';
 
   // 2-qadamda narx o'zgarganmi (manzil almashtirilgach yetkazish narxi boshqacha chiqishi mumkin)
@@ -82,14 +94,14 @@ export function OrderConfirmModal({
 
   return (
     <div className="ocm-overlay" onClick={onClose} style={overlayStyle}>
-      <div className={`ocm-sheet${step === 'address' ? ' ocm-sheet--map' : ''}`} onClick={(e) => e.stopPropagation()} {...dragProps}>
+      <div className={`ocm-sheet${step === 'address' || step === 'gps' ? ' ocm-sheet--map' : ''}`} onClick={(e) => e.stopPropagation()} {...dragProps}>
         <div className="ocm-handle" />
 
         {/* Qadam ko'rsatkichi — mijoz "yana qancha qoldi" ni biladi */}
         {needsAddressStep && (
           <div className="ocm-steps" aria-hidden="true">
             <span className={`ocm-steps__dot ${step === 'check' ? 'is-active' : 'is-done'}`} />
-            <span className={`ocm-steps__dot ${step === 'address' ? 'is-active' : ''}`} />
+            <span className={`ocm-steps__dot ${step !== 'check' ? 'is-active' : ''}`} />
           </div>
         )}
 
@@ -199,7 +211,7 @@ export function OrderConfirmModal({
             <div className="ocm-map">
               <DeliveryRouteMap
                 restaurants={restaurants}
-                destination={{ lat: address.lat, lng: address.lng, label: address.title || t('address') }}
+                destination={{ lat: address.lat, lng: address.lng, label: isOnce ? t('onceChip') : (address.title || t('address')) }}
                 me={gps.pos ? { lat: gps.pos.lat, lng: gps.pos.lng, accuracy: gps.pos.accuracy } : null}
                 onLocate={recheckGps}
               />
@@ -208,30 +220,34 @@ export function OrderConfirmModal({
             <div className="ocm-addr__scroll">
 
               {/* GPS holati va ogohlantirish — BITTA ixcham blok (avval ikki karta edi: biri aylanishda xarita tagiga yashirinardi) */}
-              <GpsCheck
-                gps={gps}
-                acked={farAcked}
-                onKeep={() => { haptic(); setFarAcked(true); }}
-                onRetry={recheckGps}
-                onChoose={onChooseAddress}
-                busy={submitting}
-                t={t}
-              />
+              {!isOnce && (
+                <GpsCheck
+                  gps={gps}
+                  acked={farAcked}
+                  onKeep={() => { haptic(); setFarAcked(true); }}
+                  onRetry={recheckGps}
+                  onChoose={onChooseAddress}
+                  busy={submitting}
+                  t={t}
+                />
+              )}
 
               <div className="ocm-addr-card2">
                 <div className="ocm-addr-card2__top">
                   <div className="ocm-addr-chip">
                     <Icon name={labelIcon} size={17} color="var(--brand)" />
-                    <span>{address.title || t('address')}</span>
+                    <span>{isOnce ? t('onceChip') : (address.title || t('address'))}</span>
+                    {isOnce && <em className="ocm-once-badge">{t('onceBadge')}</em>}
                   </div>
-                  <button type="button" className="ocm-addr-edit" onClick={onEditAddress} disabled={submitting}>
+                  {/* Bir martalik manzilni tahrirlash — GPS qadamida (matn/nuqta); saqlangani — avvalgi tahrir oynasi */}
+                  <button type="button" className="ocm-addr-edit" onClick={isOnce ? goGps : onEditAddress} disabled={submitting}>
                     <Icon name="edit" size={15} color="var(--ink)" />
                     <span>{t('addrEditThis')}</span>
                   </button>
                 </div>
                 <div className="ocm-addr-text" data-testid="addr-text">{address.address || address.street}</div>
                 {/* Shahar va kuryerga izoh — bitta ixcham qator (2 qatorgacha), alohida katta quti emas */}
-                {(address.city || address.note) && (
+                {!isOnce && (address.city || address.note) && (
                   <div className="ocm-addr-sub">
                     {address.city}
                     {address.city && address.note ? ' · ' : ''}
@@ -239,6 +255,20 @@ export function OrderConfirmModal({
                   </div>
                 )}
               </div>
+
+              {/* "Hozirgi joyimga yetkazish" — bir martalik GPS manzil. Bir martalik tanlangan bo'lsa — saqlangan manzilga qaytish */}
+              {onUseOneTime && (isOnce ? (hasSavedAddress ? (
+                <button type="button" className="ocm-once-row ocm-once-row--back" onClick={() => { haptic(); onClearOneTime?.(); }} disabled={submitting} data-testid="once-back-saved">
+                  <span className="ocm-once-row__ic"><Icon name="pin" size={20} color="var(--ink)" /></span>
+                  <span className="ocm-once-row__txt"><span>{t('onceBackToSaved')}</span><small>{t('onceNotSavedShort')}</small></span>
+                </button>
+              ) : null) : (
+                <button type="button" className="ocm-once-row" onClick={goGps} disabled={submitting} data-testid="once-open">
+                  <span className="ocm-once-row__ic"><Icon name="navigation" size={20} color="#2563EB" /></span>
+                  <span className="ocm-once-row__txt"><span>{t('onceTitle')}</span><small>{t('onceSub')}</small></span>
+                  <Icon name="chevronRight" size={18} color="var(--muted)" />
+                </button>
+              ))}
 
               {/* Nima uchun davom etib bo'lmayotgani — aniq va sodda */}
               {blocked === 'no_point' && (
@@ -298,6 +328,17 @@ export function OrderConfirmModal({
               </button>
             </div>
           </div>
+        )}
+
+        {/* ═══ BIR MARTALIK GPS MANZIL: aniqlash → xarita → manzil va mo'ljal → tasdiqlash ═══ */}
+        {step === 'gps' && (
+          <CurrentLocationStep
+            restaurants={restaurants}
+            initial={isOnce ? address : null}
+            onBack={backFromGps}
+            onClose={onClose}
+            onConfirm={(addr) => { onUseOneTime?.(addr); setStep('address'); }}
+          />
         )}
       </div>
     </div>

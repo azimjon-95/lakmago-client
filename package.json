@@ -8,7 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "test:gps": "node --test tests/gpsCheck.test.mjs",
-    "test:icons": "node --test tests/appIconSchedule.test.mjs tests/appIconNative.test.mjs"
+    "test:icons": "node --test tests/appIconSchedule.test.mjs tests/appIconNative.test.mjs",
+    "test:once": "node --test tests/currentFix.test.mjs tests/oneTimeAddress.test.mjs",
+    "test:once:render": "node tests/oneTimeRender.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",
