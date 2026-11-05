@@ -30,6 +30,11 @@ try {
   const modal = readFileSync('src/components/OrderConfirmModal.jsx', 'utf8');
   check('tasdiqlash oynasi: uzoq bo\'lsa tugma o\'chiriladi va tanlov tasdig\'i serverga uzatiladi', /disabled=\{submitting \|\| Boolean\(blocked\) \|\| farBlock\}/.test(modal) && modal.includes('onConfirm({ farConfirmed })'));
   check('bir martalik manzil uchun majburiy tanlov yo\'q (o\'zi tanlagan)', modal.includes('!isOnce && isFarBlock(gps)'));
+  check('ortiqcha «Hozirgi joyimga yetkazish» qatori olib tashlangan (karta va «Boshqa manzil» ro‘yxati taklif qiladi)', !modal.includes('data-testid="once-open"') && modal.includes('once-back-saved'));
+  check('qaror rejimida manzil kartasi yashirilgan va ildiz sinfi qo‘yiladi (skrolsiz sig‘ish)', modal.includes("ocm-addr${farBlock ? ' ocm-addr--far' : ''}") && /\{!farBlock && \(\s*<div className="ocm-addr-card2">/.test(modal));
+  check('tugma tushuntiradi: «Avval yetkazish joyini tanlang»', modal.includes("farBlock ? t('farPickFirst') : yesLabel"));
+  const css = readFileSync('src/components/FarDecision.css', 'utf8');
+  check('past ekranda (≤740 px) xarita yashiriladi, qaror kartasi qoladi', /max-height: 740px\) \{ \.ocm-addr--far \.ocm-map \{ display: none; \} \}/.test(css));
   const cart = readFileSync('src/pages/Cart/CartPage.jsx', 'utf8');
   check('savat: qurilma dalili buyurtma bilan yuboriladi (faqat yetkazishda)', cart.includes('buildDeviceFields({ fix: useDeviceLocation.getState().fix') && cart.includes('!isPickup ? buildDeviceFields'));
 } finally { await server.close(); }

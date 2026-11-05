@@ -199,7 +199,7 @@ export function OrderConfirmModal({
 
         {/* ═══ 2-QADAM: MANZILNI TASDIQLASH ═══ */}
         {step === 'address' && address && (
-          <div className="ocm-addr">
+          <div className={`ocm-addr${farBlock ? ' ocm-addr--far' : ''}`}>
             <div className="ocm-head ocm-head--addr">
               <button
                 type="button"
@@ -251,6 +251,8 @@ export function OrderConfirmModal({
                 />
               )}
 
+              {/* Qaror rejimida («Qayerga yetkazamiz?») manzil kartasi YASHIRILADI: manzil qaror kartasining o'zida bor — skrol bo'lmasin */}
+              {!farBlock && (
               <div className="ocm-addr-card2">
                 <div className="ocm-addr-card2__top">
                   <div className="ocm-addr-chip">
@@ -274,20 +276,16 @@ export function OrderConfirmModal({
                   </div>
                 )}
               </div>
+              )}
 
-              {/* "Hozirgi joyimga yetkazish" — bir martalik GPS manzil. Bir martalik tanlangan bo'lsa — saqlangan manzilga qaytish */}
-              {onUseOneTime && (isOnce ? (hasSavedAddress ? (
+              {/* Bir martalik manzil tanlangan bo'lsa — saqlangan manzilga qaytish. («Hozirgi joyimga» ni boshlash: uzoq bo'lsa qaror kartasi,
+                  aks holda «Boshqa manzil» ro'yxati yuqorisida — alohida qator kerak emas.) */}
+              {onUseOneTime && isOnce && hasSavedAddress && (
                 <button type="button" className="ocm-once-row ocm-once-row--back" onClick={() => { haptic(); onClearOneTime?.(); }} disabled={submitting} data-testid="once-back-saved">
                   <span className="ocm-once-row__ic"><Icon name="pin" size={20} color="var(--ink)" /></span>
                   <span className="ocm-once-row__txt"><span>{t('onceBackToSaved')}</span><small>{t('onceNotSavedShort')}</small></span>
                 </button>
-              ) : null) : (
-                <button type="button" className="ocm-once-row" onClick={goGps} disabled={submitting} data-testid="once-open">
-                  <span className="ocm-once-row__ic"><Icon name="navigation" size={20} color="#2563EB" /></span>
-                  <span className="ocm-once-row__txt"><span>{t('onceTitle')}</span><small>{t('onceSub')}</small></span>
-                  <Icon name="chevronRight" size={18} color="var(--muted)" />
-                </button>
-              ))}
+              )}
 
               {/* Nima uchun davom etib bo'lmayotgani — aniq va sodda */}
               {blocked === 'no_point' && (
@@ -327,8 +325,8 @@ export function OrderConfirmModal({
               disabled={submitting || Boolean(blocked) || farBlock}
               data-loading={submitting ? 'true' : undefined}
             >
-              {!submitting && !blocked && <Icon name="check" size={22} color="currentColor" strokeWidth={3} />}
-              <span>{yesLabel}</span>
+              {!submitting && !blocked && !farBlock && <Icon name="check" size={22} color="currentColor" strokeWidth={3} />}
+              <span>{farBlock ? t('farPickFirst') : yesLabel}</span>
             </button>
 
             <div className="ocm-addr-alt">
