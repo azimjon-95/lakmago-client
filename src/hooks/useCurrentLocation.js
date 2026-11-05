@@ -4,6 +4,7 @@ import { createFixSource } from '@/lib/gpsSource';
 import { reverseGeocodeViaYandex } from '@/lib/location';
 import { prefillText, ONCE_TEXT_MAX } from '@/lib/oneTimeAddress';
 import { FIRST_FIX_CAP_MS, SLOW_MS } from '@/hooks/useAddressGpsCheck';
+import { useDeviceLocation } from '@/store/deviceLocation';
 
 const capped = (promise, ms) => new Promise((resolve, reject) => {
   const t = setTimeout(() => reject(Object.assign(new Error('GPS vaqti tugadi'), { code: 'timeout' })), ms);
@@ -80,6 +81,7 @@ export function useCurrentLocation({ initial = null } = {}) {
       });
       if (!out || cancelled()) return;
       setSt({ stage: 'ready', quality: out.state, pos: { ...out.pos, accuracy: out.U }, manual: false });
+      useDeviceLocation.getState().set({ lat: out.pos.lat, lng: out.pos.lng, accuracy: out.U, at: Date.now() });
       resolveText(out.pos.lat, out.pos.lng);
     } catch (e) {
       if (cancelled()) return;

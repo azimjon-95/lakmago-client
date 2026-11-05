@@ -12,6 +12,8 @@ import { AddressFlow } from '@/components/AddressFlow/AddressFlow';
 import { CurrentLocationSheet } from '@/components/CurrentLocationSheet';
 import { useOneTimeAddress } from '@/store/oneTimeAddress';
 import { orderAddressFields } from '@/lib/oneTimeAddress';
+import { buildDeviceFields } from '@/lib/deviceFix';
+import { useDeviceLocation } from '@/store/deviceLocation';
 import { useCart } from '@/store/cart';
 import { useUser } from '@/store/user';
 import { useOrders } from '@/store/orders';
@@ -972,8 +974,10 @@ export function CartPage() {
 
   placeOrderRef.current = handlePlaceOrder; // kirishdan keyin eng so'nggi (yangi holatli) versiya chaqiriladi
 
-  function confirmAndSubmit() {
+  function confirmAndSubmit(opts) {
     if (submitLock.current) return;
+    // «Qayerga yetkazamiz?» da mijoz uzoq saqlangan manzilni o'zi tasdiqlaganmi (onClick hodisasi emas, obyekt keladi)
+    const farConfirmed = opts?.farConfirmed === true;
 
     /*
      * YAKUNIY HIMOYA: placeOrder aynan shu yerdan chaqiriladi.
@@ -1062,6 +1066,11 @@ export function CartPage() {
             addressNote: addrFields.note,
           }
         : {}),
+      /*
+       * Qurilma qayerda ekani (YANGI GPS nuqta ≤ 15 daqiqa) — server yetkazish manzili bilan masofani hisoblab buyurtmaga yozadi,
+       * restoran "mijoz manzildan 8 km uzoqda" belgisini ko'radi. Bir martalik manzilni mijoz o'zi tanlagan — bu ham tasdiq.
+       */
+      ...(!isPickup ? buildDeviceFields({ fix: useDeviceLocation.getState().fix, confirmedFar: farConfirmed || Boolean(oneTimeAddress) }) : {}),
     })
       .then(async (created) => {
         /*

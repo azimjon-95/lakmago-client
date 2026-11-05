@@ -18,7 +18,8 @@
  * (tests/gpsCheck.test.mjs). Haqiqiy GPS manbai: lib/gpsSource.js.
  */
 export const GPS = {
-  FAR_BASE_M: 100,     // xato ayirilgach shuncha uzoq bo'lsagina "uzoq"
+  FAR_BASE_M: 100,     // xato ayirilgach shuncha uzoq bo'lsagina "uzoq" (yumshoq ogohlantirish)
+  BLOCK_M: 500,        // xato ayirilgach shuncha uzoq bo'lsa — MAJBURIY tanlov ("Qayerga yetkazamiz?") va aniqlik yaxshi bo'lishi shart
   GOOD_ACC_M: 50,      // shundan aniq bo'lsa o'lchov barqaror deb olinadi
   USABLE_ACC_M: 100,   // shundan yomon bo'lsa xulosa chiqarilmaydi (faqat aniq uzoq bo'lsa)
   DEFAULT_ACC_M: 60,   // aniqlik berilmasa (ba'zi Telegram javoblari) — o'rtacha taxmin
@@ -130,4 +131,15 @@ export async function runGpsCheck({ target, source, onUpdate, isCancelled = () =
     if (isCancelled()) return null;
     if (fix) add(fix);
   }
+}
+
+/**
+ * MAJBURIY TANLOV kerakmi: mijoz saqlangan manzildan ≥ BLOCK_M (500 m) uzoqda — GPS xatosi ayirilgandan KEYIN ham — va aniqlik
+ * yetarli (≤ USABLE_ACC_M). Aniqlik past bo'lsa (tarmoq joylashuvi 200+ m adashadi) MAJBURLANMAYDI: to'g'ri joydagi mijoz
+ * soxta "uzoqdasiz" bilan to'xtatilmasin. `res` — useAddressGpsCheck natijasi { state, d, acc|U }.
+ */
+export function isFarBlock(res, cfg = GPS) {
+  if (!res || res.state !== 'far' || !Number.isFinite(res.d)) return false;
+  const err = res.acc ?? res.U;
+  return Number.isFinite(err) && err <= cfg.USABLE_ACC_M && res.d - err >= cfg.BLOCK_M;
 }

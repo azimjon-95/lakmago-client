@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { runGpsCheck } from '@/lib/gpsCheck';
 import { createFixSource } from '@/lib/gpsSource';
+import { useDeviceLocation } from '@/store/deviceLocation';
 
 /*
  * ═══ JORIY GPS ↔ SAQLANGAN MANZIL (yumshoq tekshiruv) ═══
@@ -65,6 +66,8 @@ export function useAddressGpsCheck(address, active) {
       if (!out || cancelled()) return;
       // pos.accuracy — BARQARORLASHGAN xato: xaritadagi aniqlik doirasi shuni ko'rsatadi
       setRes({ state: out.state, pos: { ...out.pos, accuracy: out.U }, d: out.d, acc: out.U, n: out.n });
+      // Qurilma qayerda ekani buyurtma bilan serverga ketadi (lib/deviceFix.js)
+      if (out.pos) useDeviceLocation.getState().set({ lat: out.pos.lat, lng: out.pos.lng, accuracy: out.U, at: Date.now() });
     } catch (e) {
       if (cancelled()) return;
       const c = e?.code;

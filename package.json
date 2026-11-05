@@ -11,7 +11,9 @@
     "test:icons": "node --test tests/appIconSchedule.test.mjs tests/appIconNative.test.mjs",
     "test:once": "node --test tests/currentFix.test.mjs tests/oneTimeAddress.test.mjs",
     "test:once:render": "node tests/oneTimeRender.mjs",
-    "test:card": "node --test tests/cardProviders.test.mjs"
+    "test:card": "node --test tests/cardProviders.test.mjs",
+    "test:device": "node --test tests/deviceCheck.test.mjs",
+    "test:device:render": "node tests/farDecisionRender.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",
