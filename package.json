@@ -10,7 +10,8 @@
     "test:gps": "node --test tests/gpsCheck.test.mjs",
     "test:icons": "node --test tests/appIconSchedule.test.mjs tests/appIconNative.test.mjs",
     "test:once": "node --test tests/currentFix.test.mjs tests/oneTimeAddress.test.mjs",
-    "test:once:render": "node tests/oneTimeRender.mjs"
+    "test:once:render": "node tests/oneTimeRender.mjs",
+    "test:card": "node --test tests/cardProviders.test.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",

@@ -31,7 +31,7 @@ import { useModalBackClose } from '@/hooks/useModalBackClose';
 import { hasValidCoords, deliveryAddressCheck } from '@/lib/addressCoords';
 import { GiftBonusBanner, GiftLines, useGiftQuote } from '@/components/GiftBonus/GiftBonus';
 import './Cart.css';
-import { CARD_PAYMENT_ENABLED } from '@/config/features';
+import { CARD_PAYMENT_ENABLED, filterCardProviders } from '@/config/features';
 
 
 /*
@@ -509,7 +509,7 @@ export function CartPage() {
     const load = (retry = true) => api.getPaymentStatus()
       .then((st) => {
         if (cancelled) return;
-        setProviders(CARD_PAYMENT_ENABLED && !user?.isDemo && Array.isArray(st?.available) ? st.available : []);   // demo hisob: faqat naqd (hech narsa olinmaydi)
+        setProviders(CARD_PAYMENT_ENABLED && !user?.isDemo ? filterCardProviders(st?.available) : []);   // demo hisob: faqat naqd (hech narsa olinmaydi)
         setProvidersFailed(false);
         setProvidersLoaded(true);
       })
