@@ -56,3 +56,31 @@
 
 @media (max-height: 640px) { .fd { padding: 12px 12px 10px; } .fd-route { padding-bottom: 6px; } .fd-sub { margin-bottom: 10px; } }
 @media (prefers-reduced-motion: reduce) { .fd, .fd-confirm, .fd-line, .fd-me::after { animation: none; } }
+
+/* ═══ IXCHAM REJIM: «Qayerga yetkazamiz?» ekranga SKROLSIZ sig'sin ═══
+   Telefon (≈ 700–850 px balandlik): sarlavha + xarita + shu karta + «Jami» + 2 tugma qatori. Xarita shu rejimda kichrayadi,
+   juda past ekranda umuman yashiriladi (qaror xarita'dan muhimroq). */
+.fd { margin-bottom: 8px; padding: 10px 12px 12px; border-radius: 20px; }
+.fd-route { padding: 0 2px 6px; gap: 4px; }
+.fd-node { width: 64px; gap: 3px; }
+.fd-node small { font-size: 11.5px; }
+.fd-me, .fd-pin { width: 30px; height: 30px; }
+.fd-me i { width: 13px; height: 13px; border-width: 2.5px; }
+.fd-line { height: 30px; }
+.fd-chip { padding: 3px 9px; font-size: 12.5px; }
+.fd-title { font-size: 18px; margin-top: 0; }
+.fd-sub { margin: 2px 0 10px; font-size: 13px; }
+.fd-options { gap: 6px; }
+.fd-opt { min-height: 58px; padding: 7px 12px; gap: 10px; border-radius: 16px; }
+.fd-opt__ic { width: 40px; height: 40px; }
+.fd-opt__txt b { font-size: 15px; }
+.fd-opt__txt small { font-size: 12.5px; -webkit-line-clamp: 2; }
+.fd-confirm { gap: 8px; }
+.fd-confirm__addr { padding: 9px 12px; font-size: 13.5px; }
+.fd-warn { padding: 8px 10px; font-size: 13px; }
+.fd-yes { min-height: 50px; font-size: 15.5px; }
+.fd-back { min-height: 38px; font-size: 14.5px; }
+
+/* Qaror rejimida xarita past (marshrut ko'rinishi uchun yetadi), qolgan joy — qaror kartasiga */
+.ocm-addr--far .ocm-map { flex: 0 1 132px; min-height: 96px; }
+@media (max-height: 740px) { .ocm-addr--far .ocm-map { display: none; } }
