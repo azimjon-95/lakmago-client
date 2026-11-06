@@ -81,6 +81,25 @@
 .fd-yes { min-height: 50px; font-size: 15.5px; }
 .fd-back { min-height: 38px; font-size: 14.5px; }
 
-/* Qaror rejimida xarita past (marshrut ko'rinishi uchun yetadi), qolgan joy — qaror kartasiga */
-.ocm-addr--far .ocm-map { flex: 0 1 132px; min-height: 96px; }
-@media (max-height: 740px) { .ocm-addr--far .ocm-map { display: none; } }
+/* ═══ BO'SH JOY TAQSIMOTI (qaror rejimi) ═══
+   Oyna balandligi telefonga qarab o'zgaradi. Karta kontent balandligida qoladi, QOLGAN joyni xarita (240 px gacha) va karta
+   atrofidagi havo oladi — pastda bo'sh joy qolmaydi. Past ekranda xarita avtomatik kichrayadi/yashiriladi, skrol paydo bo'lmaydi. */
+.ocm-addr--far .ocm-map { flex: 6 1 0; min-height: 96px; max-height: 250px; }   /* bo'sh joyning katta qismi xaritaga (6:1); 250 px dan ortig'i karta atrofiga */
+.ocm-sheet--map .ocm-addr--far .ocm-addr__scroll { flex: 1 1 auto; justify-content: center; }   /* .ocm-sheet--map .ocm-addr__scroll (flex: 0 1 auto) dan kuchliroq */
+.ocm-addr--far .fd { margin: 0; }
+@media (max-height: 720px) { .ocm-addr--far .ocm-map { display: none; } }
+
+/* Karta o'lchamlari ekran balandligiga qarab kattalashadi (baland telefonda kengroq, past telefonda ixcham) */
+.fd { padding: clamp(10px, 1.7dvh, 16px) 12px clamp(12px, 1.9dvh, 18px); }
+.fd-route { padding-bottom: clamp(6px, 1.2dvh, 12px); }
+.fd-me, .fd-pin { width: clamp(30px, 4.4dvh, 40px); height: clamp(30px, 4.4dvh, 40px); }
+.fd-line { height: clamp(30px, 4.4dvh, 40px); }
+.fd-node small { font-size: clamp(11.5px, 1.5dvh, 13px); }
+.fd-title { font-size: clamp(18px, 2.7dvh, 22px); }
+.fd-sub { font-size: clamp(13px, 1.7dvh, 14.5px); margin-bottom: clamp(10px, 1.7dvh, 16px); }
+.fd-options { gap: clamp(6px, 1dvh, 10px); }
+.fd-opt { min-height: clamp(58px, 8.4dvh, 80px); padding-block: clamp(7px, 1.1dvh, 12px); }
+.fd-opt__ic { width: clamp(40px, 5.4dvh, 48px); height: clamp(40px, 5.4dvh, 48px); }
+.fd-opt__txt b { font-size: clamp(15px, 2.05dvh, 17px); }
+.fd-opt__txt small { font-size: clamp(12.5px, 1.65dvh, 14px); }
+.fd-yes { min-height: clamp(50px, 6.6dvh, 58px); }

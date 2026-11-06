@@ -34,7 +34,9 @@ try {
   check('qaror rejimida manzil kartasi yashirilgan va ildiz sinfi qo‘yiladi (skrolsiz sig‘ish)', modal.includes("ocm-addr${farBlock ? ' ocm-addr--far' : ''}") && /\{!farBlock && \(\s*<div className="ocm-addr-card2">/.test(modal));
   check('tugma tushuntiradi: «Avval yetkazish joyini tanlang»', modal.includes("farBlock ? t('farPickFirst') : yesLabel"));
   const css = readFileSync('src/components/FarDecision.css', 'utf8');
-  check('past ekranda (≤740 px) xarita yashiriladi, qaror kartasi qoladi', /max-height: 740px\) \{ \.ocm-addr--far \.ocm-map \{ display: none; \} \}/.test(css));
+  check('past ekranda (≤720 px) xarita yashiriladi, qaror kartasi qoladi', /max-height: 720px\) \{ \.ocm-addr--far \.ocm-map \{ display: none; \} \}/.test(css));
+  check('bo\'sh joy taqsimlanadi: xarita (6:1, 250 px gacha) + karta atrofi kengayadi — pastda bo\'shliq qolmaydi', /\.ocm-addr--far \.ocm-map \{ flex: 6 1 0; min-height: 96px; max-height: 250px; \}/.test(css) && /\.ocm-sheet--map \.ocm-addr--far \.ocm-addr__scroll \{ flex: 1 1 auto; justify-content: center; \}/.test(css));
+  check('karta ekran balandligiga qarab kattalashadi (dvh)', /\.fd-opt \{ min-height: clamp\(58px, 8\.4dvh, 80px\)/.test(css) && /\.fd-title \{ font-size: clamp\(18px, 2\.7dvh, 22px\)/.test(css));
   const cart = readFileSync('src/pages/Cart/CartPage.jsx', 'utf8');
   check('savat: qurilma dalili buyurtma bilan yuboriladi (faqat yetkazishda)', cart.includes('buildDeviceFields({ fix: useDeviceLocation.getState().fix') && cart.includes('!isPickup ? buildDeviceFields'));
 } finally { await server.close(); }
