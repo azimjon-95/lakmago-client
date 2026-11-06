@@ -9,8 +9,6 @@ import { DeliveryRouteMap, formatDistance } from './DeliveryRouteMap';
 import { useAddressGpsCheck } from '@/hooks/useAddressGpsCheck';
 import { canOpenLocationSettings, openLocationSettings } from '@/lib/location';
 import { CurrentLocationStep } from './CurrentLocationStep';
-import { FarDecision } from './FarDecision';
-import { isFarBlock } from '@/lib/gpsCheck';
 import './OrderConfirmModal.css';
 
 /**
@@ -69,13 +67,6 @@ export function OrderConfirmModal({
   // "Manzil to'g'ri" bosilsa ogohlantirish yig'iladi; GPS qayta tekshirilib holat o'zgarsa — yana ko'rinishi mumkin
   const [farAcked, setFarAcked] = useState(false);
   useEffect(() => { if (gps.state !== 'far') setFarAcked(false); }, [gps.state]);
-  /*
-   * MAJBURIY TANLOV: mijoz saqlangan manzildan ≥ 500 m uzoqda (GPS xatosi ayirilgach ham, aniqlik yaxshi) — «Qayerga yetkazamiz?»
-   * kartasi chiqadi va tanlanmaguncha buyurtma yuborilmaydi. Saqlangan manzilni tanlasa aniq tasdiqlaydi (farAcked) — bu
-   * tasdiq serverga `addressConfirmedFar` bo'lib ketadi. 100–500 m: avvalgi yumshoq ogohlantirish.
-   */
-  const farBlock = !isOnce && isFarBlock(gps) && !farAcked;
-  const farConfirmed = !isOnce && farAcked && isFarBlock(gps);
 
   // Android "orqaga": 2-qadamda avval chekka qaytadi, keyingisi oynani yopadi
   useModalBackClose(step === 'address' && !submitting, goCheck);
@@ -83,7 +74,7 @@ export function OrderConfirmModal({
 
   const handleYes = () => {
     if (needsAddressStep) goAddress();
-    else onConfirm({});
+    else onConfirm();
   };
 
 
@@ -199,7 +190,7 @@ export function OrderConfirmModal({
 
         {/* ═══ 2-QADAM: MANZILNI TASDIQLASH ═══ */}
         {step === 'address' && address && (
-          <div className={`ocm-addr${farBlock ? ' ocm-addr--far' : ''}`}>
+          <div className="ocm-addr">
             <div className="ocm-head ocm-head--addr">
               <button
                 type="button"
@@ -229,17 +220,7 @@ export function OrderConfirmModal({
             <div className="ocm-addr__scroll">
 
               {/* GPS holati va ogohlantirish — BITTA ixcham blok (avval ikki karta edi: biri aylanishda xarita tagiga yashirinardi) */}
-              {!isOnce && farBlock && (
-                <FarDecision
-                  distanceM={gps.d}
-                  name={address.title}
-                  address={address.address}
-                  onNow={goGps}
-                  onKeep={() => setFarAcked(true)}
-                  busy={submitting}
-                />
-              )}
-              {!isOnce && !farBlock && (
+              {!isOnce && (
                 <GpsCheck
                   gps={gps}
                   acked={farAcked}
@@ -251,8 +232,6 @@ export function OrderConfirmModal({
                 />
               )}
 
-              {/* Qaror rejimida («Qayerga yetkazamiz?») manzil kartasi YASHIRILADI: manzil qaror kartasining o'zida bor — skrol bo'lmasin */}
-              {!farBlock && (
               <div className="ocm-addr-card2">
                 <div className="ocm-addr-card2__top">
                   <div className="ocm-addr-chip">
@@ -276,16 +255,20 @@ export function OrderConfirmModal({
                   </div>
                 )}
               </div>
-              )}
 
-              {/* Bir martalik manzil tanlangan bo'lsa — saqlangan manzilga qaytish. («Hozirgi joyimga» ni boshlash: uzoq bo'lsa qaror kartasi,
-                  aks holda «Boshqa manzil» ro'yxati yuqorisida — alohida qator kerak emas.) */}
-              {onUseOneTime && isOnce && hasSavedAddress && (
+              {/* "Hozirgi joyimga yetkazish" — bir martalik GPS manzil. Bir martalik tanlangan bo'lsa — saqlangan manzilga qaytish */}
+              {onUseOneTime && (isOnce ? (hasSavedAddress ? (
                 <button type="button" className="ocm-once-row ocm-once-row--back" onClick={() => { haptic(); onClearOneTime?.(); }} disabled={submitting} data-testid="once-back-saved">
                   <span className="ocm-once-row__ic"><Icon name="pin" size={20} color="var(--ink)" /></span>
                   <span className="ocm-once-row__txt"><span>{t('onceBackToSaved')}</span><small>{t('onceNotSavedShort')}</small></span>
                 </button>
-              )}
+              ) : null) : (
+                <button type="button" className="ocm-once-row" onClick={goGps} disabled={submitting} data-testid="once-open">
+                  <span className="ocm-once-row__ic"><Icon name="navigation" size={20} color="#2563EB" /></span>
+                  <span className="ocm-once-row__txt"><span>{t('onceTitle')}</span><small>{t('onceSub')}</small></span>
+                  <Icon name="chevronRight" size={18} color="var(--muted)" />
+                </button>
+              ))}
 
               {/* Nima uchun davom etib bo'lmayotgani — aniq va sodda */}
               {blocked === 'no_point' && (
@@ -320,13 +303,13 @@ export function OrderConfirmModal({
 
             <button
               type="button"
-              onClick={() => onConfirm({ farConfirmed })}
+              onClick={onConfirm}
               className="ocm-addr-yes"
-              disabled={submitting || Boolean(blocked) || farBlock}
+              disabled={submitting || Boolean(blocked)}
               data-loading={submitting ? 'true' : undefined}
             >
-              {!submitting && !blocked && !farBlock && <Icon name="check" size={22} color="currentColor" strokeWidth={3} />}
-              <span>{farBlock ? t('farPickFirst') : yesLabel}</span>
+              {!submitting && !blocked && <Icon name="check" size={22} color="currentColor" strokeWidth={3} />}
+              <span>{yesLabel}</span>
             </button>
 
             <div className="ocm-addr-alt">

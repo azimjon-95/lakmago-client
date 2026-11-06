@@ -134,6 +134,7 @@ export async function runGpsCheck({ target, source, onUpdate, isCancelled = () =
 }
 
 /**
+ * (HOZIR ISHLATILMAYDI — «Qayerga yetkazamiz?» qaror kartasi dizayni qaytarilgan; to'liq dizayn: branch backup/address-far-decision.)
  * MAJBURIY TANLOV kerakmi: mijoz saqlangan manzildan ≥ BLOCK_M (500 m) uzoqda — GPS xatosi ayirilgandan KEYIN ham — va aniqlik
  * yetarli (≤ USABLE_ACC_M). Aniqlik past bo'lsa (tarmoq joylashuvi 200+ m adashadi) MAJBURLANMAYDI: to'g'ri joydagi mijoz
  * soxta "uzoqdasiz" bilan to'xtatilmasin. `res` — useAddressGpsCheck natijasi { state, d, acc|U }.
