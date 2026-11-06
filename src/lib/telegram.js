@@ -548,6 +548,13 @@ export function getStartParam() {
   // To'yxona havolasi: startapp=wedding_<slug> → to'yxonalar ichida shu to'yxona sahifasi
   const wv = /^wedding_([a-z0-9-]{1,80})$/i.exec(String(raw));
   if (wv) return { type: 'section', to: `/weddings/venue/${wv[1].toLowerCase()}` };
+  /*
+   * RESTORAN havolasi: startapp=rest_<ObjectId> → to'g'ridan-to'g'ri shu restoran sahifasi.
+   * Restoran guruhi/kanalidagi pin tugmasi shunday havola beradi (server: services/telegramGroup.js restaurantStartParam).
+   * Faqat aniq 24 belgili ID qabul qilinadi; restoran mavjudligini sahifaning o'zi tekshiradi.
+   */
+  const rv = /^rest_([a-f\d]{24})$/i.exec(String(raw));
+  if (rv) return { type: 'section', to: `/restaurant/${rv[1].toLowerCase()}` };
 
   // XAVFSIZLIK: parametr faqat kutilgan naqshga mos bo'lsa qabul
   // qilinadi. Zararli qiymat (skript, yo'l, uzun matn) rad etiladi.
