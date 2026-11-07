@@ -441,14 +441,14 @@ ul { list-style: none; }
 
   /* Suzuvchi tugmalar — yotiqda ekrandan chiqib ketmasin */
   .support-fab {
-    bottom: calc(var(--bottom-nav-h, 76px) + 6px + var(--tg-bottom-offset, 0px));
+    bottom: calc(var(--bottom-nav-h, 74px) + 6px + var(--tg-bottom-offset, 0px));
     right: calc(12px + env(safe-area-inset-right, 0px));
     width: 48px; height: 48px;
   }
   .active-order-badge,
   .aob {
     /* Markazda qoladi (left:50% + transform), faqat balandlik ixchamlashadi */
-    bottom: calc(var(--bottom-nav-h, 76px) + var(--tg-bottom-offset, 0px));
+    bottom: calc(var(--bottom-nav-h, 74px) + var(--tg-bottom-offset, 0px));
   }
 }
 

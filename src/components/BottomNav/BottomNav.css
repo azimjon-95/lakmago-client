@@ -4,14 +4,15 @@
  * Lokma Go va Market pastki menyusi (Instagram uslubidagi suzuvchi kapsula, ./floating-nav.css).
  * Menyu .app-shell oxirida: margin-top: auto — kontent QISQA bo'lsa ham ekran tagida turadi; sticky — uzun kontentda
  * kontent shisha kapsula ortidan o'tadi. Atrofi shaffof va bosilmaydi (faqat kapsulaning o'zi bosiladi).
- * Balandlik: 6 + 58 + 12 = 76 px (BottomNav.jsx --bottom-nav-h, savat paneli va suzuvchi tugmalar shunga tayanadi).
+ * Pastdan: max(10, xavfsiz zona + 2) px — Instagramdagidek (iPhone'da kapsula home-chiziqdan ~12 px yuqorida, ekran chetidan ≈22 px).
+ * Balandlik: 6 + 58 + pastki oraliq (BottomNav.jsx --bottom-nav-h shuni xavfsiz zonasiz beradi; savat paneli va tugmalar tayanadi).
  */
 .bottom-nav {
   margin-top: auto;
   position: sticky;
   bottom: 0;
   z-index: 20;
-  padding: 6px 20px calc(12px + var(--tg-bottom-offset, 0px));
+  padding: 6px 20px max(10px, calc(var(--tg-bottom-offset, 0px) + 2px));
   pointer-events: none;
 }
 .bottom-nav .fnav { pointer-events: auto; }

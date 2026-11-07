@@ -26,16 +26,17 @@ Lokma mijoz ilovasi kodida emas, **sayt repozitoriysida** o'zgartiriladi. Bu pap
    ```css
    .lokma-bottom-nav {
      position: sticky; bottom: 0; z-index: 20; margin-top: auto;
-     padding: 6px 20px calc(12px + env(safe-area-inset-bottom, 0px));
+     /* pastdan: Instagramdagidek — iPhone'da home-chiziqdan ~12 px yuqorida (ekran chetidan ≈22 px); xavfsiz zona yo'q bo'lsa 10 px */
+     padding: 6px 20px max(10px, calc(env(safe-area-inset-bottom, 0px) - 12px));
      pointer-events: none;           /* atrofi bosilmaydi */
    }
    .lokma-bottom-nav .fnav { pointer-events: auto; }
    ```
-4. Sahifa kontentining pastiga kamida **76 px + xavfsiz zona** bo'sh joy qoldiring (menyu balandligi: 6 + 58 + 12), aks holda oxirgi kartalar menyu ostida qoladi.
+4. Sahifa kontentining pastiga menyu balandligicha bo'sh joy qoldiring: **6 + 58 + pastki oraliq** (pastki oraliq kamida 10 px), aks holda oxirgi kartalar menyu ostida qoladi.
 
 ## Dizayn qoidalari (uch bo'limda bir xil)
 
-- Kapsula: balandligi **58 px**, yon chetlardan **20 px**, kengligi ≤ **420 px**, burchak to'liq yumaloq, ostida **12 px**.
+- Kapsula: balandligi **58 px**, yon chetlardan **20 px**, kengligi ≤ **420 px**, burchak to'liq yumaloq; pastdan **max(10 px, xavfsiz zona − 12 px)** (Lokma ichida: host bergan zona + 2 px).
 - Fon: oq 72% shaffoflik + `backdrop-filter: blur(22px) saturate(1.8)` (shisha); soya yumshoq; ichki yuqori yorug' chiziq.
 - Faqat ikonkalar (matn yo'q). Faol tab: faol rangdagi ikonka + ortida **yumshoq rangli "pill"**, u tablar orasida 360 ms silliq suriladi.
 - Bosilganda tab `scale(.88)`. "Harakatni kamaytirish" yoqilgan qurilmada animatsiyasiz.
