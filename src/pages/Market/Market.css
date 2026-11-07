@@ -52,7 +52,6 @@
 .market-stores { display: flex; flex-direction: column; gap: 8px; padding: 8px 12px 8px; }
 /* Do'konlar tepasidagi bo'lim kartalari (Lokma Go · To'yxonalar): Market'da ixcham — bo'sh joy kam, kontent ko'p */
 .market-stores-head ~ .home-sections { padding: 6px 12px 0; gap: 8px; }
-.market-stores-head ~ .home-sections .home-section-tile { min-height: 90px; }
 @media (prefers-reduced-motion: reduce) { .market-header__deco { animation: none; } }
 
 /* Admin bannerlari — bosh sahifa karuseli */

@@ -46,7 +46,7 @@ try {
   const hdr = /\.market-header\s*\{[^}]*?background:\s*(#[0-9a-fA-F]{6})/s.exec(mcss)?.[1];
   const mc = readFileSync('src/pages/Market/Market.css', 'utf8');
   const px = (re) => Number((re.exec(mc) || [])[1]);
-  check("Do'konlar qatori ixcham: tepa oraliq ≤ 10 px, sarlavha ≤ 18 px, bo'lim kartalari balandligi ≤ 92 px (bo'sh joy kam)", px(/\.market-stores-head\s*\{[^}]*padding:\s*(\d+)px/) <= 10 && px(/\.market-stores-head h2\s*\{[^}]*font-size:\s*(\d+)px/) <= 18 && px(/\.home-section-tile\s*\{\s*min-height:\s*(\d+)px/) <= 92);
+  check("Do'konlar qatori ixcham: tepa oraliq ≤ 10 px, sarlavha ≤ 18 px, bo'lim kartalari balandligi ≤ 92 px (bo'sh joy kam)", px(/\.market-stores-head\s*\{[^}]*padding:\s*(\d+)px/) <= 10 && px(/\.market-stores-head h2\s*\{[^}]*font-size:\s*(\d+)px/) <= 18 && Number((/\.home-section-tile\s*\{[^}]*?min-height:\s*(\d+)px/.exec(readFileSync('src/components/HomeSections/HomeSections.css', 'utf8')) || [])[1]) <= 92);
   check("savat tepadan pastroqda joylashgan (top: 8px) va oq varaq pastki qismini yopadi", /\.market-header__deco\s*\{[^}]*top:\s*8px/.test(mc));
   check('Telegram sarlavhasi va sahifa sarlavhasi rangi AYNAN bir xil (maket: #016029), gradient yo‘q', Boolean(surf) && surf.toLowerCase() === '#016029' && hdr?.toLowerCase() === surf.toLowerCase() && !/\.market-header\s*\{[^}]*gradient/s.test(mcss), `${surf} / ${hdr}`);
   check("kuryer O'NGDAN chapga yuradi: boshlanish o'ng tashqarida (translateX(130%)), tezlik chiziqlari orqasida", css.includes('transform: translateX(130%)') && css.includes('0% { transform: translateX(130%)') && !css.includes('translateX(-120%)'));
