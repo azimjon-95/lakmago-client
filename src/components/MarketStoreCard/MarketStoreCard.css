@@ -1,0 +1,43 @@
+/* Market do'kon kartasi (MarketStoreCard.jsx) — dizayn maketi 1:1 */
+.mscard {
+  display: block; width: 100%; text-align: left; background: #fff; border-radius: 16px; overflow: hidden;
+  box-shadow: 0 4px 16px rgba(16, 40, 24, 0.10); -webkit-tap-highlight-color: transparent;
+  transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1); animation: mscard-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.mscard:active { transform: scale(0.985); }
+@keyframes mscard-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.mscard__banner { position: relative; height: clamp(110px, 29vw, 150px); background: #e9efe9; overflow: hidden; }
+.mscard__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 300ms ease; }
+.mscard__img.is-loaded { opacity: 1; }
+.mscard__rec {
+  position: absolute; z-index: 2; top: 10px; left: 10px; display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 9px; border-radius: 999px; background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff;
+  font-size: 10.5px; font-weight: 700; box-shadow: 0 3px 8px rgba(220, 38, 38, 0.35);
+}
+.mscard__rec svg { fill: #fff; }
+.mscard__eta {
+  position: absolute; z-index: 2; right: 10px; bottom: 10px; display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 10px; border-radius: 999px; background: rgba(64, 14, 18, 0.78); border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff; font-size: 12px; font-weight: 700; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+.mscard__body { display: flex; align-items: center; gap: 11px; padding: 11px 12px 12px; }
+.mscard__logo {
+  flex: none; width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, #ef4444, #b91c1c); color: #fff; box-shadow: 0 4px 10px rgba(185, 28, 28, 0.3);
+}
+.mscard__info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mscard__name { font-size: 15px; font-weight: 800; color: #0f2418; letter-spacing: -0.1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mscard__sub { font-size: 11.5px; color: #7a857f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mscard__chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+.mchip {
+  display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px;
+  font-size: 10.5px; font-weight: 600; color: #3f4a44; background: #f1f4f2; white-space: nowrap;
+}
+.mchip svg { color: #1f9d55; }
+.mchip--open { color: #15803d; background: #dcfce7; }
+.mchip--closed { color: #b91c1c; background: #fee2e2; }
+.mchip--deliv { background: transparent; padding-inline: 4px; color: #3f4a44; }
+.mchip--deliv.is-free { color: #15803d; font-weight: 700; }
+.mscard__go { flex: none; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #f1f4f2; color: #46524b; }
+.mscard.is-closed .mscard__banner { filter: grayscale(0.35); }
+@media (prefers-reduced-motion: reduce) { .mscard { animation: none; transition: none; } .mscard__img { transition: none; } }

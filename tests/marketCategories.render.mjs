@@ -47,19 +47,20 @@ try {
   // Komponent
   const row = (p = {}) => clean(renderToString(h(MarketCategories, { value: 'all', onChange() {}, available: null, lang: 'uz', allLabel: 'Hammasi', ariaLabel: 'Mahsulot kategoriyalari', ...p })));
   let html = row();
-  check('22 ta tugma: «Hammasi» + 21 kategoriya', (html.match(/<button/g) || []).length === 22 && WANTED.every((k) => html.includes(`data-testid="mcat-${k}"`)));
-  check('«Hammasi» tanlangan; qolganlari aria-pressed=false', html.includes('data-testid="mcat-all"') && (html.match(/aria-pressed="true"/g) || []).length === 1);
+  check('qator: «Barchasi» + 4 kategoriya + «Boshqa kategoriyalar» (maketdagidek, 6 ta)', (html.match(/<button/g) || []).length === 6 && html.includes('data-testid="mcat-more"') && WANTED.slice(0, 4).every((k) => html.includes(`data-testid="mcat-${k}"`)));
+  check('«Barchasi» tanlangan; qolganlari aria-pressed=false', html.includes('data-testid="mcat-all"') && (html.match(/aria-pressed="true"/g) || []).length === 1);
+  check('«Boshqa kategoriyalar» oynani ochadi (aria-haspopup)', /data-testid="mcat-more"/.test(html) && html.includes('aria-haspopup="dialog"'));
   check('rasmi bor kategoriyada <img> (yumaloq 64×64), rasmi yo\'qda emoji', /data-testid="mcat-shaxsiy_gigiyena"[^>]*>(?:(?!<\/button>).)*<img/s.test(html) && /data-testid="mcat-choy"[^>]*>(?:(?!<\/button>).)*mcat__emoji[^>]*>🍵/s.test(html));
   check('rasmlar ekran tashqarisida kechiktirib yuklanadi (lazy) va to‘g‘ri o‘lchamli (CLS yo‘q)', html.includes('loading="lazy"') && html.includes('width="64"') && html.includes('height="64"'));
   html = row({ value: 'konfetlar' });
-  check('tanlangan kategoriya belgilanadi', /data-testid="mcat-konfetlar"[^>]*class="mcat is-active/.test(html) || /class="mcat is-active[^"]*"[^>]*data-testid="mcat-konfetlar"/.test(html) || html.includes('aria-pressed="true"') && /mcat-konfetlar/.test(html));
+  check('qatorda yo‘q kategoriya tanlansa — qatorga chiqadi va belgilanadi', /aria-pressed="true"[^>]*data-testid="mcat-konfetlar"/.test(html) && (html.match(/<button/g) || []).length === 6);
   html = row({ available: new Set(['choy', 'konfetlar']) });
-  check('mahsuloti yo‘q kategoriyalar xira (is-empty), borlari oddiy', (html.match(/is-empty/g) || []).length === 19 && !/mcat-choy[^>]*is-empty|is-empty[^>]*mcat-choy/.test(html));
+  check('mahsuloti BOR kategoriyalar qatorda birinchi, yo‘qlari xira', /data-testid="mcat-choy"[\s\S]*data-testid="mcat-konfetlar"/.test(html) && html.indexOf('mcat-choy') < html.indexOf('mcat-shaxsiy_gigiyena') && (html.match(/is-empty/g) || []).length === 2);
   html = row({ available: null });
   check('server eski (available=null) — hech narsa xiralashmaydi', !html.includes('is-empty'));
   html = row({ lang: 'ru' });
-  check('ruscha nomlar', html.includes('Чай') && html.includes('Молочные продукты') && html.includes('Все') === false);
-  check('kirill (o‘zbekcha) nomlar', row({ lang: 'uzc' }).includes('Қаҳва'));
+  check('ruscha nomlar', html.includes('Чай') && html.includes('Личная гигиена'));
+  check('kirill (o‘zbekcha) nomlar', row({ lang: 'uzc' }).includes('Шахсий гигиена'));
   check('ekran o‘qiydigan dasturlar uchun: group + aria-label', html.includes('role="group"') && html.includes('aria-label="Mahsulot kategoriyalari"'));
 
   // MarketPage ulanishi

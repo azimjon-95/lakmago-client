@@ -9,7 +9,8 @@ import { formatSom, formatSomShort } from '@/lib/utils';
 import { freeDeliveryPromo } from '@/lib/freeDeliveryPromo';
 import './cards/CartBar.css';
 
-export function CartBar() {
+/** `variant="market"` — Market dizayni: savat belgisi + son nishoni, ajratgich, summa va strelka (dizayn maketi). */
+export function CartBar({ variant = 'default' }) {
   const navigate = useNavigate();
   const t = useT();
   const count = useCart((s) => s.totalCount());
@@ -76,11 +77,21 @@ export function CartBar() {
         </div>
       )}
 
-      <button onClick={() => navigate('/cart')} className="cart-bar">
-        <span className="cart-bar__count">{count}</span>
-        <span className="cart-bar__label">{t('goToCart')}</span>
-        <span className="cart-bar__total">{formatSom(total)}</span>
-      </button>
+      {variant === 'market' ? (
+        <button onClick={() => navigate('/cart')} className="cart-bar cart-bar--market" data-testid="cart-bar-market">
+          <span className="cart-bar__ic"><Icon name="shoppingCart" size={22} strokeWidth={2.2} /><span className="cart-bar__badge">{count}</span></span>
+          <span className="cart-bar__label">{t('goToCart')}</span>
+          <span className="cart-bar__div" aria-hidden="true" />
+          <span className="cart-bar__total">{formatSom(total)}</span>
+          <Icon name="chevronRight" size={18} strokeWidth={2.6} />
+        </button>
+      ) : (
+        <button onClick={() => navigate('/cart')} className="cart-bar">
+          <span className="cart-bar__count">{count}</span>
+          <span className="cart-bar__label">{t('goToCart')}</span>
+          <span className="cart-bar__total">{formatSom(total)}</span>
+        </button>
+      )}
       </div>
     </>
   );
