@@ -1,0 +1,6 @@
+/* Lokma To'yxonalar uchun rang (floating-nav.css ustiga qo'shiladi). Faqat rang — geometriya va harakat Go/Market bilan AYNAN bir xil. */
+.fnav--wedding {
+  --fn-accent: #A61E4D;                 /* to'q qizil (saytdagi faol tab rangi) */
+  --fn-soft: rgba(166, 30, 77, 0.12);   /* faol "pill" fon */
+}
+.fnav--wedding .fnav__badge { background: #D1A65E; color: #3a2a0a; }   /* oltin nishon (saytdagi oltin urg'u) */
