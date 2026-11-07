@@ -18,6 +18,7 @@ import { useI18n } from '@/i18n';
 import { api } from '@/api';
 import { MarketCategories } from '@/components/MarketCategories/MarketCategories';
 import { MarketHero } from '@/components/MarketHero/MarketHero';
+import { OperatorAvatar } from '@/components/SupportChat/OperatorAvatar';
 import { MarketStoreCard } from '@/components/MarketStoreCard/MarketStoreCard';
 import { MarketStoreSort } from '@/components/MarketStoreSort/MarketStoreSort';
 import { sortStores, recommendedStoreId, marketOrigin } from '@/lib/marketSort';
@@ -279,6 +280,20 @@ export function MarketPage() {
       )}
 
       <div style={{ flex: 1, minHeight: 16 }} />
+      {/* Yordam: Lokma Market operatori bilan chat (yashil, bo'lim rasmlari) */}
+      <section className="market-help" data-testid="market-help">
+        <div className="market-help__top">
+          <span className="market-help__ava"><OperatorAvatar size={52} market /></span>
+          <div className="market-help__txt">
+            <b>{t('marketHelpTitle')}</b>
+            <span>{t('marketHelpText')}</span>
+          </div>
+        </div>
+        <button type="button" className="market-help__btn" onClick={() => window.dispatchEvent(new Event('lokma:open-support'))}>
+          {t('marketHelpBtn')}
+        </button>
+      </section>
+
       <CartBar />
       <BottomNav />
 

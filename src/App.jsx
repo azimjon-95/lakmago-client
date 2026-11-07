@@ -43,10 +43,12 @@ function FloatingLayer() {
   useActiveOrderSync(); // faol buyurtmani tiklash + jonli holat (har sahifada, nishon uchun)
   const location = useLocation();
   const isHome = location.pathname === '/';
+  // Yordam chati: Lokma Go bosh sahifasida VA Lokma Market sahifasida (bo'lim rangi/rasmi SupportChat ichida)
+  const isMarketPage = location.pathname === '/market';
   return (
     <>
       {isHome && <ActiveOrderBadge />}
-      {isHome && <SupportChat />}
+      {(isHome || isMarketPage) && <SupportChat />}
     </>
   );
 }
