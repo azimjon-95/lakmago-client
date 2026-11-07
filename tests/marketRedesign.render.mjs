@@ -38,9 +38,13 @@ try {
   const page = readFileSync('src/pages/Market/MarketPage.jsx', 'utf8');
   const order = ['<MarketHero />', '<MarketCategories', 'market-stores-head', '<HomeSections', '<MarketStoreCard', '<CartBar variant="market" />'].map((x) => page.indexOf(x));
   check('sahifa tartibi maketdagidek: banner → kategoriyalar → Do‘konlar + Sizga yaqin → bo‘lim kartalari → do‘konlar → savat', order.every((i, n) => i > 0 && (n === 0 || i > order[n - 1])), JSON.stringify(order));
-  check('sarlavhada chap tomondagi kichik savat YO‘Q, faqat o‘ngdagi bezakli savat (kichik, 72 px)', !page.includes('market-header__logo') && (page.match(/market-basket\.webp/g) || []).length === 1 && page.includes('width="72" height="72"'));
+  check('sarlavhada chap tomondagi kichik savat YO‘Q, faqat o‘ngdagi bezakli savat (yuborilgan rasm, 116 px)', !page.includes('market-header__logo') && (page.match(/market-basket-hero\.webp/g) || []).length === 1 && page.includes('width="116" height="63"') && statSync('public/sections/market-basket-hero.webp').size < 40 * 1024);
+  const surf = /market:\s*'(#[0-9a-fA-F]{6})'/.exec(readFileSync('src/lib/telegram.js', 'utf8').split('SECTION_SURFACE =')[1])?.[1];
+  const mcss = readFileSync('src/pages/Market/Market.css', 'utf8');
+  const hdr = /\.market-header\s*\{[^}]*?background:\s*(#[0-9a-fA-F]{6})/s.exec(mcss)?.[1];
+  check('Telegram sarlavhasi va sahifa sarlavhasi rangi AYNAN bir xil (maket: #016029), gradient yo‘q', Boolean(surf) && surf.toLowerCase() === '#016029' && hdr?.toLowerCase() === surf.toLowerCase() && !/\.market-header\s*\{[^}]*gradient/s.test(mcss), `${surf} / ${hdr}`);
   check("kuryer O'NGDAN chapga yuradi: boshlanish o'ng tashqarida (translateX(130%)), tezlik chiziqlari orqasida", css.includes('transform: translateX(130%)') && css.includes('0% { transform: translateX(130%)') && !css.includes('translateX(-120%)'));
-  check('sarlavhada katta bezakli savat (avvalgi bannerdagi)', page.includes('market-header__deco') && page.includes('/sections/market-basket.webp'));
+  check('sarlavhada katta bezakli savat (avvalgi bannerdagi)', page.includes('market-header__deco') && page.includes('/sections/market-basket-hero.webp'));
   check('joylashuv faqat «Sizga yaqin» tanlanganda so‘raladi (ochilishda emas)', page.includes("if (mode !== 'near' || origin) return;") && !/useEffect\([^)]*getCurrentPosition/.test(page));
   const { translations: T } = await server.ssrLoadModule('/src/i18n/translations.js');
   const n = [T.uz, T.uzc, T.ru].map((o) => Object.keys(o).length);

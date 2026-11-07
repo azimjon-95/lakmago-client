@@ -106,7 +106,11 @@ export function getTelegram() {
  * (activated) va ochilish kechikishlarida ham AYNAN shu rang qayta
  * beriladi (aks holda market ichida oq bo'lib qolardi).
  */
-export const SECTION_SURFACE = { go: '#FFFFFF', market: '#1F9D55' };
+/*
+ * market: #016029 — Lokma Market sarlavhasining rangi (dizayn maketidan o'lchangan). Sahifadagi `.market-header` fonining AYNAN o'zi
+ * (Market.css) — Telegram sarlavhasi va sahifa sarlavhasi orasida chegara ko'rinmaydi. Ikkisini BIRGA o'zgartiring (test:market-redesign tekshiradi).
+ */
+export const SECTION_SURFACE = { go: '#FFFFFF', market: '#016029' };
 let surfaceColor = SECTION_SURFACE.go;
 
 /** Bo'limni qo'llash: <html data-section>, CSS ranglar, Telegram tepa qismi. */

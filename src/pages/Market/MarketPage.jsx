@@ -151,7 +151,7 @@ export function MarketPage() {
         <span>{t('lokmaMarket')}</span>
         <small>{t('marketSubtitle')}</small>
       </div>
-      <img className="market-header__deco" src="/sections/market-basket.webp" alt="" width="72" height="72" aria-hidden="true" />
+      <img className="market-header__deco" src="/sections/market-basket-hero.webp" alt="" width="116" height="63" aria-hidden="true" />
     </header>
   );
 
