@@ -17,7 +17,9 @@ import { useUser } from '@/store/user';
 import { useSection } from '@/store/section';
 import { useI18n } from '@/i18n';
 import { api } from '@/api';
-import { marketCatLabel } from '@/data/market';
+import { MarketCategories } from '@/components/MarketCategories/MarketCategories';
+import { DishGridCard } from '@/components/DishGridCard';
+import { MARKET_HOME_CATEGORIES, homeCatLabel } from '@/data/marketHomeCategories';
 import '@/pages/Home/Home.css';
 import './Market.css';
 
@@ -34,11 +36,11 @@ import './Market.css';
  */
 const PAGE = 24;
 
-function useMarketProducts({ discounted, category, enabled }) {
+function useMarketProducts({ discounted, category, catalogCategory, enabled }) {
   return useInfiniteQuery({
-    queryKey: ['market', 'products', discounted ? 'disc' : 'reg', category],
+    queryKey: ['market', 'products', discounted ? 'disc' : 'reg', category, catalogCategory],
     queryFn: ({ pageParam, signal }) => api.getMarketProducts({
-      discounted, category, cursor: pageParam || undefined, limit: PAGE, signal,
+      discounted, category, catalogCategory, cursor: pageParam || undefined, limit: PAGE, signal,
     }),
     initialPageParam: null,
     getNextPageParam: (last) => (last?.hasMore ? last.nextCursor : undefined),
@@ -79,23 +81,25 @@ export function MarketPage() {
   // Market bannerlari — admin "Bannerlar"da joylashuvni "Lokma Market" qiladi
   const { data: banners = [] } = useMarketBanners(allowed);
   const { data: stores = [], isLoading: storesLoading, isError: storesError, refetch } = useMarketStores(allowed);
-  const discQ = useMarketProducts({ discounted: true, category, enabled: allowed });
+  // `category` — katalog kaliti ('all' yoki 'choy', 'konfetlar'...): Do'konlar, chegirmalar va mahsulotlar shu bo'yicha
+  const discQ = useMarketProducts({ discounted: true, catalogCategory: category, enabled: allowed });
+  const catQ = useMarketProducts({ catalogCategory: category, enabled: allowed && category !== 'all' });
 
   /*
-   * Kategoriyalar: faqat do'konlarda MAHSULOTI BOR kategoriyalar
-   * (54 ta bo'sh tugma chiqmasin), server tartibida.
+   * Mahsuloti BOR kategoriya kalitlari (do'konlar `productCatalogCategories` beradi). Mahsuloti yo'q kategoriyalar qatorda xira
+   * ko'rinadi. Server eski bo'lsa (maydon yo'q) — null: hech narsa xiralashmaydi va do'konlar filtrlanmaydi.
    */
-  const presentCats = useMemo(() => {
-    const used = new Set(stores.flatMap((s) => s.productCategories || []));
-    return (meta?.categories || []).filter((c) => used.has(c.value));
-  }, [meta, stores]);
+  const available = useMemo(() => {
+    const lists = stores.map((s) => s.productCatalogCategories).filter(Array.isArray);
+    return lists.length ? new Set(lists.flat()) : null;
+  }, [stores]);
 
   // Kategoriya emojisi (rasmsiz mahsulot uchun slayderda)
   const catMap = useMemo(() => new Map((meta?.categories || []).map((c) => [c.value, c])), [meta]);
 
   // Tanlangan kategoriya bo'yicha do'konlar; ochiqlari oldinda
   const shownStores = useMemo(() => {
-    const list = category === 'all' ? stores : stores.filter((s) => (s.productCategories || []).includes(category));
+    const list = category === 'all' ? stores : stores.filter((s) => !Array.isArray(s.productCatalogCategories) || s.productCatalogCategories.includes(category));
     return [...list].sort((a, b) => Number(b.isOpen !== false) - Number(a.isOpen !== false));
   }, [stores, category]);
 
@@ -104,6 +108,10 @@ export function MarketPage() {
   const discParts = useOpenPartition(discount);
   const discShown = useMemo(() => [...discParts.open, ...discParts.closed], [discParts]);
   const closedIds = useMemo(() => new Set(discParts.closedIds), [discParts]);
+
+  // Tanlangan kategoriya mahsulotlari — ochiq do'konlar oldinda
+  const catParts = useOpenPartition(flat(catQ));
+  const catProducts = useMemo(() => [...catParts.open, ...catParts.closed], [catParts]);
 
   const openModal = useCallback((d) => setModalDish(d), []);
 
@@ -159,23 +167,14 @@ export function MarketPage() {
       {/* Bo'limlar orasida o'tish: Lokma Go (taomlar) · To'yxonalar */}
       <HomeSections current="market" wedding={Boolean(features?.wedding)} />
 
-      {/* Kategoriyalar */}
-      {presentCats.length > 0 && (
-        <div className="market-cats no-scrollbar">
-          <button type="button" onClick={() => setCategory('all')}
-            className={`market-cat ${category === 'all' ? 'is-active' : ''}`}>
-            <span className="market-cat__art">🛍️</span>
-            <span className="market-cat__label">{t('all')}</span>
-          </button>
-          {presentCats.map((c) => (
-            <button key={c.value} type="button"
-              onClick={() => setCategory((cur) => (cur === c.value ? 'all' : c.value))}
-              className={`market-cat ${category === c.value ? 'is-active' : ''}`}>
-              <span className="market-cat__art">{c.emoji}</span>
-              <span className="market-cat__label">{marketCatLabel(c, lang)}</span>
-            </button>
-          ))}
-        </div>
+      {/* Kategoriyalar — yumaloq rasmlar (data/marketHomeCategories.js) */}
+      {/*
+        Server hali yangilanmagan bo'lsa (do'konlarda productCatalogCategories yo'q) qator KO'RSATILMAYDI: aks holda kategoriya
+        bosilganda eski server `catalogCategory` ni tushunmay, hamma mahsulotni ko'rsatardi. Server yangilangach o'zi paydo bo'ladi.
+      */}
+      {available && (
+        <MarketCategories value={category} onChange={setCategory} available={available} lang={lang}
+          allLabel={t('all')} ariaLabel={t('marketCategories')} />
       )}
 
       {nothing ? (
@@ -185,7 +184,41 @@ export function MarketPage() {
         </div>
       ) : (
         <>
-          {/* Chegirmadagi mahsulotlar — o'zi harakatlanuvchi slayder (Do'konlar tepasida) */}
+          {/* Tanlangan kategoriya: shu kategoriyadagi mahsulotlar (barcha do'konlardan) */}
+          {available && category !== 'all' && (
+            <section className="market-catprods" data-testid="market-catprods">
+              <h2 className="home-restaurants-title">
+                {homeCatLabel(MARKET_HOME_CATEGORIES.find((c) => c.key === category), lang)}
+                {catProducts.length > 0 && <span className="market-catprods__count"> {catProducts.length}{catQ.hasNextPage ? '+' : ''}</span>}
+              </h2>
+              {catQ.isLoading ? (
+                <div className="market-grid">{Array.from({ length: 4 }).map((_, i) => <RestaurantCardSkeleton key={i} />)}</div>
+              ) : catQ.isError ? (
+                <div className="home-error">
+                  <div className="home-error__title">{t('dataLoadFailed')}</div>
+                  <button type="button" onClick={() => catQ.refetch()} className="home-error__btn">{t('retry')}</button>
+                </div>
+              ) : catProducts.length > 0 ? (
+                <>
+                  <div className="market-grid">
+                    {catProducts.map((d) => <DishGridCard key={d._id || d.id} dish={d} onClick={openModal} />)}
+                  </div>
+                  {catQ.hasNextPage && (
+                    <button type="button" className="market-more" onClick={() => catQ.fetchNextPage()} disabled={catQ.isFetchingNextPage}>
+                      {catQ.isFetchingNextPage ? '…' : t('marketShowMore')}
+                    </button>
+                  )}
+                </>
+              ) : (
+                <div className="market-catempty" data-testid="market-catempty">
+                  <div className="market-catempty__art" aria-hidden="true">{MARKET_HOME_CATEGORIES.find((c) => c.key === category)?.emoji || '🛒'}</div>
+                  <p>{t('marketCategoryEmpty')}</p>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* Chegirmadagi mahsulotlar — o'zi harakatlanuvchi slayder (Do'konlar tepasida). Kategoriya tanlanganda — o'sha kategoriyanikilar */}
           <DiscountSlider
             title={t('marketDiscounts')}
             items={discShown}
