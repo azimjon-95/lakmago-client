@@ -41,8 +41,9 @@ try {
   const px = (re, s = css) => Number((re.exec(s) || [])[1]);
   check('Instagram uslubi: kapsula 58 px, to‘liq yumaloq, shisha (blur 22px), max-kenglik 420 px', px(/--fn-h:\s*(\d+)px/) === 58 && css.includes('border-radius: 999px') && css.includes('backdrop-filter: blur(22px)') && px(/max-width:\s*(\d+)px/) === 420);
   check('faol "pill" silliq suriladi (transform + 360 ms), harakat kamaytirilsa animatsiyasiz', css.includes('translateX(calc(var(--fn-i, 0) * 100%))') && css.includes('transform 360ms') && css.includes('prefers-reduced-motion'));
-  const padTop = px(/padding:\s*(\d+)px 20px calc\((\d+)px/, nav); const padBot = Number((/padding:\s*\d+px 20px calc\((\d+)px/.exec(nav) || [])[1]);
-  check(`menyu balandligi izchil: ${padTop} + 58 + ${padBot} = ${padTop + 58 + padBot} px = BOTTOM_NAV_H (${BOTTOM_NAV_H}) — savat paneli va tugmalar shunga tayanadi`, padTop + 58 + padBot === BOTTOM_NAV_H);
+  check("pastdan Instagramdagidek: max(10, xavfsiz zona + 2) px (zona 20 px → ekran chetidan ≈22 px)", nav.includes('padding: 6px 20px max(10px, calc(var(--tg-bottom-offset, 0px) + 2px));'));
+  const cssVal = 'calc(6px + 58px + max(10px, calc(var(--tg-bottom-offset, 0px) + 2px)) - var(--tg-bottom-offset, 0px))';
+  check("--bottom-nav-h shu qoida bilan izchil: 6 + 58 + max(10, zona + 2) − zona (savat paneli va tugmalar shunga tayanadi)", BOTTOM_NAV_H === cssVal);
   check('rang faqat 2 o‘zgaruvchida; Market yashil, Go to‘q sariq (brend)', css.includes('--fn-accent: #FF5C00') && /data-section='market'\] \.bottom-nav \.fnav\s*\{[^}]*#148A43/.test(nav));
 
   // To'yxonalar uchun paket: nusxa AYNAN bir xil (tarqalib ketmasin), rang va ulanish yo'riqnomasi
@@ -53,7 +54,7 @@ try {
   const comp = readFileSync(`${dir}/FloatingNav.jsx`, 'utf8');
   check('React komponent bog‘liqliksiz va Go bilan bir xil tuzilma (fnav, fnav__pill, fnav__tab, --fn-i)', !/from '@\//.test(comp) && ['fnav__pill', 'fnav__tab', '--fn-i', '--fn-n', 'aria-current'].every((x) => comp.includes(x)));
   const rd = readFileSync(`${dir}/README.md`, 'utf8');
-  check("yo‘riqnoma: 3 bo‘lim ranglari, 76 px joy, sticky o‘rovchi", ['#FF5C00', '#148A43', '#A61E4D', '76 px', 'position: sticky'].every((x) => rd.includes(x)));
+  check("yo‘riqnoma: 3 bo‘lim ranglari, pastki oraliq qoidasi, sticky o‘rovchi", ['#FF5C00', '#148A43', '#A61E4D', 'max(10px, calc(env(safe-area-inset-bottom, 0px) - 12px))', 'position: sticky'].every((x) => rd.includes(x)));
 } finally { await server.close(); }
 if (failed) { console.log(`\n${failed} ta xato`); process.exit(1); }
 console.log('\nHammasi o‘tdi');

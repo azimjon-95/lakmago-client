@@ -19,14 +19,18 @@ const tabs = [
  * faol tab ortida silliq suriluvchi yumshoq "pill"; rang bo'limga qarab (Go — to'q sariq, Market — yashil).
  * To'yxonalar bo'limi alohida saytda — u uchun bir xil dizayn paketi: docs/wedding-floating-nav/.
  */
-export const BOTTOM_NAV_H = 76; // px: 6 (tepa) + 58 (kapsula) + 12 (past)
+/*
+ * --bottom-nav-h = menyu egallagan balandlik XAVFSIZ ZONASIZ (iste'molchilar unga `+ var(--tg-bottom-offset)` qo'shadi):
+ * 6 (tepa) + 58 (kapsula) + max(10, zona + 2) (past) − zona.  Zona 20 px → 66 px; zona 0 → 74 px.
+ */
+export const BOTTOM_NAV_H = 'calc(6px + 58px + max(10px, calc(var(--tg-bottom-offset, 0px) + 2px)) - var(--tg-bottom-offset, 0px))';
 
 export function BottomNav() {
   // Pastki menyu bor-yo'qligini bildiramiz. Savat paneli shu qiymatga
   // tayanadi — menyusiz sahifada (restoran, savat) pastga tushadi.
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty('--bottom-nav-h', `${BOTTOM_NAV_H}px`);
+    root.style.setProperty('--bottom-nav-h', BOTTOM_NAV_H);
     return () => root.style.setProperty('--bottom-nav-h', '0px');
   }, []);
 
