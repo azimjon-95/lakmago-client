@@ -1,7 +1,7 @@
 /* Lokma Market bosh banneri (MarketHero.jsx) — dizayn maketiga 1:1 */
 .mhero {
   position: relative; overflow: hidden; isolation: isolate;
-  margin: 0 12px; height: clamp(112px, 32vw, 132px); border-radius: 16px;
+  margin: 0 12px; height: clamp(98px, 27vw, 110px); border-radius: 15px;
   background: #0b7a34; color: #fff;
   box-shadow: 0 10px 24px rgba(8, 96, 42, 0.28);
 }
@@ -12,21 +12,21 @@
 }
 @keyframes mhero-bg { from { transform: scale(1.02) translateX(0); } to { transform: scale(1.08) translateX(-2%); } }
 
-.mhero__content { position: relative; z-index: 2; height: 100%; padding: 9px 0 9px 14px; width: 67%; display: flex; flex-direction: column; justify-content: center; gap: 5px; }
+.mhero__content { position: relative; z-index: 2; height: 100%; padding: 7px 0 7px 14px; width: 71%; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
 .mhero__badge {
   align-self: flex-start; display: inline-flex; align-items: center; gap: 5px;
-  padding: 3px 9px 3px 7px; border-radius: 999px; background: #fff; color: #0b6b2f;
-  font-size: 9px; font-weight: 800; letter-spacing: 0.4px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  padding: 2px 8px 2px 6px; border-radius: 999px; background: #fff; color: #0b6b2f;
+  font-size: 8.5px; font-weight: 800; letter-spacing: 0.4px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 .mhero__leaf { width: 10px; height: 10px; border-radius: 0 60% 0 60%; background: linear-gradient(135deg, #22c55e, #15803d); transform: rotate(8deg); }
-.mhero__title { margin: 0; white-space: nowrap; font-size: clamp(12px, 3.4vw, 16px); line-height: 1.16; font-weight: 800; letter-spacing: -0.2px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18); }
+.mhero__title { margin: 0; white-space: nowrap; font-size: clamp(11.8px, 3.38vw, 15px); line-height: 1.16; font-weight: 800; letter-spacing: -0.2px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18); }
 .mhero__title span { display: block; }
 .mhero__accent { color: #fde047; font-size: 1.12em; }
 
 .mhero__feats { list-style: none; margin: 1px 0 0; padding: 0; display: flex; gap: 0; width: 100%; }
 .mhero__feats li {
-  flex: 1 1 0; min-width: 0; display: flex; align-items: center; gap: 4px; padding-right: 4px; margin-right: 4px;
-  font-size: 8px; line-height: 1.15; font-weight: 600; color: rgba(255, 255, 255, 0.95);
+  flex: 1 1 0; min-width: 0; display: flex; align-items: center; gap: 4px; padding-right: 5px; margin-right: 5px;
+  font-size: 8.6px; line-height: 1.15; font-weight: 600; color: rgba(255, 255, 255, 0.95);
   border-right: 1px solid rgba(255, 255, 255, 0.22);
 }
 .mhero__feats li:last-child { border-right: 0; margin-right: 0; padding-right: 0; }
@@ -38,7 +38,7 @@
 /* Kuryer: O'NGDAN chapga qarab yumshoq yurib kiradi (oldi chapga qaragan), keyin yengil "yurish" tebranishi */
 .mhero__courier {
   position: absolute; z-index: 1; right: -2px; bottom: -2px;
-  height: 98%; width: auto; max-width: 31%; object-fit: contain; object-position: right bottom;
+  height: 100%; width: auto; max-width: 30%; object-fit: contain; object-position: right bottom;
   filter: drop-shadow(0 8px 10px rgba(0, 40, 14, 0.35));
   transform: translateX(130%); opacity: 0;
   animation: mhero-ride-in 1.25s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards, mhero-ride 2.6s ease-in-out 1.4s infinite;
@@ -72,4 +72,4 @@
   .mhero__in { opacity: 1; transform: none; }
   .mhero__streaks { display: none; }
 }
-@media (min-width: 600px) { .mhero { margin: 0 16px; height: 168px; } .mhero__feats li { font-size: 11px; } }
+@media (min-width: 600px) { .mhero { margin: 0 16px; height: 150px; } .mhero__feats li { font-size: 11px; } }
