@@ -323,12 +323,14 @@ export const api = {
     return Array.isArray(res) ? res : (res.items ?? []);
   },
   // Do'kon mahsulotlari — /dishes/all bilan bir xil format (cursor, fair, discounted)
-  getMarketProducts: async ({ discounted, category, cursor, limit = 24, fair, seed, q, signal } = {}) => {
+  getMarketProducts: async ({ discounted, category, catalogCategory, cursor, limit = 24, fair, seed, q, signal } = {}) => {
     const params = new URLSearchParams({ limit: String(limit) });
     if (q) params.set('q', q); // nom / brend / shtrix-kod bo'yicha qidiruv
     if (discounted === true) params.set('discounted', '1');
     else if (discounted === false) params.set('discounted', '0');
     if (category && category !== 'all') params.set('category', category);
+    // Market bosh sahifasi: aniq katalog kaliti (choy, konfetlar, souslar...) — server: ?catalogCategory=
+    if (catalogCategory && catalogCategory !== 'all') params.set('catalogCategory', catalogCategory);
     if (cursor) params.set('cursor', cursor);
     if (fair) params.set('fair', '1');
     if (fair && Number.isInteger(seed) && !cursor) params.set('seed', String(seed));

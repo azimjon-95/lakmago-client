@@ -129,3 +129,16 @@
   margin-top: 6px; padding: 10px 18px; border-radius: 12px;
   background: var(--market); color: #fff; font-weight: 600;
 }
+
+/* Tanlangan kategoriya: mahsulotlar bo'limi (MarketPage → MarketCategories) */
+.market-catprods { margin-bottom: 6px; }
+.market-catprods__count { font-size: 14px; font-weight: 600; color: var(--muted); }
+.market-more {
+  display: block; margin: 4px auto 14px; padding: 11px 26px; border-radius: 999px;
+  background: var(--market-tint, #e8f5e9); color: var(--market, #2e9d4f); font-size: 14px; font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
+}
+.market-more:disabled { opacity: 0.6; }
+.market-catempty { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 22px 24px 26px; text-align: center; color: var(--muted); }
+.market-catempty__art { width: 72px; height: 72px; border-radius: 50%; background: var(--market-tint, #e8f5e9); display: flex; align-items: center; justify-content: center; font-size: 34px; }
+.market-catempty p { margin: 0; font-size: 14px; line-height: 1.4; }

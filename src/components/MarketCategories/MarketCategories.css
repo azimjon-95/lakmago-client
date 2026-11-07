@@ -1,0 +1,42 @@
+/* Market: yumaloq kategoriyalar (MarketCategories.jsx). Rang — :root[data-section="market"] (--market, --market-tint) */
+.mcats {
+  display: flex; gap: 8px;
+  padding: 12px 16px 14px;
+  overflow-x: auto; overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 16px;
+}
+.mcat {
+  flex: none; width: 80px;   /* "mahsulotlari", "ichimliklar" kabi uzun so'zlar qalin yozuvda ham to'liq sig'sin */
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  scroll-snap-align: start;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  background: none; border: 0; padding: 0; cursor: pointer;
+}
+.mcat__art {
+  position: relative;
+  width: 64px; height: 64px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--market-tint, #e8f5e9);
+  box-shadow: 0 0 0 2px transparent, 0 3px 8px rgba(16, 24, 40, 0.10);
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+.mcat__art img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+.mcat__emoji { font-size: 30px; line-height: 1; }
+.mcat:active .mcat__art { transform: scale(0.93); }
+.mcat:focus-visible .mcat__art { box-shadow: 0 0 0 3px var(--market, #2e9d4f); }
+.mcat__label {
+  font-size: 11px; line-height: 1.2; color: var(--ink); text-align: center; font-weight: 500; width: 100%;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  min-height: 2.4em; overflow-wrap: break-word;
+}
+/* Tanlangan: yashil halqa + qalin yozuv */
+.mcat.is-active .mcat__art { box-shadow: 0 0 0 3px #fff, 0 0 0 5.5px var(--market, #2e9d4f), 0 6px 14px rgba(46, 157, 79, 0.28); transform: translateY(-1px); }
+.mcat.is-active .mcat__label { color: var(--market, #2e9d4f); font-weight: 700; }
+/* Mahsuloti yo'q kategoriya: xira (bosish mumkin) */
+.mcat.is-empty .mcat__art { opacity: 0.45; filter: saturate(0.6); }
+.mcat.is-empty .mcat__label { color: var(--muted); }
+.mcat.is-empty.is-active .mcat__art { opacity: 0.8; }
+
+@media (prefers-reduced-motion: reduce) { .mcat__art { transition: none; } .mcat:active .mcat__art { transform: none; } }
+@media (min-width: 640px) { .mcats { gap: 16px; } }
