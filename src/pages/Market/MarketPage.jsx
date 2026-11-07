@@ -2,7 +2,6 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Icon } from '@/components/Icon';
-import { RestaurantCard } from '@/components/RestaurantCard';
 import { DishModal } from '@/components/DishModal';
 import { BottomNav } from '@/components/BottomNav';
 import { CartBar } from '@/components/CartBar';
@@ -18,6 +17,12 @@ import { useSection } from '@/store/section';
 import { useI18n } from '@/i18n';
 import { api } from '@/api';
 import { MarketCategories } from '@/components/MarketCategories/MarketCategories';
+import { MarketHero } from '@/components/MarketHero/MarketHero';
+import { MarketStoreCard } from '@/components/MarketStoreCard/MarketStoreCard';
+import { MarketStoreSort } from '@/components/MarketStoreSort/MarketStoreSort';
+import { sortStores, recommendedStoreId, marketOrigin } from '@/lib/marketSort';
+import { useDeviceLocation } from '@/store/deviceLocation';
+import { getCurrentPosition } from '@/lib/location';
 import { DishGridCard } from '@/components/DishGridCard';
 import { MARKET_HOME_CATEGORIES, homeCatLabel } from '@/data/marketHomeCategories';
 import '@/pages/Home/Home.css';
@@ -97,11 +102,35 @@ export function MarketPage() {
   // Kategoriya emojisi (rasmsiz mahsulot uchun slayderda)
   const catMap = useMemo(() => new Map((meta?.categories || []).map((c) => [c.value, c])), [meta]);
 
+  /*
+   * Saralash: "Sizga yaqin" (standart) / reyting / tez yetkazish. Joylashuv: yangi GPS nuqta → asosiy manzil.
+   * Joylashuv yo'q bo'lsa — hech narsa SO'RALMAYDI (asl tartib); faqat foydalanuvchi "Sizga yaqin" ni tanlasa GPS so'raladi.
+   */
+  const [sortMode, setSortMode] = useState('near');
+  const [locating, setLocating] = useState(false);
+  const [sortNote, setSortNote] = useState('');
+  const fix = useDeviceLocation((s) => s.fix);
+  const user = useUser((s) => s.user);
+  const origin = useMemo(() => marketOrigin({ fix, user }), [fix, user]);
+  const chooseSort = useCallback(async (mode) => {
+    setSortMode(mode); setSortNote('');
+    if (mode !== 'near' || origin) return;
+    setLocating(true);
+    try {
+      const p = await getCurrentPosition();
+      if (p && Number.isFinite(p.lat)) useDeviceLocation.getState().set({ lat: p.lat, lng: p.lng, accuracy: p.accuracy, at: Date.now() });
+      else setSortNote(t('storeSortNoLocation'));
+    } catch { setSortNote(t('storeSortNoLocation')); }
+    setLocating(false);
+  }, [origin, t]);
+
   // Tanlangan kategoriya bo'yicha do'konlar; ochiqlari oldinda
   const shownStores = useMemo(() => {
     const list = category === 'all' ? stores : stores.filter((s) => !Array.isArray(s.productCatalogCategories) || s.productCatalogCategories.includes(category));
-    return [...list].sort((a, b) => Number(b.isOpen !== false) - Number(a.isOpen !== false));
+    return list;
   }, [stores, category]);
+  const sortedStores = useMemo(() => sortStores(shownStores, sortMode, origin), [shownStores, sortMode, origin]);
+  const recId = useMemo(() => recommendedStoreId(shownStores), [shownStores]);
 
   // Chegirmadagi mahsulotlar (slayder) — ochiq do'konlar oldinda, yopiqlari oxirida
   const discount = flat(discQ);
@@ -115,13 +144,15 @@ export function MarketPage() {
 
   const openModal = useCallback((d) => setModalDish(d), []);
 
+  // Sarlavha: chapda kichik savat + nom, o'ngda katta bezakli savat (avvalgi bannerdagi savat tepaga ko'chdi)
   const header = (
     <header className="market-header">
-      <img className="market-header__logo" src="/sections/market-basket.webp" alt="" width="40" height="40" />
+      <img className="market-header__logo" src="/sections/market-basket.webp" alt="" width="44" height="44" />
       <div className="market-header__title">
         <span>{t('lokmaMarket')}</span>
         <small>{t('marketSubtitle')}</small>
       </div>
+      <img className="market-header__deco" src="/sections/market-basket.webp" alt="" width="132" height="132" aria-hidden="true" />
     </header>
   );
 
@@ -149,23 +180,16 @@ export function MarketPage() {
         Banner: admin qo'shgan Market bannerlari (bosh sahifa bannerlari bilan bir xil
         karusel). Hali qo'shilmagan bo'lsa — o'rnatilgan bezakli banner.
       */}
-      {banners.length > 0 ? (
-        <div className="market-banner">
-          <BannerSlider banners={banners} onAdClick={() => {}} />
-        </div>
-      ) : (
-        <div className="market-hero">
-          <div className="market-hero__text">
-            <div className="market-hero__eyebrow">{t('lokmaMarket')}</div>
-            <div className="market-hero__title">{t('marketHero')}</div>
-            {stores.length > 0 && <div className="market-hero__sub">{stores.length} · {t('stores')}</div>}
+      <div className="market-sheet">
+        {banners.length > 0 ? (
+          <div className="market-banner">
+            <BannerSlider banners={banners} onAdClick={() => {}} />
           </div>
-          <img className="market-hero__art" src="/sections/market-basket.webp" alt="" width="104" height="104" />
-        </div>
-      )}
+        ) : (
+          <MarketHero />
+        )}
+      </div>
 
-      {/* Bo'limlar orasida o'tish: Lokma Go (taomlar) · To'yxonalar */}
-      <HomeSections current="market" wedding={Boolean(features?.wedding)} />
 
       {/* Kategoriyalar — yumaloq rasmlar (data/marketHomeCategories.js) */}
       {/*
@@ -174,7 +198,7 @@ export function MarketPage() {
       */}
       {available && (
         <MarketCategories value={category} onChange={setCategory} available={available} lang={lang}
-          allLabel={t('all')} ariaLabel={t('marketCategories')} />
+          allLabel={t('all')} moreLabel={t('marketOtherCats')} sheetTitle={t('marketAllCats')} closeLabel={t('close')} ariaLabel={t('marketCategories')} />
       )}
 
       {nothing ? (
@@ -228,9 +252,14 @@ export function MarketPage() {
             emojiOf={(d) => catMap.get(d.marketCategory)?.emoji}
           />
 
-          {/* Do'konlar */}
-          <h2 className="home-restaurants-title">{t('stores')}</h2>
-          <div className="home-restaurants">
+          {/* Do'konlar: sarlavha + "Sizga yaqin do'konlar" (maketdagidek), so'ng bo'limlar orasida o'tish kartalari */}
+          <div className="market-stores-head">
+            <h2>{t('stores')}</h2>
+            <MarketStoreSort mode={sortMode} onChange={chooseSort} locating={locating} />
+          </div>
+          {sortNote && <div className="msort__note" role="status">{sortNote}</div>}
+          <HomeSections current="market" wedding={Boolean(features?.wedding)} />
+          <div className="home-restaurants market-stores">
             {storesLoading ? (
               Array.from({ length: 3 }).map((_, i) => <RestaurantCardSkeleton key={i} />)
             ) : storesError ? (
@@ -238,8 +267,10 @@ export function MarketPage() {
                 <div className="home-error__title">{t('dataLoadFailed')}</div>
                 <button type="button" onClick={() => refetch()} className="home-error__btn">{t('retry')}</button>
               </div>
-            ) : shownStores.length > 0 ? (
-              shownStores.map((s) => <RestaurantCard key={s._id || s.id} restaurant={s} />)
+            ) : sortedStores.length > 0 ? (
+              sortedStores.map(({ store: st, distanceKm }) => (
+                <MarketStoreCard key={st._id || st.id} restaurant={st} distanceKm={distanceKm} recommended={String(st._id || st.id) === recId} />
+              ))
             ) : (
               <div className="home-empty">{t('empty')}</div>
             )}
@@ -249,7 +280,7 @@ export function MarketPage() {
       )}
 
       <div style={{ flex: 1, minHeight: 16 }} />
-      <CartBar />
+      <CartBar variant="market" />
       <BottomNav />
 
       {modalDish && (

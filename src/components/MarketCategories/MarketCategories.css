@@ -1,42 +1,69 @@
-/* Market: yumaloq kategoriyalar (MarketCategories.jsx). Rang — :root[data-section="market"] (--market, --market-tint) */
+/* Market kategoriyalari (MarketCategories.jsx) — dizayn maketi 1:1. Rang: --market */
 .mcats {
-  display: flex; gap: 8px;
-  padding: 12px 16px 14px;
-  overflow-x: auto; overscroll-behavior-x: contain;
-  scroll-snap-type: x proximity;
-  scroll-padding-inline: 16px;
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
+  align-items: start; gap: 2px; padding: 14px 6px 10px;
 }
 .mcat {
-  flex: none; width: 80px;   /* "mahsulotlari", "ichimliklar" kabi uzun so'zlar qalin yozuvda ham to'liq sig'sin */
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
-  scroll-snap-align: start;
+  min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 5px;
+  background: none; border: 0; padding: 0 1px; cursor: pointer; position: relative;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
-  background: none; border: 0; padding: 0; cursor: pointer;
 }
 .mcat__art {
-  position: relative;
-  width: 64px; height: 64px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--market-tint, #e8f5e9);
-  box-shadow: 0 0 0 2px transparent, 0 3px 8px rgba(16, 24, 40, 0.10);
-  transition: transform 140ms ease, box-shadow 140ms ease;
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+  background: #f1f5f3; box-shadow: 0 2px 8px rgba(16, 24, 40, 0.10);
+  transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 160ms ease;
 }
-.mcat__art img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
-.mcat__emoji { font-size: 30px; line-height: 1; }
-.mcat:active .mcat__art { transform: scale(0.93); }
-.mcat:focus-visible .mcat__art { box-shadow: 0 0 0 3px var(--market, #2e9d4f); }
+.mcat__art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mcat__emoji { font-size: 22px; line-height: 1; }
 .mcat__label {
-  font-size: 11px; line-height: 1.2; color: var(--ink); text-align: center; font-weight: 500; width: 100%;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-  min-height: 2.4em; overflow-wrap: break-word;
+  width: 100%; font-size: 9px; letter-spacing: -0.1px; line-height: 1.2; font-weight: 600; color: #1f2a24; text-align: center;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.4em; overflow-wrap: normal; word-break: normal; hyphens: manual;
 }
-/* Tanlangan: yashil halqa + qalin yozuv */
-.mcat.is-active .mcat__art { box-shadow: 0 0 0 3px #fff, 0 0 0 5.5px var(--market, #2e9d4f), 0 6px 14px rgba(46, 157, 79, 0.28); transform: translateY(-1px); }
-.mcat.is-active .mcat__label { color: var(--market, #2e9d4f); font-weight: 700; }
-/* Mahsuloti yo'q kategoriya: xira (bosish mumkin) */
-.mcat.is-empty .mcat__art { opacity: 0.45; filter: saturate(0.6); }
-.mcat.is-empty .mcat__label { color: var(--muted); }
-.mcat.is-empty.is-active .mcat__art { opacity: 0.8; }
+.mcat:active .mcat__art { transform: scale(0.92); }
+.mcat:focus-visible .mcat__art { box-shadow: 0 0 0 3px var(--market, #1f9d55); }
 
-@media (prefers-reduced-motion: reduce) { .mcat__art { transition: none; } .mcat:active .mcat__art { transform: none; } }
-@media (min-width: 640px) { .mcats { gap: 16px; } }
+/* Tanlangan: yashil halqa + ostida yashil chiziq */
+.mcat.is-active .mcat__art { box-shadow: 0 0 0 2.5px #fff, 0 0 0 4.5px var(--market, #1f9d55), 0 6px 14px rgba(31, 157, 85, 0.25); }
+.mcat.is-active .mcat__label { color: #0f5132; font-weight: 800; }
+.mcat.is-active::after {
+  content: ''; position: absolute; left: 50%; bottom: -8px; width: 28px; height: 3px; border-radius: 3px;
+  background: var(--market, #1f9d55); transform: translateX(-50%); animation: mcat-bar 220ms ease-out;
+}
+@keyframes mcat-bar { from { width: 0; } to { width: 28px; } }
+
+/* "Barchasi" — yashil yumaloq kvadrat va setka belgisi */
+.mcat--all .mcat__art { border-radius: 14px; background: #fff; color: var(--market, #1f9d55); box-shadow: 0 0 0 1.5px #cfe9da, 0 2px 8px rgba(16, 24, 40, 0.08); }
+.mcat--all.is-active .mcat__art { background: linear-gradient(160deg, #2bb563, #148a43); color: #fff; box-shadow: 0 6px 14px rgba(20, 138, 67, 0.32); }
+
+/* "Boshqa kategoriyalar" — oq doira ichida strelka */
+.mcat--more .mcat__label { font-size: 8.5px; }
+.mcat--more .mcat__art { width: 32px; height: 32px; margin: 10px 0; background: #fff; color: #145c35; box-shadow: 0 2px 10px rgba(16, 24, 40, 0.16); }
+
+/* Mahsuloti yo'q kategoriya: xira */
+.mcat.is-empty .mcat__art { opacity: 0.5; filter: saturate(0.55); }
+.mcat.is-empty .mcat__label { color: #8a948e; }
+.mcat.is-empty.is-active .mcat__art { opacity: 0.85; }
+
+/* ─── Pastdan chiqadigan oyna: barcha kategoriyalar ─── */
+.mcsheet { position: fixed; inset: 0; z-index: 1200; display: flex; align-items: flex-end; justify-content: center; }
+.mcsheet__backdrop { position: absolute; inset: 0; background: rgba(9, 30, 18, 0.45); animation: mcsheet-fade 200ms ease-out; }
+.mcsheet__panel {
+  position: relative; width: 100%; max-width: 560px; max-height: 86vh; overflow-y: auto; overscroll-behavior: contain;
+  background: #fff; border-radius: 22px 22px 0 0; padding: 8px 14px calc(18px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.18); animation: mcsheet-up 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mcsheet__handle { width: 40px; height: 5px; border-radius: 5px; background: #e3e7e5; margin: 2px auto 8px; }
+.mcsheet__head { display: flex; align-items: center; justify-content: space-between; padding: 2px 2px 12px; }
+.mcsheet__head h3 { margin: 0; font-size: 18px; font-weight: 800; color: #0f2e1d; }
+.mcsheet__close { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #f1f4f2; color: #1f2a24; }
+.mcsheet__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 8px; }
+.mcat--lg .mcat__art { width: 62px; height: 62px; }
+.mcat--lg.mcat--all .mcat__art { border-radius: 18px; }
+.mcat--lg .mcat__label { font-size: 11.5px; }
+.mcat--lg.is-active::after { bottom: -7px; }
+@keyframes mcsheet-up { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes mcsheet-fade { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) { .mcat__art, .mcat.is-active::after, .mcsheet__panel, .mcsheet__backdrop { transition: none; animation: none; } }
+@media (min-width: 600px) { .mcat__art { width: 58px; height: 58px; } .mcat__label { font-size: 11.5px; } .mcats { gap: 8px; padding-inline: 16px; } }
