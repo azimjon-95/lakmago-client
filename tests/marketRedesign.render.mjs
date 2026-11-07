@@ -23,7 +23,7 @@ try {
   check('banner: belgi, ikki qatorli sarlavha (sariq urg‘u), 3 afzallik', html.includes('LOKMA MARKET') && html.includes('Do&#x27;kondan uyingizgacha —') && html.includes('mhero__accent') && html.includes('tez va qulay!') && ['Tez yetkazib berish', 'Aksiyalar va chegirmalar', 'Ishonchli do&#x27;konlar'].every((x) => html.includes(x)));
   check('banner: fon va kuryer rasmlari mavjud va yengil', html.includes('/sections/market-courier.webp') && statSync('public/sections/market-courier.webp').size < 70 * 1024 && statSync('public/sections/market-hero-bg.webp').size < 40 * 1024);
   const css = readFileSync('src/components/MarketHero/MarketHero.css', 'utf8');
-  check('banner: kuryer chapdan yumshoq kirib keladi, yozuvlar yumshoq paydo bo‘ladi; harakat kamaytirilsa animatsiyasiz', css.includes('@keyframes mhero-ride-in') && css.includes('@keyframes mhero-in') && css.includes('prefers-reduced-motion'));
+  check('banner: kuryer o‘ngdan chapga yumshoq yurib kiradi, yozuvlar yumshoq paydo bo‘ladi; harakat kamaytirilsa animatsiyasiz', css.includes('@keyframes mhero-ride-in') && css.includes('@keyframes mhero-in') && css.includes('prefers-reduced-motion'));
 
   const r = { _id: 's1', name: 'ANOR MARKET', cuisine: 'Oziq-ovqat', isOpen: true, openTime: '00:00', closeTime: '23:59', deliveryMin: 25, deliveryMax: 40, deliveryFee: 0 };
   html = wrap(h(MarketStoreCard, { restaurant: r, recommended: true, distanceKm: 1.24 }));
@@ -38,6 +38,8 @@ try {
   const page = readFileSync('src/pages/Market/MarketPage.jsx', 'utf8');
   const order = ['<MarketHero />', '<MarketCategories', 'market-stores-head', '<HomeSections', '<MarketStoreCard', '<CartBar variant="market" />'].map((x) => page.indexOf(x));
   check('sahifa tartibi maketdagidek: banner → kategoriyalar → Do‘konlar + Sizga yaqin → bo‘lim kartalari → do‘konlar → savat', order.every((i, n) => i > 0 && (n === 0 || i > order[n - 1])), JSON.stringify(order));
+  check('sarlavhada chap tomondagi kichik savat YO‘Q, faqat o‘ngdagi bezakli savat (kichik, 72 px)', !page.includes('market-header__logo') && (page.match(/market-basket\.webp/g) || []).length === 1 && page.includes('width="72" height="72"'));
+  check("kuryer O'NGDAN chapga yuradi: boshlanish o'ng tashqarida (translateX(130%)), tezlik chiziqlari orqasida", css.includes('transform: translateX(130%)') && css.includes('0% { transform: translateX(130%)') && !css.includes('translateX(-120%)'));
   check('sarlavhada katta bezakli savat (avvalgi bannerdagi)', page.includes('market-header__deco') && page.includes('/sections/market-basket.webp'));
   check('joylashuv faqat «Sizga yaqin» tanlanganda so‘raladi (ochilishda emas)', page.includes("if (mode !== 'near' || origin) return;") && !/useEffect\([^)]*getCurrentPosition/.test(page));
   const { translations: T } = await server.ssrLoadModule('/src/i18n/translations.js');

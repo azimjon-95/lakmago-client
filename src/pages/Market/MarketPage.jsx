@@ -147,12 +147,11 @@ export function MarketPage() {
   // Sarlavha: chapda kichik savat + nom, o'ngda katta bezakli savat (avvalgi bannerdagi savat tepaga ko'chdi)
   const header = (
     <header className="market-header">
-      <img className="market-header__logo" src="/sections/market-basket.webp" alt="" width="44" height="44" />
       <div className="market-header__title">
         <span>{t('lokmaMarket')}</span>
         <small>{t('marketSubtitle')}</small>
       </div>
-      <img className="market-header__deco" src="/sections/market-basket.webp" alt="" width="132" height="132" aria-hidden="true" />
+      <img className="market-header__deco" src="/sections/market-basket.webp" alt="" width="72" height="72" aria-hidden="true" />
     </header>
   );
 
