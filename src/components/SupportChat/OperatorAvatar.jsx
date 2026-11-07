@@ -3,12 +3,13 @@
  * Retina uchun yetarli (56 px tugma × 3 = 168 px). WebP bo'lmagan eski brauzerlar PNG oladi.
  * `online` — FAQAT haqiqiy holatda (operator onlayn bo'lsa) yashil nuqta ko'rsatiladi; avval u doim yonib turardi.
  */
-export function OperatorAvatar({ size = 56, online = false }) {
+export function OperatorAvatar({ size = 56, online = false, market = false }) {
+  const base = market ? '/support/market/avatar' : '/support/avatar';
   return (
     <span className="op-avatar" style={{ width: size, height: size }} aria-hidden="true">
       <picture>
-        <source srcSet="/support/avatar.webp" type="image/webp" />
-        <img src="/support/avatar.png" width={size} height={size} alt="" draggable="false" decoding="async" />
+        <source srcSet={`${base}.webp`} type="image/webp" />
+        <img src={`${base}.png`} width={size} height={size} alt="" draggable="false" decoding="async" />
       </picture>
       {online && <i className="op-avatar__dot" />}
     </span>

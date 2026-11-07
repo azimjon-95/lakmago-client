@@ -58,7 +58,10 @@
 /* ═══════════════════════ YORDAM XIZMATI (maket bo'yicha) ═══════════════════════ */
 .sc {
   --sc-ink: #222A3B; --sc-text: #3D4253; --sc-muted: #A4A9BC; --sc-orange: #F7741F; --sc-heart: #FA6509;
-  --sc-card: #FDF9F8; --sc-card-2: #FEF5F0;
+  --sc-card: #FDF9F8; --sc-card-2: #FEF5F0; --sc-card-mid: #FFFBF8;
+  /* Bo'lim urg'usi: gradientlar, tugma, nuqtalar, chiziqlar — shu o'zgaruvchilardan */
+  --sc-g1: #FF8A3D; --sc-g2: #F2620E; --sc-btn-a: #F76C19; --sc-btn-b: #FF731C; --sc-spark: #FB9A5C;
+  --sc-brand-ring: rgba(255, 92, 0, 0.5);
   --sc-top: calc(var(--tg-top-offset, 0px) + 18px);
   /* .app-shell::before (z 100, Telegram tugmalari ostidagi qopqoq) dan YUQORIDA — maketdagidek butun ekran qoraysin */
   position: fixed; z-index: 102; left: 0; right: 0; margin: 0 auto;
@@ -99,7 +102,7 @@
   position: relative; z-index: 2; flex: 1; min-height: 0; margin-top: -12px;
   display: flex; flex-direction: column;
   padding: 2px 34px calc(18px + max(var(--tg-bottom-offset, 0px), env(safe-area-inset-bottom, 0px)));
-  background: linear-gradient(180deg, var(--sc-card) 0%, #FFFBF8 55%, var(--sc-card-2) 100%);
+  background: linear-gradient(180deg, var(--sc-card) 0%, var(--sc-card-mid) 55%, var(--sc-card-2) 100%);
   border-radius: 0 0 28px 28px;
 }
 .sc-wave { position: absolute; left: 0; right: 0; bottom: 100%; width: 100%; height: 34px; margin-bottom: -1px; display: block; }
@@ -110,7 +113,7 @@
 .sc-title__accent { display: block; color: var(--sc-orange); white-space: pre-line; }
 
 .sc-mini { display: none; align-items: center; gap: 10px; margin: 2px 0 8px; }
-.sc-mini__ava { flex: none; display: flex; border-radius: 50%; box-shadow: 0 4px 12px -4px rgba(247, 116, 31, 0.5); }
+.sc-mini__ava { flex: none; display: flex; border-radius: 50%; box-shadow: 0 4px 12px -4px var(--sc-shadow, rgba(247, 116, 31, 0.5)); }
 
 .sc-mini__title { font-family: 'Inter Tight', system-ui, sans-serif; font-weight: 800; font-size: 17px; letter-spacing: -0.02em; color: var(--sc-ink); }
 .sc-mini__title span { color: var(--sc-orange); }
@@ -143,8 +146,8 @@
   box-shadow: 0 6px 18px -10px rgba(120, 70, 30, 0.35), 0 0 0 1px rgba(242, 226, 215, 0.9);
 }
 .sc-msg--user {
-  color: #fff; background: linear-gradient(135deg, #FF8A3D 0%, var(--sc-orange) 60%, #F2620E 100%);
-  border-bottom-right-radius: 6px; box-shadow: 0 8px 18px -10px rgba(247, 116, 31, 0.8);
+  color: #fff; background: linear-gradient(135deg, var(--sc-g1) 0%, var(--sc-orange) 60%, var(--sc-g2) 100%);
+  border-bottom-right-radius: 6px; box-shadow: 0 8px 18px -10px var(--sc-shadow-2, rgba(247, 116, 31, 0.8));
 }
 .sc-msg--failed { opacity: 0.75; }
 .sc-msg--typing { padding: 12px 15px; }
@@ -161,12 +164,12 @@
 
 /* ── Pastki qism ── */
 .sc-happy { display: flex; align-items: center; gap: 9px; margin: 10px 0 13px 8px; font-size: clamp(12.5px, 3.6vw, 14px); font-weight: 600; line-height: 1.3; color: var(--sc-text); letter-spacing: -0.005em; }
-.sc-happy svg { flex: none; }
+.sc-happy svg { flex: none; color: var(--sc-heart); }
 
 .sc-pill {
   position: relative; flex: none; display: flex; align-items: center; gap: 11px; height: 46px; padding: 0 5px 0 17px;
-  border-radius: 999px; background: linear-gradient(90deg, #F76C19 0%, #FF731C 100%);
-  box-shadow: 0 14px 26px -12px rgba(247, 108, 25, 0.75);
+  border-radius: 999px; background: linear-gradient(90deg, var(--sc-btn-a) 0%, var(--sc-btn-b) 100%);
+  box-shadow: 0 14px 26px -12px var(--sc-shadow-3, rgba(247, 108, 25, 0.75));
 }
 .sc-pill__icon { flex: none; display: flex; }
 .sc-pill input {
@@ -179,9 +182,10 @@
   display: flex; align-items: center; justify-content: center; cursor: pointer;
   box-shadow: 0 4px 10px -4px rgba(120, 50, 10, 0.4); transition: transform 0.15s ease, opacity 0.2s ease;
 }
+.sc-send { color: var(--sc-orange); }
 .sc-send:active { transform: scale(0.9); }
 .sc-send:disabled { cursor: default; }
-.sc-spark { position: absolute; right: -2px; top: -30px; width: 34px; height: 30px; fill: none; stroke: #FB9A5C; stroke-width: 3; stroke-linecap: round; opacity: 0.85; }
+.sc-spark { position: absolute; right: -2px; top: -30px; width: 34px; height: 30px; fill: none; stroke: var(--sc-spark); stroke-width: 3; stroke-linecap: round; opacity: 0.85; }
 
 /* ── Ixcham rejim: klaviatura ochiq yoki yozishmalar ko'p ── */
 .sc--compact .sc-hero { height: 0; opacity: 0; }
@@ -190,7 +194,7 @@
 .sc--compact .sc-mini { display: flex; animation: sc-in 0.32s ease both; }
 .sc--compact .sc-card { padding-top: 14px; border-radius: 26px 26px 0 0; }
 .sc--compact .sc-wave { display: none; }
-.sc--compact .sc-x { top: 18px; right: 18px; box-shadow: none; background: rgba(247, 116, 31, 0.08); }
+.sc--compact .sc-x { top: 18px; right: 18px; box-shadow: none; background: var(--sc-soft-bg, rgba(247, 116, 31, 0.08)); }
 .sc--compact .sc-happy { display: none; }
 
 @keyframes sc-up { from { transform: translateY(100%); } to { transform: none; } }
@@ -205,3 +209,18 @@
   .sc, .sc.is-closing, .sc-girl, .sc-row, .support-overlay.is-closing { animation: none; }
   .sc-hero, .sc-title, .sc-x { transition: none; }
 }
+
+/* ═══ LOKMA MARKET — yordam chati yashil (bo'lim: :root[data-section='market']) ═══ */
+:root[data-section='market'] .sc {
+  --sc-orange: #148A43; --sc-heart: #148A43;
+  --sc-card: #F4FBF6; --sc-card-2: #E9F6ED; --sc-card-mid: #F8FDF9;
+  --sc-g1: #2BB563; --sc-g2: #0F6B34; --sc-btn-a: #148A43; --sc-btn-b: #1FA35A; --sc-spark: #7ED957;
+  --sc-brand-ring: rgba(20, 138, 67, 0.5);
+  --sc-shadow: rgba(20, 138, 67, 0.5); --sc-shadow-2: rgba(20, 138, 67, 0.8); --sc-shadow-3: rgba(20, 138, 67, 0.75); --sc-soft-bg: rgba(20, 138, 67, 0.08);
+}
+:root[data-section='market'] .sc-card { background: linear-gradient(180deg, var(--sc-card) 0%, var(--sc-card-mid) 55%, var(--sc-card-2) 100%); }
+:root[data-section='market'] .sc-girl { filter: drop-shadow(0 18px 22px rgba(20, 110, 50, 0.16)); }
+:root[data-section='market'] .sc-title__brand { color: #0F2E1D; }
+:root[data-section='market'] .sc-mini__title { color: #0F2E1D; }
+:root[data-section='market'] .sc-x { color: #145C35; }
+:root[data-section='market'] .support-fab__ring { border-color: rgba(20, 138, 67, 0.45); }

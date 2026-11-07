@@ -3,6 +3,7 @@ import '@fontsource/inter-tight/800.css';
 import { useT, useI18n } from '@/i18n';
 import './SupportChat.css';
 import { OperatorAvatar } from './OperatorAvatar';
+import { useSection } from '@/store/section';
 import { Icon } from '@/components/Icon';
 import { api } from '@/api';
 import { getSocket, joinUserRoom } from '@/lib/socket';
@@ -267,6 +268,11 @@ export function SupportChat({ hideFab = false } = {}) {
   };
 
   const compact = focused || latched;
+  // Bo'lim: Lokma Go (standart) yoki Lokma Market — nom, rasm va rang shunga qarab
+  const market = useSection((s) => s.section === 'market');
+  const brand = market ? 'Lokma Market' : 'Lokma Go';
+  const heroBase = market ? '/support/market/operator' : '/support/operator';
+  const backdrop = market ? '/support/market/backdrop.svg' : '/support/backdrop.svg';
   // Kun ajratgichi faqat yozishma bir necha kunni qamrasa (bitta kun uchun "Bugun" — ortiqcha shovqin)
   const multiDay = new Set(timeline.map((m) => dayKey(m.at))).size > 1;
   let lastDay = '';
@@ -277,7 +283,7 @@ export function SupportChat({ hideFab = false } = {}) {
         <button className="support-fab" onClick={() => setOpen(true)} aria-label={t('chatTitle')}>
           <span className="support-fab__ring" />
           <span className="support-fab__ring support-fab__ring--2" />
-          <span className="support-fab__icon"><OperatorAvatar size={56} /></span>
+          <span className="support-fab__icon"><OperatorAvatar size={56} market={market} /></span>
           {unread > 0 && <span className="support-fab__badge">{unread}</span>}
         </button>
       )}
@@ -288,10 +294,10 @@ export function SupportChat({ hideFab = false } = {}) {
           <div className={`sc${compact ? ' sc--compact' : ''}${closing ? ' is-closing' : ''}`} role="dialog" aria-modal="true" aria-labelledby="sc-title" lang={lang === 'ru' ? 'ru' : 'uz'}>
             {/* Qahramon: krem fon + operator (varaq chetidan chiqib turadi) */}
             <div className="sc-hero" aria-hidden="true">
-              <img className="sc-back" src="/support/backdrop.svg" alt="" draggable="false" />
+              <img className="sc-back" src={backdrop} alt="" draggable="false" />
               <picture>
-                <source srcSet="/support/operator.webp" type="image/webp" />
-                <img className="sc-girl" src="/support/operator.png" alt="" draggable="false" />
+                <source srcSet={`${heroBase}.webp`} type="image/webp" />
+                <img className="sc-girl" src={`${heroBase}.png`} alt="" draggable="false" />
               </picture>
             </div>
             <button type="button" className="sc-x" onClick={close} aria-label={t('close')}>
@@ -305,15 +311,15 @@ export function SupportChat({ hideFab = false } = {}) {
 
               {/* Ixcham sarlavha (klaviatura/uzun yozishma) */}
               <div className="sc-mini">
-                <span className="sc-mini__ava"><OperatorAvatar size={40} online={presence.online} /></span>
+                <span className="sc-mini__ava"><OperatorAvatar size={40} online={presence.online} market={market} /></span>
                 <div className="sc-mini__txt">
-                  <div className="sc-mini__title">Lokma Go <span>{t('chatTitle')}</span></div>
+                  <div className="sc-mini__title">{brand} <span>{t('chatTitle')}</span></div>
                   <div className={`sc-mini__sub${presence.online ? ' is-online' : ''}`}>{presenceLabel()}</div>
                 </div>
               </div>
 
               <h2 className="sc-title" id="sc-title">
-                <span className="sc-title__brand">Lokma Go</span>
+                <span className="sc-title__brand">{brand}</span>
                 <span className="sc-title__accent">{t('supTitleAccent')}</span>
               </h2>
 
@@ -337,7 +343,7 @@ export function SupportChat({ hideFab = false } = {}) {
               </div>
 
               <p className="sc-happy">
-                <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.3 2.9 4.5 6.6 4.1c2.1-.2 3.7.9 5.4 2.9 1.7-2 3.3-3.1 5.4-2.9 3.7.4 5.7 4.2 4.2 7.6C19.5 16.4 12 21 12 21z" fill="#FA6509" /></svg>
+                <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.3 2.9 4.5 6.6 4.1c2.1-.2 3.7.9 5.4 2.9 1.7-2 3.3-3.1 5.4-2.9 3.7.4 5.7 4.2 4.2 7.6C19.5 16.4 12 21 12 21z" fill="currentColor" /></svg>
                 {t('supHappy')}
               </p>
 
@@ -358,7 +364,7 @@ export function SupportChat({ hideFab = false } = {}) {
                   maxLength={2000}
                 />
                 <button type="submit" className="sc-send" aria-label={t('send')} disabled={!input.trim() || sending} onMouseDown={keepFocus}>
-                  <Icon name="send" size={19} color="#F7741F" />
+                  <Icon name="send" size={19} color="currentColor" />
                 </button>
               </form>
             </div>

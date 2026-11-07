@@ -155,3 +155,25 @@
 .market-catempty { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 22px 24px 26px; text-align: center; color: var(--muted); }
 .market-catempty__art { width: 72px; height: 72px; border-radius: 50%; background: var(--market-tint, #e8f5e9); display: flex; align-items: center; justify-content: center; font-size: 34px; }
 .market-catempty p { margin: 0; font-size: 14px; line-height: 1.4; }
+
+/* Market: yordam kartasi — operator + matn yuqorida, chat tugmasi to'liq kenglikda pastda.
+   O'ng chetda joy qoldirilgan: suzuvchi operator tugmasi (FAB) kartaning tugmasini yopmaydi. */
+.market-help {
+  margin: 14px 88px 6px 12px; display: flex; flex-direction: column; gap: 10px;
+  padding: 12px; border-radius: 18px;
+  background: linear-gradient(135deg, #F4FBF6 0%, #E4F5EA 100%);
+  box-shadow: 0 0 0 1px #CDEBD7 inset, 0 6px 16px rgba(20, 110, 50, 0.08);
+}
+.market-help__top { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.market-help__ava { flex: none; width: 52px; height: 52px; display: block; }
+.market-help__ava .op-avatar { width: 100%; height: 100%; }
+.market-help__txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.market-help__txt b { font-size: 14.5px; font-weight: 800; color: #0F2E1D; }
+.market-help__txt span { font-size: 11.5px; color: #4D6B58; line-height: 1.3; }
+.market-help__btn {
+  height: 38px; border: 0; border-radius: 999px; width: 100%;
+  background: linear-gradient(90deg, #148A43 0%, #1FA35A 100%); color: #fff;
+  font-size: 13.5px; font-weight: 700; box-shadow: 0 6px 14px rgba(20, 138, 67, 0.28);
+  -webkit-tap-highlight-color: transparent;
+}
+.market-help__btn:active { transform: scale(0.97); }
