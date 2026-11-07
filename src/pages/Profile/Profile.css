@@ -3,6 +3,7 @@
   --pf-g1: #1FA050; --pf-g2: #0E7A3A; --pf-green: #148A43; --pf-green-soft: #E7F6EC;
   --pf-orange: #F26B1D; --pf-orange-soft: #FFF1E4; --pf-red: #E5484D; --pf-red-soft: #FDECEC;
   --pf-blue: #2F8FD8; --pf-blue-soft: #E7F2FC;
+  --pf-btn: #F26B1D;   /* barcha tugmalar — "+100 ball" nishoni rangi */
   --pf-ink: #1F2A24; --pf-muted: #7A847F; --pf-line: #E7ECE9; --pf-card: #FFFFFF;
   padding-bottom: 0; background: #F4F7F5; min-height: 100%;
 }
@@ -10,13 +11,18 @@
 /* ── Sarlavha ── */
 .pf-hero {
   position: relative; overflow: hidden; isolation: isolate;
-  background: linear-gradient(180deg, var(--pf-g1) 0%, var(--pf-g2) 100%);
+  background: linear-gradient(180deg, #1FA050 0%, #0B9A3A 42%, #028527 100%);
   border-radius: 0 0 28px 28px;
   padding: 10px 16px 0; min-height: 280px;
   display: flex; flex-direction: column; align-items: center;
   color: #fff;
 }
-.pf-hero__wave { position: absolute; left: 0; right: 0; bottom: -2px; width: 100%; height: auto; z-index: -1; pointer-events: none; }
+.pf-hero__wave {
+  position: absolute; left: 0; right: 0; bottom: -2px; width: 100%; height: auto; z-index: -1; pointer-events: none;
+  /* Rasmning yuqori qismi gradient bilan birlashsin: chiziq ko'rinmaydi */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 38%);
+          mask-image: linear-gradient(to bottom, transparent 0%, #000 38%);
+}
 .pf-top { width: 100%; display: flex; align-items: center; gap: 12px; height: 46px; margin-top: 4px; }
 .pf-back {
   width: 40px; height: 40px; border-radius: 50%; border: 0; flex: none;
@@ -42,7 +48,7 @@
 .pf-name { margin-top: 12px; font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.2px; text-align: center; }
 .pf-id { margin-top: 2px; font-size: 14px; font-weight: 700; color: #FFD9B8; text-align: center; }
 .pf-bag {
-  position: absolute; right: -8px; top: 64px; width: 128px; height: auto; pointer-events: none;
+  position: absolute; right: 10px; top: 60px; width: 118px; height: auto; pointer-events: none;
   filter: drop-shadow(0 8px 12px rgba(0, 40, 15, 0.3)); z-index: 1;
 }
 
@@ -65,12 +71,11 @@
 /* ── Taklif kartasi (sovg'a banneri fonida) ── */
 .pf-ref {
   position: relative; overflow: hidden; margin: 14px 16px 0; border-radius: 20px;
-  padding: 16px 16px 16px; background: #FFF6EC;
-  background-image: linear-gradient(90deg, rgba(255, 246, 236, 0.97) 0%, rgba(255, 246, 236, 0.86) 55%, rgba(255, 246, 236, 0.35) 100%), url('/profile/referral-bg.webp');
-  background-size: cover; background-position: center right;
+  padding: 0 16px 16px; background: #FFF6EC;
   box-shadow: 0 6px 18px rgba(200, 110, 30, 0.12), inset 0 0 0 1px #FCD9B0;
 }
-.pf-ref__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pf-ref__banner { display: block; width: calc(100% + 32px); max-width: none; margin: 0 -16px; height: auto; }
+.pf-ref__head { margin-top: 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .pf-ref__title { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 800; color: var(--pf-ink); }
 .pf-ref__ic { width: 30px; height: 30px; border-radius: 10px; background: #fff; display: flex; align-items: center; justify-content: center; }
 .pf-ref__badge { flex: none; background: var(--pf-orange); color: #fff; font-size: 12.5px; font-weight: 800; padding: 5px 11px; border-radius: 999px; box-shadow: 0 4px 10px rgba(242, 107, 29, 0.3); }
@@ -85,15 +90,15 @@
 .pf-ref__actions { display: flex; gap: 8px; margin-top: 12px; }
 .pf-ref__share {
   flex: 1; height: 46px; border: 0; border-radius: 14px;
-  background: linear-gradient(90deg, var(--pf-g1) 0%, var(--pf-green) 100%); color: #fff;
+  background: var(--pf-btn); color: #fff;
   display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14.5px; font-weight: 800;
-  box-shadow: 0 6px 14px rgba(20, 138, 67, 0.3); -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 6px 14px rgba(242, 107, 29, 0.32); -webkit-tap-highlight-color: transparent;
 }
 .pf-ref__share:active { transform: scale(0.98); }
 .pf-ref__copy {
   width: 46px; height: 46px; border-radius: 14px; border: 0; flex: none;
-  background: #fff; display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 2px 6px rgba(160, 90, 30, 0.1);
+  background: var(--pf-btn); display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 14px rgba(242, 107, 29, 0.32);
 }
 
 /* ── Bo'limlar ── */
@@ -132,19 +137,19 @@
 .pf-addr__text { font-size: 12.5px; color: var(--pf-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pf-addr.is-default .pf-row__ic { background: var(--pf-green); }
 .pf-addr.is-default .pf-row__ic svg { stroke: #fff; }
-.pf-addr__set { border: 0; background: var(--pf-green-soft); color: var(--pf-green); font-size: 12px; font-weight: 800; padding: 6px 10px; border-radius: 999px; flex: none; }
+.pf-addr__set { border: 0; background: var(--pf-btn); color: #fff; font-size: 12px; font-weight: 800; padding: 6px 10px; border-radius: 999px; flex: none; }
 .pf-addr__del { width: 34px; height: 34px; border: 0; border-radius: 50%; background: transparent; flex: none; display: flex; align-items: center; justify-content: center; }
 .pf-addr__del:active { background: var(--pf-red-soft); }
 .pf-empty { padding: 16px; font-size: 13.5px; color: var(--pf-muted); text-align: center; }
 
 .pf-add {
-  width: 100%; margin-top: 10px; height: 48px; border-radius: 16px; border: 1.5px dashed #B9D9C4; background: transparent;
-  display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 800; color: var(--pf-green);
+  width: 100%; margin-top: 10px; height: 48px; border-radius: 16px; border: 1.5px dashed #F7C9A3; background: transparent;
+  display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 800; color: var(--pf-btn);
 }
-.pf-add__plus { width: 24px; height: 24px; border-radius: 50%; background: var(--pf-green-soft); display: inline-flex; align-items: center; justify-content: center; }
+.pf-add__plus { width: 24px; height: 24px; border-radius: 50%; background: var(--pf-orange-soft); display: inline-flex; align-items: center; justify-content: center; }
 .pf-addr-types { display: flex; gap: 8px; margin-bottom: 10px; }
 .pf-addr-type { flex: 1; height: 36px; border-radius: 12px; border: 1.5px solid var(--pf-line); background: #fff; font-size: 13px; font-weight: 700; color: var(--pf-muted); }
-.pf-addr-type.is-active { border-color: var(--pf-green); background: var(--pf-green-soft); color: var(--pf-green); }
+.pf-addr-type.is-active { border-color: var(--pf-btn); background: var(--pf-btn); color: #fff; }
 
 .pf-demo-note { margin: 0 0 8px 4px; font-size: 12px; color: var(--pf-muted); }
 
@@ -152,6 +157,8 @@
   .pf-hero { min-height: 300px; }
   .pf-bag { width: 150px; }
 }
+/* Forma tugmalari (btn-primary / btn-secondary) — Profilda ham --pf-btn rangida */
+.pf .btn-primary { background: var(--pf-btn); color: #fff; box-shadow: 0 6px 14px rgba(242, 107, 29, 0.28); }
 @media (prefers-reduced-motion: reduce) { .pf-row { transition: none; } }
 
 /* Til tanlagich (LangSwitch) — Profilda mockup bo'yicha yashil faol holat (boshqa sahifalarda o'zgarmaydi) */
@@ -160,7 +167,7 @@
   box-shadow: 0 2px 8px rgba(16, 40, 24, 0.06); color: var(--pf-muted); font-weight: 700;
 }
 .pf .lang-switch--full .lang-switch__pill.is-active {
-  background: linear-gradient(90deg, var(--pf-g1) 0%, var(--pf-green) 100%); color: #fff;
-  box-shadow: 0 6px 14px rgba(20, 138, 67, 0.28);
+  background: var(--pf-btn); color: #fff;
+  box-shadow: 0 6px 14px rgba(242, 107, 29, 0.28);
 }
 .pf .lang-switch--full { gap: 8px; }
