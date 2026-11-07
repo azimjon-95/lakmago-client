@@ -279,7 +279,7 @@ export function MarketPage() {
       )}
 
       <div style={{ flex: 1, minHeight: 16 }} />
-      <CartBar variant="market" />
+      <CartBar />
       <BottomNav />
 
       {modalDish && (

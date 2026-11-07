@@ -9,8 +9,11 @@ import { formatSom, formatSomShort } from '@/lib/utils';
 import { freeDeliveryPromo } from '@/lib/freeDeliveryPromo';
 import './cards/CartBar.css';
 
-/** `variant="market"` — Market dizayni: savat belgisi + son nishoni, ajratgich, summa va strelka (dizayn maketi). */
-export function CartBar({ variant = 'default' }) {
+/*
+ * Savat paneli — BIR XIL dizayn barcha bo'limlarda (Lokma Go, Lokma Market, ...). Rang bo'limga qarab: CartBar.css
+ * (--cb-accent / --cb-soft, :root[data-section]). Ichki tuzilma va o'lcham hamma joyda aynan bir xil.
+ */
+export function CartBar() {
   const navigate = useNavigate();
   const t = useT();
   const count = useCart((s) => s.totalCount());
@@ -23,7 +26,7 @@ export function CartBar({ variant = 'default' }) {
   // MUHIM: hook har doim chaqiriladi (early return'dan oldin) — Rules of Hooks.
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty('--cart-bar-offset', visible ? '78px' : '0px');
+    root.style.setProperty('--cart-bar-offset', visible ? '66px' : '0px');
     return () => root.style.setProperty('--cart-bar-offset', '0px');
   }, [visible]);
 
@@ -77,21 +80,16 @@ export function CartBar({ variant = 'default' }) {
         </div>
       )}
 
-      {variant === 'market' ? (
-        <button onClick={() => navigate('/cart')} className="cart-bar cart-bar--market" data-testid="cart-bar-market">
-          <span className="cart-bar__ic"><Icon name="shoppingCart" size={22} strokeWidth={2.2} /><span className="cart-bar__badge">{count}</span></span>
-          <span className="cart-bar__label">{t('goToCart')}</span>
-          <span className="cart-bar__div" aria-hidden="true" />
-          <span className="cart-bar__total">{formatSom(total)}</span>
-          <Icon name="chevronRight" size={18} strokeWidth={2.6} />
-        </button>
-      ) : (
-        <button onClick={() => navigate('/cart')} className="cart-bar">
-          <span className="cart-bar__count">{count}</span>
-          <span className="cart-bar__label">{t('goToCart')}</span>
-          <span className="cart-bar__total">{formatSom(total)}</span>
-        </button>
-      )}
+      <button onClick={() => navigate('/cart')} className="cart-bar" data-testid="cart-bar">
+        <span className="cart-bar__ic">
+          <Icon name="shoppingCart" size={22} strokeWidth={2.2} />
+          <span className="cart-bar__badge">{count}</span>
+        </span>
+        <span className="cart-bar__label">{t('goToCart')}</span>
+        <span className="cart-bar__div" aria-hidden="true" />
+        <span className="cart-bar__total">{formatSom(total)}</span>
+        <Icon name="chevronRight" size={18} strokeWidth={2.6} />
+      </button>
       </div>
     </>
   );
