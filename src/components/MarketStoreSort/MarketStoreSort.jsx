@@ -32,9 +32,9 @@ export function MarketStoreSort({ mode, onChange, locating = false, note = '' })
   return (
     <>
       <button type="button" className="msort" onClick={() => setOpen(true)} aria-haspopup="dialog" data-testid="market-sort">
-        {locating ? <span className="msort__spin" aria-hidden="true" /> : <Icon name={cur.icon} size={15} strokeWidth={2.4} />}
+        {locating ? <span className="msort__spin" aria-hidden="true" /> : <Icon name={cur.icon} size={13} strokeWidth={2.4} />}
         <span className="msort__label">{t(cur.label)}</span>
-        <Icon name="chevronDown" size={15} strokeWidth={2.4} />
+        <Icon name="chevronDown" size={13} strokeWidth={2.4} />
       </button>
       {note && <div className="msort__note" role="status">{note}</div>}
       {open && createPortal(
