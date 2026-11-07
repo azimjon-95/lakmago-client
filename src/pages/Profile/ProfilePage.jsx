@@ -345,6 +345,7 @@ function ReferralCard() {
 
   return (
     <div className="pf-ref">
+      <img className="pf-ref__banner" src="/profile/referral-bg.webp" alt="" aria-hidden="true" />
       <div className="pf-ref__head">
         <div className="pf-ref__title">
           <span className="pf-ref__ic"><Icon name="users" size={18} color="#F26B1D" /></span>
