@@ -1,318 +1,166 @@
-/* ============ Profil ============ */
-.profile { padding-bottom: 0; background: var(--canvas); }
-
-.profile-card {
-  margin: 16px;
-  background: var(--brand-tint);
-  border-radius: 18px;
-  padding: 18px;
-  display: flex; align-items: center; gap: 14px;
-}
-.profile-card__avatar {
-  width: 56px; height: 56px; border-radius: 50%;
-  background: var(--brand); color: var(--brand-text);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px; font-weight: 500;
-}
-.profile-card__info { flex: 1; min-width: 0; }
-.profile-card__name { font-size: 16px; font-weight: 600; color: var(--ink); }
-.profile-card__id { font-size: 12px; color: var(--brand-100); margin-top: 2px; }
-
-.profile-section { margin: 0 16px 14px; }
-.profile-section__label {
-  font-size: 12px; font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.05em;
-  color: var(--muted);
-  margin: 0 0 8px 2px;
+/* ═══ PROFIL — yangi dizayn (mockup bo'yicha): yashil sarlavha + to'lqin, avatar, statistika, taklif kartasi, guruhlangan ro'yxatlar ═══ */
+.pf {
+  --pf-g1: #1FA050; --pf-g2: #0E7A3A; --pf-green: #148A43; --pf-green-soft: #E7F6EC;
+  --pf-orange: #F26B1D; --pf-orange-soft: #FFF1E4; --pf-red: #E5484D; --pf-red-soft: #FDECEC;
+  --pf-blue: #2F8FD8; --pf-blue-soft: #E7F2FC;
+  --pf-ink: #1F2A24; --pf-muted: #7A847F; --pf-line: #E7ECE9; --pf-card: #FFFFFF;
+  padding-bottom: 0; background: #F4F7F5; min-height: 100%;
 }
 
-/* Guruhlangan ro'yxat — qatorlar bitta qutida, orasida
-   ingichka ajratgich (iOS "grouped list"). Har qatorga alohida
-   quti berilsa ro'yxat parchalanib ko'rinardi. */
-.profile-list {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-/* Qatorlar */
-.profile-row {
-  width: 100%;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  padding: 13px 14px;
-  min-height: 56px;
-  display: flex; align-items: center; gap: 12px;
-  text-align: left;
-  transition: background 0.15s var(--ease);
-}
-.profile-row:active { background: var(--surface-2); }
-
-/* Ajratgich — ikonka ustunidan keyin boshlanadi (iOS kabi) */
-.profile-list > * + * { box-shadow: inset 0 1px 0 var(--line); }
-
-/* Guruhdan tashqarida turgan qator o'z qutisiga ega bo'ladi */
-.profile-row:only-child { border-radius: 16px; }
-
-.profile-row--required { box-shadow: inset 0 0 0 1.5px var(--brand) !important; border-radius: 16px; }
-.profile-row__body { flex: 1; min-width: 0; }
-.profile-row__value { font-size: 14.5px; font-weight: 500; color: var(--ink); }
-.profile-row__value--accent { color: var(--brand); }
-.profile-row__label { font-size: 12px; color: var(--muted); margin-top: 1px; }
-
-/* Tahrirlash */
-.profile-edit { background: var(--surface); border-radius: 16px; padding: 14px; }
-.profile-edit__actions { display: flex; gap: 8px; }
-
-/* Manzillar */
-.profile-addresses { display: flex; flex-direction: column; gap: 8px; }
-.profile-addresses__empty { font-size: 12px; color: var(--muted); text-align: center; padding: 12px 0; }
-.profile-address {
-  background: transparent;
-  padding: 12px 14px;
-  min-height: 56px;
-  display: flex; align-items: center; gap: 12px;
-}
-.profile-address.is-default .profile-address__title { color: var(--brand-100); }
-.profile-address__body { flex: 1; min-width: 0; }
-.profile-address__title { font-size: 13px; font-weight: 500; color: var(--ink); display: flex; align-items: center; gap: 4px; }
-.profile-address__badge { font-size: 10px; color: var(--brand); }
-.profile-address__text { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.profile-address__set { font-size: 11px; color: var(--brand); font-weight: 500; }
-
-.profile-addr-types { display: flex; gap: 8px; margin-bottom: 10px; }
-.profile-addr-type { flex: 1; padding: 8px; border-radius: 10px; font-size: 12px; font-weight: 500; background: var(--canvas); color: var(--muted); border: 1px solid var(--line); }
-.profile-addr-type.is-active { background: var(--brand-tint); color: var(--brand-100); border-color: var(--brand); }
-
-.profile-add-address {
-  margin-top: 10px; width: 100%;
-  border: 2px dashed var(--line);
-  border-radius: 12px;
-  padding: 12px;
-  color: var(--muted); font-size: 13px; font-weight: 500;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-}
-
-/* ===== Referral karta ===== */
-.referral-card {
-  background: linear-gradient(135deg, var(--brand-tint), var(--surface));
-  border: 1px solid rgba(var(--brand-rgb),  0.28);
-  border-radius: 16px;
-  padding: 16px;
-  margin: 0 16px 14px;
-}
-.referral-card__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.referral-card__title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: var(--ink); }
-.referral-card__badge {
-  background: var(--brand-400); color: var(--brand-text);
-  font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px;
-}
-.referral-card__desc { font-size: 12.5px; color: var(--muted); line-height: 1.45; margin-bottom: 13px; }
-.referral-card__stats { display: flex; gap: 10px; margin-bottom: 13px; }
-.referral-stat {
-  flex: 1; background: var(--canvas); border-radius: 12px; padding: 10px; text-align: center;
-}
-.referral-stat__value { font-size: 20px; font-weight: 800; color: var(--brand-100); }
-.referral-stat__label { font-size: 11px; color: var(--muted); margin-top: 2px; }
-.referral-card__actions { display: flex; gap: 10px; }
-.referral-card__share {
-  flex: 1; padding: 12px; border-radius: 12px;
-  background: var(--brand-400); color: var(--brand-text);
-  font-size: 14px; font-weight: 600;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-}
-.referral-card__share:active { transform: scale(0.98); }
-.referral-card__copy {
-  width: 48px; border-radius: 12px;
-  background: var(--surface-2); border: 1px solid var(--line);
-  display: flex; align-items: center; justify-content: center;
-}
-.referral-card__copy:active { background: var(--line); }
-
-/* ============ PREMIUM PROFIL ============ */
-
-/* Hero — yorug' fon, yumshoq iliq soya */
-.profile-hero {
-  position: relative;
-  margin: 0 16px 16px;
-  padding: 22px 18px 16px;
-  border-radius: 22px;
-  background:
-    radial-gradient(120% 100% at 50% 0%, var(--brand-tint) 0%, var(--brand-50, #FFF8F3) 55%, #FFFFFF 100%);
-  border: 1px solid rgba(var(--brand-rgb),  0.16);
-  text-align: center;
-  overflow: hidden;
-}
-/* Yumshoq amber yorug'lik — chuqurlik beradi */
-.profile-hero__glow {
-  position: absolute;
-  top: -60px; left: 50%;
-  width: 240px; height: 240px;
-  transform: translateX(-50%);
-  background: radial-gradient(circle, rgba(var(--brand-rgb), 0.12) 0%, transparent 68%);
-  pointer-events: none;
-}
-
-.profile-hero__avatar {
-  position: relative;
-  width: 72px; height: 72px;
-  margin: 0 auto 12px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-600) 100%);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 30px; font-weight: 700; color: var(--brand-text);
-  overflow: hidden;
-  box-shadow:
-    0 0 0 3px rgba(var(--brand-rgb),  0.16),
-    0 10px 24px rgba(var(--brand-rgb),  0.18);
-}
-.profile-hero__avatar img {
-  width: 100%; height: 100%; object-fit: cover; display: block;
-}
-
-.profile-hero__name {
-  position: relative;
-  font-size: 19px; font-weight: 700; color: var(--ink);
-  line-height: 1.2;
-}
-.profile-hero__id {
-  position: relative;
-  font-size: 13px; color: var(--brand-100);
-  margin-top: 4px;
-}
-
-/* Statistika qatori */
-.profile-hero__stats {
-  position: relative;
-  display: flex; align-items: center; justify-content: center;
-  gap: 4px; margin-top: 15px;
-}
-.profile-stat {
-  flex: 1;
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-}
-.profile-stat__value { font-size: 18px; font-weight: 700; color: var(--ink); }
-.profile-stat__label { font-size: 11px; color: var(--muted); }
-.profile-stat__sep {
-  width: 1px; height: 26px;
-  background: linear-gradient(180deg, transparent, var(--line), transparent);
-}
-
-/* ============ KARTALAR SLAYDI ============ */
-.pcards { margin: 0 0 18px; }
-.pcards__row {
-  display: flex; gap: 10px;
-  overflow-x: auto;
-  /* Chap chekka boshqa bo'limlar bilan bir chiziqda (16px).
-     scroll-padding — surilganda ham karta chekkaga yopishmaydi. */
-  padding: 2px 16px 6px;
-  scroll-padding-left: 16px;
-  scroll-snap-type: x proximity;
-}
-
-.pcard {
-  position: relative;
-  flex: none;
-  width: 206px; height: 124px;
-  border-radius: 16px;
-  padding: 13px 14px;
-  display: flex; flex-direction: column; justify-content: space-between;
+/* ── Sarlavha ── */
+.pf-hero {
+  position: relative; overflow: hidden; isolation: isolate;
+  background: linear-gradient(180deg, var(--pf-g1) 0%, var(--pf-g2) 100%);
+  border-radius: 0 0 28px 28px;
+  padding: 10px 16px 0; min-height: 280px;
+  display: flex; flex-direction: column; align-items: center;
   color: #fff;
-  scroll-snap-align: start;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  overflow: hidden;
-  transition: transform 0.18s var(--ease);
 }
-.pcard:active { transform: scale(0.98); }
+.pf-hero__wave { position: absolute; left: 0; right: 0; bottom: -2px; width: 100%; height: auto; z-index: -1; pointer-events: none; }
+.pf-top { width: 100%; display: flex; align-items: center; gap: 12px; height: 46px; margin-top: 4px; }
+.pf-back {
+  width: 40px; height: 40px; border-radius: 50%; border: 0; flex: none;
+  background: rgba(255, 255, 255, 0.18); display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.pf-top__title { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.2px; color: #fff; }
 
-/* Yaltiroq chiziq — plastik effekti */
-.pcard__shine {
-  position: absolute;
-  top: -50%; left: -30%;
-  width: 80%; height: 200%;
-  background: linear-gradient(
-    100deg,
-    transparent 20%,
-    rgba(255, 255, 255, 0.14) 45%,
-    rgba(255, 255, 255, 0.05) 55%,
-    transparent 75%
-  );
-  transform: rotate(12deg);
-  pointer-events: none;
+.pf-avatar {
+  position: relative; margin-top: 14px; width: 104px; height: 104px; border-radius: 50%; flex: none;
+  background: #fff; padding: 4px;
+  box-shadow: 0 10px 26px rgba(0, 60, 25, 0.28);
 }
-
-.pcard__top {
-  display: flex; align-items: center; justify-content: space-between;
-  position: relative;
+.pf-avatar img, .pf-avatar > span {
+  width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: flex; align-items: center; justify-content: center;
+  background: var(--pf-green-soft); color: var(--pf-green); font-size: 32px; font-weight: 800;
 }
-/* Chip — haqiqiy kartadagidek */
-.pcard__chip {
-  width: 28px; height: 21px;
-  border-radius: 4px;
-  background: linear-gradient(135deg, #E8C87A 0%, #B8964A 50%, #E8C87A 100%);
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.18);
+.pf-avatar__edit {
+  position: absolute; right: 2px; bottom: 4px; width: 32px; height: 32px; border-radius: 50%; border: 3px solid #fff;
+  background: var(--pf-green); display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
 }
-.pcard__badge {
-  font-size: 9.5px; font-weight: 700;
-  padding: 3px 8px; border-radius: 999px;
-  background: rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(6px);
-  letter-spacing: 0.3px;
+.pf-name { margin-top: 12px; font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.2px; text-align: center; }
+.pf-id { margin-top: 2px; font-size: 14px; font-weight: 700; color: #FFD9B8; text-align: center; }
+.pf-bag {
+  position: absolute; right: -8px; top: 64px; width: 128px; height: auto; pointer-events: none;
+  filter: drop-shadow(0 8px 12px rgba(0, 40, 15, 0.3)); z-index: 1;
 }
 
-.pcard__num {
-  position: relative;
-  white-space: nowrap;
-  font-size: 16px; font-weight: 600;
-  letter-spacing: 1.4px;
-  font-variant-numeric: tabular-nums;
+/* ── Statistika ── */
+.pf-stats {
+  position: relative; z-index: 2; margin: -34px 16px 0;
+  display: flex; align-items: center; justify-content: space-around;
+  background: var(--pf-card); border-radius: 18px; padding: 14px 10px;
+  box-shadow: 0 8px 22px rgba(16, 40, 24, 0.10);
+}
+.pf-stat { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.pf-stat > div { display: flex; flex-direction: column; line-height: 1.15; }
+.pf-stat__ic { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex: none; }
+.pf-stat__ic--green { background: var(--pf-green-soft); }
+.pf-stat__ic--red { background: var(--pf-red-soft); }
+.pf-stat__value { font-size: 20px; font-weight: 800; color: var(--pf-ink); }
+.pf-stat__label { font-size: 12px; color: var(--pf-muted); font-weight: 600; }
+.pf-stats__sep { width: 1px; height: 36px; background: var(--pf-line); }
+
+/* ── Taklif kartasi (sovg'a banneri fonida) ── */
+.pf-ref {
+  position: relative; overflow: hidden; margin: 14px 16px 0; border-radius: 20px;
+  padding: 16px 16px 16px; background: #FFF6EC;
+  background-image: linear-gradient(90deg, rgba(255, 246, 236, 0.97) 0%, rgba(255, 246, 236, 0.86) 55%, rgba(255, 246, 236, 0.35) 100%), url('/profile/referral-bg.webp');
+  background-size: cover; background-position: center right;
+  box-shadow: 0 6px 18px rgba(200, 110, 30, 0.12), inset 0 0 0 1px #FCD9B0;
+}
+.pf-ref__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pf-ref__title { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 800; color: var(--pf-ink); }
+.pf-ref__ic { width: 30px; height: 30px; border-radius: 10px; background: #fff; display: flex; align-items: center; justify-content: center; }
+.pf-ref__badge { flex: none; background: var(--pf-orange); color: #fff; font-size: 12.5px; font-weight: 800; padding: 5px 11px; border-radius: 999px; box-shadow: 0 4px 10px rgba(242, 107, 29, 0.3); }
+.pf-ref__desc { margin: 8px 0 0; font-size: 12.5px; line-height: 1.45; color: #6B5B4C; max-width: 78%; }
+.pf-ref__stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; max-width: 86%; }
+.pf-ref__stat {
+  display: flex; flex-direction: column; align-items: center; padding: 9px 6px; border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92); box-shadow: 0 2px 6px rgba(160, 90, 30, 0.08);
+}
+.pf-ref__value { font-size: 20px; font-weight: 800; color: var(--pf-orange); line-height: 1.1; }
+.pf-ref__label { font-size: 11px; font-weight: 600; color: var(--pf-muted); margin-top: 2px; text-align: center; }
+.pf-ref__actions { display: flex; gap: 8px; margin-top: 12px; }
+.pf-ref__share {
+  flex: 1; height: 46px; border: 0; border-radius: 14px;
+  background: linear-gradient(90deg, var(--pf-g1) 0%, var(--pf-green) 100%); color: #fff;
+  display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14.5px; font-weight: 800;
+  box-shadow: 0 6px 14px rgba(20, 138, 67, 0.3); -webkit-tap-highlight-color: transparent;
+}
+.pf-ref__share:active { transform: scale(0.98); }
+.pf-ref__copy {
+  width: 46px; height: 46px; border-radius: 14px; border: 0; flex: none;
+  background: #fff; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 6px rgba(160, 90, 30, 0.1);
 }
 
-.pcard__bottom {
-  position: relative;
-  display: flex; align-items: flex-end; justify-content: space-between;
-  gap: 10px;
-}
-.pcard__holder {
-  font-size: 10px; letter-spacing: 0.5px;
-  text-transform: uppercase;
-  opacity: 0.85;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.pcard__brand {
-  font-size: 11.5px; font-weight: 700;
-  letter-spacing: 0.4px; flex: none;
-}
+/* ── Bo'limlar ── */
+.pf-section { margin: 18px 16px 0; }
+.pf-section__label { font-size: 13px; font-weight: 800; color: var(--pf-green); margin: 0 0 8px 4px; letter-spacing: 0.1px; }
+.pf-group { background: var(--pf-card); border-radius: 18px; overflow: hidden; box-shadow: 0 2px 10px rgba(16, 40, 24, 0.05); }
 
-/* Qo'shish kartasi */
-.pcard--add {
-  background: transparent;
-  border: 1.5px dashed var(--line);
-  box-shadow: none;
-  align-items: center; justify-content: center;
-  gap: 8px;
-  color: var(--brand-100);
-  font-size: 12.5px; font-weight: 600;
-  gap: 4px;
-  width: 96px;
+.pf-row {
+  width: 100%; display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 10px 14px;
+  background: transparent; border: 0; text-align: left; color: var(--pf-ink);
+  -webkit-tap-highlight-color: transparent; transition: background 0.15s ease;
 }
-
-/* Karta yo'q holati */
-.pcards-empty {
-  display: flex; align-items: center; gap: 12px;
-  width: calc(100% - 32px);
-  margin: 0 16px 18px;
-  padding: 15px 16px;
-  background: var(--surface);
-  border: 1.5px dashed var(--line);
-  border-radius: 16px;
-  text-align: left;
+.pf-row:active { background: #F3F8F5; }
+.pf-row + .pf-row, .pf-row + .pf-addr, .pf-addr + .pf-row, .pf-addr + .pf-addr, .pf-edit + .pf-row, .pf-row + .pf-edit, .pf-empty + .pf-addr {
+  box-shadow: inset 0 1px 0 var(--pf-line);
 }
-.pcards-empty__body { flex: 1; min-width: 0; }
-.pcards-empty__title { font-size: 14px; font-weight: 600; color: var(--ink); }
-.pcards-empty__hint { font-size: 12px; color: var(--muted); margin-top: 1px; }
+.pf-row__ic { width: 40px; height: 40px; border-radius: 13px; display: flex; align-items: center; justify-content: center; flex: none; }
+.pf-row__ic--green { background: var(--pf-green-soft); }
+.pf-row__ic--red { background: var(--pf-red-soft); }
+.pf-row__ic--orange { background: var(--pf-orange-soft); }
+.pf-row__ic--blue { background: var(--pf-blue-soft); }
+.pf-row__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.pf-row__value { font-size: 15px; font-weight: 700; color: var(--pf-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pf-row__value--accent { color: var(--pf-green); }
+.pf-row__label { font-size: 12.5px; color: var(--pf-muted); }
+.pf-row--required { box-shadow: inset 0 0 0 1.5px var(--pf-green) !important; border-radius: 18px; }
 
-/* Demo hisob (App Store tekshiruvi) eslatmasi */
-.profile-demo-note { margin: 0 0 10px; padding: 9px 12px; border-radius: 12px; background: #FFF4E5; color: #92400E; border: 1px solid #FCD9A8; font-size: 12.5px; }
+.pf-edit { padding: 12px 14px 14px; }
+.pf-edit--card { background: var(--pf-card); border-radius: 18px; box-shadow: 0 2px 10px rgba(16, 40, 24, 0.05); }
+.pf-edit__actions { display: flex; gap: 8px; }
+
+.pf-addr { display: flex; align-items: center; gap: 12px; padding: 12px 10px 12px 14px; }
+.pf-addr__body { flex: 1; min-width: 0; }
+.pf-addr__title { font-size: 15px; font-weight: 700; color: var(--pf-ink); display: flex; align-items: center; gap: 6px; }
+.pf-addr__badge { width: 18px; height: 18px; border-radius: 50%; background: var(--pf-green); color: #fff; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; }
+.pf-addr__text { font-size: 12.5px; color: var(--pf-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pf-addr.is-default .pf-row__ic { background: var(--pf-green); }
+.pf-addr.is-default .pf-row__ic svg { stroke: #fff; }
+.pf-addr__set { border: 0; background: var(--pf-green-soft); color: var(--pf-green); font-size: 12px; font-weight: 800; padding: 6px 10px; border-radius: 999px; flex: none; }
+.pf-addr__del { width: 34px; height: 34px; border: 0; border-radius: 50%; background: transparent; flex: none; display: flex; align-items: center; justify-content: center; }
+.pf-addr__del:active { background: var(--pf-red-soft); }
+.pf-empty { padding: 16px; font-size: 13.5px; color: var(--pf-muted); text-align: center; }
+
+.pf-add {
+  width: 100%; margin-top: 10px; height: 48px; border-radius: 16px; border: 1.5px dashed #B9D9C4; background: transparent;
+  display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 800; color: var(--pf-green);
+}
+.pf-add__plus { width: 24px; height: 24px; border-radius: 50%; background: var(--pf-green-soft); display: inline-flex; align-items: center; justify-content: center; }
+.pf-addr-types { display: flex; gap: 8px; margin-bottom: 10px; }
+.pf-addr-type { flex: 1; height: 36px; border-radius: 12px; border: 1.5px solid var(--pf-line); background: #fff; font-size: 13px; font-weight: 700; color: var(--pf-muted); }
+.pf-addr-type.is-active { border-color: var(--pf-green); background: var(--pf-green-soft); color: var(--pf-green); }
+
+.pf-demo-note { margin: 0 0 8px 4px; font-size: 12px; color: var(--pf-muted); }
+
+@media (min-width: 600px) {
+  .pf-hero { min-height: 300px; }
+  .pf-bag { width: 150px; }
+}
+@media (prefers-reduced-motion: reduce) { .pf-row { transition: none; } }
+
+/* Til tanlagich (LangSwitch) — Profilda mockup bo'yicha yashil faol holat (boshqa sahifalarda o'zgarmaydi) */
+.pf .lang-switch--full .lang-switch__pill {
+  height: 46px; border-radius: 14px; border: 0; background: #fff;
+  box-shadow: 0 2px 8px rgba(16, 40, 24, 0.06); color: var(--pf-muted); font-weight: 700;
+}
+.pf .lang-switch--full .lang-switch__pill.is-active {
+  background: linear-gradient(90deg, var(--pf-g1) 0%, var(--pf-green) 100%); color: #fff;
+  box-shadow: 0 6px 14px rgba(20, 138, 67, 0.28);
+}
+.pf .lang-switch--full { gap: 8px; }

@@ -86,192 +86,206 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="app-shell profile">
-      <header className="page-header">
-        <button onClick={() => navigate('/')} aria-label={t('back')}><Icon name="arrowLeft" size={22} color="var(--ink)" /></button>
-        <h1>{t('profile')}</h1>
-      </header>
+    <div className="app-shell pf">
+      {/* Yashil sarlavha: to'lqinli fon, orqaga tugma, katta avatar, Lokma Go Market sumkasi */}
+      <section className="pf-hero">
+        <img className="pf-hero__wave" src="/profile/hero-wave.webp" alt="" aria-hidden="true" />
+        <div className="pf-top">
+          <button type="button" className="pf-back" onClick={() => navigate('/')} aria-label={t('back')}>
+            <Icon name="arrowLeft" size={20} color="#fff" />
+          </button>
+          <h1 className="pf-top__title">{t('profile')}</h1>
+        </div>
+
+        {!isGuest && (
+          <>
+            <div className="pf-avatar">
+              {user.photoUrl ? (
+                <img src={user.photoUrl} alt="" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+              ) : (
+                <span>{user.photoInitials}</span>
+              )}
+              <button type="button" className="pf-avatar__edit"
+                onClick={() => { setFirstName(user.firstName); setLastName(user.lastName); setEditingField('name'); }}
+                aria-label="Tahrirlash">
+                <Icon name="edit" size={14} color="#fff" />
+              </button>
+            </div>
+            <div className="pf-name">{user.firstName} {user.lastName}</div>
+            <div className="pf-id">{user.username ? `@${user.username}` : `ID: ${user.telegramId ?? '—'}`}</div>
+          </>
+        )}
+        <img className="pf-bag" src="/profile/bag.webp" alt="" aria-hidden="true" />
+      </section>
 
       {isGuest ? (
         <GuestHero onSignIn={() => ensureAuth({ reason: 'profile' })} />
       ) : (
         <>
-      {/* Hero — gradient fon, Telegram rasmi */}
-        <div className="profile-hero">
-          <div className="profile-hero__glow" />
-          <div className="profile-hero__avatar">
-            {user.photoUrl ? (
-              <img
-                src={user.photoUrl}
-                alt=""
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-              />
-            ) : (
-              <span>{user.photoInitials}</span>
-            )}
-          </div>
-          <div className="profile-hero__name">
-            {user.firstName} {user.lastName}
-          </div>
-          <div className="profile-hero__id">
-            {user.username ? `@${user.username}` : `ID: ${user.telegramId ?? '—'}`}
-          </div>
-  
-          {/* Tez statistika */}
-          <div className="profile-hero__stats">
-            <div className="profile-stat">
-              <span className="profile-stat__value">{user.addresses?.length || 0}</span>
-              <span className="profile-stat__label">{t('address')}</span>
+          {/* Tez statistika: manzil va sevimlilar */}
+          <div className="pf-stats">
+            <div className="pf-stat">
+              <span className="pf-stat__ic pf-stat__ic--green"><Icon name="pin" size={17} color="#148A43" /></span>
+              <div>
+                <span className="pf-stat__value">{user.addresses?.length || 0}</span>
+                <span className="pf-stat__label">{t('address')}</span>
+              </div>
             </div>
-            <span className="profile-stat__sep" />
-            <div className="profile-stat">
-              <span className="profile-stat__value">{favCount}</span>
-              <span className="profile-stat__label">{t('favorites')}</span>
+            <span className="pf-stats__sep" aria-hidden="true" />
+            <div className="pf-stat">
+              <span className="pf-stat__ic pf-stat__ic--red"><Icon name="heart" size={17} color="#E5484D" /></span>
+              <div>
+                <span className="pf-stat__value">{favCount}</span>
+                <span className="pf-stat__label">{t('favorites')}</span>
+              </div>
             </div>
           </div>
-        </div>
-  
-        {/* Do'stlarni taklif qilish (referral) */}
-        <ReferralCard />
+
+          {/* Do'stlarni taklif qilish (referal) */}
+          <ReferralCard />
         </>
       )}
 
-      {/* Til tanlash */}
-      <div className="profile-section">
-        <div className="profile-section__label">{t('language')}</div>
+      {/* Til */}
+      <div className="pf-section">
+        <div className="pf-section__label">{t('language')}</div>
         <LangSwitch />
       </div>
 
-      {/* Tez havolalar — bitta guruhda */}
-      <div className="profile-section">
-        <div className="profile-list">
-          <button onClick={() => navigate('/favorites')} className="profile-row">
-            <Icon name="heart" size={18} color="var(--brand)" />
-            <div className="profile-row__body">
-              <div className="profile-row__value">{t('favoritesTitle')}</div>
-              <div className="profile-row__label">{t('favoritesHint')}</div>
-            </div>
-            <Icon name="chevronRight" size={17} color="var(--muted)" />
+      {/* Tez havolalar */}
+      <div className="pf-section">
+        <div className="pf-group">
+          <button type="button" onClick={() => navigate('/favorites')} className="pf-row">
+            <span className="pf-row__ic pf-row__ic--red"><Icon name="heart" size={18} color="#E5484D" /></span>
+            <span className="pf-row__body">
+              <span className="pf-row__value">{t('favoritesTitle')}</span>
+              <span className="pf-row__label">{t('favoritesHint')}</span>
+            </span>
+            <Icon name="chevronRight" size={17} color="#9AA3A0" />
           </button>
-
-          <button onClick={() => navigate('/my-reservations')} className="profile-row">
-            <Icon name="calendarPlus" size={18} color="var(--brand)" />
-            <div className="profile-row__body">
-              <div className="profile-row__value">{t('myReservations')}</div>
-              <div className="profile-row__label">{t('myReservationsHint')}</div>
-            </div>
-            <Icon name="chevronRight" size={17} color="var(--muted)" />
+          <button type="button" onClick={() => navigate('/my-reservations')} className="pf-row">
+            <span className="pf-row__ic pf-row__ic--orange"><Icon name="calendarPlus" size={18} color="#F26B1D" /></span>
+            <span className="pf-row__body">
+              <span className="pf-row__value">{t('myReservations')}</span>
+              <span className="pf-row__label">{t('myReservationsHint')}</span>
+            </span>
+            <Icon name="chevronRight" size={17} color="#9AA3A0" />
           </button>
         </div>
       </div>
 
-      <div className="profile-section">
-        <div className="profile-section__label">{t('settings')}</div>
+      {/* Sozlamalar */}
+      <div className="pf-section">
+        <div className="pf-section__label">{t('settings')}</div>
+        <div className="pf-group">
+          {editingField === 'name' ? (
+            <div className="pf-edit">
+              <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder={t('firstNamePlaceholder')} className="input-field" style={{ marginBottom: 8 }} />
+              <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder={t('lastNamePlaceholder')} className="input-field" style={{ marginBottom: 10 }} />
+              <div className="pf-edit__actions">
+                <button onClick={() => setEditingField(null)} className="btn-secondary" style={{ flex: 1 }}>{t('cancel')}</button>
+                <button onClick={saveName} className="btn-primary" style={{ flex: 1.5 }}>{t('save')}</button>
+              </div>
+            </div>
+          ) : (
+            <button type="button" onClick={() => { setFirstName(user.firstName); setLastName(user.lastName); setEditingField('name'); }} className="pf-row">
+              <span className="pf-row__ic pf-row__ic--green"><Icon name="edit" size={18} color="#148A43" /></span>
+              <span className="pf-row__body">
+                <span className="pf-row__value">{user.firstName} {user.lastName}</span>
+                <span className="pf-row__label">{t('profile')}</span>
+              </span>
+              <Icon name="chevronRight" size={17} color="#9AA3A0" />
+            </button>
+          )}
 
-        <div className="profile-list">
-        {editingField === 'name' ? (
-          <div className="profile-edit">
-            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder={t('firstNamePlaceholder')} className="input-field" style={{ marginBottom: 8 }} />
-            <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder={t('lastNamePlaceholder')} className="input-field" style={{ marginBottom: 10 }} />
-            <div className="profile-edit__actions">
-              <button onClick={() => setEditingField(null)} className="btn-secondary" style={{ flex: 1 }}>{t('cancel')}</button>
-              <button onClick={saveName} className="btn-primary" style={{ flex: 1.5 }}>{t('save')}</button>
+          {editingField === 'phone' ? (
+            <div className="pf-edit">
+              <input value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" className="input-field" style={{ marginBottom: 10 }} />
+              <div className="pf-edit__actions">
+                <button onClick={() => setEditingField(null)} className="btn-secondary" style={{ flex: 1 }}>{t('cancel')}</button>
+                <button onClick={savePhone} className="btn-primary" style={{ flex: 1.5 }}>{t('save')}</button>
+              </div>
             </div>
-          </div>
-        ) : (
-          <button onClick={() => { setFirstName(user.firstName); setLastName(user.lastName); setEditingField('name'); }} className="profile-row">
-            <Icon name="edit" size={18} color="var(--muted)" />
-            <div className="profile-row__body">
-              <div className="profile-row__value">{user.firstName} {user.lastName}</div>
-              <div className="profile-row__label">{t('profile')}</div>
-            </div>
-            <Icon name="chevronRight" size={18} color="var(--muted)" />
-          </button>
-        )}
-
-        {editingField === 'phone' ? (
-          <div className="profile-edit">
-            <input value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" className="input-field" style={{ marginBottom: 10 }} />
-            <div className="profile-edit__actions">
-              <button onClick={() => setEditingField(null)} className="btn-secondary" style={{ flex: 1 }}>{t('cancel')}</button>
-              <button onClick={savePhone} className="btn-primary" style={{ flex: 1.5 }}>{t('save')}</button>
-            </div>
-          </div>
-        ) : (
-          <button onClick={() => { setPhone(user.phone || ''); setEditingField('phone'); }} className={`profile-row ${user.phone ? '' : 'profile-row--required'}`}>
-            <Icon name="phone" size={18} color={user.phone ? 'var(--muted)' : 'var(--brand)'} />
-            <div className="profile-row__body">
-              <div className={`profile-row__value ${user.phone ? '' : 'profile-row__value--accent'}`}>{user.phone || t('empty')}</div>
-              <div className="profile-row__label">{t('phoneLabel')}</div>
-            </div>
-            <Icon name="chevronRight" size={17} color="var(--muted)" />
-          </button>
-        )}
+          ) : (
+            <button type="button" onClick={() => { setPhone(user.phone || ''); setEditingField('phone'); }}
+              className={`pf-row ${user.phone ? '' : 'pf-row--required'}`}>
+              <span className="pf-row__ic pf-row__ic--blue"><Icon name="phone" size={18} color="#2F8FD8" /></span>
+              <span className="pf-row__body">
+                <span className={`pf-row__value ${user.phone ? '' : 'pf-row__value--accent'}`}>{user.phone || t('empty')}</span>
+                <span className="pf-row__label">{t('phoneLabel')}</span>
+              </span>
+              <Icon name="chevronRight" size={17} color="#9AA3A0" />
+            </button>
+          )}
         </div>
       </div>
 
       {/* Manzillar */}
-      <div className="profile-section">
-        <div className="profile-section__label">{t('myAddresses')}</div>
-        <div className="profile-list">
-          {user.addresses.length === 0 && <div className="profile-addresses__empty">{t('empty')}</div>}
-          {user.addresses.map((a) => (
-            <div key={a.id} className={`profile-address ${a.id === user.defaultAddressId ? 'is-default' : ''}`}>
-              <Icon name="pin" size={18} color={a.id === user.defaultAddressId ? 'var(--brand)' : 'var(--muted)'} />
-              <div className="profile-address__body">
-                <div className="profile-address__title">
-                  {a.title}
-                  {a.id === user.defaultAddressId && <span className="profile-address__badge">✓</span>}
+      <div className="pf-section">
+        <div className="pf-section__label">{t('myAddresses')}</div>
+        <div className="pf-group">
+          {user.addresses.length === 0 && <div className="pf-empty">{t('empty')}</div>}
+          {user.addresses.map((a) => {
+            const isDef = a.id === user.defaultAddressId;
+            return (
+              <div key={a.id} className={`pf-addr ${isDef ? 'is-default' : ''}`}>
+                <span className="pf-row__ic pf-row__ic--green"><Icon name="pin" size={18} color="#148A43" /></span>
+                <div className="pf-addr__body">
+                  <div className="pf-addr__title">
+                    {a.title}
+                    {isDef && <span className="pf-addr__badge">✓</span>}
+                  </div>
+                  <div className="pf-addr__text">{a.address}</div>
                 </div>
-                <div className="profile-address__text">{a.address}</div>
+                {!isDef && <button type="button" onClick={() => setDefaultAddress(a.id)} className="pf-addr__set">{t('save')}</button>}
+                <button type="button" className="pf-addr__del" onClick={() => removeAddress(a.id)} aria-label={t('close')}>
+                  <Icon name="trash" size={16} color="#DC2626" />
+                </button>
               </div>
-              {a.id !== user.defaultAddressId && (
-                <button onClick={() => setDefaultAddress(a.id)} className="profile-address__set">{t('save')}</button>
-              )}
-              <button onClick={() => removeAddress(a.id)} aria-label={t('close')}><Icon name="trash" size={16} color="var(--danger)" /></button>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {showAddAddress ? (
-          <div className="profile-edit" style={{ marginTop: 10 }}>
-            <div className="profile-addr-types">
+          <div className="pf-edit pf-edit--card" style={{ marginTop: 10 }}>
+            <div className="pf-addr-types">
               {['Uy', 'Ish', 'Boshqa'].map((tp) => (
-                <button key={tp} onClick={() => setAddrTitle(tp)} className={`profile-addr-type ${addrTitle === tp ? 'is-active' : ''}`}>{tp}</button>
+                <button key={tp} type="button" onClick={() => setAddrTitle(tp)} className={`pf-addr-type ${addrTitle === tp ? 'is-active' : ''}`}>{tp}</button>
               ))}
             </div>
             <input value={addrText} onChange={(e) => setAddrText(e.target.value)} placeholder="Ko'cha, uy, xonadon" autoFocus className="input-field" style={{ marginBottom: 10 }} />
-            <div className="profile-edit__actions">
+            <div className="pf-edit__actions">
               <button onClick={() => setShowAddAddress(false)} className="btn-secondary" style={{ flex: 1 }}>{t('cancel')}</button>
               <button onClick={handleAddAddress} disabled={addrText.trim().length < 5} className="btn-primary" style={{ flex: 1.5 }}>{t('add')}</button>
             </div>
           </div>
         ) : (
-          <button onClick={() => setShowAddAddress(true)} className="profile-add-address">
-            <Icon name="plus" size={16} color="var(--muted)" /> {t('add')}
+          <button type="button" onClick={() => setShowAddAddress(true)} className="pf-add">
+            <span className="pf-add__plus"><Icon name="plus" size={15} color="#148A43" /></span>
+            {t('add')}
           </button>
         )}
       </div>
 
+      {/* Hisob: chiqish va (ruxsat bo'lsa) hisobni o'chirish */}
       {isAuthed && (
-        <div className="profile-section">
-          <div className="profile-section__label">{t('acc_title')}</div>
-          {user.isDemo && <p className="profile-demo-note" data-testid="profile-demo-note">{t('demo_profile_note')}</p>}
-          <div className="profile-list">
-            <button type="button" onClick={() => setConfirm('logout')} className="profile-row" data-testid="logout-row">
-              <Icon name="logout" size={18} color="var(--brand)" />
-              <div className="profile-row__body"><div className="profile-row__value">{t('logout')}</div></div>
-              <Icon name="chevronRight" size={17} color="var(--muted)" />
+        <div className="pf-section">
+          <div className="pf-section__label">{t('acc_title')}</div>
+          {user.isDemo && <p className="pf-demo-note" data-testid="profile-demo-note">{t('demo_profile_note')}</p>}
+          <div className="pf-group">
+            <button type="button" onClick={() => setConfirm('logout')} className="pf-row" data-testid="logout-row">
+              <span className="pf-row__ic pf-row__ic--green"><Icon name="logout" size={18} color="#148A43" /></span>
+              <span className="pf-row__body"><span className="pf-row__value">{t('logout')}</span></span>
+              <Icon name="chevronRight" size={17} color="#9AA3A0" />
             </button>
-            {/* Demo hisobda ham (App Store tekshiruvi): server buni qo'llasagina (eski serverda demoAccountDeletion yo'q → yashirin) */}
             {caps.accountDeletion && (!user.isDemo || caps.demoAccountDeletion) && (
-              <button type="button" onClick={() => setConfirm('delete')} className="profile-row" data-testid="delete-row">
-                <Icon name="trash" size={18} color="#DC2626" />
-                <div className="profile-row__body">
-                  <div className="profile-row__value" style={{ color: '#DC2626' }}>{t('acc_delete')}</div>
-                  <div className="profile-row__label">{t('acc_delete_hint')}</div>
-                </div>
-                <Icon name="chevronRight" size={17} color="var(--muted)" />
+              <button type="button" onClick={() => setConfirm('delete')} className="pf-row" data-testid="delete-row">
+                <span className="pf-row__ic pf-row__ic--red"><Icon name="trash" size={18} color="#DC2626" /></span>
+                <span className="pf-row__body">
+                  <span className="pf-row__value" style={{ color: '#DC2626' }}>{t('acc_delete')}</span>
+                  <span className="pf-row__label">{t('acc_delete_hint')}</span>
+                </span>
+                <Icon name="chevronRight" size={17} color="#9AA3A0" />
               </button>
             )}
           </div>
@@ -330,50 +344,44 @@ function ReferralCard() {
   if (info && info.enabled === false) return null;
 
   return (
-    <div className="referral-card">
-      <div className="referral-card__head">
-        <div className="referral-card__title">
-          <Icon name="users" size={18} color="var(--brand)" /> {t('referralTitle')}
+    <div className="pf-ref">
+      <div className="pf-ref__head">
+        <div className="pf-ref__title">
+          <span className="pf-ref__ic"><Icon name="users" size={18} color="#F26B1D" /></span>
+          {t('referralTitle')}
         </div>
-        {info?.reward > 0 && (
-          <div className="referral-card__badge">+{som(info.reward)} {t('ball')}</div>
-        )}
+        {info?.reward > 0 && <div className="pf-ref__badge">+{som(info.reward)} {t('ball')}</div>}
       </div>
 
-      <p className="referral-card__desc">
-        {t('referralDesc')}
-      </p>
+      <p className="pf-ref__desc">{t('referralDesc')}</p>
 
       {/* Statistika */}
-      <div className="referral-card__stats">
-        <div className="referral-stat">
-          <div className="referral-stat__value">{info?.referralCount ?? 0}</div>
-          <div className="referral-stat__label">{t('referralInvited')}</div>
+      <div className="pf-ref__stats">
+        <div className="pf-ref__stat">
+          <span className="pf-ref__value">{info?.referralCount ?? 0}</span>
+          <span className="pf-ref__label">{t('referralInvited')}</span>
         </div>
-        <div className="referral-stat">
+        <div className="pf-ref__stat">
           {/*
             `referralPoints` — YANGI maydon, `bonusBalance` EMAS.
             Taklif mukofoti endi ball (pul emas) va alohida
-            maydonda saqlanadi — bonusBalance buyurtmada
-            ishlatiladigan HAQIQIY pul, ular aralashmasligi kerak
-            (server: models/User.js, services/referral.js).
+            maydonda saqlanadi (server: models/User.js, services/referral.js).
           */}
-          <div className="referral-stat__value">{som(info?.referralPoints)}</div>
-          <div className="referral-stat__label">{t('referralBonusLabel')}</div>
+          <span className="pf-ref__value">{som(info?.referralPoints)}</span>
+          <span className="pf-ref__label">{t('referralBonusLabel')}</span>
         </div>
       </div>
 
       {/* Amallar */}
-      <div className="referral-card__actions">
-        <button onClick={share} className="referral-card__share">
-          <Icon name="send" size={16} color="var(--brand-text)" /> {t('referralShareBtn')}
+      <div className="pf-ref__actions">
+        <button type="button" onClick={share} className="pf-ref__share">
+          <Icon name="send" size={16} color="#fff" /> {t('referralShareBtn')}
         </button>
-        <button onClick={copy} className="referral-card__copy">
-          <Icon name={copied ? 'check' : 'copy'} size={16} color="var(--ink)" />
+        <button type="button" onClick={copy} className="pf-ref__copy" aria-label="Nusxalash">
+          <Icon name={copied ? 'check' : 'copy'} size={16} color="#1F2A24" />
         </button>
       </div>
     </div>
-
   );
 }
 
