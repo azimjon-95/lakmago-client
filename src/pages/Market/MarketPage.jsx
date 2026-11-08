@@ -83,6 +83,8 @@ export function MarketPage() {
   const { closedInfo, showClosed, hideClosed } = useClosedAlert();
 
   const { data: meta } = useMarketCategories();
+  // Market kategoriyalari — markaziy ro'yxat (server, admin boshqaradi). Server hali yangilanmagan bo'lsa — zaxira ro'yxat.
+  const catItems = useMemo(() => (meta?.catalogCategories?.length ? meta.catalogCategories : MARKET_HOME_CATEGORIES), [meta]);
   // Market bannerlari — admin "Bannerlar"da joylashuvni "Lokma Market" qiladi
   const { data: banners = [] } = useMarketBanners(allowed);
   const { data: stores = [], isLoading: storesLoading, isError: storesError, refetch } = useMarketStores(allowed);
@@ -196,7 +198,7 @@ export function MarketPage() {
         bosilganda eski server `catalogCategory` ni tushunmay, hamma mahsulotni ko'rsatardi. Server yangilangach o'zi paydo bo'ladi.
       */}
       {available && (
-        <MarketCategories value={category} onChange={setCategory} available={available} lang={lang}
+        <MarketCategories items={catItems} value={category} onChange={setCategory} available={available} lang={lang}
           allLabel={t('all')} moreLabel={t('marketOtherCats')} sheetTitle={t('marketAllCats')} closeLabel={t('close')} ariaLabel={t('marketCategories')} />
       )}
 
@@ -211,7 +213,7 @@ export function MarketPage() {
           {available && category !== 'all' && (
             <section className="market-catprods" data-testid="market-catprods">
               <h2 className="home-restaurants-title">
-                {homeCatLabel(MARKET_HOME_CATEGORIES.find((c) => c.key === category), lang)}
+                {homeCatLabel(catItems.find((c) => c.key === category), lang)}
                 {catProducts.length > 0 && <span className="market-catprods__count"> {catProducts.length}{catQ.hasNextPage ? '+' : ''}</span>}
               </h2>
               {catQ.isLoading ? (
@@ -234,7 +236,7 @@ export function MarketPage() {
                 </>
               ) : (
                 <div className="market-catempty" data-testid="market-catempty">
-                  <div className="market-catempty__art" aria-hidden="true">{MARKET_HOME_CATEGORIES.find((c) => c.key === category)?.emoji || '🛒'}</div>
+                  <div className="market-catempty__art" aria-hidden="true">{catItems.find((c) => c.key === category)?.emoji || '🛒'}</div>
                   <p>{t('marketCategoryEmpty')}</p>
                 </div>
               )}
