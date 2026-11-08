@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Icon } from '../Icon';
 import { useCart } from '@/store/cart';
@@ -23,9 +23,35 @@ const tabs = [
  * --bottom-nav-h = menyu egallagan balandlik XAVFSIZ ZONASIZ (iste'molchilar unga `+ var(--tg-bottom-offset)` qo'shadi):
  * 6 (tepa) + 58 (kapsula) + max(10, zona + 2) (past) − zona.  Zona 20 px → 66 px; zona 0 → 74 px.
  */
-export const BOTTOM_NAV_H = 'calc(6px + 58px + max(10px, calc(var(--tg-bottom-offset, 0px) + 2px)) - var(--tg-bottom-offset, 0px))';
+// Pastki oraliq: 10px + zona × 0.35 (iOS home indikatoriga qarab; Android'da zona 0 → 10px). Savat paneli shu bilan hisoblanadi:
+// balandlik (6 + 58 + oraliq) − zona  →  CSS: 74px − zona × 0.65 ; consumer'lar `+ zona` qo'shadi.
+export const BOTTOM_NAV_H = 'calc(74px - var(--tg-bottom-offset, 0px) * 0.65)';
+// Scroll: pastga — kapsula kichrayadi, yuqoriga — o'z holiga qaytadi (Instagram kabi)
+const COMPACT_AFTER = 72;   // px: shundan pastroqda ixchamlashadi
+const MIN_DELTA = 3;        // px: kichik siljishlarga javob bermaydi (titrashni oldini oladi)
 
 export function BottomNav() {
+  const [compact, setCompact] = useState(false);
+  useEffect(() => {
+    const last = new WeakMap();
+    last.set(document, window.scrollY || document.documentElement.scrollTop || 0);   // boshlang'ich pozitsiya (birinchi scroll uchun)
+    const isDoc = (t) => t === document || t === window || t === document.documentElement || t === document.body;
+    const onScroll = (e) => {
+      const t = e.target;
+      const y = isDoc(t) ? (window.scrollY || document.documentElement.scrollTop || 0) : (t.scrollTop || 0);
+      const key = isDoc(t) ? document : t;
+      const prev = last.has(key) ? last.get(key) : y;
+      last.set(key, y);
+      const dy = y - prev;
+      if (Math.abs(dy) < MIN_DELTA && y > 8) return;
+      const want = y <= 8 ? false : dy > 0 && y > COMPACT_AFTER ? true : dy < 0 ? false : null;
+      if (want === null) return;
+      setCompact((c) => (c === want ? c : want));
+    };
+    document.addEventListener('scroll', onScroll, { capture: true, passive: true });
+    return () => document.removeEventListener('scroll', onScroll, { capture: true });
+  }, []);
+
   // Pastki menyu bor-yo'qligini bildiramiz. Savat paneli shu qiymatga
   // tayanadi — menyusiz sahifada (restoran, savat) pastga tushadi.
   useEffect(() => {
@@ -47,7 +73,7 @@ export function BottomNav() {
   const activeIndex = tabs.findIndex((tab) => pathname === targetOf(tab));
 
   return (
-    <nav className="bottom-nav" aria-label="Lokma">
+    <nav className={`bottom-nav ${compact ? 'bottom-nav--compact' : ''}`} aria-label="Lokma">
       <div className="fnav" style={{ '--fn-i': Math.max(activeIndex, 0), '--fn-n': tabs.length }} data-active={activeIndex >= 0 ? 'true' : 'false'} data-testid="floating-nav">
         <span className="fnav__pill" aria-hidden="true" />
         {tabs.map((tab, i) => {

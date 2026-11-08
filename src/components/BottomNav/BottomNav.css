@@ -12,10 +12,26 @@
   position: sticky;
   bottom: 0;
   z-index: 20;
-  padding: 6px 20px max(10px, calc(var(--tg-bottom-offset, 0px) + 2px));
+  /* Pastki oraliq: zonaning 35% + 10px — iOS'da Instagram kabi (~22pt), Android'da 10px */
+  padding: 6px 20px calc(10px + var(--tg-bottom-offset, 0px) * 0.35);
   pointer-events: none;
 }
-.bottom-nav .fnav { pointer-events: auto; }
+.bottom-nav .fnav {
+  pointer-events: auto;
+  transition: height 320ms cubic-bezier(0.22, 1, 0.36, 1), max-width 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.bottom-nav .fnav__tab svg, .bottom-nav .fnav__photo {
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), width 320ms, height 320ms;
+}
+
+/* Pastga scroll — ixchamlashgan kapsula (Instagram kabi): balandlik, kenglik va ikonkalar kichrayadi */
+.bottom-nav--compact .fnav { height: 46px; max-width: 292px; }
+.bottom-nav--compact .fnav__tab svg { transform: scale(0.84); }
+.bottom-nav--compact .fnav__photo { width: 22px; height: 22px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bottom-nav .fnav, .bottom-nav .fnav__tab svg, .bottom-nav .fnav__photo { transition: none; }
+}
 
 /* Bo'lim ranglari: Lokma Go (to'q sariq) — standart; Market — yashil */
 :root[data-section='market'] .bottom-nav .fnav {
