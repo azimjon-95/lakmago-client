@@ -41,7 +41,7 @@ try {
   const px = (re, s = css) => Number((re.exec(s) || [])[1]);
   check('Instagram uslubi: kapsula 58 px, to‘liq yumaloq, shisha (blur 22px), max-kenglik 420 px', px(/--fn-h:\s*(\d+)px/) === 58 && css.includes('border-radius: 999px') && css.includes('backdrop-filter: blur(22px)') && px(/max-width:\s*(\d+)px/) === 420);
   check('faol "pill" silliq suriladi (transform + 360 ms), harakat kamaytirilsa animatsiyasiz', css.includes('translateX(calc(var(--fn-i, 0) * 100%))') && css.includes('transform 360ms') && css.includes('prefers-reduced-motion'));
-  check("pastki oraliq: 10px + zona × 0.35 (iOS'da Instagram kabi, Android'da 10px)", nav.includes('padding: 6px 20px calc(10px + var(--tg-bottom-offset, 0px) * 0.35);'));
+  check("pastki oraliq: --nav-gap = 10px + zona × 0.35 (iOS'da Instagram kabi, Android'da 10px); menyu balandligi qat'iy", nav.includes('--nav-gap: calc(10px + var(--tg-bottom-offset, 0px) * 0.35)') && nav.includes('padding: 0 20px var(--nav-gap);') && nav.includes('height: var(--cap-h);'));
   const cssVal = 'calc(74px - var(--tg-bottom-offset, 0px) * 0.65)';
   check("--bottom-nav-h izchil: 74px − zona × 0.65 (consumer + zona = 74 + 0.35×zona)", BOTTOM_NAV_H === cssVal);
   check('rang faqat 2 o‘zgaruvchida; Market yashil, Go to‘q sariq (brend)', css.includes('--fn-accent: #FF5C00') && /data-section='market'\] \.bottom-nav \.fnav\s*\{[^}]*#148A43/.test(nav));

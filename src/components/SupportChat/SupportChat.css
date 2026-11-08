@@ -6,10 +6,12 @@
   right: calc(14px + env(safe-area-inset-right, 0px));
   /* Savat paneli (fixed) + pastki menyu USTIDA — to'qnashmaydi.
      --cart-bar-offset: savat bo'lganda JS/CSS orqali oshiriladi. */
-  bottom: calc(var(--bottom-nav-h, 0px) + 16px + var(--cart-bar-offset, 0px) + var(--tg-bottom-offset, 0px));
+  /* Kapsula (menyu yoki savat) ustida — --nav-top va --cart-bar-offset bilan birga siljiydi */
+  bottom: calc(var(--nav-top, 68px) + 12px + var(--cart-bar-offset, 0px));
+  transition: bottom 320ms cubic-bezier(0.22, 1, 0.36, 1), width 320ms cubic-bezier(0.22, 1, 0.36, 1), height 320ms cubic-bezier(0.22, 1, 0.36, 1);
   z-index: 46;
   width: 56px; height: 56px;
-  transition: bottom 0.25s var(--ease), transform 0.15s ease;
+  transition: bottom 320ms cubic-bezier(0.22, 1, 0.36, 1), width 320ms cubic-bezier(0.22, 1, 0.36, 1), height 320ms cubic-bezier(0.22, 1, 0.36, 1), transform 0.15s ease;
   border-radius: 50%;
   background: var(--brand);   /* rasm yuklanguncha shu rang (rasm ham to'q sariq — sakrash bo'lmaydi) */
   display: flex; align-items: center; justify-content: center;
@@ -224,3 +226,7 @@
 :root[data-section='market'] .sc-mini__title { color: #0F2E1D; }
 :root[data-section='market'] .sc-x { color: #145C35; }
 :root[data-section='market'] .support-fab__ring { border-color: rgba(20, 138, 67, 0.45); }
+
+/* Pastga scroll: operator tugmasi ham menyu bilan birga kichrayadi (56 → 46 px) */
+html.is-compact .support-fab { width: 46px; height: 46px; }
+@media (prefers-reduced-motion: reduce) { .support-fab { transition: none !important; } }
