@@ -83,14 +83,15 @@ export function MarketPage() {
   const { closedInfo, showClosed, hideClosed } = useClosedAlert();
 
   const { data: meta } = useMarketCategories();
-  // Market kategoriyalari — markaziy ro'yxat (server, admin boshqaradi). Server hali yangilanmagan bo'lsa — zaxira ro'yxat.
-  const catItems = useMemo(() => (meta?.catalogCategories?.length ? meta.catalogCategories : MARKET_HOME_CATEGORIES), [meta]);
+  // Market kategoriyalari — admin paneldagi ro'yxat (server). Yuklanguncha — zaxira; yuklangach faqat server ro'yxati.
+  const catItems = useMemo(() => (meta ? (meta.catalogCategories || []) : MARKET_HOME_CATEGORIES), [meta]);
   // Market bannerlari — admin "Bannerlar"da joylashuvni "Lokma Market" qiladi
   const { data: banners = [] } = useMarketBanners(allowed);
   const { data: stores = [], isLoading: storesLoading, isError: storesError, refetch } = useMarketStores(allowed);
   // `category` — katalog kaliti ('all' yoki 'choy', 'konfetlar'...): Do'konlar, chegirmalar va mahsulotlar shu bo'yicha
   const discQ = useMarketProducts({ discounted: true, catalogCategory: category, enabled: allowed });
-  const catQ = useMarketProducts({ catalogCategory: category, enabled: allowed && category !== 'all' });
+  // Mahsulotlar: 'Barchasi' → hammasi; kategoriya → faqat shu kalitdagilar
+  const catQ = useMarketProducts({ catalogCategory: category === 'all' ? undefined : category, enabled: allowed });
 
   /*
    * Mahsuloti BOR kategoriya kalitlari (do'konlar `productCatalogCategories` beradi). Mahsuloti yo'q kategoriyalar qatorda xira
@@ -197,7 +198,7 @@ export function MarketPage() {
         Server hali yangilanmagan bo'lsa (do'konlarda productCatalogCategories yo'q) qator KO'RSATILMAYDI: aks holda kategoriya
         bosilganda eski server `catalogCategory` ni tushunmay, hamma mahsulotni ko'rsatardi. Server yangilangach o'zi paydo bo'ladi.
       */}
-      {available && (
+      {catItems.length > 0 && (
         <MarketCategories items={catItems} value={category} onChange={setCategory} available={available} lang={lang}
           allLabel={t('all')} moreLabel={t('marketOtherCats')} sheetTitle={t('marketAllCats')} closeLabel={t('close')} ariaLabel={t('marketCategories')} />
       )}
@@ -210,17 +211,18 @@ export function MarketPage() {
       ) : (
         <>
           {/* Tanlangan kategoriya: shu kategoriyadagi mahsulotlar (barcha do'konlardan) */}
-          {available && category !== 'all' && (
+          {(
             <section className="market-catprods" data-testid="market-catprods">
               {/* Kategoriya sarlavhasi: karta rasmi (yumaloq), nom, tavsif — ekran kengligiga moslashadi */}
               {(() => {
                 const cat = catItems.find((c) => c.key === category);
+                const title = category === 'all' ? t('all') : homeCatLabel(cat, lang);
                 return (
                   <div className="market-cathead" data-testid="market-cathead">
                     {cat?.cardUrl && <img className="market-cathead__img" src={cat.cardUrl} alt="" loading="lazy" decoding="async" />}
                     <div className="market-cathead__txt">
                       <h2 className="home-restaurants-title">
-                        {homeCatLabel(cat, lang)}
+                        {title}
                         {catProducts.length > 0 && <span className="market-catprods__count"> {catProducts.length}{catQ.hasNextPage ? '+' : ''}</span>}
                       </h2>
                       {cat?.description && <p className="market-cathead__desc">{cat.description}</p>}
@@ -249,7 +251,7 @@ export function MarketPage() {
               ) : (
                 <div className="market-catempty" data-testid="market-catempty">
                   <div className="market-catempty__art" aria-hidden="true">{catItems.find((c) => c.key === category)?.emoji || '🛒'}</div>
-                  <p>{t('marketCategoryEmpty')}</p>
+                  <p>{category === 'all' ? t('noProducts') : t('marketCategoryEmpty')}</p>
                 </div>
               )}
             </section>

@@ -66,7 +66,7 @@ try {
   // MarketPage ulanishi
   const page = readFileSync('src/pages/Market/MarketPage.jsx', 'utf8');
   check('MarketPage: yangi qator, do‘konlar va mahsulotlar aniq katalog kaliti bo‘yicha', page.includes('<MarketCategories items={catItems} value={category}') && page.includes('productCatalogCategories') && page.includes('catalogCategory: category'));
-  check("MarketPage: eski server (productCatalogCategories yo'q) — qator va mahsulotlar bo'limi KO'RSATILMAYDI, do'konlar filtrlanmaydi", page.includes('{available && (\n        <MarketCategories items={catItems}') && page.includes("{available && category !== 'all' && (") && page.includes('!Array.isArray(s.productCatalogCategories) ||'));
+  check("MarketPage: qator admin ro'yxatidan (catItems.length); mahsulotlar bo'limi HAR DOIM (Barchasi ham); do'konlar filtri saqlanadi", page.includes('{catItems.length > 0 && (\n        <MarketCategories items={catItems}') && page.includes('catalogCategory: category === \'all\' ? undefined : category') && page.includes('!Array.isArray(s.productCatalogCategories) ||'));
   check('MarketPage: tanlangan kategoriya mahsulotlari + bo‘sh holat + «yana ko‘rsatish»', page.includes('data-testid="market-catprods"') && page.includes('market-catempty') && page.includes("t('marketShowMore')"));
   // API: HAQIQIY chaqiruv (fetch ushlanadi) — parametr to'g'ri funksiyada va boshqa funksiyalar (bosh sahifa lentasi) BUZILMAGAN
   const { api } = await server.ssrLoadModule('/src/api/index.js');
