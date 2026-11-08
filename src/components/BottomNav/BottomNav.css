@@ -7,27 +7,33 @@
  * Pastdan: max(10, xavfsiz zona + 2) px — Instagramdagidek (iPhone'da kapsula home-chiziqdan ~12 px yuqorida, ekran chetidan ≈22 px).
  * Balandlik: 6 + 58 + pastki oraliq (BottomNav.jsx --bottom-nav-h shuni xavfsiz zonasiz beradi; savat paneli va tugmalar tayanadi).
  */
+/* Kapsula balandligi (oddiy 58, pastga scroll → 46) — <html class="is-compact"> boshqaradi.
+   --nav-gap: pastki oraliq (10px + zona × 0.35) · --nav-top: kapsulaning ekran pastidan tepagacha masofasi */
+:root { --cap-h: 58px; --nav-gap: calc(10px + var(--tg-bottom-offset, 0px) * 0.35); --nav-top: calc(var(--nav-gap) + var(--cap-h)); }
+html.is-compact { --cap-h: 46px; }
+
 .bottom-nav {
   margin-top: auto;
   position: sticky;
   bottom: 0;
   z-index: 20;
-  /* Pastki oraliq: zonaning 35% + 10px — iOS'da Instagram kabi (~22pt), Android'da 10px */
-  padding: 6px 20px calc(10px + var(--tg-bottom-offset, 0px) * 0.35);
+  /* Balandlik qat'iy: kapsula ixchamlashganda kontent siljimaydi (kapsula pastga yopishgan) */
+  height: calc(6px + 58px + var(--nav-gap));
+  display: flex; align-items: flex-end;
+  padding: 0 20px var(--nav-gap);
   pointer-events: none;
 }
 .bottom-nav .fnav {
   pointer-events: auto;
+  height: var(--cap-h);
+  max-width: 420px;
   transition: height 320ms cubic-bezier(0.22, 1, 0.36, 1), max-width 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .bottom-nav .fnav__tab svg, .bottom-nav .fnav__photo {
   transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), width 320ms, height 320ms;
 }
-
-/* Pastga scroll — ixchamlashgan kapsula (Instagram kabi): balandlik, kenglik va ikonkalar kichrayadi */
-.bottom-nav--compact .fnav { height: 46px; max-width: 292px; }
-.bottom-nav--compact .fnav__tab svg { transform: scale(0.84); }
-.bottom-nav--compact .fnav__photo { width: 22px; height: 22px; }
+html.is-compact .bottom-nav .fnav__tab svg { transform: scale(0.84); }
+html.is-compact .bottom-nav .fnav__photo { width: 22px; height: 22px; }
 
 @media (prefers-reduced-motion: reduce) {
   .bottom-nav .fnav, .bottom-nav .fnav__tab svg, .bottom-nav .fnav__photo { transition: none; }

@@ -36,7 +36,7 @@ try {
   const cart = readFileSync('src/components/CartBar.jsx', 'utf8');
   check("savat paneli: bitta dizayn barcha bo'limlarda (variant yo'q), ichki tuzilma: belgi+son, ajratgich, summa, strelka", cart.includes('export function CartBar()') && !cart.includes("variant === 'market'") && cart.includes('cart-bar__badge') && cart.includes('cart-bar__div') && cart.includes('className="cart-bar"'));
   const cbCss = readFileSync('src/components/cards/CartBar.css', 'utf8');
-  check("savat paneli rangi bo'limga qarab: Market yashil #148A43, Go — brend (to'q sariq); balandlik 46 px (hammasi bir xil)", cbCss.includes(':root[data-section=\'market\'] .cart-bar-wrap') && cbCss.includes('#148A43') && /\.cart-bar \{[^}]*height: 46px/.test(cbCss) && !cbCss.includes('cart-bar--market'));
+  check("savat paneli rangi bo'limga qarab: Market yashil #148A43, Go — brend (to'q sariq); balandlik --cap-h (58 px, scroll'da 46 px — hammasi bir xil)", cbCss.includes(':root[data-section=\'market\'] .cart-bar-wrap') && cbCss.includes('#148A43') && /\.cart-bar \{[^}]*height: var\(--cap-h, 58px\)/.test(cbCss) && !cbCss.includes('cart-bar--market'));
   const page = readFileSync('src/pages/Market/MarketPage.jsx', 'utf8');
   const order = ['<MarketHero />', '<MarketCategories', 'market-stores-head', '<HomeSections', '<MarketStoreCard', '<CartBar />'].map((x) => page.indexOf(x));
   check('sahifa tartibi maketdagidek: banner → kategoriyalar → Do‘konlar + Sizga yaqin → bo‘lim kartalari → do‘konlar → savat', order.every((i, n) => i > 0 && (n === 0 || i > order[n - 1])), JSON.stringify(order));
