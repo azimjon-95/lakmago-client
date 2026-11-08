@@ -329,8 +329,8 @@ export const api = {
     if (discounted === true) params.set('discounted', '1');
     else if (discounted === false) params.set('discounted', '0');
     if (category && category !== 'all') params.set('category', category);
-    // Market bosh sahifasi: aniq katalog kaliti (choy, konfetlar, souslar...) — server: ?catalogCategory=
-    if (catalogCategory && catalogCategory !== 'all') params.set('catalogCategory', catalogCategory);
+    // Market kategoriyasi (katalog kaliti: choy, konfetlar, sut_mahsulotlari...) — server `category` parametri bo'yicha qidiradi
+    if (catalogCategory && catalogCategory !== 'all') params.set('category', catalogCategory);
     if (cursor) params.set('cursor', cursor);
     if (fair) params.set('fair', '1');
     if (fair && Number.isInteger(seed) && !cursor) params.set('seed', String(seed));
