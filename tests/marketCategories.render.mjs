@@ -80,12 +80,12 @@ try {
     await api.getDishesFeed({ category: 'milliy', fair: true, seed: 5 });      // bosh sahifa lentasi — catalogCategory'siz ishlashi SHART
   } catch (e) { threw = e; }
   check("API: getMarketProducts va getDishesFeed xatosiz ishlaydi (ReferenceError yo'q)", threw === null, String(threw));
-  check('API: ?catalogCategory=konfetlar yuboriladi; "all" yuborilmaydi; eski ?category= o\'zgarmagan', urls[0]?.includes('/market/products') && urls[0].includes('catalogCategory=konfetlar') && !urls[1].includes('catalogCategory') && urls[2].includes('category=sut') && urls[2].includes('discounted=1'), urls.slice(0, 3).join(' | '));
+  check('API: kategoriya ?category=konfetlar bilan yuboriladi; "all" yuborilmaydi; eski ?category=sut o\'zgarmagan', urls[0]?.includes('/market/products') && urls[0].includes('category=konfetlar') && !urls[1].includes('category=') && urls[2].includes('category=sut') && urls[2].includes('discounted=1'), urls.slice(0, 3).join(' | '));
   check('API: bosh sahifa lentasiga catalogCategory QO\'SHILMAGAN', urls[3]?.includes('/dishes') && !urls[3].includes('catalogCategory'), urls[3]);
   const apiSrc = readFileSync('src/api/index.js', 'utf8');
   const feedFn = apiSrc.slice(apiSrc.indexOf('getDishesFeed:'), apiSrc.indexOf('getMarketCategories:'));
   const marketFn = apiSrc.slice(apiSrc.indexOf('getMarketProducts:'), apiSrc.indexOf('// ===== Auth ====='));
-  check('catalogCategory faqat getMarketProducts ichida (bosh sahifa lentasida YO\'Q)', !feedFn.includes('catalogCategory') && marketFn.includes("params.set('catalogCategory', catalogCategory)"));
+  check("kategoriya faqat getMarketProducts ichida (bosh sahifa lentasida YO'Q)", !feedFn.includes('catalogCategory') && marketFn.includes("params.set('category', catalogCategory)"));
 
   // Tarjimalar
   const { translations: T } = await server.ssrLoadModule('/src/i18n/translations.js');
