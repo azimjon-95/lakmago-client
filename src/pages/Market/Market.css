@@ -154,3 +154,23 @@
 .market-catempty { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 22px 24px 26px; text-align: center; color: var(--muted); }
 .market-catempty__art { width: 72px; height: 72px; border-radius: 50%; background: var(--market-tint, #e8f5e9); display: flex; align-items: center; justify-content: center; font-size: 34px; }
 .market-catempty p { margin: 0; font-size: 14px; line-height: 1.4; }
+
+/* Kategoriya sarlavhasi: karta rasmi + nom + tavsif (moslashuvchan: tor ekranda rasm kichrayadi) */
+.market-cathead {
+  display: flex; align-items: center; gap: clamp(10px, 3vw, 16px);
+  margin: 4px 0 10px; padding: 12px 14px; border-radius: 18px;
+  background: linear-gradient(135deg, #F4FBF6 0%, #E9F6ED 100%);
+  box-shadow: inset 0 0 0 1px #D3EBDB;
+}
+.market-cathead__img {
+  flex: none; width: clamp(56px, 17vw, 84px); height: clamp(56px, 17vw, 84px);
+  border-radius: 50%; object-fit: cover; box-shadow: 0 6px 14px rgba(20, 110, 50, 0.18);
+}
+.market-cathead__txt { flex: 1; min-width: 0; }
+.market-cathead__txt .home-restaurants-title { margin: 0; overflow-wrap: anywhere; }
+.market-cathead__desc {
+  margin: 4px 0 0; font-size: clamp(12px, 3.2vw, 14px); line-height: 1.4; color: #4D6B58;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+@media (max-width: 340px) { .market-cathead { padding: 10px; } }
+
