@@ -15,7 +15,7 @@
   /* Yon "notch" (yotiq iPhone) hisobga olinadi */
   padding-left: calc(20px + env(safe-area-inset-left, 0px));
   padding-right: calc(20px + env(safe-area-inset-right, 0px));
-  background: linear-gradient(to top, var(--surface) 72%, transparent);
+  background: none;   /* oq fon yo'q — faqat kapsula ko'rinadi */
   z-index: 30;
   pointer-events: none;
 }
