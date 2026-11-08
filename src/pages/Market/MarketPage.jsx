@@ -212,10 +212,22 @@ export function MarketPage() {
           {/* Tanlangan kategoriya: shu kategoriyadagi mahsulotlar (barcha do'konlardan) */}
           {available && category !== 'all' && (
             <section className="market-catprods" data-testid="market-catprods">
-              <h2 className="home-restaurants-title">
-                {homeCatLabel(catItems.find((c) => c.key === category), lang)}
-                {catProducts.length > 0 && <span className="market-catprods__count"> {catProducts.length}{catQ.hasNextPage ? '+' : ''}</span>}
-              </h2>
+              {/* Kategoriya sarlavhasi: karta rasmi (yumaloq), nom, tavsif — ekran kengligiga moslashadi */}
+              {(() => {
+                const cat = catItems.find((c) => c.key === category);
+                return (
+                  <div className="market-cathead" data-testid="market-cathead">
+                    {cat?.cardUrl && <img className="market-cathead__img" src={cat.cardUrl} alt="" loading="lazy" decoding="async" />}
+                    <div className="market-cathead__txt">
+                      <h2 className="home-restaurants-title">
+                        {homeCatLabel(cat, lang)}
+                        {catProducts.length > 0 && <span className="market-catprods__count"> {catProducts.length}{catQ.hasNextPage ? '+' : ''}</span>}
+                      </h2>
+                      {cat?.description && <p className="market-cathead__desc">{cat.description}</p>}
+                    </div>
+                  </div>
+                );
+              })()}
               {catQ.isLoading ? (
                 <div className="market-grid">{Array.from({ length: 4 }).map((_, i) => <RestaurantCardSkeleton key={i} />)}</div>
               ) : catQ.isError ? (
