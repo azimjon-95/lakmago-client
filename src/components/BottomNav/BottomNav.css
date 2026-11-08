@@ -9,8 +9,9 @@
  */
 /* Kapsula balandligi (oddiy 58, pastga scroll → 46) — <html class="is-compact"> boshqaradi.
    --nav-gap: pastki oraliq (10px + zona × 0.35) · --nav-top: kapsulaning ekran pastidan tepagacha masofasi */
-:root { --cap-h: 58px; --nav-gap: calc(10px + var(--tg-bottom-offset, 0px) * 0.35); --nav-top: calc(var(--nav-gap) + var(--cap-h)); }
-html.is-compact { --cap-h: 46px; }
+:root { --cap-h: 58px; --cart-h: 50px; --bar-max: 420px; --nav-gap: calc(10px + var(--tg-bottom-offset, 0px) * 0.35); --nav-top: calc(var(--nav-gap) + var(--cap-h)); }
+/* Pastga scroll: menyu va savat qisqaradi/ingichkalashadi (umumiy --bar-max, --cap-h, --cart-h) */
+html.is-compact { --cap-h: 46px; --cart-h: 40px; --bar-max: 300px; }
 
 .bottom-nav {
   margin-top: auto;
@@ -26,8 +27,8 @@ html.is-compact { --cap-h: 46px; }
 .bottom-nav .fnav {
   pointer-events: auto;
   height: var(--cap-h);
-  max-width: 420px;
-  transition: height 320ms cubic-bezier(0.22, 1, 0.36, 1), max-width 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  max-width: var(--bar-max);
+  transition: height 380ms cubic-bezier(0.22, 1, 0.36, 1), max-width 380ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .bottom-nav .fnav__tab svg, .bottom-nav .fnav__photo {
   transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), width 320ms, height 320ms;

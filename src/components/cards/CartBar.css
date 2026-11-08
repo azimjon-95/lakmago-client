@@ -24,17 +24,24 @@
 .cart-bar {
   position: relative;
   width: 100%;
-  max-width: 420px;
+  max-width: var(--bar-max, 420px);
   margin: 0 auto;
-  height: var(--cap-h, 58px);
-  transition: height 320ms cubic-bezier(0.22, 1, 0.36, 1), padding 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  height: var(--cart-h, 50px);
+  transition: height 380ms cubic-bezier(0.22, 1, 0.36, 1), max-width 380ms cubic-bezier(0.22, 1, 0.36, 1), padding 380ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 380ms cubic-bezier(0.22, 1, 0.36, 1);
   display: flex; align-items: center; gap: 10px;
   padding: 0 14px 0 12px;
   border: 0;
   border-radius: 999px;
-  background: var(--cb-soft);
+  /* 3D: yuqoridan yorug', pastga to'qroq gradient; tugma atrofida bir tekis soya (4 qatlam) */
+  background: linear-gradient(180deg, color-mix(in srgb, #fff 55%, var(--cb-soft)) 0%, var(--cb-soft) 58%, color-mix(in srgb, var(--cb-soft) 84%, #000) 100%);
   color: #101418;
-  box-shadow: 0 0 0 3px #fff, 0 8px 18px rgba(16, 24, 40, 0.16);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.9),
+    0 0 0 4px color-mix(in srgb, var(--cb-accent) 10%, transparent),
+    0 6px 16px -4px color-mix(in srgb, var(--cb-accent) 30%, transparent),
+    0 14px 30px -10px rgba(16, 24, 40, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.07);
   font-weight: 600;
   -webkit-tap-highlight-color: transparent;
   transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -84,9 +91,9 @@
 .cart-bar-spacer { height: 66px; flex: none; }
 
 /* Ixchamlashgan (pastga scroll): savat ham pastki menyu bilan birga kichrayadi */
-html.is-compact .cart-bar { padding: 0 12px 0 10px; }
-html.is-compact .cart-bar__label { font-size: 13px; }
-html.is-compact .cart-bar__total { font-size: 13px; }
+html.is-compact .cart-bar { padding: 0 11px 0 10px; gap: 8px; box-shadow: 0 0 0 1px rgba(255,255,255,0.9), 0 0 0 3px color-mix(in srgb, var(--cb-accent) 9%, transparent), 0 4px 12px -4px color-mix(in srgb, var(--cb-accent) 28%, transparent), 0 10px 22px -8px rgba(16,24,40,0.28), inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -2px 3px rgba(0,0,0,0.06); }
+html.is-compact .cart-bar__label { font-size: 12.5px; }
+html.is-compact .cart-bar__total { font-size: 12.5px; }
 html.is-compact .cart-bar__ic svg { transform: scale(0.9); }
 .cart-bar__ic svg, .cart-bar__label, .cart-bar__total { transition: transform 320ms, font-size 320ms; }
 @media (prefers-reduced-motion: reduce) { .cart-bar, .cart-bar__ic svg, .cart-bar__label, .cart-bar__total { transition: none; } }

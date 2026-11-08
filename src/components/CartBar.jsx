@@ -26,7 +26,7 @@ export function CartBar() {
   // MUHIM: hook har doim chaqiriladi (early return'dan oldin) — Rules of Hooks.
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty('--cart-bar-offset', visible ? 'calc(var(--cap-h, 58px) + 8px)' : '0px');
+    root.style.setProperty('--cart-bar-offset', visible ? 'calc(var(--cart-h, 50px) + 8px)' : '0px');
     return () => root.style.setProperty('--cart-bar-offset', '0px');
   }, [visible]);
 
