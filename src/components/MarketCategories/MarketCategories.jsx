@@ -13,21 +13,21 @@ import './MarketCategories.css';
  * `available` (Set | null): mahsuloti bor kalitlar; yo'qlari xira (bosish mumkin).
  */
 export function MarketCategories({
-  value, onChange, available = null, lang = 'uz', visible = 4,
+  items = MARKET_HOME_CATEGORIES, value, onChange, available = null, lang = 'uz', visible = 4,
   allLabel = 'Barchasi', moreLabel = 'Boshqa kategoriyalar', sheetTitle = 'Barcha kategoriyalar', ariaLabel = '', closeLabel = 'Yopish',
 }) {
   const [open, setOpen] = useState(false);
 
   const row = useMemo(() => {
     const has = (c) => (available ? available.has(c.key) : true);
-    const ordered = [...MARKET_HOME_CATEGORIES.filter(has), ...MARKET_HOME_CATEGORIES.filter((c) => !has(c))];
+    const ordered = [...items.filter(has), ...items.filter((c) => !has(c))];
     let first = ordered.slice(0, visible);
     if (value !== 'all' && !first.some((c) => c.key === value)) {
-      const sel = MARKET_HOME_CATEGORIES.find((c) => c.key === value);
+      const sel = items.find((c) => c.key === value);
       if (sel) first = [sel, ...first.slice(0, visible - 1)];
     }
     return first;
-  }, [available, value, visible]);
+  }, [items, available, value, visible]);
 
   const pick = (key) => { onChange(key); setOpen(false); };
   const dim = (key) => Boolean(available) && !available.has(key);
@@ -53,7 +53,7 @@ export function MarketCategories({
             <span className="mcat__art"><Icon name="layoutGrid" size={26} strokeWidth={2.2} /></span>
             <span className="mcat__label">{allLabel}</span>
           </button>
-          {MARKET_HOME_CATEGORIES.map((c) => (
+          {items.map((c) => (
             <CatTile key={c.key} c={c} lang={lang} large active={value === c.key} dim={dim(c.key)} onClick={() => pick(c.key)} />
           ))}
         </CategorySheet>
@@ -63,7 +63,8 @@ export function MarketCategories({
 }
 
 function CatTile({ c, lang, active, dim, large = false, onClick }) {
-  const img = catImage(c.key);
+  // Rasm: server (admin yuklagan https havola) ustun; bo'lmasa bo'lim papkasidagi rasm (kalit bo'yicha); bo'lmasa emoji
+  const img = c.imageUrl || catImage(c.key);
   return (
     <button type="button" aria-pressed={active} data-testid={`mcat-${c.key}`} onClick={onClick}
       className={`mcat ${large ? 'mcat--lg' : ''} ${active ? 'is-active' : ''} ${dim ? 'is-empty' : ''}`}>
