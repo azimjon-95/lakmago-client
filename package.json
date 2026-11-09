@@ -17,7 +17,8 @@
     "test:marketcats": "node tests/marketCategories.render.mjs",
     "test:marketsort": "node --test tests/marketSort.test.mjs",
     "test:market-redesign": "node tests/marketRedesign.render.mjs",
-    "test:floating-nav": "node tests/floatingNav.render.mjs"
+    "test:floating-nav": "node tests/floatingNav.render.mjs",
+    "test:backroute": "node --test tests/backRoute.test.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",

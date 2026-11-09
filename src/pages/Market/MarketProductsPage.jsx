@@ -1,3 +1,4 @@
+import { useBack } from '@/hooks/useBack';
 import { useMemo, useState, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useInfiniteQuery } from '@tanstack/react-query';
@@ -16,6 +17,7 @@ const flat = (q) => (q.data?.pages || []).flatMap((p) => p?.items || []);
 /* Barcha mahsulotlar — alohida sahifa (Market'dagi "Barchasi" tugmasi shu yerga olib keladi) */
 export function MarketProductsPage() {
   const navigate = useNavigate();
+  const goBack = useBack();
   const { t } = useI18n();
   const [params] = useSearchParams();
   const catalogCategory = params.get('category') || undefined;
@@ -36,7 +38,7 @@ export function MarketProductsPage() {
   return (
     <div className="app-shell market-products-page">
       <header className="mpp-head">
-        <button type="button" className="mpp-back" onClick={() => navigate(-1)} aria-label={t('back')}>
+        <button type="button" className="mpp-back" onClick={goBack} aria-label={t('back')}>
           <span aria-hidden="true">‹</span>
         </button>
         <h1 className="mpp-title">{t('all')}</h1>

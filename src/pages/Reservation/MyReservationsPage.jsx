@@ -1,3 +1,4 @@
+import { useBack } from '@/hooks/useBack';
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
@@ -22,6 +23,7 @@ const STATUS_KEYS = {
 export function MyReservationsPage() {
   const t = useT();
   const navigate = useNavigate();
+  const goBack = useBack();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
@@ -54,7 +56,7 @@ export function MyReservationsPage() {
   return (
     <div className="app-shell">
       <header className="myresv-header">
-        <button onClick={() => navigate(-1)} aria-label={t('back')} className="myresv-header__btn">
+        <button onClick={goBack} aria-label={t('back')} className="myresv-header__btn">
           <Icon name="arrowLeft" size={22} color="var(--ink)" />
         </button>
         <h1 className="myresv-header__title">{t('myReservations')}</h1>

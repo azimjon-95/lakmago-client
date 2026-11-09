@@ -1,3 +1,6 @@
+import { useBack } from '@/hooks/useBack';
+import { useSyncSection } from '@/hooks/useSyncSection';
+import { isStoreRestaurant } from '@/lib/storeKind';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
@@ -23,11 +26,14 @@ import './Food.css';
 export function FoodPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const goBack = useBack();
   const addItem = useCart((s) => s.addItem);
   const t = useT();
 
   const [dish, setDish] = useState(null);
   const [restaurant, setRestaurant] = useState(null);
+  // Do'kon taomi bo'lsa — Lokma Market bo'limi (ranglar, pastki menyu, "Назад"); ma'lumot kelguncha tegilmaydi
+  useSyncSection(restaurant ? isStoreRestaurant(restaurant) : undefined);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -144,7 +150,7 @@ export function FoodPage() {
       <div className="food-photo">
         <DishPhoto dish={dish} fill fit="cover" radius={0} iconSize={72} />
 
-        <button onClick={() => navigate(-1)} className="food-photo__btn food-photo__btn--back">
+        <button onClick={goBack} className="food-photo__btn food-photo__btn--back">
           <Icon name="arrowLeft" size={20} color="#fff" />
         </button>
 
