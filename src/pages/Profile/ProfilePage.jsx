@@ -1,3 +1,4 @@
+import { syncPhoneToServer } from '@/lib/syncPhone';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
@@ -79,7 +80,7 @@ export function ProfilePage() {
   }
 
   function saveName() { updateUser({ firstName, lastName }); setEditingField(null); }
-  function savePhone() { updateUser({ phone }); setEditingField(null); }
+  function savePhone() { updateUser({ phone }); syncPhoneToServer(phone); setEditingField(null); }
   function handleAddAddress() {
     addAddress({ title: addrTitle, address: addrText });
     setShowAddAddress(false); setAddrTitle('Uy'); setAddrText('');

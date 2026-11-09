@@ -33,6 +33,7 @@ import { Splash } from '@/components/Splash/Splash';
 import { PromoModals } from '@/components/PromoModals/PromoModals';
 import { useTelegramBack } from '@/hooks/useTelegramBack';
 import { WeddingHost } from '@/components/WeddingHost/WeddingHost';
+import { maybeAskContactOnce } from '@/lib/contactVerify';
 import { BlockedGate } from '@/components/Restrictions/Restrictions';
 import { initSectionTheme } from '@/store/section';
 
@@ -145,7 +146,9 @@ function AppInner({ authMode = 'telegram' }) {
         isPremium: profile.isPremium,
         photoUrl: profile.photoUrl,
         photoInitials: initialsOf(profile.firstName, profile.lastName),
-        phone: latest.phone ?? profile.phone ?? null,
+        // Telegram orqali tasdiqlangan raqam — ishonchli manba (services/phoneVerify.js)
+        phone: profile.phoneVerified && profile.phone ? profile.phone : (latest.phone ?? profile.phone ?? null),
+        phoneVerified: Boolean(profile.phoneVerified),
         addresses: latest.addresses.length ? latest.addresses : profile.addresses ?? [],
         verified: true,
         isDemo: Boolean(profile.isDemo),   // App Store demo hisobi (server /users/me beradi)
@@ -179,6 +182,9 @@ function AppInner({ authMode = 'telegram' }) {
 
       const uid = profile._id || profile.id;
       if (uid) joinUserRoom(uid);
+
+      // Telefonni Telegram orqali tasdiqlash — BIR MARTA, ixtiyoriy, buyurtmani to'xtatmaydi
+      setTimeout(() => { maybeAskContactOnce(); }, 6000);
     };
 
     /*
