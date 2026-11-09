@@ -54,7 +54,14 @@ try {
   // Tanlangan kategoriya: mahsulotlar BARCHA do'konlardan, "Super narxlar" TEPASIDA; slayderda faqat shu kategoriyaning chegirmalilari
   check("MarketPage: market-catprods bo'limi DiscountSlider'dan OLDIN (kategoriya mahsulotlari tepada)", mpage.indexOf('data-testid="market-catprods"') > 0 && mpage.indexOf('data-testid="market-catprods"') < mpage.indexOf('<DiscountSlider'));
   check("MarketPage: kategoriya tanlanganda Super narxlar faqat chegirmalilar (takrorlanmaydi); 'Barchasi'da chegirma + barcha mahsulotlar", mpage.includes("if (category !== 'all') return discShown;"));
-  check("MarketPage: kategoriya mahsulotlari ixcham setkada (mpp-grid, 88 px, contain) va mahsulot skeleton bilan", mpage.includes('<div className="mpp-grid">{catProducts.map') || (mpage.includes('className="mpp-grid"') && mpage.includes('photoHeight={88} photoFit="contain"') && mpage.includes('<ProductCardSkeleton')));
+  check("MarketPage: tanlangan kategoriya — MarketCatSlider (kalit bo'yicha qayta o'rnatiladi, keyingi sahifa onNeedMore bilan, 'Barchasini ko'rish' → /market/products?category=)", mpage.includes('<MarketCatSlider') && mpage.includes('key={category}') && mpage.includes('onNeedMore=') && mpage.includes('/market/products?category=') && mpage.includes("t('marketViewAll')"));
+  const slider = readFileSync('src/components/MarketCatSlider/MarketCatSlider.jsx', 'utf8');
+  const sliderCss = readFileSync('src/components/MarketCatSlider/MarketCatSlider.css', 'utf8');
+  check("MarketCatSlider: 2 qator × gorizontal ustunlar, ‹ nuqtalar ›, oxirida avtomatik yuklash, skeleton ustunlar, sevimli (yurakcha), chegirma belgisi", /grid-template-rows: repeat\(2, auto\)/.test(sliderCss) && sliderCss.includes('grid-auto-flow: column') && slider.includes('mcs__arrow') && slider.includes('mcs__dots') && slider.includes('NEAR_END_PAGES') && slider.includes('fetchingNext && Array.from') && slider.includes("toggleFavorite('dish'") && slider.includes('discountPercent(dish)'));
+  check("MarketCatSlider: karta bosilsa modal (onOpen), yurakcha va + bosilganda to'xtatiladi (stopPropagation); 3+ ustun ko'rinadi (3.25)", slider.includes('e.stopPropagation(); onToggleFav') && slider.includes('onOpen(dish)') && sliderCss.includes('(100% - 24px) / 3.25'));
+  const prodPage2 = readFileSync('src/pages/Market/MarketProductsPage.jsx', 'utf8');
+  check("MarketProductsPage: ?category= bilan ochilsa sarlavha — kategoriya nomi", prodPage2.includes('catTitle || t(\'all\')') && prodPage2.includes("params.get('category')"));
+  check("marketViewAll — uz/uzc/ru", (readFileSync('src/i18n/translations.js', 'utf8').match(/marketViewAll:/g) || []).length === 3);
   const qhooks = readFileSync('src/hooks/queries.js', 'utf8');
   check("Market kategoriyalari keshi ≤ 60 soniya (admin faol/nofaol tez ko'rinadi)", /queryKey: \['market', 'categories'\][\s\S]{0,300}staleTime: 60_000/.test(qhooks));
   // server vaqti kelmasa/yaroqsiz bo'lsa client soatiga tayanadi (NaN → yaroqsiz sana → Intl yiqiladi)
