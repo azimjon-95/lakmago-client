@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from '@/components/Icon';
 import { MARKET_HOME_CATEGORIES, catImage, homeCatLabel } from '@/data/marketHomeCategories';
@@ -36,15 +36,29 @@ export function MarketCategories({
   const pick = (key) => onChange(key);
   const dim = (key) => Boolean(available) && !available.has(key);
 
+  // Tanlangan kategoriya qatorda ko'rinib tursin: yumshoq siljib markazga keladi
+  const trackRef = useRef(null);
+  useEffect(() => {
+    const tr = trackRef.current;
+    if (!tr) return;
+    const el = tr.querySelector('.mcat.is-active');
+    if (!el) { tr.scrollTo({ left: 0, behavior: 'smooth' }); return; }
+    const left = el.offsetLeft - (tr.clientWidth - el.offsetWidth) / 2;
+    tr.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
+  }, [value]);
+
   return (
     <div className="mcats" role="group" aria-label={ariaLabel} data-testid="market-cats">
+      {/* "Barchasi" — qotirilgan (surilmaydi); faqat kategoriyalar slayderda */}
       <button type="button" className={`mcat mcat--all ${value === 'all' ? 'is-active' : ''}`} aria-pressed={value === 'all'} onClick={() => pick('all')} data-testid="mcat-all">
         <span className="mcat__art"><Icon name="layoutGrid" size={22} strokeWidth={2.2} /></span>
         <span className="mcat__label">{allLabel}</span>
       </button>
-      {row.map((c) => (
-        <CatTile key={c.key} c={c} lang={lang} active={value === c.key} dim={dim(c.key)} onClick={() => pick(value === c.key ? 'all' : c.key)} />
-      ))}
+      <div className="mcats__track" ref={trackRef}>
+        {row.map((c) => (
+          <CatTile key={c.key} c={c} lang={lang} active={value === c.key} dim={dim(c.key)} onClick={() => pick(value === c.key ? 'all' : c.key)} />
+        ))}
+      </div>
     </div>
   );
 }
