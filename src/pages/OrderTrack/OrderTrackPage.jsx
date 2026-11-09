@@ -1,3 +1,4 @@
+import { useBack } from '@/hooks/useBack';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
@@ -125,6 +126,7 @@ const shortName = (n = '') => {
 };
 export function OrderTrackPage() {
   const navigate = useNavigate();
+  const goBack = useBack();
   const { lang } = useI18n();
   const T = TXT[lang] || TXT.uz;
   const order = useOrders((s) => s.activeOrder);
@@ -290,7 +292,7 @@ export function OrderTrackPage() {
 
       <div className="ot-top" ref={topRef}>
         {!inTelegram && (
-          <button className="ot-back" onClick={() => navigate(-1)} aria-label={T.back}>
+          <button className="ot-back" onClick={goBack} aria-label={T.back}>
             <Icon name="chevronLeft" size={20} color="var(--ink)" /><span>{T.back}</span>
           </button>
         )}

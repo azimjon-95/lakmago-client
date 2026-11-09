@@ -1,3 +1,4 @@
+import { useBack } from '@/hooks/useBack';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
@@ -107,6 +108,7 @@ function openPaymentUrl(url) {
 
 export function CartPage() {
   const navigate = useNavigate();
+  const goBack = useBack();
   const t = useT();
   const { ensureAuth, AuthGate } = useRequireAuth();
   const placeOrderRef = useRef(null);
@@ -1193,7 +1195,7 @@ export function CartPage() {
   return (
     <div className="app-shell cart">
       <header className="cart-header">
-        <button onClick={() => navigate(-1)} aria-label={t('back')} className="cart-header__btn">
+        <button onClick={goBack} aria-label={t('back')} className="cart-header__btn">
           <Icon name="arrowLeft" size={21} color="var(--ink)" />
         </button> 
 

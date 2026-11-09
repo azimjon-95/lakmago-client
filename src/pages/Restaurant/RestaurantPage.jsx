@@ -6,6 +6,10 @@ import { Icon } from '@/components/Icon';
 import { DishScrollCard } from '@/components/DishScrollCard';
 import { DishModal } from '@/components/DishModal';
 import { CartBar } from '@/components/CartBar';
+import { BottomNav } from '@/components/BottomNav';
+import { useBack } from '@/hooks/useBack';
+import { useSyncSection } from '@/hooks/useSyncSection';
+import { isStoreRestaurant } from '@/lib/storeKind';
 import { RestaurantBanner } from '@/components/DishPhoto';
 import { RestaurantInfoSheet } from '@/components/RestaurantInfoSheet';
 import { useI18n } from '@/i18n';
@@ -22,7 +26,6 @@ import './Restaurant.css';
 const REVIEWS_TAB = '__reviews__';
 const SALE_TAB = '__sale__';
 // Do'kon qoidasi — server services/storeRules.js bilan bir xil (eski serverda isStore bo'lmasa ham)
-const STORE_CATEGORIES = ['magazin_oziq', 'magazin_meva', 'magazin'];
 
 export function RestaurantPage() {
   const { id = '' } = useParams();
@@ -51,7 +54,10 @@ export function RestaurantPage() {
    * EMAS, Market kategoriyalari (Mevalar, Sut, Go'sht...) bo'yicha guruhlanadi, tepada
    * "Chegirmalar". Kategoriyalar ro'yxati serverdan (GET /market/categories).
    */
-  const isStore = Boolean(restaurant?.isStore || restaurant?.kind === 'shop' || STORE_CATEGORIES.includes(restaurant?.category));
+  const isStore = isStoreRestaurant(restaurant);
+  // Havola orqali kirilganda ham bo'lim mazmunga mos bo'ladi (do'kon → Market, restoran → Go): ranglar, pastki menyu, "Назад"
+  useSyncSection(restaurant ? isStore : undefined);
+  const goBack = useBack();
   const { data: market } = useMarketCategories(isStore);
   const catsLoading = isStore && !market;
   const marketCatMap = useMemo(() => new Map((market?.categories || []).map((c) => [c.value, c])), [market]);
@@ -320,13 +326,10 @@ export function RestaurantPage() {
           </div>
         )}
         {/*
-          navigate(-1) emas — ATAYLAB. Bron sahifasiga kirib
-          (push), u yerdan ushbu sahifaga qaytilsa (yana push),
-          tarix stekida bir necha "Restoran" yozuvi paydo bo'lib
-          qolardi — shu tugma bosilganda ORQAGA emas, BRON
-          sahifasiga qaytib ketardi. Bosh sahifaga aniq
-          yo'naltirish bu chalkashlikni butunlay yo'q qiladi. */}
-        <button onClick={() => navigate('/')} className="rest-banner__btn rest-banner__btn--back" aria-label={t('back')}>
+          Orqaga: hooks/useBack.js (lib/backRoute.js qoidasi). Bron/taom/savat tarixi chalkashmasin deb,
+          faqat RO'YXAT sahifasidan kelingan bo'lsa tarix bo'yicha qaytadi; aks holda (havola, bron sahifasidan
+          qaytish) o'z bo'limining bosh sahifasiga: do'kon → Market, restoran → Lokma Go. */}
+        <button onClick={goBack} className="rest-banner__btn rest-banner__btn--back" aria-label={t('back')}>
           <Icon name="arrowLeft" size={18} color="#fff" />
         </button>
         <button onClick={() => { haptic(); toggleFavorite('restaurant', id); }} className="rest-banner__btn rest-banner__btn--fav" aria-label="♥">
@@ -530,6 +533,7 @@ export function RestaurantPage() {
       </div>
 
       <CartBar />
+      <BottomNav />
       {modalDish && (
         <DishModal
           dish={modalDish}

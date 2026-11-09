@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { useBack, useTrackTrail } from '@/hooks/useBack';
 import { getTelegram } from '@/lib/telegram';
 import { useUI } from '@/store/ui';
 import { useWeddingFrame } from '@/store/weddingFrame';
@@ -20,7 +21,7 @@ import { useWeddingFrame } from '@/store/weddingFrame';
  * NAVBATI BILAN:
  *
  *   1. Modal ochiq          → faqat ENG YUQORI modalni yop
- *   2. Modal yo'q, sahifa≠"/" → bir qadam orqaga (navigate(-1))
+ *   2. Modal yo'q, sahifa≠"/" → lib/backRoute.js qoidasi (hooks/useBack.js)
  *   3. Modal yo'q, sahifa="/" → Telegram.WebApp.close()
  *
  * iOS'GA TA'SIRI YO'Q: iOS'da tizim Back tugmasi UMUMAN yo'q
@@ -39,8 +40,9 @@ import { useWeddingFrame } from '@/store/weddingFrame';
  * standart tarix (history) mexanizmi orqali ishlayveradi.
  */
 export function useTelegramBack() {
-  const navigate = useNavigate();
   const { pathname } = useLocation();
+  useTrackTrail();
+  const back = useBack();
   const modalCount = useUI((s) => s.modalCount);
   const tg = getTelegram();
 
@@ -64,12 +66,9 @@ export function useTelegramBack() {
       wf.goBack();
       return;
     }
-    if (pathname !== '/') {
-      navigate(-1);
-      return;
-    }
-    tg?.close?.();
-  }, [pathname, navigate, tg]);
+    // Qoida: lib/backRoute.js — Market/To'yxonalar → Lokma Go; do'kon/restoran → o'z bo'limining bosh sahifasi (havola orqali kirilgan bo'lsa ham)
+    if (!back()) tg?.close?.();
+  }, [back, tg]);
 
   useEffect(() => {
     if (!tg?.BackButton) return undefined; // Telegram yo'q / eski versiya

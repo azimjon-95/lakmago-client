@@ -1,3 +1,4 @@
+import { useBack } from '@/hooks/useBack';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
@@ -12,6 +13,7 @@ import './Favorites.css';
 export function FavoritesPage() {
   const t = useT();
   const navigate = useNavigate();
+  const goBack = useBack();
   // Ikkita alohida selector — obyekt yaratmaydi, barqaror havola
   const favRestIds = useUser((s) => s.user.favorites?.restaurants);
   const favDishIds = useUser((s) => s.user.favorites?.dishes);
@@ -33,7 +35,7 @@ export function FavoritesPage() {
   return (
     <div className="app-shell fav">
       <header className="fav-header">
-        <button onClick={() => navigate(-1)} aria-label={t('back')} className="fav-header__btn">
+        <button onClick={goBack} aria-label={t('back')} className="fav-header__btn">
           <Icon name="arrowLeft" size={22} color="var(--ink)" />
         </button>
         <h1 className="fav-header__title">{t('favoritesTitle')}</h1>
