@@ -47,9 +47,16 @@ try {
   const gridCard = readFileSync('src/components/DishGridCard.jsx', 'utf8');
   check("DishGridCard: photoHeight standart 104 (boshqa sahifalar o'zgarmaydi); sahifada 88 + contain", gridCard.includes('photoHeight = 104') && gridCard.includes("photoFit = 'cover'") && prodPage.includes('photoHeight={88} photoFit="contain"'));
   const mppCss = readFileSync('src/pages/Market/MarketProducts.css', 'utf8');
-  check("MarketProducts.css: yopishqoq sarlavha, 2 ustun setka, skeleton", /\.mpp-head \{[^}]*position: sticky/.test(mppCss) && mppCss.includes('repeat(2, minmax(0, 1fr))') && mppCss.includes('.mpp-skel'));
+  check("MarketProducts.css: yopishqoq sarlavha va 2 ustun setka; skeleton umumiy ProductCardSkeleton.css da", /\.mpp-head \{[^}]*position: sticky/.test(mppCss) && mppCss.includes('repeat(2, minmax(0, 1fr))') && readFileSync('src/components/Skeleton/ProductCardSkeleton.css', 'utf8').includes('.pcskel'));
   const tr = readFileSync('src/i18n/translations.js', 'utf8');
   check("marketAllShown — uz/uzc/ru", (tr.match(/marketAllShown:/g) || []).length === 3);
+  const mpage = readFileSync('src/pages/Market/MarketPage.jsx', 'utf8');
+  // Tanlangan kategoriya: mahsulotlar BARCHA do'konlardan, "Super narxlar" TEPASIDA; slayderda faqat shu kategoriyaning chegirmalilari
+  check("MarketPage: market-catprods bo'limi DiscountSlider'dan OLDIN (kategoriya mahsulotlari tepada)", mpage.indexOf('data-testid="market-catprods"') > 0 && mpage.indexOf('data-testid="market-catprods"') < mpage.indexOf('<DiscountSlider'));
+  check("MarketPage: kategoriya tanlanganda Super narxlar faqat chegirmalilar (takrorlanmaydi); 'Barchasi'da chegirma + barcha mahsulotlar", mpage.includes("if (category !== 'all') return discShown;"));
+  check("MarketPage: kategoriya mahsulotlari ixcham setkada (mpp-grid, 88 px, contain) va mahsulot skeleton bilan", mpage.includes('<div className="mpp-grid">{catProducts.map') || (mpage.includes('className="mpp-grid"') && mpage.includes('photoHeight={88} photoFit="contain"') && mpage.includes('<ProductCardSkeleton')));
+  const qhooks = readFileSync('src/hooks/queries.js', 'utf8');
+  check("Market kategoriyalari keshi ≤ 60 soniya (admin faol/nofaol tez ko'rinadi)", /queryKey: \['market', 'categories'\][\s\S]{0,300}staleTime: 60_000/.test(qhooks));
   // server vaqti kelmasa/yaroqsiz bo'lsa client soatiga tayanadi (NaN → yaroqsiz sana → Intl yiqiladi)
   const openSt = readFileSync('src/hooks/useOpenStatus.js', 'utf8');
   check("useOpenStatus: serverOffset yaroqsiz (NaN) bo'lsa 0", openSt.includes('Number.isFinite(offset) ? offset : 0'));

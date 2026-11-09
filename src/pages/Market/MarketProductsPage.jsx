@@ -7,7 +7,7 @@ import { ClosedAlert } from '@/components/ClosedAlert';
 import { BottomNav } from '@/components/BottomNav';
 import { CartBar } from '@/components/CartBar';
 import { Icon } from '@/components/Icon';
-import { Skeleton } from '@/components/Skeleton/Skeleton';
+import { ProductCardSkeleton } from '@/components/Skeleton/ProductCardSkeleton';
 import { useClosedAlert } from '@/hooks/useOpenStatus';
 import { useBack } from '@/hooks/useBack';
 import { api } from '@/api';
@@ -21,23 +21,6 @@ const PAGE = 24;           // bir so'rovda keladigan mahsulotlar
 const SKELETON_COUNT = 6;  // dastlabki yuklashda
 const MORE_SKELETON = 4;   // keyingi sahifa yuklanayotganda (pastda)
 const PRELOAD_MARGIN = '700px 0px';   // pastga shuncha qolganda keyingi sahifani oldindan so'raymiz
-
-/* Mahsulot kartasi shaklidagi skeleton (DishGridCard bilan bir xil o'lcham — yuklangach sakramaydi) */
-function ProductSkeleton() {
-  return (
-    <div className="mpp-skel" aria-hidden="true">
-      <Skeleton w="100%" h={88} r={0} />
-      <div className="mpp-skel__body">
-        <Skeleton w="92%" h={11} r={6} />
-        <Skeleton w="62%" h={11} r={6} style={{ marginTop: 6 }} />
-        <div className="mpp-skel__row">
-          <Skeleton w="46%" h={14} r={6} />
-          <Skeleton w={26} h={26} r={9} />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /*
  * Ro'yxat oxiriga yaqinlashganda `onVisible` chaqiriladi (IntersectionObserver).
@@ -115,7 +98,7 @@ export function MarketProductsPage() {
       <div className="mpp-body">
         {q.isLoading ? (
           <div className="mpp-grid" data-testid="mpp-loading">
-            {Array.from({ length: SKELETON_COUNT }).map((_, i) => <ProductSkeleton key={i} />)}
+            {Array.from({ length: SKELETON_COUNT }).map((_, i) => <ProductCardSkeleton key={i} />)}
           </div>
         ) : q.isError && items.length === 0 ? (
           <div className="home-error">
@@ -131,7 +114,7 @@ export function MarketProductsPage() {
                 <DishGridCard key={d._id || d.id} dish={d} onClick={openModal} photoHeight={88} photoFit="contain" />
               ))}
               {/* Keyingi sahifa yuklanayotganda — ro'yxat davomida skeleton */}
-              {isFetchingNextPage && Array.from({ length: MORE_SKELETON }).map((_, i) => <ProductSkeleton key={`s${i}`} />)}
+              {isFetchingNextPage && Array.from({ length: MORE_SKELETON }).map((_, i) => <ProductCardSkeleton key={`s${i}`} />)}
             </div>
 
             {/* Yuklash qo'riqchisi: ko'rinishga yaqinlashsa keyingi sahifa so'raladi */}

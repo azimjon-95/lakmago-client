@@ -8,6 +8,7 @@ import { CartBar } from '@/components/CartBar';
 import { RestaurantCardSkeleton } from '@/components/Skeleton/Skeleton';
 import { DiscountSlider } from '@/components/MarketSlider/DiscountSlider';
 import { ClosedAlert } from '@/components/ClosedAlert';
+import { ProductCardSkeleton } from '@/components/Skeleton/ProductCardSkeleton';
 import { useClosedAlert, useOpenPartition } from '@/hooks/useOpenStatus';
 import { useFeatures, useMarketCategories, useMarketStores, useMarketBanners } from '@/hooks/queries';
 import { BannerSlider } from '@/components/BannerSlider';
@@ -26,6 +27,7 @@ import { getCurrentPosition } from '@/lib/location';
 import { DishGridCard } from '@/components/DishGridCard';
 import { MARKET_HOME_CATEGORIES, homeCatLabel } from '@/data/marketHomeCategories';
 import '@/pages/Home/Home.css';
+import './MarketProducts.css';   // ixcham mahsulot setkasi (.mpp-grid) — "Barchasi" sahifasi bilan bir xil dizayn
 import './Market.css';
 
 /*
@@ -144,11 +146,16 @@ export function MarketPage() {
   // Tanlangan kategoriya mahsulotlari — ochiq do'konlar oldinda
   const catParts = useOpenPartition(flat(catQ));
   const catProducts = useMemo(() => [...catParts.open, ...catParts.closed], [catParts]);
-  // "Sumar narxlar": chegirmadagilar birinchi, keyin BARCHA mahsulotlar (tanlangan bo'lim yoki barchasi)
+  /*
+   * "Super narxlar": "Barchasi" da — chegirmadagilar birinchi, keyin BARCHA mahsulotlar.
+   * Kategoriya tanlanganda esa faqat shu kategoriyaning chegirmalilari (kategoriyaning barcha mahsulotlari tepada alohida chiqadi,
+   * shuning uchun slayderda takrorlanmaydi).
+   */
   const sumarItems = useMemo(() => {
+    if (category !== 'all') return discShown;
     const seen = new Set(discShown.map((d) => String(d._id || d.id)));
     return [...discShown, ...catProducts.filter((d) => !seen.has(String(d._id || d.id)))];
-  }, [discShown, catProducts]);
+  }, [discShown, catProducts, category]);
 
   const openModal = useCallback((d) => setModalDish(d), []);
 
@@ -220,6 +227,53 @@ export function MarketPage() {
         </div>
       ) : (
         <>
+          {/* Tanlangan kategoriya: shu kategoriyadagi mahsulotlar BARCHA do'konlardan — "Super narxlar" TEPASIDA */}
+          {category !== 'all' && (
+            <section className="market-catprods" data-testid="market-catprods">
+              {/* Kategoriya sarlavhasi: karta rasmi (yumaloq), nom, tavsif — ekran kengligiga moslashadi */}
+              {(() => {
+                const cat = catItems.find((c) => c.key === category);
+                const title = category === 'all' ? t('all') : homeCatLabel(cat, lang);
+                return (
+                  <div className="market-cathead" data-testid="market-cathead">
+                    {cat?.cardUrl && <img className="market-cathead__img" src={cat.cardUrl} alt="" loading="lazy" decoding="async" />}
+                    <div className="market-cathead__txt">
+                      <h2 className="home-restaurants-title">
+                        {title}
+                        {catProducts.length > 0 && <span className="market-catprods__count"> {catProducts.length}{catQ.hasNextPage ? '+' : ''}</span>}
+                      </h2>
+                      {cat?.description && <p className="market-cathead__desc">{cat.description}</p>}
+                    </div>
+                  </div>
+                );
+              })()}
+              {catQ.isLoading ? (
+                <div className="mpp-grid">{Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)}</div>
+              ) : catQ.isError ? (
+                <div className="home-error">
+                  <div className="home-error__title">{t('dataLoadFailed')}</div>
+                  <button type="button" onClick={() => catQ.refetch()} className="home-error__btn">{t('retry')}</button>
+                </div>
+              ) : catProducts.length > 0 ? (
+                <>
+                  <div className="mpp-grid">
+                    {catProducts.map((d) => <DishGridCard key={d._id || d.id} dish={d} onClick={openModal} photoHeight={88} photoFit="contain" />)}
+                  </div>
+                  {catQ.hasNextPage && (
+                    <button type="button" className="market-more" onClick={() => catQ.fetchNextPage()} disabled={catQ.isFetchingNextPage}>
+                      {catQ.isFetchingNextPage ? '…' : t('marketShowMore')}
+                    </button>
+                  )}
+                </>
+              ) : (
+                <div className="market-catempty" data-testid="market-catempty">
+                  <div className="market-catempty__art" aria-hidden="true">{catItems.find((c) => c.key === category)?.emoji || '🛒'}</div>
+                  <p>{category === 'all' ? t('noProducts') : t('marketCategoryEmpty')}</p>
+                </div>
+              )}
+            </section>
+          )}
+
           {/* Chegirmadagi mahsulotlar — o'zi harakatlanuvchi slayder (Do'konlar tepasida). Kategoriya tanlanganda — o'sha kategoriyanikilar */}
           <DiscountSlider
             title={t('marketDiscounts')}
@@ -254,53 +308,6 @@ export function MarketPage() {
               <div className="home-empty">{t('empty')}</div>
             )}
           </div>
-
-          {/* Tanlangan kategoriya: shu kategoriyadagi mahsulotlar (barcha do'konlardan) */}
-          {category !== 'all' && (
-            <section className="market-catprods" data-testid="market-catprods">
-              {/* Kategoriya sarlavhasi: karta rasmi (yumaloq), nom, tavsif — ekran kengligiga moslashadi */}
-              {(() => {
-                const cat = catItems.find((c) => c.key === category);
-                const title = category === 'all' ? t('all') : homeCatLabel(cat, lang);
-                return (
-                  <div className="market-cathead" data-testid="market-cathead">
-                    {cat?.cardUrl && <img className="market-cathead__img" src={cat.cardUrl} alt="" loading="lazy" decoding="async" />}
-                    <div className="market-cathead__txt">
-                      <h2 className="home-restaurants-title">
-                        {title}
-                        {catProducts.length > 0 && <span className="market-catprods__count"> {catProducts.length}{catQ.hasNextPage ? '+' : ''}</span>}
-                      </h2>
-                      {cat?.description && <p className="market-cathead__desc">{cat.description}</p>}
-                    </div>
-                  </div>
-                );
-              })()}
-              {catQ.isLoading ? (
-                <div className="market-grid">{Array.from({ length: 4 }).map((_, i) => <RestaurantCardSkeleton key={i} />)}</div>
-              ) : catQ.isError ? (
-                <div className="home-error">
-                  <div className="home-error__title">{t('dataLoadFailed')}</div>
-                  <button type="button" onClick={() => catQ.refetch()} className="home-error__btn">{t('retry')}</button>
-                </div>
-              ) : catProducts.length > 0 ? (
-                <>
-                  <div className="market-grid">
-                    {catProducts.map((d) => <DishGridCard key={d._id || d.id} dish={d} onClick={openModal} />)}
-                  </div>
-                  {catQ.hasNextPage && (
-                    <button type="button" className="market-more" onClick={() => catQ.fetchNextPage()} disabled={catQ.isFetchingNextPage}>
-                      {catQ.isFetchingNextPage ? '…' : t('marketShowMore')}
-                    </button>
-                  )}
-                </>
-              ) : (
-                <div className="market-catempty" data-testid="market-catempty">
-                  <div className="market-catempty__art" aria-hidden="true">{catItems.find((c) => c.key === category)?.emoji || '🛒'}</div>
-                  <p>{category === 'all' ? t('noProducts') : t('marketCategoryEmpty')}</p>
-                </div>
-              )}
-            </section>
-          )}
 
         </>
       )}
