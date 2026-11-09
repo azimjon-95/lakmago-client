@@ -169,7 +169,8 @@ export const useMarketCategories = (enabled = true) =>
   useQuery({
     queryKey: ['market', 'categories'],
     queryFn: ({ signal }) => api.getMarketCategories({ signal }),
-    staleTime: 30 * 60_000,
+    // Admin faol/nofaol qilgan kategoriya tez ko'rinsin (server ham 60 soniya keshlaydi)
+    staleTime: 60_000,
     enabled,
   });
 
