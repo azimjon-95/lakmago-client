@@ -25,7 +25,7 @@ export const PHOTO_STYLES = {
 // Rasm slot: photo bo'lsa gradient+ikon "fotosurat" taqlidi, bo'lmasa universal fallback (kamera belgisi bilan)
 // Cloudinary URL'ni optimallashtirish (WebP/AVIF, o'lcham) — tez yuklanadi
 // fit='contain' bo'lsa c_fit (rasm kesilmaydi), aks holda c_fill (to'ldiradi)
-function optimizeCloudinary(url, width, fit = 'cover') {
+export function optimizeCloudinary(url, width, fit = 'cover') {
   if (!url || !url.includes('/upload/')) return url;
   const crop = fit === 'contain' ? 'c_fit' : 'c_fill';
   return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},${crop}/`);

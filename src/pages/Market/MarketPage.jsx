@@ -8,7 +8,7 @@ import { CartBar } from '@/components/CartBar';
 import { RestaurantCardSkeleton } from '@/components/Skeleton/Skeleton';
 import { DiscountSlider } from '@/components/MarketSlider/DiscountSlider';
 import { ClosedAlert } from '@/components/ClosedAlert';
-import { ProductCardSkeleton } from '@/components/Skeleton/ProductCardSkeleton';
+import { MarketCatSlider } from '@/components/MarketCatSlider/MarketCatSlider';
 import { useClosedAlert, useOpenPartition } from '@/hooks/useOpenStatus';
 import { useFeatures, useMarketCategories, useMarketStores, useMarketBanners } from '@/hooks/queries';
 import { BannerSlider } from '@/components/BannerSlider';
@@ -227,52 +227,36 @@ export function MarketPage() {
         </div>
       ) : (
         <>
-          {/* Tanlangan kategoriya: shu kategoriyadagi mahsulotlar BARCHA do'konlardan — "Super narxlar" TEPASIDA */}
-          {category !== 'all' && (
-            <section className="market-catprods" data-testid="market-catprods">
-              {/* Kategoriya sarlavhasi: karta rasmi (yumaloq), nom, tavsif — ekran kengligiga moslashadi */}
-              {(() => {
-                const cat = catItems.find((c) => c.key === category);
-                const title = category === 'all' ? t('all') : homeCatLabel(cat, lang);
-                return (
-                  <div className="market-cathead" data-testid="market-cathead">
-                    {cat?.cardUrl && <img className="market-cathead__img" src={cat.cardUrl} alt="" loading="lazy" decoding="async" />}
-                    <div className="market-cathead__txt">
-                      <h2 className="home-restaurants-title">
-                        {title}
-                        {catProducts.length > 0 && <span className="market-catprods__count"> {catProducts.length}{catQ.hasNextPage ? '+' : ''}</span>}
-                      </h2>
-                      {cat?.description && <p className="market-cathead__desc">{cat.description}</p>}
-                    </div>
-                  </div>
-                );
-              })()}
-              {catQ.isLoading ? (
-                <div className="mpp-grid">{Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)}</div>
-              ) : catQ.isError ? (
-                <div className="home-error">
-                  <div className="home-error__title">{t('dataLoadFailed')}</div>
-                  <button type="button" onClick={() => catQ.refetch()} className="home-error__btn">{t('retry')}</button>
-                </div>
-              ) : catProducts.length > 0 ? (
-                <>
-                  <div className="mpp-grid">
-                    {catProducts.map((d) => <DishGridCard key={d._id || d.id} dish={d} onClick={openModal} photoHeight={88} photoFit="contain" />)}
-                  </div>
-                  {catQ.hasNextPage && (
-                    <button type="button" className="market-more" onClick={() => catQ.fetchNextPage()} disabled={catQ.isFetchingNextPage}>
-                      {catQ.isFetchingNextPage ? '…' : t('marketShowMore')}
-                    </button>
-                  )}
-                </>
-              ) : (
-                <div className="market-catempty" data-testid="market-catempty">
-                  <div className="market-catempty__art" aria-hidden="true">{catItems.find((c) => c.key === category)?.emoji || '🛒'}</div>
-                  <p>{category === 'all' ? t('noProducts') : t('marketCategoryEmpty')}</p>
-                </div>
-              )}
-            </section>
-          )}
+          {/* Tanlangan kategoriya: 2 qatorli slayder — mahsulotlar BARCHA do'konlardan, "Super narxlar" TEPASIDA */}
+          {category !== 'all' && (() => {
+            const cat = catItems.find((c) => c.key === category);
+            return (
+              <div data-testid="market-catprods">
+                <MarketCatSlider
+                  key={category}
+                  category={category}
+                  title={homeCatLabel(cat, lang)}
+                  description={cat?.description}
+                  imageUrl={cat?.cardUrl}
+                  items={catProducts}
+                  closedIds={catParts.closedIds}
+                  lang={lang}
+                  loading={catQ.isLoading}
+                  error={catQ.isError}
+                  onRetry={() => catQ.refetch()}
+                  hasNext={Boolean(catQ.hasNextPage)}
+                  fetchingNext={catQ.isFetchingNextPage}
+                  onNeedMore={() => { if (catQ.hasNextPage && !catQ.isFetchingNextPage) catQ.fetchNextPage(); }}
+                  onOpen={openModal}
+                  onViewAll={() => navigate(`/market/products?category=${encodeURIComponent(category)}`)}
+                  viewAllLabel={t('marketViewAll')}
+                  emptyText={t('marketCategoryEmpty')}
+                  emptyEmoji={cat?.emoji || '🛒'}
+                  retryLabel={t('retry')}
+                />
+              </div>
+            );
+          })()}
 
           {/* Chegirmadagi mahsulotlar — o'zi harakatlanuvchi slayder (Do'konlar tepasida). Kategoriya tanlanganda — o'sha kategoriyanikilar */}
           <DiscountSlider

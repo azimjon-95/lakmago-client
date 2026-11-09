@@ -12,6 +12,8 @@ import { useClosedAlert } from '@/hooks/useOpenStatus';
 import { useBack } from '@/hooks/useBack';
 import { api } from '@/api';
 import { useI18n } from '@/i18n';
+import { useMarketCategories } from '@/hooks/queries';
+import { homeCatLabel } from '@/data/marketHomeCategories';
 // DishGridCard ning asosiy uslublari Home.css da — sahifa to'g'ridan-to'g'ri ochilganda (havola/yangilash) ham yuklansin (MarketPage kabi)
 import '@/pages/Home/Home.css';
 import './Market.css';
@@ -46,10 +48,13 @@ function useNearEnd({ enabled, onVisible, deps }) {
 
 /* Barcha mahsulotlar — alohida sahifa (Market'dagi "Barchasi" tugmasi shu yerga olib keladi) */
 export function MarketProductsPage() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const goBack = useBack();
   const [params] = useSearchParams();
   const catalogCategory = params.get('category') || undefined;
+  // Sarlavha: kategoriya bilan ochilsa — kategoriya nomi ("Choy"), aks holda "Barchasi"
+  const { data: catMeta } = useMarketCategories(Boolean(catalogCategory));
+  const catTitle = catalogCategory ? homeCatLabel((catMeta?.catalogCategories || []).find((c) => c.key === catalogCategory), lang) : '';
   const [modalDish, setModalDish] = useState(null);
   const { closedInfo, showClosed, hideClosed } = useClosedAlert();
   const openModal = useCallback((d) => setModalDish(d), []);
@@ -91,7 +96,7 @@ export function MarketProductsPage() {
         <button type="button" className="mpp-back" onClick={goBack} aria-label={t('back')}>
           <Icon name="arrowLeft" size={20} color="#13803F" strokeWidth={2.4} />
         </button>
-        <h1 className="mpp-title">{t('all')}</h1>
+        <h1 className="mpp-title">{catTitle || t('all')}</h1>
         {items.length > 0 && <span className="mpp-count" data-testid="mpp-count">{items.length}{hasNextPage ? '+' : ''}</span>}
       </header>
 
