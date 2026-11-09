@@ -5,21 +5,30 @@
   box-shadow: inset 0 0 0 1px rgba(20, 120, 60, 0.08), 0 8px 22px rgba(20, 110, 50, 0.09);
 }
 
-/* ── Sarlavha ── */
-.mcs__head { display: flex; align-items: center; gap: 10px; padding: 0 2px 12px 4px; }
-.mcs__ico { flex: none; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+/* ── Sarlavha ──
+   Bir qatorda: [belgi · nom + soni · tavsif] ........ [Barchasini ko'rish ›]
+   Joy yetmasa (tor ekran / uzun nom) tugma PASTKI qatorga o'tadi (flex-wrap) — nom 2-3 qatorga siqilib ketmaydi.
+   Soni nom bilan bir oqimda; nom 3 qatorgacha ko'rinadi, shuning uchun son hech qachon kesilmaydi. */
+.mcs__head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 0 2px 10px 2px; }
+.mcs__main { flex: 1 1 178px; min-width: 0; display: flex; align-items: center; gap: 8px; }
+.mcs__ico { flex: none; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; }
+.mcs__ico svg { width: 30px; height: 30px; }
 .mcs__ico--img { border-radius: 50%; object-fit: cover; box-shadow: 0 4px 10px rgba(20, 110, 50, 0.2); }
-.mcs__txt { flex: 1; min-width: 0; }
-.mcs__title { margin: 0; font-size: 21px; line-height: 1.1; font-weight: 800; letter-spacing: -0.3px; color: var(--ink, #14201A); display: flex; align-items: baseline; gap: 4px; }
-.mcs__count { font-size: 19px; font-weight: 800; color: #7A8D82; font-variant-numeric: tabular-nums; }
-.mcs__desc { margin: 3px 0 0; font-size: 11.5px; line-height: 1.3; color: #5C7266; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mcs__txt { flex: 1 1 auto; min-width: 0; }
+.mcs__title {
+  margin: 0; font-size: 18px; line-height: 1.15; font-weight: 800; letter-spacing: -0.25px; color: var(--ink, #14201A);
+  overflow-wrap: break-word; text-wrap: balance; max-height: 3.5em; overflow: hidden;   /* -webkit-box ISHLATILMAYDI: son alohida qatorga tushib ketardi */
+}
+.mcs__count { font-size: 15px; font-weight: 800; color: #7A8D82; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mcs__desc { margin: 2px 0 0; font-size: 11px; line-height: 1.3; color: #5C7266; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .mcs__all {
-  flex: none; display: inline-flex; align-items: center; gap: 2px; height: 34px; padding: 0 10px 0 13px;
-  border: 0; border-radius: 999px; background: #fff; color: #13803F; font-size: 12px; font-weight: 800; white-space: nowrap;
+  flex: none; margin-left: auto; display: inline-flex; align-items: center; gap: 1px; height: 30px; padding: 0 6px 0 10px;
+  border: 0; border-radius: 999px; background: #fff; color: #13803F; font-size: 11px; font-weight: 800; white-space: nowrap;
   box-shadow: 0 1px 2px rgba(16, 40, 24, 0.06), 0 3px 10px rgba(20, 110, 50, 0.12);
   -webkit-tap-highlight-color: transparent; transition: transform 140ms ease;
 }
 .mcs__all:active { transform: scale(0.96); }
+@media (max-width: 359px) { .mcs__title { font-size: 16.5px; } .mcs__all { font-size: 11px; padding: 0 6px 0 9px; } }
 
 /* ── Slayder: 2 qator, gorizontal; 3 ustun to'liq + 4-chisi ko'rinib turadi ── */
 .mcs__track {
@@ -66,13 +75,13 @@
 /* Narx nishoni: raqam + "so'm". Sig'masa "so'm" PASTKI qatorga tushadi va yashiriladi (yarim kesilmaydi): faqat raqam qoladi */
 .mcs-card__price {
   display: flex; flex-wrap: wrap; align-content: flex-start; column-gap: 2px;
-  height: 20px; max-width: 100%; width: fit-content; padding: 0 6px; border-radius: 999px; overflow: hidden;
-  background: #EEF3F0; color: var(--ink, #14201A); font-size: 10.5px; line-height: 20px; font-weight: 800; white-space: nowrap;
+  height: 20px; max-width: 100%; width: fit-content; padding: 0 5px; border-radius: 999px; overflow: hidden;
+  background: #EEF3F0; color: var(--ink, #14201A); font-size: 10px; line-height: 20px; font-weight: 800; white-space: nowrap;
 }
 .mcs-card__price b { font-weight: 800; }
-.mcs-card__price small { font-size: 8px; font-weight: 700; opacity: 0.75; }
+.mcs-card__price small { font-size: 7.5px; font-weight: 700; opacity: 0.75; }
 .mcs-card__price.is-sale { background: #D3EFDC; }
-.mcs-card__price.is-long { font-size: 10px; }
+.mcs-card__price.is-long { font-size: 9.5px; }
 .mcs-card__add {
   flex: none; width: 22px; height: 22px; border: 0; border-radius: 50%; color: #fff;
   background: linear-gradient(160deg, #2BB563, #148A43); box-shadow: 0 3px 8px rgba(20, 138, 67, 0.34);
