@@ -40,7 +40,9 @@ async function syncTime() {
     const { now } = await api.getServerTime();
     // Tarmoq kechikishining yarmini hisobga olamiz
     const latency = (Date.now() - t0) / 2;
-    serverOffset = now + latency - Date.now();
+    const offset = Number(now) + latency - Date.now();
+    // Server vaqti kelmasa/yaroqsiz bo'lsa (NaN) — client soatiga tayanamiz; aks holda sana yaroqsiz bo'lib Intl yiqiladi
+    serverOffset = Number.isFinite(offset) ? offset : 0;
   } catch {
     serverOffset = 0; // Server javob bermasa client soatiga tayanamiz
   }
