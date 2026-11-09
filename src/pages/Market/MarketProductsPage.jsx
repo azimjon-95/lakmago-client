@@ -4,6 +4,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { DishGridCard } from '@/components/DishGridCard';
 import { DishModal } from '@/components/DishModal';
+import { ClosedAlert } from '@/components/ClosedAlert';
+import { useClosedAlert } from '@/hooks/useOpenStatus';
 import { BottomNav } from '@/components/BottomNav';
 import { CartBar } from '@/components/CartBar';
 import { RestaurantCardSkeleton } from '@/components/Skeleton/Skeleton';
@@ -22,6 +24,7 @@ export function MarketProductsPage() {
   const [params] = useSearchParams();
   const catalogCategory = params.get('category') || undefined;
   const [modalDish, setModalDish] = useState(null);
+  const { closedInfo, showClosed, hideClosed } = useClosedAlert();
   const openModal = useCallback((d) => setModalDish(d), []);
 
   const q = useInfiniteQuery({
@@ -71,7 +74,10 @@ export function MarketProductsPage() {
 
       <CartBar />
       <BottomNav />
-      <DishModal dish={modalDish} onClose={() => setModalDish(null)} onClosedAlert={() => {}} />
+      {modalDish && (
+        <DishModal dish={modalDish} onClose={() => setModalDish(null)} onClosedAlert={showClosed} />
+      )}
+      <ClosedAlert info={closedInfo} onClose={hideClosed} />
     </div>
   );
 }
