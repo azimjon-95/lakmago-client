@@ -1,0 +1,74 @@
+/* ═══ "BARCHASI" — barcha mahsulotlar sahifasi (/market/products) ═══
+   Yopishqoq sarlavha · 2 ustunli ixcham kartalar · scroll bilan avtomatik yuklash · pastda skeleton */
+.market-products-page { background: #F5F8F6; }
+
+/* ── Sarlavha: yopishqoq, shaffof oq (blur) ── */
+.mpp-head {
+  position: sticky; top: 0; z-index: 6;
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.9);
+  -webkit-backdrop-filter: blur(14px) saturate(1.5); backdrop-filter: blur(14px) saturate(1.5);
+  box-shadow: 0 1px 0 rgba(16, 40, 24, 0.07);
+}
+.mpp-back {
+  flex: none; width: 38px; height: 38px; border-radius: 50%; border: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, #EAF7EF, #D9F0E2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 3px rgba(20, 110, 50, 0.14);
+  -webkit-tap-highlight-color: transparent; transition: transform 140ms ease;
+}
+.mpp-back:active { transform: scale(0.92); }
+.mpp-title { flex: 1; min-width: 0; margin: 0; font-size: 21px; font-weight: 800; letter-spacing: -0.3px; color: var(--ink, #14201A); }
+.mpp-count {
+  flex: none; min-width: 34px; height: 28px; padding: 0 11px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #E3F4EA; color: #13803F; font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums;
+}
+
+/* ── Setka: 2 ustun, ixcham ── */
+.mpp-body { padding-bottom: 14px; }
+.mpp-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;
+  padding: 12px 14px 6px;
+}
+@media (min-width: 560px) { .mpp-grid { grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 12px; padding-inline: 18px; } }
+
+/* Kartalar: faqat shu sahifada kichraytirilgan va toza (rasm kesilmaydi, og'ir soya yo'q) */
+.mpp-grid .dgcard {
+  width: 100%; border-radius: 15px; border: 1px solid rgba(16, 40, 24, 0.07); background: #fff;
+  box-shadow: 0 1px 2px rgba(16, 40, 24, 0.04), 0 5px 14px rgba(16, 40, 24, 0.06);
+}
+.mpp-grid .dgcard__photo { box-shadow: none; border-radius: 0; background: #fff; }
+.mpp-grid .dgcard__photo > :first-child { background: #fff !important; }
+.mpp-grid .dgcard__body { padding: 7px 9px 9px; }
+.mpp-grid .dgcard__name { font-size: 12px; line-height: 1.25; min-height: 30px; margin-bottom: 2px; font-weight: 700; }
+.mpp-grid .dgcard__pack { font-size: 10px; }
+.mpp-grid .dgcard__rest { font-size: 9.5px; margin-bottom: 5px; }
+.mpp-grid .dgcard__price { font-size: 13px; letter-spacing: -0.1px; }
+.mpp-grid .dgcard__unit { font-size: 10px; white-space: nowrap; }   /* "/ dona" bo'linmaydi: sig'masa butunlay pastki qatorga tushadi */
+.mpp-grid .dgcard__old { font-size: 10px; }
+.mpp-grid .dgcard__price-row { padding-right: 30px; }
+.mpp-grid .dgcard__add {
+  width: 26px; height: 26px; border-radius: 9px; bottom: 8px; right: 8px;
+  background: linear-gradient(160deg, #2BB563, #148A43); box-shadow: 0 3px 8px rgba(20, 138, 67, 0.32);
+}
+.mpp-grid .dgcard__add svg { width: 16px; height: 16px; stroke: #fff; }
+.mpp-grid .dgcard__badge { top: 7px; left: 7px; font-size: 10.5px; padding: 3px 7px; }
+
+/* ── Skeleton (karta bilan bir xil o'lcham) ── */
+.mpp-skel { border-radius: 15px; border: 1px solid rgba(16, 40, 24, 0.06); background: #fff; overflow: hidden; box-shadow: 0 1px 2px rgba(16, 40, 24, 0.04); }
+.mpp-skel__body { padding: 9px 9px 10px; min-height: 100px; display: flex; flex-direction: column; }
+.mpp-skel__row { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px; }
+
+/* ── Yuklash qo'riqchisi va pastki qatorlar ── */
+.mpp-sentinel { height: 1px; }
+.mpp-foot { display: flex; justify-content: center; padding: 10px 16px 4px; }
+.mpp-retry {
+  height: 40px; padding: 0 22px; border: 0; border-radius: 999px;
+  background: #E3F4EA; color: #13803F; font-size: 14px; font-weight: 800;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 8px rgba(20, 110, 50, 0.14);
+}
+.mpp-retry:active { transform: scale(0.97); }
+.mpp-end { display: flex; align-items: center; gap: 12px; padding: 14px 24px 6px; color: #7D8B83; font-size: 12px; font-weight: 600; }
+.mpp-end::before, .mpp-end::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, #D5E0DA, transparent); }

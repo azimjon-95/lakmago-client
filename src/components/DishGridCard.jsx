@@ -19,7 +19,7 @@ import { isDishOffToday } from '@/hooks/useOpenStatus';
  * `onClick` ixtiyoriy — berilmasa karta bosilganda hech narsa
  * bo'lmaydi (avval `onClick(dish)` undefined bo'lib xato berardi).
  */
-export const DishGridCard = memo(function DishGridCard({ dish, onClick, closed = false }) {
+export const DishGridCard = memo(function DishGridCard({ dish, onClick, closed = false, photoHeight = 104, photoFit = 'cover' }) {
   const { t, lang } = useI18n();
   // Do'kon mahsuloti: "12 000 so'm / kg", qadoq hajmi nom ostida (restoran taomida bo'sh)
   const unit = unitSuffix(dish.unit, lang);
@@ -31,7 +31,7 @@ export const DishGridCard = memo(function DishGridCard({ dish, onClick, closed =
       onClick={onClick ? () => onClick(dish) : undefined}
     >
       <div className="dgcard__photo">
-        <DishPhoto dish={dish} height={104} radius={0} iconSize={34} />
+        <DishPhoto dish={dish} height={photoHeight} radius={0} iconSize={34} fit={photoFit} />
         {hasDiscount && (
           <div className="dgcard__badge">−{discountPercent(dish)}%</div>
         )}

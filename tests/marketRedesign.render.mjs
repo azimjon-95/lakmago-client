@@ -40,6 +40,16 @@ try {
   // /market/products ("Barchasi"): mahsulot oynasi FAQAT tanlangan mahsulot bo'lganda chiziladi (dish=null bo'lsa 'n.id' xatosi)
   const prodPage = readFileSync('src/pages/Market/MarketProductsPage.jsx', 'utf8');
   check("MarketProductsPage: DishModal faqat modalDish bor bo'lganda; yopiq do'kon ogohlantirishi ulangan", /\{modalDish && \(\s*<DishModal dish=\{modalDish\}/.test(prodPage) && !prodPage.includes('onClosedAlert={() => {}}') && prodPage.includes('<ClosedAlert'));
+  // "Barchasi" sahifasi: scroll bo'yicha avtomatik yuklash (IntersectionObserver qayta quriladi), pastda skeleton, takrorsiz, xatoda qayta urinish
+  check("MarketProductsPage: IntersectionObserver + sahifa yuklangach qayta ulanadi (deps: items.length); oldindan yuklash", prodPage.includes('new IntersectionObserver') && /useNearEnd\(\{[^}]*deps: \[items\.length\]/.test(prodPage) && prodPage.includes("rootMargin: PRELOAD_MARGIN"));
+  check("MarketProductsPage: keyingi sahifa yuklanganda pastda skeleton; dastlab skeleton; mahsulotlar takrorlanmaydi", prodPage.includes('isFetchingNextPage && Array.from({ length: MORE_SKELETON })') && prodPage.includes('SKELETON_COUNT') && prodPage.includes('seen.has(id)'));
+  check("MarketProductsPage: xatoda qayta urinish (isFetchNextPageError), IntersectionObserver yo'q brauzerda tugma; Home.css import", prodPage.includes('isFetchNextPageError') && prodPage.includes("typeof IntersectionObserver === 'undefined'") && prodPage.includes("import '@/pages/Home/Home.css'"));
+  const gridCard = readFileSync('src/components/DishGridCard.jsx', 'utf8');
+  check("DishGridCard: photoHeight standart 104 (boshqa sahifalar o'zgarmaydi); sahifada 88 + contain", gridCard.includes('photoHeight = 104') && gridCard.includes("photoFit = 'cover'") && prodPage.includes('photoHeight={88} photoFit="contain"'));
+  const mppCss = readFileSync('src/pages/Market/MarketProducts.css', 'utf8');
+  check("MarketProducts.css: yopishqoq sarlavha, 2 ustun setka, skeleton", /\.mpp-head \{[^}]*position: sticky/.test(mppCss) && mppCss.includes('repeat(2, minmax(0, 1fr))') && mppCss.includes('.mpp-skel'));
+  const tr = readFileSync('src/i18n/translations.js', 'utf8');
+  check("marketAllShown — uz/uzc/ru", (tr.match(/marketAllShown:/g) || []).length === 3);
   // server vaqti kelmasa/yaroqsiz bo'lsa client soatiga tayanadi (NaN → yaroqsiz sana → Intl yiqiladi)
   const openSt = readFileSync('src/hooks/useOpenStatus.js', 'utf8');
   check("useOpenStatus: serverOffset yaroqsiz (NaN) bo'lsa 0", openSt.includes('Number.isFinite(offset) ? offset : 0'));
