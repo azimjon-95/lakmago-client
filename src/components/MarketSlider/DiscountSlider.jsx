@@ -60,7 +60,7 @@ const Slide = memo(function Slide({ dish, closed, onOpen, lang, emojiOf }) {
   );
 });
 
-export function DiscountSlider({ items, loading, closedIds, onOpen, title, emojiOf }) {
+export function DiscountSlider({ items, loading, closedIds, onOpen, title, emojiOf, onAll, allLabel }) {
   const { lang } = useI18n();
   const trackRef = useRef(null);
   const [index, setIndex] = useState(0);
@@ -121,7 +121,11 @@ export function DiscountSlider({ items, loading, closedIds, onOpen, title, emoji
           <span className="mds__fire" aria-hidden="true"><Icon name="flame" size={16} color="#fff" /></span>
           {title}
         </div>
-        {n > 0 && <span className="mds__count">{n}</span>}
+        {onAll ? (
+          <button type="button" className="mds__all" onClick={onAll} data-testid="mds-all">{allLabel || 'Barchasi'}</button>
+        ) : (
+          n > 0 && <span className="mds__count">{n}</span>
+        )}
       </div>
 
       <div

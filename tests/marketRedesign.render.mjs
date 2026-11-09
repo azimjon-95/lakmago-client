@@ -38,8 +38,8 @@ try {
   const cbCss = readFileSync('src/components/cards/CartBar.css', 'utf8');
   check("savat paneli rangi bo'limga qarab: Market yashil #148A43, Go — brend (to'q sariq); balandlik --cart-h (50 px, scroll'da 40 px)", cbCss.includes(':root[data-section=\'market\'] .cart-bar-wrap') && cbCss.includes('#148A43') && /\.cart-bar \{[^}]*height: var\(--cart-h, 50px\)/.test(cbCss) && !cbCss.includes('cart-bar--market'));
   const page = readFileSync('src/pages/Market/MarketPage.jsx', 'utf8');
-  const order = ['<MarketHero />', '<MarketCategories', 'market-stores-head', '<HomeSections', '<MarketStoreCard', '<CartBar />'].map((x) => page.indexOf(x));
-  check('sahifa tartibi maketdagidek: banner → kategoriyalar → Do‘konlar + Sizga yaqin → bo‘lim kartalari → do‘konlar → savat', order.every((i, n) => i > 0 && (n === 0 || i > order[n - 1])), JSON.stringify(order));
+  const order = ['<MarketHero />', '<HomeSections', '<MarketCategories', '<DiscountSlider', 'market-stores-head', '<MarketStoreCard', '<CartBar />'].map((x) => page.indexOf(x));
+  check('sahifa tartibi: banner → Lokma kartalari → kategoriyalar → chegirmalar → do‘konlar → savat', order.every((i, n) => i > 0 && (n === 0 || i > order[n - 1])), JSON.stringify(order));
   check('sarlavhada chap tomondagi kichik savat YO‘Q, faqat o‘ngdagi bezakli savat (yuborilgan rasm, 116 px)', !page.includes('market-header__logo') && (page.match(/market-basket-hero\.webp/g) || []).length === 1 && page.includes('width="116" height="63"') && statSync('public/sections/market-basket-hero.webp').size < 40 * 1024);
   const surf = /market:\s*'(#[0-9a-fA-F]{6})'/.exec(readFileSync('src/lib/telegram.js', 'utf8').split('SECTION_SURFACE =')[1])?.[1];
   const mcss = readFileSync('src/pages/Market/Market.css', 'utf8');
