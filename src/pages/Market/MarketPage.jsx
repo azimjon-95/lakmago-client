@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Icon } from '@/components/Icon';
@@ -178,13 +178,8 @@ export function MarketPage() {
   }
 
   const nothing = !storesLoading && !storesError && stores.length === 0;
-  // Mahsulotlar ro'yxati standart holatda yashirin; "Barchasi" tugmasi yoki kategoriya tanlanganda ochiladi
-  const [showAll, setShowAll] = useState(false);
-  const allRef = useRef(null);
-  const openAll = useCallback(() => {
-    setShowAll(true);
-    setTimeout(() => allRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
-  }, []);
+  // "Barchasi" — barcha mahsulotlar alohida sahifada
+  const openAll = useCallback(() => navigate('/market/products'), [navigate]);
 
   return (
     <div className="app-shell market">
@@ -261,8 +256,8 @@ export function MarketPage() {
           </div>
 
           {/* Tanlangan kategoriya: shu kategoriyadagi mahsulotlar (barcha do'konlardan) */}
-          {(showAll || category !== 'all') && (
-            <section ref={allRef} className="market-catprods" data-testid="market-catprods">
+          {category !== 'all' && (
+            <section className="market-catprods" data-testid="market-catprods">
               {/* Kategoriya sarlavhasi: karta rasmi (yumaloq), nom, tavsif — ekran kengligiga moslashadi */}
               {(() => {
                 const cat = catItems.find((c) => c.key === category);

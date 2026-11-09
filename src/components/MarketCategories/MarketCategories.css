@@ -78,3 +78,8 @@
 .mcat { flex: 0 0 auto; width: 76px; scroll-snap-align: start; }
 @media (min-width: 600px) { .mcat { width: 92px; } }
 
+/* Kategoriyalar — yaqinroq joylashuv: tepaga yaqin, tiplar orasi tor */
+.mcats { justify-content: flex-start; gap: 12px; padding-top: 6px; padding-bottom: 6px; }
+.mcat { flex: 0 0 84px; width: 84px; }
+@media (min-width: 600px) { .mcats { gap: 14px; } .mcat { flex: 0 0 96px; width: 96px; } }
+

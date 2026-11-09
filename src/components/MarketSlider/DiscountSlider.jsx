@@ -118,11 +118,21 @@ export function DiscountSlider({ items, loading, closedIds, onOpen, title, emoji
     <section className="mds" aria-label={title}>
       <div className="mds__head">
         <div className="mds__title">
-          <span className="mds__fire" aria-hidden="true"><Icon name="flame" size={16} color="#fff" /></span>
+          <span className="mds__fire" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <defs>
+                <linearGradient id="mdsBolt" x1="4" y1="2" x2="20" y2="22" gradientUnits="userSpaceOnUse">
+                  <stop offset="0" stopColor="#FFE58A" />
+                  <stop offset="1" stopColor="#FFFFFF" />
+                </linearGradient>
+              </defs>
+              <path d="M13.4 2.2 4.6 13.4h6.1l-1.3 8.4 9.2-11.8h-6.2l1-7.8z" fill="url(#mdsBolt)" stroke="#FFFFFF" strokeOpacity=".55" strokeWidth="0.6" strokeLinejoin="round" />
+            </svg>
+          </span>
           {title}
         </div>
         {onAll ? (
-          <button type="button" className="mds__all" onClick={onAll} data-testid="mds-all">{allLabel || 'Barchasi'}</button>
+          <button type="button" className="mds__all" onClick={onAll} data-testid="mds-all">{allLabel || 'Barchasi'}<span className="mds__all-arrow" aria-hidden="true">›</span></button>
         ) : (
           n > 0 && <span className="mds__count">{n}</span>
         )}
