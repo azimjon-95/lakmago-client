@@ -1,11 +1,17 @@
 import { tashkentParts } from './tashkentTime';
 
+// Narx yo'q/yaroqsiz (undefined, null, matn) bo'lsa — 0 ko'rsatiladi, sahifa yiqilmaydi
+const safeSom = (value) => {
+  const n = Math.round(Number(value));
+  return Number.isFinite(n) ? n : 0;
+};
+
 export function formatSom(value) {
-  return value.toLocaleString('ru-RU').replace(/,/g, ' ') + " so'm";
+  return safeSom(value).toLocaleString('ru-RU').replace(/,/g, ' ') + " so'm";
 }
 
 export function formatSomShort(value) {
-  return value.toLocaleString('ru-RU').replace(/,/g, ' ');
+  return safeSom(value).toLocaleString('ru-RU').replace(/,/g, ' ');
 }
 
 export function buildOptionKey(dishId, optionIds) {

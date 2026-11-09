@@ -43,7 +43,7 @@ const Slide = memo(function Slide({ dish, closed, onOpen, lang, emojiOf }) {
         {dish.packSize && <span className="mds-slide__pack">{dish.packSize}</span>}
         <span className="mds-slide__prices">
           <span className="mds-slide__price">{formatSomShort(dish.price)}<small> so'm{unit ? ` ${unit}` : ''}</small></span>
-          <span className="mds-slide__old">{formatSomShort(dish.oldPrice)}</span>
+          {Number(dish.oldPrice) > Number(dish.price) && <span className="mds-slide__old">{formatSomShort(dish.oldPrice)}</span>}
         </span>
       </span>
 
