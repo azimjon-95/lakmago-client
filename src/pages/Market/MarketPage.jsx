@@ -210,6 +210,40 @@ export function MarketPage() {
         </div>
       ) : (
         <>
+          {/* Chegirmadagi mahsulotlar — o'zi harakatlanuvchi slayder (Do'konlar tepasida). Kategoriya tanlanganda — o'sha kategoriyanikilar */}
+          <DiscountSlider
+            title={t('marketDiscounts')}
+            items={discShown}
+            loading={discQ.isLoading}
+            closedIds={closedIds}
+            onOpen={openModal}
+            emojiOf={(d) => catMap.get(d.marketCategory)?.emoji}
+          />
+
+          {/* Do'konlar: sarlavha + "Sizga yaqin do'konlar" (maketdagidek), so'ng bo'limlar orasida o'tish kartalari */}
+          <div className="market-stores-head">
+            <h2>{t('stores')}</h2>
+            <MarketStoreSort mode={sortMode} onChange={chooseSort} locating={locating} />
+          </div>
+          {sortNote && <div className="msort__note" role="status">{sortNote}</div>}
+          <HomeSections current="market" wedding={Boolean(features?.wedding)} />
+          <div className="home-restaurants market-stores">
+            {storesLoading ? (
+              Array.from({ length: 3 }).map((_, i) => <RestaurantCardSkeleton key={i} />)
+            ) : storesError ? (
+              <div className="home-error">
+                <div className="home-error__title">{t('dataLoadFailed')}</div>
+                <button type="button" onClick={() => refetch()} className="home-error__btn">{t('retry')}</button>
+              </div>
+            ) : sortedStores.length > 0 ? (
+              sortedStores.map(({ store: st, distanceKm }) => (
+                <MarketStoreCard key={st._id || st.id} restaurant={st} distanceKm={distanceKm} recommended={String(st._id || st.id) === recId} />
+              ))
+            ) : (
+              <div className="home-empty">{t('empty')}</div>
+            )}
+          </div>
+
           {/* Tanlangan kategoriya: shu kategoriyadagi mahsulotlar (barcha do'konlardan) */}
           {(
             <section className="market-catprods" data-testid="market-catprods">
@@ -256,40 +290,6 @@ export function MarketPage() {
               )}
             </section>
           )}
-
-          {/* Chegirmadagi mahsulotlar — o'zi harakatlanuvchi slayder (Do'konlar tepasida). Kategoriya tanlanganda — o'sha kategoriyanikilar */}
-          <DiscountSlider
-            title={t('marketDiscounts')}
-            items={discShown}
-            loading={discQ.isLoading}
-            closedIds={closedIds}
-            onOpen={openModal}
-            emojiOf={(d) => catMap.get(d.marketCategory)?.emoji}
-          />
-
-          {/* Do'konlar: sarlavha + "Sizga yaqin do'konlar" (maketdagidek), so'ng bo'limlar orasida o'tish kartalari */}
-          <div className="market-stores-head">
-            <h2>{t('stores')}</h2>
-            <MarketStoreSort mode={sortMode} onChange={chooseSort} locating={locating} />
-          </div>
-          {sortNote && <div className="msort__note" role="status">{sortNote}</div>}
-          <HomeSections current="market" wedding={Boolean(features?.wedding)} />
-          <div className="home-restaurants market-stores">
-            {storesLoading ? (
-              Array.from({ length: 3 }).map((_, i) => <RestaurantCardSkeleton key={i} />)
-            ) : storesError ? (
-              <div className="home-error">
-                <div className="home-error__title">{t('dataLoadFailed')}</div>
-                <button type="button" onClick={() => refetch()} className="home-error__btn">{t('retry')}</button>
-              </div>
-            ) : sortedStores.length > 0 ? (
-              sortedStores.map(({ store: st, distanceKm }) => (
-                <MarketStoreCard key={st._id || st.id} restaurant={st} distanceKm={distanceKm} recommended={String(st._id || st.id) === recId} />
-              ))
-            ) : (
-              <div className="home-empty">{t('empty')}</div>
-            )}
-          </div>
 
         </>
       )}

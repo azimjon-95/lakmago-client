@@ -12,53 +12,40 @@ import './MarketCategories.css';
  * Tanlangan kategoriya qatorda doim ko'rinadi (yashirinlar orasida bo'lsa — birinchi o'ringa chiqadi).
  * `available` (Set | null): mahsuloti bor kalitlar; yo'qlari xira (bosish mumkin).
  */
-export function MarketCategories({
-  items = MARKET_HOME_CATEGORIES, value, onChange, available = null, lang = 'uz', visible = 4,
-  allLabel = 'Barchasi', moreLabel = 'Boshqa kategoriyalar', sheetTitle = 'Barcha kategoriyalar', ariaLabel = '', closeLabel = 'Yopish',
-}) {
-  const [open, setOpen] = useState(false);
+/* Tasodifiy tartib (Fisher–Yates): har kirishda boshqacha; bo'sh kategoriyalar oxirida */
+function shuffled(list) {
+  const a = [...list];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
+export function MarketCategories({
+  items = MARKET_HOME_CATEGORIES, value, onChange, available = null, lang = 'uz',
+  allLabel = 'Barchasi', ariaLabel = '',
+}) {
+  // Tartib sahifa ochilganda aralashadi (items o'zgarganda qayta); "Barchasi" doim birinchi
   const row = useMemo(() => {
     const has = (c) => (available ? available.has(c.key) : true);
-    const ordered = [...items.filter(has), ...items.filter((c) => !has(c))];
-    let first = ordered.slice(0, visible);
-    if (value !== 'all' && !first.some((c) => c.key === value)) {
-      const sel = items.find((c) => c.key === value);
-      if (sel) first = [sel, ...first.slice(0, visible - 1)];
-    }
-    return first;
-  }, [items, available, value, visible]);
+    const mix = shuffled(items);
+    return [...mix.filter(has), ...mix.filter((c) => !has(c))];
+  }, [items, available]);
 
-  const pick = (key) => { onChange(key); setOpen(false); };
+  const pick = (key) => onChange(key);
   const dim = (key) => Boolean(available) && !available.has(key);
 
   return (
-    <>
-      <div className="mcats" role="group" aria-label={ariaLabel} data-testid="market-cats">
-        <button type="button" className={`mcat mcat--all ${value === 'all' ? 'is-active' : ''}`} aria-pressed={value === 'all'} onClick={() => pick('all')} data-testid="mcat-all">
-          <span className="mcat__art"><Icon name="layoutGrid" size={22} strokeWidth={2.2} /></span>
-          <span className="mcat__label">{allLabel}</span>
-        </button>
-        {row.map((c) => (
-          <CatTile key={c.key} c={c} lang={lang} active={value === c.key} dim={dim(c.key)} onClick={() => pick(value === c.key ? 'all' : c.key)} />
-        ))}
-        <button type="button" className="mcat mcat--more" onClick={() => setOpen(true)} aria-haspopup="dialog" data-testid="mcat-more">
-          <span className="mcat__art"><Icon name="chevronRight" size={18} strokeWidth={2.4} /></span>
-          <span className="mcat__label">{moreLabel}</span>
-        </button>
-      </div>
-      {open && (
-        <CategorySheet title={sheetTitle} closeLabel={closeLabel} onClose={() => setOpen(false)}>
-          <button type="button" className={`mcat mcat--all mcat--lg ${value === 'all' ? 'is-active' : ''}`} aria-pressed={value === 'all'} onClick={() => pick('all')}>
-            <span className="mcat__art"><Icon name="layoutGrid" size={26} strokeWidth={2.2} /></span>
-            <span className="mcat__label">{allLabel}</span>
-          </button>
-          {items.map((c) => (
-            <CatTile key={c.key} c={c} lang={lang} large active={value === c.key} dim={dim(c.key)} onClick={() => pick(c.key)} />
-          ))}
-        </CategorySheet>
-      )}
-    </>
+    <div className="mcats" role="group" aria-label={ariaLabel} data-testid="market-cats">
+      <button type="button" className={`mcat mcat--all ${value === 'all' ? 'is-active' : ''}`} aria-pressed={value === 'all'} onClick={() => pick('all')} data-testid="mcat-all">
+        <span className="mcat__art"><Icon name="layoutGrid" size={22} strokeWidth={2.2} /></span>
+        <span className="mcat__label">{allLabel}</span>
+      </button>
+      {row.map((c) => (
+        <CatTile key={c.key} c={c} lang={lang} active={value === c.key} dim={dim(c.key)} onClick={() => pick(value === c.key ? 'all' : c.key)} />
+      ))}
+    </div>
   );
 }
 
