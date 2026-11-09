@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Icon } from '@/components/Icon';
@@ -178,6 +178,13 @@ export function MarketPage() {
   }
 
   const nothing = !storesLoading && !storesError && stores.length === 0;
+  // Mahsulotlar ro'yxati standart holatda yashirin; "Barchasi" tugmasi yoki kategoriya tanlanganda ochiladi
+  const [showAll, setShowAll] = useState(false);
+  const allRef = useRef(null);
+  const openAll = useCallback(() => {
+    setShowAll(true);
+    setTimeout(() => allRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+  }, []);
 
   return (
     <div className="app-shell market">
@@ -197,6 +204,9 @@ export function MarketPage() {
         )}
       </div>
 
+
+      {/* Lokma Go va Lokma To'yxonalari — banner ostida */}
+      <HomeSections current="market" wedding={Boolean(features?.wedding)} />
 
       {/* Kategoriyalar — yumaloq rasmlar (data/marketHomeCategories.js) */}
       {/*
@@ -219,6 +229,8 @@ export function MarketPage() {
           <DiscountSlider
             title={t('marketDiscounts')}
             items={sumarItems}
+            onAll={openAll}
+            allLabel={t('all')}
             loading={discQ.isLoading}
             closedIds={closedIds}
             onOpen={openModal}
@@ -231,7 +243,6 @@ export function MarketPage() {
             <MarketStoreSort mode={sortMode} onChange={chooseSort} locating={locating} />
           </div>
           {sortNote && <div className="msort__note" role="status">{sortNote}</div>}
-          <HomeSections current="market" wedding={Boolean(features?.wedding)} />
           <div className="home-restaurants market-stores">
             {storesLoading ? (
               Array.from({ length: 3 }).map((_, i) => <RestaurantCardSkeleton key={i} />)
@@ -250,8 +261,8 @@ export function MarketPage() {
           </div>
 
           {/* Tanlangan kategoriya: shu kategoriyadagi mahsulotlar (barcha do'konlardan) */}
-          {(
-            <section className="market-catprods" data-testid="market-catprods">
+          {(showAll || category !== 'all') && (
+            <section ref={allRef} className="market-catprods" data-testid="market-catprods">
               {/* Kategoriya sarlavhasi: karta rasmi (yumaloq), nom, tavsif — ekran kengligiga moslashadi */}
               {(() => {
                 const cat = catItems.find((c) => c.key === category);
