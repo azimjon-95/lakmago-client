@@ -58,6 +58,13 @@ try {
   const slider = readFileSync('src/components/MarketCatSlider/MarketCatSlider.jsx', 'utf8');
   const sliderCss = readFileSync('src/components/MarketCatSlider/MarketCatSlider.css', 'utf8');
   check("MarketCatSlider: 2 qator × gorizontal ustunlar, ‹ nuqtalar ›, oxirida avtomatik yuklash, skeleton ustunlar, sevimli (yurakcha), chegirma belgisi", /grid-template-rows: repeat\(2, auto\)/.test(sliderCss) && sliderCss.includes('grid-auto-flow: column') && slider.includes('mcs__arrow') && slider.includes('mcs__dots') && slider.includes('NEAR_END_PAGES') && slider.includes('fetchingNext && Array.from') && slider.includes("toggleFavorite('dish'") && slider.includes('discountPercent(dish)'));
+  // Sarlavha: uzun nomlar sig'adi, son kesilmaydi, tugma joy yetmasa pastga o'tadi; nom bloki -webkit-box EMAS (ichidagi son alohida qatorga tushardi)
+  const cssNoComments = sliderCss.replace(/\/\*[\s\S]*?\*\//g, '');
+  const titleBlock = (/\.mcs__title \{[^}]*\}/.exec(cssNoComments) || [''])[0];
+  check("MarketCatSlider sarlavhasi: flex-wrap (tugma sig'masa pastga), nom 18 px, nom bloki -webkit-box emas, 3.5em gacha ko'rinadi (son kesilmaydi)", /\.mcs__head \{[^}]*flex-wrap: wrap/.test(cssNoComments) && titleBlock.includes('font-size: 18px') && !titleBlock.includes('-webkit-box') && titleBlock.includes('max-height: 3.5em') && /\.mcs__main \{[^}]*flex: 1 1 178px/.test(cssNoComments));
+  // Narx nishoni: "so'm" sig'masa pastki qatorga tushib yashiriladi (yarim kesilmaydi)
+  const priceBlock = (/\.mcs-card__price \{[^}]*\}/.exec(cssNoComments) || [''])[0];
+  check("MarketCatSlider narx nishoni: flex-wrap + qat'iy balandlik + overflow hidden — 'so'm' sig'masa toza yashiriladi", priceBlock.includes('flex-wrap: wrap') && priceBlock.includes('height: 20px') && priceBlock.includes('overflow: hidden') && slider.includes("<b>{priceText}</b><small>so'm</small>"));
   check("MarketCatSlider: karta bosilsa modal (onOpen), yurakcha va + bosilganda to'xtatiladi (stopPropagation); 3+ ustun ko'rinadi (3.25)", slider.includes('e.stopPropagation(); onToggleFav') && slider.includes('onOpen(dish)') && sliderCss.includes('(100% - 24px) / 3.25'));
   const prodPage2 = readFileSync('src/pages/Market/MarketProductsPage.jsx', 'utf8');
   check("MarketProductsPage: ?category= bilan ochilsa sarlavha — kategoriya nomi", prodPage2.includes('catTitle || t(\'all\')') && prodPage2.includes("params.get('category')"));

@@ -155,12 +155,14 @@ export function MarketCatSlider({
   return (
     <section className="mcs" data-testid="market-catslider" aria-label={title}>
       <header className="mcs__head">
-        {imageUrl
-          ? <img className="mcs__ico mcs__ico--img" src={imageUrl} alt="" loading="lazy" decoding="async" />
-          : <span className="mcs__ico"><LeafIcon /></span>}
-        <div className="mcs__txt">
-          <h2 className="mcs__title">{title}{count > 0 && <span className="mcs__count" data-testid="mcs-count"> {count}{hasNext ? '+' : ''}</span>}</h2>
-          {description && <p className="mcs__desc">{description}</p>}
+        <div className="mcs__main">
+          {imageUrl
+            ? <img className="mcs__ico mcs__ico--img" src={imageUrl} alt="" loading="lazy" decoding="async" />
+            : <span className="mcs__ico"><LeafIcon /></span>}
+          <div className="mcs__txt">
+            <h2 className="mcs__title">{title}{count > 0 && <span className="mcs__count" data-testid="mcs-count"> {count}{hasNext ? '+' : ''}</span>}</h2>
+            {description && <p className="mcs__desc">{description}</p>}
+          </div>
         </div>
         <button type="button" className="mcs__all" onClick={onViewAll} data-testid="mcs-all">
           {viewAllLabel}<ChevR12 />
