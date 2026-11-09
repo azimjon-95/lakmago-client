@@ -144,6 +144,12 @@ export function MarketPage() {
   // Tanlangan kategoriya mahsulotlari — ochiq do'konlar oldinda
   const catParts = useOpenPartition(flat(catQ));
   const catProducts = useMemo(() => [...catParts.open, ...catParts.closed], [catParts]);
+  // "Sumar narxlar": avval chegirmadagilar; chegirma bo'lmasa — eng arzon mahsulotlar (narx bo'yicha)
+  const cheapShown = useMemo(
+    () => [...catProducts].filter((d) => Number(d.price) > 0).sort((a, b) => Number(a.price) - Number(b.price)).slice(0, 12),
+    [catProducts],
+  );
+  const sumarItems = discShown.length > 0 ? discShown : cheapShown;
 
   const openModal = useCallback((d) => setModalDish(d), []);
 
@@ -213,7 +219,7 @@ export function MarketPage() {
           {/* Chegirmadagi mahsulotlar — o'zi harakatlanuvchi slayder (Do'konlar tepasida). Kategoriya tanlanganda — o'sha kategoriyanikilar */}
           <DiscountSlider
             title={t('marketDiscounts')}
-            items={discShown}
+            items={sumarItems}
             loading={discQ.isLoading}
             closedIds={closedIds}
             onOpen={openModal}
