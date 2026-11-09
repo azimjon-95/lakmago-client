@@ -17,6 +17,7 @@ const ProfilePage = lazy(() => import('@/pages/Profile/ProfilePage').then((m) =>
 const SearchPage = lazy(() => import('@/pages/Search/SearchPage').then((m) => ({ default: m.SearchPage })));
 const DiscoverDishesPage = lazy(() => import('@/pages/Discover/DiscoverDishesPage').then((m) => ({ default: m.DiscoverDishesPage })));
 const MarketPage = lazy(() => import('@/pages/Market/MarketPage').then((m) => ({ default: m.MarketPage })));
+const MarketProductsPage = lazy(() => import('@/pages/Market/MarketProductsPage').then((m) => ({ default: m.MarketProductsPage })));
 // Lokma To'yxonalari — alohida sayt, Lokma ichida (iframe)
 const WeddingsPage = lazy(() => import('@/pages/Weddings/WeddingsPage').then((m) => ({ default: m.WeddingsPage })));
 import { useUser } from '@/store/user';
@@ -233,6 +234,7 @@ function AppInner({ authMode = 'telegram' }) {
             <Route path="/search" element={<SearchPage />} />
             <Route path="/discover/:type" element={<DiscoverDishesPage />} />
             <Route path="/market" element={<MarketPage />} />
+            <Route path="/market/products" element={<MarketProductsPage />} />
             <Route path="/weddings" element={<WeddingsPage />} />
             <Route path="/weddings/venue/:slug" element={<WeddingsPage />} />
             <Route path="/orders" element={<OrdersPage />} />
