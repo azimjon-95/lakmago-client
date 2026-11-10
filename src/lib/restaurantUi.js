@@ -9,13 +9,30 @@ export function monogram(name) {
   return (a + b).toLocaleUpperCase();
 }
 
-/** Nom uzunligiga qarab shrift (px): qisqa — katta, uzun — kichikroq; hammasi bir xil ko'rinishda sig'adi */
-export function nameFontSize(name) {
-  const n = String(name || '').length;
-  if (n <= 14) return 26;
-  if (n <= 20) return 23;
-  if (n <= 28) return 20;
-  return 18;
+/** Restoran brend rangi: faqat to'g'ri #RRGGBB qabul qilinadi (aks holda '' — standart yashil). TOTLI, LORUS, ZIYNAT: bir komponent, farq — rang/logo/banner/kontent */
+export function brandHex(v) {
+  const s = String(v || '').trim();
+  return /^#[0-9a-fA-F]{6}$/.test(s) ? s : '';
+}
+
+/**
+ * Brend rangidan CSS o'zgaruvchilari (JS da hisoblanadi — `color-mix` eski iOS/Android WebView'da bo'lmasligi mumkin).
+ * Rang yo'q/noto'g'ri bo'lsa — bo'sh obyekt (CSS dagi standart yashil ishlaydi).
+ * accent — asosiy; dark — faol chip, logotip, bron banneri (to'q); deep — banner boshlanishi; soft — och fon; rgb — soyalar uchun.
+ */
+export function brandVars(v) {
+  const hex = brandHex(v);
+  if (!hex) return {};
+  const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  const mix = (k) => c.map((x) => Math.round(x * k)).join(', ');
+  const soft = c.map((x) => Math.round(255 - (255 - x) * 0.13)).join(', ');
+  return {
+    '--rp-accent': hex,
+    '--rp-accent-rgb': c.join(', '),
+    '--rp-accent-dark': `rgb(${mix(0.58)})`,
+    '--rp-accent-deep': `rgb(${mix(0.4)})`,
+    '--rp-accent-soft': `rgb(${soft})`,
+  };
 }
 
 /** Nom emoji bilan boshlansa (do'kon bo'limlari: "🥛 Sut mahsulotlari") ikonka KERAK EMAS — emojining o'zi ikonka */

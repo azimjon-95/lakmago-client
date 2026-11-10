@@ -31,12 +31,14 @@ export function optimizeCloudinary(url, width, fit = 'cover') {
   return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},${crop}/`);
 }
 
-export function DishPhoto({ dish, height = 96, radius = 12, iconSize = 34, fill = false, fit = 'cover' }) {
+export function DishPhoto({ dish, height = 96, radius = 12, iconSize = 34, fill = false, fit = 'cover', aspect = null }) {
+  // aspect (masalan '1 / 0.85') berilsa — o'lcham ENIGA qarab bir xil nisbatda; aks holda qat'iy balandlik
+  const sz = aspect ? { width: '100%', aspectRatio: aspect } : { height };
   // fill=true — ota elementни to'liq egallaydi (modal uchun)
   // fit='contain' — rasm kesilmaydi, to'liq ko'rinadi
   const boxStyle = fill
     ? { width: '100%', height: '100%', borderRadius: radius, overflow: 'hidden', background: dish.tint || 'var(--food-tint-1)' }
-    : { height, borderRadius: radius, overflow: 'hidden', background: dish.tint || 'var(--food-tint-1)' };
+    : { ...sz, borderRadius: radius, overflow: 'hidden', background: dish.tint || 'var(--food-tint-1)' };
 
   // 1) Haqiqiy rasm bo'lsa (Cloudinary) — uni ko'rsatamiz (optimallashtirilган, lazy)
   const realUrl = dish.imageUrl || (dish.images && dish.images[0]);
@@ -60,7 +62,7 @@ export function DishPhoto({ dish, height = 96, radius = 12, iconSize = 34, fill 
 
   if (style) {
     return (
-      <div style={{ height, borderRadius: radius, position: 'relative', overflow: 'hidden', background: style.grad }}>
+      <div style={{ ...sz, borderRadius: radius, position: 'relative', overflow: 'hidden', background: style.grad }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.35), transparent 55%)' }} />
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Icon name={style.icon} size={iconSize * 1.7} color={style.iconColor} strokeWidth={1.4} />
@@ -70,7 +72,7 @@ export function DishPhoto({ dish, height = 96, radius = 12, iconSize = 34, fill 
   }
 
   return (
-    <div style={{ height, borderRadius: radius, background: dish.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+    <div style={{ ...sz, borderRadius: radius, background: dish.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
       <Icon name={dish.icon} size={iconSize} color="var(--brand)" />
       <div style={{ position: 'absolute', bottom: 5, right: 6, display: 'flex', alignItems: 'center', gap: 2, background: 'rgba(255,255,255,0.65)', borderRadius: 6, padding: '1px 5px' }}>
         <Icon name="camera" size={9} color="var(--muted)" />
@@ -85,7 +87,7 @@ export function DishPhoto({ dish, height = 96, radius = 12, iconSize = 34, fill 
 
 
 // Restoran banneri: real rasm (Cloudinary) bo'lsa uni ko'rsatadi, bo'lmasa universal banner
-export function RestaurantBanner({ restaurant, height = 150 }) {
+export function RestaurantBanner({ restaurant, height = 150, objectPosition = 'center' }) {
   const [index, setIndex] = useState(0);
   // Haqiqiy rasm yuklanganmi — yuklanguncha (yoki umuman bo'lmasa)
   // RestaurantBannerFallback ko'rinadi.
@@ -122,7 +124,7 @@ export function RestaurantBanner({ restaurant, height = 150 }) {
           onLoad={() => setImgLoaded(true)}
           style={{
             position: 'absolute', inset: 0,
-            width: '100%', height: '100%', objectFit: 'cover',
+            width: '100%', height: '100%', objectFit: 'cover', objectPosition,
             opacity: imgLoaded ? 1 : 0,
             transition: 'opacity 320ms ease',
           }}

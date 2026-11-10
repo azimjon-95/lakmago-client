@@ -12,6 +12,7 @@ import { useSyncSection } from '@/hooks/useSyncSection';
 import { isStoreRestaurant } from '@/lib/storeKind';
 import { RestaurantHero, RestaurantIdentity, RestaurantStats, ReserveBanner } from '@/components/RestaurantPage/RestaurantHeader';
 import { SectionChips } from '@/components/RestaurantPage/SectionChips';
+import { brandVars } from '@/lib/restaurantUi';
 import { RestaurantInfoSheet } from '@/components/RestaurantInfoSheet';
 import { useI18n } from '@/i18n';
 import { isDiscountedDish } from '@/lib/discount';
@@ -304,21 +305,23 @@ export function RestaurantPage() {
 
   // Stol bron qilish: restoranda yoqilgan bo'lsa va bu do'kon bo'lmasa
   const canReserve = restaurant.reservationEnabled !== false && !isStore;
-  // Statistika kartasi: ma'lumot bor ustunlargina (3–4 ta). Bepul yetkazish — birinchi ustun yorlig'ida
+  // Statistika kartasi: HAR DOIM 4 ta teng ustun (ma'lumot bo'lmasa ustun xiralashadi). Bepul yetkazish — birinchi ustun yorlig'ida
   const freeDelivery = isFreeDelivery(restaurant);
+  const hasTime = Number.isFinite(restaurant.deliveryMin) && Number.isFinite(restaurant.deliveryMax);
+  const hasRating = restaurant.rating > 0;
   const statItems = [
-    ...(Number.isFinite(restaurant.deliveryMin) && Number.isFinite(restaurant.deliveryMax) ? [{
-      key: 'time', tone: 'accent', icon: 'time',
-      value: `${restaurant.deliveryMin}–${restaurant.deliveryMax} ${t('min')}`,
+    {
+      key: 'time', tone: 'accent', icon: 'time', disabled: !hasTime,
+      value: hasTime ? `${restaurant.deliveryMin}–${restaurant.deliveryMax} ${t('min')}` : '—',
       label: freeDelivery ? `${t('free')} ${t('deliveryLower')}` : t('restDelivery'), accentLabel: freeDelivery,
-    }] : []),
-    ...(restaurant.rating > 0 ? [{ key: 'rating', tone: 'green', icon: 'star', value: Number(restaurant.rating).toFixed(1), label: t('restRating'), onClick: () => scrollTo(REVIEWS_TAB) }] : []),
-    ...(hasCoords ? [{ key: 'route', tone: 'accent', icon: 'nav', value: t('routeLabel'), label: t('routeSubLabel'), onClick: openRoute }] : []),
-    ...(hasInfo ? [{ key: 'info', tone: 'blue', icon: 'info', value: t('termsLabel'), label: t('workingHoursLabel'), onClick: () => { haptic(); setInfoOpen(true); } }] : []),
+    },
+    { key: 'rating', tone: 'green', icon: 'star', disabled: !hasRating, value: hasRating ? Number(restaurant.rating).toFixed(1) : t('restNoRating'), label: t('restRating'), onClick: () => scrollTo(REVIEWS_TAB) },
+    { key: 'route', tone: 'accent', icon: 'nav', disabled: !hasCoords, value: t('routeLabel'), label: hasCoords ? t('routeSubLabel') : t('restNoRoute'), onClick: openRoute },
+    { key: 'info', tone: 'blue', icon: 'info', disabled: !hasInfo, value: t('termsLabel'), label: t('workingHoursLabel'), onClick: () => { haptic(); setInfoOpen(true); } },
   ];
 
   return (
-    <div className="app-shell restaurant">
+    <div className="app-shell restaurant restaurant-page" style={brandVars(restaurant.brandColor)}>
       <RestaurantHero
         restaurant={restaurant}
         isFav={isFav}
@@ -327,6 +330,7 @@ export function RestaurantPage() {
         onMore={() => { haptic(); setInfoOpen(true); }}
         backLabel={t('back')}
         moreLabel={t('restMore')}
+        favLabel={t(isFav ? 'restFavRemove' : 'restFavAdd')}
       />
 
       {/* Oq varaq: belgi · NOM · holat · statistika · bron — hamma restoranda bir xil dizayn, har biri o'z ma'lumoti bilan */}
@@ -455,7 +459,7 @@ export function RestaurantPage() {
                   Vertikal ro'yxatda bitta kategoriya butun ekranni
                   egallab, qolganini topish uchun uzoq surish
                   kerak edi. */}
-              <div className={isExpanded && !(dishesLoading || catsLoading) ? 'rest-grid' : 'rest-row no-scrollbar'}>
+              <div className={isExpanded && !(dishesLoading || catsLoading) ? 'rest-grid' : 'rest-row no-scrollbar'} role="group" aria-label={name} tabIndex={isExpanded ? undefined : 0}>
                 {dishesLoading || catsLoading
                   ? Array.from({ length: 3 }).map((_, i) => (
                       <div key={i} className="rest-row__sk" />
@@ -467,7 +471,8 @@ export function RestaurantPage() {
                       showRestaurant={false}
                       showFav
                       showCurrency
-                      photoHeight={100}
+                      photoAspect="1 / 0.85"
+                      addLabel={t('addToCart')}
                       disabled={!isOpen}
                       onDisabledTap={() => showClosed({
                         name: restaurant?.name,
