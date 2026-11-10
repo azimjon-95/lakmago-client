@@ -86,7 +86,9 @@ test('Restoran/do‘kon sahifasi: pastki menyu, bo‘lim do‘kon turiga qarab, 
   const p = src('src/pages/Restaurant/RestaurantPage.jsx');
   assert.ok(p.includes("<BottomNav />") && p.includes("import { BottomNav }"));
   assert.ok(p.includes('useSyncSection(restaurant ? isStore : undefined)') && p.includes('isStoreRestaurant(restaurant)'));
-  assert.ok(/onClick=\{goBack\}[^>]*rest-banner__btn--back/.test(p) && !/navigate\('\/'\)\} className="rest-banner__btn--back/.test(p));
+  // Orqaga o'qi: sahifa goBack (yagona qoida) ni RestaurantHero ga beradi, qahramon uni bosilganda chaqiradi
+  assert.ok(p.includes('onBack={goBack}') && !/navigate\('\/'\)\} className="rest-banner__btn--back/.test(p));
+  assert.ok(readFileSync(new URL('../src/components/RestaurantPage/RestaurantHeader.jsx', import.meta.url), 'utf8').includes('onClick={onBack}'));
 });
 
 test('Orqaga o‘qlari tarixsiz (havola) ochilganda ham ishlaydi: navigate(-1) o‘rniga useBack', () => {
