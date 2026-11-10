@@ -82,22 +82,22 @@ test('ТЗ qiymatlari: fluid clamp() tokenlari, 4 teng ustun, bron 76–90, chip
   const css = noComments(src('src/components/RestaurantPage/RestaurantHeader.css'));
   const has = (s) => assert.ok(css.includes(s), s);
   has('--rp-accent: #17803F');                                   // standart yashil (ZIYNAT eталon); brendniki — brandVars
-  has('--rp-pad: clamp(14px, 4vw, 24px)'); has('--rp-hero-h: clamp(190px, 52vw, 230px)');
-  has('width: clamp(72px, 21vw, 88px); aspect-ratio: 1 / 1');   // logotip
-  has('font-size: clamp(23px, 6.6vw, 27px)');                    // nom 23–27
-  has('font-size: clamp(14px, 3.9vw, 16px)');                    // tur 14–16
+  has('--rp-pad: clamp(14px, 4vw, 24px)'); has('--rp-hero-h: clamp(176px, 48vw, 220px)'); has('text-size-adjust: 100%');
+  has('width: clamp(66px, 19.5vw, 80px); aspect-ratio: 1 / 1');   // logotip
+  has('font-size: clamp(19px, 5.6vw, 23px)');                    // nom (iPhone 13 Pro'da ~22 px)
+  has('font-size: clamp(12.5px, 3.4vw, 14px)');                  // tur
   has('grid-template-columns: repeat(4, minmax(0, 1fr))');       // statistika: 4 teng ustun
-  has('width: clamp(52px, 14.5vw, 64px)');                       // ikonka doirasi 52–64
-  has('min-height: clamp(76px, 21vw, 90px)');                    // bron banneri 76–90
+  has('width: clamp(46px, 12.8vw, 56px)');                       // ikonka doirasi
+  has('min-height: clamp(66px, 18vw, 80px)');                    // bron banneri
   has('aspect-ratio: 640 / 413');                                // stol rasmi deformatsiyalanmaydi
-  has('min-height: clamp(44px, 12vw, 50px)');                    // chip 44–50
+  has('min-height: clamp(40px, 10.6vw, 46px)');                    // chip (bosish maydoni ::before bilan ≥44)
   has('scrollbar-width: none');                                  // chip scrollbar yashirin
   has('overflow-x: clip');                                       // gorizontal overflow yo'q
   for (const bp of ['(max-width: 359px)', '(min-width: 431px)', '(min-width: 601px)', '(min-width: 769px)']) has(bp);
   has('prefers-reduced-motion');
   assert.ok(/\.rp-chip\.is-active \{[^}]*var\(--rp-accent-dark\)/.test(css));
   assert.ok(/\.rp-sheet \{[^}]*margin-top: calc\(-1 \* clamp\(22px, 7vw, 30px\)\)/.test(css));
-  assert.ok(/\.rp-hbtn \{[^}]*width: 44px; height: 44px/.test(css));    // touch target
+  assert.ok(/\.rp-hbtn \{[^}]*width: 40px; height: 40px/.test(css) && css.includes('inset: -3px'));    // ko'rinadigan 40, bosish maydoni 46
   const page = noComments(src('src/pages/Restaurant/Restaurant.css'));
   const pg = (s) => assert.ok(page.includes(s), s);
   pg('grid-auto-columns: calc((100% - var(--rp-gaps) * var(--rp-gap)) / var(--rp-cols))');

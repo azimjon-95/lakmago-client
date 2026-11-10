@@ -255,18 +255,18 @@ img.review-card__avatar { object-fit: cover; }
 
 
 /* ═══ Bo'lim sarlavhasi + karusel + karta (Responsive Restaurant Detail tizimi; tokenlar: RestaurantHeader.css) ═══ */
-.rp-sec__head { display: flex; align-items: center; gap: 10px; padding: clamp(14px, 4.4vw, 20px) var(--rp-pad) 10px; }
-.rp-sec__title { margin: 0; min-width: 0; font-size: clamp(20px, 5.6vw, 24px); font-weight: 800; letter-spacing: -0.4px; color: var(--ink, #14201A); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rp-sec__head { display: flex; align-items: center; gap: 8px; padding: clamp(12px, 3.8vw, 18px) var(--rp-pad) 8px; }
+.rp-sec__title { margin: 0; min-width: 0; font-size: clamp(17px, 4.8vw, 20px); font-weight: 800; letter-spacing: -0.3px; color: var(--ink, #14201A); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rp-sec__count {
-  flex: none; min-width: 28px; height: 26px; padding: 0 9px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
-  background: #E9EEEB; color: #3F4F47; font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums;
+  flex: none; min-width: 24px; height: 22px; padding: 0 8px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+  background: #E9EEEB; color: #3F4F47; font-size: 11.5px; font-weight: 800; font-variant-numeric: tabular-nums;
 }
 .rp-sec__all {
   flex: none; margin-left: auto; min-height: 44px; display: inline-flex; align-items: center; gap: 1px; padding: 0 0 0 8px; border: 0; background: none;
-  color: var(--rp-accent, #17803F); font-size: clamp(13px, 3.7vw, 14.5px); font-weight: 800; white-space: nowrap; -webkit-tap-highlight-color: transparent;
+  color: var(--rp-accent, #17803F); font-size: clamp(12px, 3.3vw, 13.5px); font-weight: 800; white-space: nowrap; -webkit-tap-highlight-color: transparent;
 }
 .rp-sec__all:active { opacity: 0.6; }
-.rp-sheet .rest-closed { margin-top: 10px; padding: 10px 12px; border-radius: 14px; justify-content: flex-start; text-align: left; font-size: clamp(12.5px, 3.4vw, 13.5px); line-height: 1.35; }
+.rp-sheet .rest-closed { margin-top: 10px; padding: 10px 12px; border-radius: 14px; justify-content: flex-start; text-align: left; font-size: clamp(11.5px, 3.1vw, 12.5px); line-height: 1.35; }
 
 /* Slayder: grid, touch + scroll-snap, o'z konteyneri ichida (sahifani yonga surmaydi) */
 .restaurant .rest-row {
@@ -284,17 +284,17 @@ img.review-card__avatar { object-fit: cover; }
 
 /* Karta: tuzilma ustun (rasm · nom · narx); hamma karta bir xil baland, narxlar BIR XIL qatorda */
 .restaurant .dscard {
-  position: relative; display: flex; flex-direction: column; min-width: 0; padding: 8px 8px 10px; text-align: left;
+  position: relative; display: flex; flex-direction: column; min-width: 0; padding: 7px 7px 9px; text-align: left;
   border-radius: 18px; border: 1px solid var(--rp-line); background: #fff;
   box-shadow: 0 1px 2px rgba(16, 40, 24, 0.04), 0 6px 16px rgba(16, 40, 24, 0.06);
 }
 .restaurant .dscard__photo { position: static; flex: none; margin: 0; border-radius: 14px; overflow: hidden; }
 .restaurant .dscard__photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.restaurant .dscard__badge { top: 14px; left: 14px; max-width: calc(100% - 64px); }
-.restaurant .dscard__badge--discount { padding: 3px 8px; border-radius: 999px; background: #D92D33; font-size: 11px; font-weight: 800; line-height: 1.2; }
+.restaurant .dscard__badge { top: 12px; left: 12px; max-width: calc(100% - 56px); }
+.restaurant .dscard__badge--discount { padding: 2px 7px; border-radius: 999px; background: #D92D33; font-size: 10px; font-weight: 800; line-height: 1.2; }
 .restaurant .dscard__badge--hit { padding: 3px 8px; border-radius: 999px; background: var(--rp-accent); color: #fff; font-size: 10.5px; font-weight: 800; }
 .restaurant .dscard__fav {
-  position: absolute; top: 13px; right: 13px; z-index: 2; width: 27px; height: 27px; border-radius: 50%;
+  position: absolute; top: 11px; right: 11px; z-index: 2; width: 25px; height: 25px; border-radius: 50%;
   background: rgba(255, 255, 255, 0.92); color: #6F7F77; display: flex; align-items: center; justify-content: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14); -webkit-tap-highlight-color: transparent; transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1), color 160ms;
 }
@@ -302,20 +302,20 @@ img.review-card__avatar { object-fit: cover; }
 .restaurant .dscard__fav:active { transform: scale(0.84); }
 .restaurant .dscard__fav.is-on { color: #D92D33; }
 .restaurant .dscard__add {
-  position: absolute; right: 8px; bottom: 8px; width: 29px; height: 29px; border-radius: 10px; background: var(--rp-accent);
+  position: absolute; right: 7px; bottom: 7px; width: 27px; height: 27px; border-radius: 9px; background: var(--rp-accent);
   box-shadow: 0 4px 10px rgba(var(--rp-accent-rgb), 0.38);
 }
 .restaurant .dscard.is-closed .dscard__add { background: #8E9C95; box-shadow: none; }
 .restaurant .dscard__name {
-  flex: none; margin-top: 8px; min-height: 2.44em; font-size: clamp(12px, 3.3vw, 13px); font-weight: 700; line-height: 1.22; color: var(--ink, #14201A);
+  flex: none; margin-top: 7px; min-height: 2.44em; font-size: clamp(11px, 3vw, 12px); font-weight: 700; line-height: 1.22; color: var(--ink, #14201A);
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; overflow-wrap: anywhere;   /* maks. 2 qator */
 }
 .restaurant .dscard__pack { flex: none; }
 /* Narx bloki: pastga yopishadi; 2-qator (eski narx) har doim joy oladi → asosiy narx hamma kartada bir chiziqda */
-.restaurant .dscard__price { flex: none; margin-top: auto; padding-top: 5px; padding-right: 33px; display: grid; grid-template-rows: auto 1.25em; align-content: start; gap: 1px; min-width: 0; }
-.restaurant .dscard__price-main { font-size: clamp(13px, 3.6vw, 14px); font-weight: 800; letter-spacing: -0.1px; color: var(--ink, #14201A); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.restaurant .dscard__cur { font-size: 10.5px; font-weight: 500; color: var(--rp-text-2); }
-.restaurant .dscard__price-old { font-size: 10.5px; line-height: 1.25; color: var(--rp-text-2); text-decoration: line-through; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.restaurant .dscard__price { flex: none; margin-top: auto; padding-top: 4px; padding-right: 31px; display: grid; grid-template-rows: auto 1.25em; align-content: start; gap: 1px; min-width: 0; }
+.restaurant .dscard__price-main { font-size: clamp(12px, 3.3vw, 13px); font-weight: 800; letter-spacing: -0.1px; color: var(--ink, #14201A); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.restaurant .dscard__cur { font-size: 10px; font-weight: 500; color: var(--rp-text-2); }
+.restaurant .dscard__price-old { font-size: 10px; line-height: 1.25; color: var(--rp-text-2); text-decoration: line-through; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Bo'sh/yopiq/rasm holati: matn kontrasti */
 .restaurant .dscard.is-closed .dscard__photo, .restaurant .dscard.is-closed .dscard__name, .restaurant .dscard.is-closed .dscard__price { opacity: 0.5; }
