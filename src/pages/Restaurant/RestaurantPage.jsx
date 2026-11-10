@@ -10,7 +10,8 @@ import { BottomNav } from '@/components/BottomNav';
 import { useBack } from '@/hooks/useBack';
 import { useSyncSection } from '@/hooks/useSyncSection';
 import { isStoreRestaurant } from '@/lib/storeKind';
-import { RestaurantBanner } from '@/components/DishPhoto';
+import { RestaurantHero, RestaurantIdentity, RestaurantStats, ReserveBanner } from '@/components/RestaurantPage/RestaurantHeader';
+import { SectionChips } from '@/components/RestaurantPage/SectionChips';
 import { RestaurantInfoSheet } from '@/components/RestaurantInfoSheet';
 import { useI18n } from '@/i18n';
 import { isDiscountedDish } from '@/lib/discount';
@@ -215,28 +216,21 @@ export function RestaurantPage() {
   }, [restaurantDishes, location.state, location.pathname, navigate]);
 
   const [active, setActive] = useState('');
+  // "Barchasini ko'rish": bo'lim karuseldan 2 ustunli setkaga yoyiladi (tanlanmagan bo'lsa — standart qoida pastda)
+  const [expanded, setExpanded] = useState({});
   const tabsRef = useRef(null);
   // Bosilgandan keyin kuzatuvchi darhol boshqa bo'limga
   // o'tkazib yubormasligi uchun qisqa muddat to'xtatiladi
   const lockRef = useRef(0);
 
   /*
-   * ═══ MENYU KO'RINISHI: QATOR YOKI TARMOQ ═══
-   *
-   * Kategoriyalar KO'P bo'lsa — har biri gorizontal qatorda.
-   * Aks holda bitta kategoriya butun ekranni egallab, mijoz
-   * qolganini topish uchun uzoq surishga majbur bo'lardi.
-   *
-   * Kategoriya IKKITA yoki undan kam bo'lsa — bu muammo yo'q.
-   * O'shanda gorizontal surish faqat xalaqit beradi: mijoz
-   * ekranda 2-3 ta taomni ko'radi, qolganini ko'rish uchun
-   * yon tomonga surishi kerak, garchi sahifada bo'sh joy
-   * bo'lsa ham. Tarmoq ko'rinishida hammasi ko'rinib turadi.
-   *
-   * Sharhlar bo'limi kategoriya sanalmaydi — u menyu emas.
+   * MENYU KO'RINISHI — hamma restoranda BIR XIL: har bo'lim gorizontal karusel + "Barchasini ko'rish".
+   * Bo'limlar 1–2 ta bo'lsa karusel boshidan YOYILGAN (2 ustunli setka) — sahifada bo'sh joy bor, surish shart emas.
+   * Mijoz istalgan bo'limni "Barchasini ko'rish" / "Yig'ish" bilan almashtira oladi.
    */
   const dishSections = sections.filter(([name]) => name !== REVIEWS_TAB && name !== SALE_TAB).length;
-  const gridLayout = dishSections > 0 && dishSections <= 2;
+  const defaultExpanded = dishSections > 0 && dishSections <= 2;
+  const toggleSection = (name) => { haptic(); setExpanded((m) => ({ ...m, [name]: !(m[name] ?? defaultExpanded) })); };
 
   function scrollTo(name) {
     setActive(name);
@@ -308,14 +302,46 @@ export function RestaurantPage() {
     );
   }
 
+  // Stol bron qilish: restoranda yoqilgan bo'lsa va bu do'kon bo'lmasa
+  const canReserve = restaurant.reservationEnabled !== false && !isStore;
+  // Statistika kartasi: ma'lumot bor ustunlargina (3–4 ta). Bepul yetkazish — birinchi ustun yorlig'ida
+  const freeDelivery = isFreeDelivery(restaurant);
+  const statItems = [
+    ...(Number.isFinite(restaurant.deliveryMin) && Number.isFinite(restaurant.deliveryMax) ? [{
+      key: 'time', tone: 'accent', icon: 'time',
+      value: `${restaurant.deliveryMin}–${restaurant.deliveryMax} ${t('min')}`,
+      label: freeDelivery ? `${t('free')} ${t('deliveryLower')}` : t('restDelivery'), accentLabel: freeDelivery,
+    }] : []),
+    ...(restaurant.rating > 0 ? [{ key: 'rating', tone: 'green', icon: 'star', value: Number(restaurant.rating).toFixed(1), label: t('restRating'), onClick: () => scrollTo(REVIEWS_TAB) }] : []),
+    ...(hasCoords ? [{ key: 'route', tone: 'accent', icon: 'nav', value: t('routeLabel'), label: t('routeSubLabel'), onClick: openRoute }] : []),
+    ...(hasInfo ? [{ key: 'info', tone: 'blue', icon: 'info', value: t('termsLabel'), label: t('workingHoursLabel'), onClick: () => { haptic(); setInfoOpen(true); } }] : []),
+  ];
+
   return (
     <div className="app-shell restaurant">
-      {/* Banner */}
-      <div className="rest-banner">
-        <RestaurantBanner restaurant={restaurant} height={150} />
+      <RestaurantHero
+        restaurant={restaurant}
+        isFav={isFav}
+        onBack={goBack}
+        onFav={() => { haptic(); toggleFavorite('restaurant', id); }}
+        onMore={() => { haptic(); setInfoOpen(true); }}
+        backLabel={t('back')}
+        moreLabel={t('restMore')}
+      />
 
-        {/* Yopiq bo'lsa ogohlantiramiz */}
-        {restaurant && !isOpen && (
+      {/* Oq varaq: belgi · NOM · holat · statistika · bron — hamma restoranda bir xil dizayn, har biri o'z ma'lumoti bilan */}
+      <div className="rp-sheet">
+        <RestaurantIdentity
+          restaurant={restaurant}
+          isOpen={isOpen}
+          offToday={offToday}
+          hoursLabel={hoursLabel}
+          onHours={() => { haptic(); setInfoOpen(true); }}
+          t={t}
+        />
+
+        {/* Yopiq bo'lsa sababni aytamiz (ish vaqti/kunlari) */}
+        {!isOpen && (
           <div className="rest-closed">
             <Icon name="clock" size={16} color="var(--danger)" />
             <span>
@@ -325,111 +351,22 @@ export function RestaurantPage() {
             </span>
           </div>
         )}
-        {/*
-          Orqaga: hooks/useBack.js (lib/backRoute.js qoidasi). Bron/taom/savat tarixi chalkashmasin deb,
-          faqat RO'YXAT sahifasidan kelingan bo'lsa tarix bo'yicha qaytadi; aks holda (havola, bron sahifasidan
-          qaytish) o'z bo'limining bosh sahifasiga: do'kon → Market, restoran → Lokma Go. */}
-        <button onClick={goBack} className="rest-banner__btn rest-banner__btn--back" aria-label={t('back')}>
-          <Icon name="arrowLeft" size={18} color="#fff" />
-        </button>
-        <button onClick={() => { haptic(); toggleFavorite('restaurant', id); }} className="rest-banner__btn rest-banner__btn--fav" aria-label="♥">
-          <Icon name="heart" size={17} color={isFav ? 'var(--brand)' : '#fff'} style={isFav ? { fill: 'var(--brand)' } : {}} />
-        </button>
+
+        <RestaurantStats items={statItems} />
+
+        {/* Stol bron qilish — do'konda stol yo'q (server isStore beradi; eski serverda kind/category bo'yicha ham yashiriladi) */}
+        {canReserve && <ReserveBanner label={t('reserveTable')} onClick={() => navigate(`/restaurant/${id}/reserve`)} />}
       </div>
 
-      {/* Ma'lumot — Uzum uslubi: nom markazda + stat kartalari */}
-      <div className="rest-info">
-        <h1 className="rest-info__name">{restaurant.name}</h1>
-        {restaurant.cuisine && <div className="rest-info__cuisine">{restaurant.cuisine}</div>}
-
-        {/* Stat kartalari */}
-        <div className="rest-stats">
-          <div className="rest-stat">
-            <span className="rest-stat__icon rest-stat__icon--time">
-              <Icon name="clock" size={20} color="var(--brand)" />
-            </span>
-            <span className="rest-stat__value">{restaurant.deliveryMin}–{restaurant.deliveryMax} {t('min')}</span>
-            <span className="rest-stat__label">eshikkacha</span>
-          </div>
-
-          {/* Reyting — faqat baho berilgan bo'lsa ko'rinadi */}
-          {restaurant.rating > 0 && (
-            <button onClick={() => scrollTo(REVIEWS_TAB)} className="rest-stat">
-              <span className="rest-stat__icon rest-stat__icon--rating">
-                <Icon name="star" size={20} color="var(--success)" />
-              </span>
-              <span className="rest-stat__value">{Number(restaurant.rating).toFixed(1)}</span>
-              <span className="rest-stat__label">reyting</span>
-            </button>
-          )}
-
-          {isFreeDelivery(restaurant) && (
-            <div className="rest-stat">
-              <span className="rest-stat__icon rest-stat__icon--free">
-                <Icon name="bike" size={20} color="var(--brand)" />
-              </span>
-              <span className="rest-stat__value">{t('free')}</span>
-              <span className="rest-stat__label">{t('deliveryLower')}</span>
-            </div>
-          )}
-
-          {/*
-            ═══ YO'NALISH ═══
-            Faqat restoran koordinatalari bo'lsa ko'rinadi.
-            Koordinatasiz Yandex faqat qidiruv oynasini ochardi
-            va mijoz "nega ishlamadi?" deb o'ylardi — tugma
-            umuman bo'lmagani afzal.
-          */}
-          {hasCoords && (
-            <button onClick={openRoute} className="rest-stat">
-              <span className="rest-stat__icon rest-stat__icon--route">
-                <Icon name="navigation" size={20} color="var(--brand)" />
-              </span>
-              <span className="rest-stat__value">{t('routeLabel')}</span>
-              <span className="rest-stat__label">{t('routeSubLabel')}</span>
-            </button>
-          )}
-
-          {/* Ish tartibi — faqat ma'lumot kiritilgan bo'lsa */}
-          {hasInfo && (
-            <button onClick={() => setInfoOpen(true)} className="rest-stat">
-              <span className="rest-stat__icon rest-stat__icon--info">
-                <Icon name="info" size={20} color="var(--info)" />
-              </span>
-              <span className="rest-stat__value">{t('termsLabel')}</span>
-              <span className="rest-stat__label">{t('workingHoursLabel')}</span>
-            </button>
-          )}
-        </div>
-
-        {/* Stol bron qilish — bizning ustunligimiz */}
-        {/* Do'konda stol yo'q: server isStore beradi; eski serverda kind/category bo'yicha ham yashiriladi */}
-        {restaurant.reservationEnabled !== false && !restaurant.isStore && restaurant.kind !== 'shop'
-          && !['magazin_oziq', 'magazin_meva', 'magazin'].includes(restaurant.category) && (
-          <button onClick={() => navigate(`/restaurant/${id}/reserve`)} className="rest-reserve-btn">
-            <Icon name="calendarPlus" size={17} color="var(--brand)" /> {t('reserveTable')}
-          </button>
-        )}
-      </div>
-
-      {/* Tablar */}
-      <div ref={tabsRef} className="rest-tabs no-scrollbar">
-        {sections.map(([name]) => {
-          const isTabActive = name === active;
-          const label = name === REVIEWS_TAB ? `${t('reviewsLabel')} (${restaurantReviews.length})`
-            : name === SALE_TAB ? `🔥 ${t('saleTab')}` : name;
-          return (
-            <button
-              key={name}
-              onClick={() => scrollTo(name)}
-              data-on={isTabActive ? '1' : '0'}
-              className={`rest-tab ${isTabActive ? 'is-active' : ''}`}
-            >
-              {label}
-            </button>
-          );
-        })}
-      </div>
+      {/* Bo'limlar — ikonkali chiplar */}
+      <SectionChips
+        sections={sections}
+        active={active}
+        onPick={scrollTo}
+        innerRef={tabsRef}
+        kindOf={(name) => (name === REVIEWS_TAB ? 'reviews' : name === SALE_TAB ? 'sale' : 'dish')}
+        labelOf={(name) => (name === REVIEWS_TAB ? `${t('reviewsLabel')} (${restaurantReviews.length})` : name === SALE_TAB ? t('saleTab') : name)}
+      />
 
       {/* Menyu + sharhlar */}
       <div className="rest-content">
@@ -499,27 +436,38 @@ export function RestaurantPage() {
               </div>
             );
           }
+          const isExpanded = expanded[name] ?? defaultExpanded;
+          const canExpand = !(dishesLoading || catsLoading) && list.length > 3;
           return (
             <div key={name} id={`sec-${name}`} className="rest-section">
-              <div className="rest-section__head">
-                <div className="rest-section__title">{name}</div>
-                <span className="rest-section__count">{list.length}</span>
+              <div className="rp-sec__head">
+                <h2 className="rp-sec__title">{name}</h2>
+                <span className="rp-sec__count">{list.length}</span>
+                {canExpand && (
+                  <button type="button" className="rp-sec__all" onClick={() => toggleSection(name)} aria-expanded={isExpanded}>
+                    {isExpanded ? t('restCollapse') : t('marketViewAll')}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={isExpanded ? { transform: 'rotate(-90deg)' } : undefined}><path d="M9 5l7 7-7 7" /></svg>
+                  </button>
+                )}
               </div>
 
               {/* Gorizontal slayd — har kategoriya o'z qatorida.
                   Vertikal ro'yxatda bitta kategoriya butun ekranni
                   egallab, qolganini topish uchun uzoq surish
                   kerak edi. */}
-              <div className={gridLayout ? 'rest-grid' : 'rest-row no-scrollbar'}>
+              <div className={isExpanded && !(dishesLoading || catsLoading) ? 'rest-grid' : 'rest-row no-scrollbar'}>
                 {dishesLoading || catsLoading
-                  ? Array.from({ length: gridLayout ? 6 : 3 }).map((_, i) => (
-                      <div key={i} className={gridLayout ? 'rest-grid__sk' : 'rest-row__sk'} />
+                  ? Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="rest-row__sk" />
                     ))
                   : list.map((d) => <DishScrollCard
                       key={d.id || d._id}
                       dish={d}
                       onClick={setModalDish}
                       showRestaurant={false}
+                      showFav
+                      showCurrency
+                      photoHeight={100}
                       disabled={!isOpen}
                       onDisabledTap={() => showClosed({
                         name: restaurant?.name,
