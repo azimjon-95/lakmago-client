@@ -8,9 +8,10 @@
   --rp-text-2: #55655D;                       /* ikkilamchi matn: oq fonda ~6:1 kontrast */
   --rp-pad: clamp(14px, 4vw, 24px);
   --rp-gap: clamp(10px, 3vw, 12px);
-  --rp-hero-h: clamp(190px, 52vw, 230px);
+  --rp-hero-h: clamp(176px, 48vw, 220px);
   --rp-cols: 3; --rp-gaps: 2;                  /* karusel: ko'rinadigan ustunlar va oraliqlar soni */
   width: 100%; max-width: 100%; overflow-x: clip;
+  -webkit-text-size-adjust: 100%; text-size-adjust: 100%;     /* iOS matnni o'zboshimcha kattalashtirmasin */
 }
 /* 601–768 planshet: kontent markazda (max 640); 769+ keng ekran: max-width 720 */
 @media (min-width: 601px) { .restaurant.app-shell { max-width: 640px; margin-inline: auto; } }
@@ -24,11 +25,11 @@
 .rp-hero { position: relative; z-index: 0; flex: none; width: 100%; height: var(--rp-hero-h); overflow: hidden; background: #1d1a16; }
 .rp-hero__shade { position: absolute; left: 0; right: 0; top: 0; height: 96px; pointer-events: none; background: linear-gradient(rgba(0, 0, 0, 0.5), transparent); }
 .rp-hbtn {
-  position: relative; width: 44px; height: 44px; border: 0; border-radius: 50%; color: #fff; flex: none;       /* touch target ≥44 (iOS) */
+  position: relative; width: 40px; height: 40px; border: 0; border-radius: 50%; color: #fff; flex: none;       /* ko'rinadigan 40; bosish maydoni 46 (≥44) */
   background: rgba(20, 18, 16, 0.55); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
   display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; transition: transform 140ms ease;
 }
-.rp-hbtn::before { content: ''; position: absolute; inset: -2px; }                                            /* hit area 48 (Android) */
+.rp-hbtn::before { content: ''; position: absolute; inset: -3px; }
 .rp-hbtn:active { transform: scale(0.92); }
 .rp-hbtn--back { position: absolute; top: clamp(10px, 3vw, 14px); left: var(--rp-pad); }
 .rp-hbtn.is-fav { color: var(--rp-accent); background: rgba(255, 255, 255, 0.92); }
@@ -43,45 +44,46 @@
 /* ── Logo + ma'lumot: bitta gorizontal blok ── */
 .rp-id { display: flex; align-items: center; gap: clamp(10px, 3vw, 14px); }
 .rp-logo {
-  flex-shrink: 0; width: clamp(72px, 21vw, 88px); aspect-ratio: 1 / 1; border-radius: clamp(20px, 6vw, 24px); overflow: hidden;
+  flex-shrink: 0; width: clamp(66px, 19.5vw, 80px); aspect-ratio: 1 / 1; border-radius: clamp(18px, 5.4vw, 22px); overflow: hidden;
   display: flex; align-items: center; justify-content: center;
   background: linear-gradient(145deg, var(--rp-accent) 0%, var(--rp-accent-dark) 100%);
   box-shadow: 0 10px 24px rgba(var(--rp-accent-rgb), 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 .rp-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.rp-logo__mono { color: #fff; font-size: clamp(25px, 7.4vw, 31px); font-weight: 800; letter-spacing: 1px; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25); }
+.rp-logo__mono { color: #fff; font-size: clamp(22px, 6.6vw, 28px); font-weight: 800; letter-spacing: 1px; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25); }
 .rp-id__main { flex: 1 1 auto; min-width: 0; }
 /* Nom 23–27 px; uzun nom 3 qatorgacha wrap, keyin ellipsis; tasdiq belgisi nom YONIDA */
 .rp-name {
   margin: 0; display: flex; align-items: flex-start; gap: 6px;
-  font-size: clamp(23px, 6.6vw, 27px); font-weight: 800; letter-spacing: -0.5px; line-height: 1.12; color: var(--ink, #14201A);
+  font-size: clamp(19px, 5.6vw, 23px); font-weight: 800; letter-spacing: -0.4px; line-height: 1.15; color: var(--ink, #14201A);
 }
 .rp-name__t { min-width: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .rp-verified { flex: none; width: 0.82em; height: 0.82em; margin-top: 0.2em; }
-.rp-cuisine { display: flex; align-items: center; gap: 6px; margin-top: 4px; color: var(--rp-text-2); font-size: clamp(14px, 3.9vw, 16px); font-weight: 500; line-height: 1.25; }
+.rp-cuisine { display: flex; align-items: center; gap: 5px; margin-top: 3px; color: var(--rp-text-2); font-size: clamp(12.5px, 3.4vw, 14px); font-weight: 500; line-height: 1.25; }
+.rp-cuisine svg { width: 14px; height: 14px; }
 .rp-cuisine > span { min-width: 0; overflow-wrap: anywhere; }
 .rp-cuisine svg { flex: none; }
-.rp-pills { display: flex; flex-wrap: wrap; gap: 6px 8px; margin-top: 8px; }
+.rp-pills { display: flex; flex-wrap: wrap; gap: 5px 6px; margin-top: 7px; }
 .rp-status {
-  display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 4px 12px 4px 10px; border-radius: 999px;
-  font-size: clamp(13px, 3.6vw, 14px); font-weight: 700; line-height: 1.15;
+  display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 3px 10px 3px 9px; border-radius: 999px;
+  font-size: clamp(11.5px, 3.2vw, 12.5px); font-weight: 700; line-height: 1.15;
 }
-.rp-status i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.rp-status i { flex: none; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 .rp-status.is-open { background: #E3F4EA; color: #136B34; }
 .rp-status.is-closed { background: #FDECEC; color: #B3261E; }
 .rp-hours {
-  position: relative; display: inline-flex; align-items: center; gap: 5px; min-height: 32px; padding: 4px 7px 4px 10px; border-radius: 999px;
-  border: 1px solid var(--rp-line); background: #fff; color: var(--ink, #14201A); font-size: clamp(13px, 3.6vw, 14px); font-weight: 600; line-height: 1.15;
+  position: relative; display: inline-flex; align-items: center; gap: 4px; min-height: 30px; padding: 3px 6px 3px 9px; border-radius: 999px;
+  border: 1px solid var(--rp-line); background: #fff; color: var(--ink, #14201A); font-size: clamp(11.5px, 3.2vw, 12.5px); font-weight: 600; line-height: 1.15;
   -webkit-tap-highlight-color: transparent;
 }
-.rp-hours::before { content: ''; position: absolute; inset: -6px -2px; }                                       /* touch target ≥44 */
-.rp-hours svg { color: var(--rp-text-2); flex: none; }
+.rp-hours::before { content: ''; position: absolute; inset: -7px -2px; }                                       /* bosish maydoni ≥44 */
+.rp-hours svg { color: var(--rp-text-2); flex: none; width: 14px; height: 14px; }
 .rp-hours:active { background: #F4F6F5; }
 
 /* ── Statistika: HAR DOIM 4 ta teng ustun; ikonka, qiymat, izoh markazda; ustunlar orasida divider ── */
 .rp-stats {
-  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: clamp(10px, 3vw, 14px); padding: clamp(10px, 3vw, 14px) 2px;
-  background: #fff; border-radius: clamp(18px, 5.6vw, 22px); border: 1px solid rgba(16, 40, 24, 0.05);
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: clamp(8px, 2.6vw, 12px); padding: clamp(8px, 2.4vw, 12px) 2px;
+  background: #fff; border-radius: clamp(16px, 5vw, 20px); border: 1px solid rgba(16, 40, 24, 0.05);
   box-shadow: 0 1px 2px rgba(16, 40, 24, 0.04), 0 8px 24px rgba(16, 40, 24, 0.08);
 }
 .rp-stat {
@@ -92,7 +94,7 @@
 button.rp-stat:active .rp-stat__ico { transform: scale(0.92); }
 .rp-stat.is-off { opacity: 0.55; }
 .rp-stat__ico {
-  flex: none; width: clamp(52px, 14.5vw, 64px); aspect-ratio: 1 / 1; border-radius: 50%; margin-bottom: 6px;
+  flex: none; width: clamp(46px, 12.8vw, 56px); aspect-ratio: 1 / 1; border-radius: 50%; margin-bottom: 5px;
   display: flex; align-items: center; justify-content: center; transition: transform 140ms ease;
 }
 .rp-stat__ico svg { width: 42%; height: 42%; }
@@ -101,47 +103,48 @@ button.rp-stat:active .rp-stat__ico { transform: scale(0.92); }
 .rp-stat--blue .rp-stat__ico { background: #E8F0FB; color: #1F5FA8; }
 /* Uzun matn (yoki katta shrift) boshqa ustunni siqmaydi: 2 qatorgacha wrap */
 .rp-stat__val, .rp-stat__lbl { max-width: 100%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; line-height: 1.15; }
-.rp-stat__val { font-size: clamp(13px, 3.7vw, 15px); font-weight: 800; color: var(--ink, #14201A); }
-.rp-stat__lbl { font-size: clamp(11.5px, 3.1vw, 12.5px); color: var(--rp-text-2); }
+.rp-stat__val { font-size: clamp(12px, 3.3vw, 13.5px); font-weight: 800; color: var(--ink, #14201A); }
+.rp-stat__lbl { font-size: clamp(10.5px, 2.85vw, 11.5px); color: var(--rp-text-2); }
 .rp-stat__lbl.is-accent { color: #136B34; font-weight: 700; }
 
 /* ── "Stol bron qilish" banneri: 76–90 px; chapda stol (aspect saqlanadi), markazda matn, o'ngda tugma ── */
 .rp-reserve {
-  position: relative; width: 100%; min-height: clamp(76px, 21vw, 90px); margin-top: clamp(10px, 3vw, 14px); padding: 6px clamp(10px, 3vw, 14px) 6px 0;
-  display: grid; grid-template-columns: clamp(112px, 33vw, 150px) minmax(0, 1fr) auto; align-items: center; column-gap: 6px;
-  border: 0; border-radius: clamp(18px, 5.4vw, 22px); overflow: hidden; color: #F7D98E; text-align: left;
+  position: relative; width: 100%; min-height: clamp(66px, 18vw, 80px); margin-top: clamp(8px, 2.6vw, 12px); padding: 5px clamp(10px, 3vw, 14px) 5px 0;
+  display: grid; grid-template-columns: clamp(100px, 29vw, 134px) minmax(0, 1fr) auto; align-items: center; column-gap: 6px;
+  border: 0; border-radius: clamp(16px, 5vw, 20px); overflow: hidden; color: #F7D98E; text-align: left;
   background: linear-gradient(100deg, var(--rp-accent-deep) 0%, var(--rp-accent-dark) 58%, var(--rp-accent) 150%);
   box-shadow: 0 8px 20px rgba(var(--rp-accent-rgb), 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.14);
   -webkit-tap-highlight-color: transparent; transition: transform 140ms ease;
 }
 .rp-reserve:active { transform: scale(0.985); }
 .rp-reserve__pic {
-  position: absolute; left: -4px; bottom: -10px; width: clamp(122px, 36vw, 164px); pointer-events: none;
+  position: absolute; left: -4px; bottom: -9px; width: clamp(108px, 31vw, 146px); pointer-events: none;
   -webkit-mask-image: linear-gradient(90deg, #000 64%, transparent 100%); mask-image: linear-gradient(90deg, #000 64%, transparent 100%);
 }
 .rp-reserve__pic img { display: block; width: 100%; height: auto; aspect-ratio: 640 / 413; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.35)); }
 .rp-reserve__label { position: relative; grid-column: 2; min-width: 0; display: flex; align-items: center; gap: 8px; }
-.rp-reserve__label svg { flex: none; }
-.rp-reserve__label b { font-size: clamp(16px, 4.7vw, 19px); font-weight: 800; letter-spacing: -0.2px; line-height: 1.15; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.rp-reserve__label svg { flex: none; width: 20px; height: 20px; }
+.rp-reserve__label b { font-size: clamp(14.5px, 4vw, 16.5px); font-weight: 800; letter-spacing: -0.2px; line-height: 1.15; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .rp-reserve__go {
-  position: relative; grid-column: 3; flex: none; width: clamp(44px, 12vw, 50px); aspect-ratio: 1 / 1; border-radius: 50%;
+  position: relative; grid-column: 3; flex: none; width: clamp(40px, 10.5vw, 46px); aspect-ratio: 1 / 1; border-radius: 50%;
   display: flex; align-items: center; justify-content: center; background: linear-gradient(160deg, #FBE3A1, #E2A83A); color: #3A1F0C; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* ── Kategoriya chiplari: bir qator, gorizontal scroll, ~2.5–3 ta ko'rinadi, 44–50 px ── */
 .rp-chips {
-  position: sticky; top: 0; z-index: 10; display: flex; gap: clamp(8px, 2.4vw, 10px); overflow-x: auto; overflow-y: hidden;
-  padding: clamp(10px, 3vw, 14px) var(--rp-pad); scroll-padding-inline: var(--rp-pad); scroll-snap-type: x proximity;
+  position: sticky; top: 0; z-index: 10; display: flex; gap: clamp(7px, 2.2vw, 9px); overflow-x: auto; overflow-y: hidden;
+  padding: clamp(8px, 2.6vw, 12px) var(--rp-pad); scroll-padding-inline: var(--rp-pad); scroll-snap-type: x proximity;
   background: var(--surface, #fff); -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; scrollbar-width: none;
 }
 .rp-chips::-webkit-scrollbar { display: none; }
 .rp-chip {
   flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: 8px; scroll-snap-align: start;
-  min-height: clamp(44px, 12vw, 50px); min-width: clamp(104px, 29vw, 150px); padding: 0 clamp(12px, 3.6vw, 16px); border: 0; border-radius: clamp(14px, 4vw, 16px);
-  background: #F1F4F2; color: var(--ink, #14201A); font-size: clamp(14px, 3.8vw, 15px); font-weight: 700; white-space: nowrap;   /* nom kesilmaydi */
+  position: relative; min-height: clamp(40px, 10.6vw, 46px); min-width: clamp(104px, 28vw, 140px); padding: 0 clamp(11px, 3.2vw, 15px); border: 0; border-radius: clamp(13px, 3.8vw, 15px);
+  background: #F1F4F2; color: var(--ink, #14201A); font-size: clamp(12.5px, 3.4vw, 14px); font-weight: 700; white-space: nowrap;   /* nom kesilmaydi */
   -webkit-tap-highlight-color: transparent; transition: background 200ms ease, color 200ms ease, box-shadow 200ms ease, transform 140ms ease;
 }
-.rp-chip svg { flex: none; }
+.rp-chip svg { flex: none; width: 17px; height: 17px; }
+.rp-chip::before { content: ''; position: absolute; inset: -2px 0; }                                          /* bosish maydoni ≥44 */
 .rp-chip:active { transform: scale(0.96); }
 .rp-chip.is-active { background: var(--rp-accent-dark); color: #fff; box-shadow: 0 6px 14px rgba(var(--rp-accent-rgb), 0.34); }
 
