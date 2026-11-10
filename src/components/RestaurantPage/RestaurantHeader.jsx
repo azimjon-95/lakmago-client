@@ -1,12 +1,14 @@
 import { RestaurantBanner } from '@/components/DishPhoto';
-import { monogram, nameFontSize } from '@/lib/restaurantUi';
+import { monogram } from '@/lib/restaurantUi';
 import './RestaurantHeader.css';
 
 /*
  * RESTORAN / DO'KON SAHIFASI — YAGONA SARLAVHA DIZAYNI (hamma restoranda bir xil).
  *   Muqova (+ orqaga · sevimli · ma'lumot)  →  oq varaq: belgi, NOM, tasdiq, tur, holat/ish vaqti
  *   →  statistika kartasi  →  "Stol bron qilish" banneri.
- * Hammasi restoranning O'Z ma'lumotidan (nom, tur, soat, reyting...); rang bo'limga qarab: Go — to'q sariq, Market — yashil.
+ * Hammasi restoranning O'Z ma'lumotidan (nom, tur, soat, reyting, logoUrl, brandColor, muqova); komponent hammasi uchun BIR XIL
+ * (TOTLI, LORUS, ZIYNAT...) — farq faqat brend rangi, logotip, banner va kontent.
+ * O'lchamlar RestaurantHeader.css dagi `clamp()` tokenlariga bog'langan (320–768+ px), qat'iy pikselga emas.
  */
 
 const S = ({ children, size = 20, sw = 2, ...p }) => (
@@ -32,14 +34,14 @@ const VerifiedBadge = ({ label }) => (
   </svg>
 );
 
-export function RestaurantHero({ restaurant, isFav, onBack, onFav, onMore, backLabel, moreLabel }) {
+export function RestaurantHero({ restaurant, isFav, onBack, onFav, onMore, backLabel, moreLabel, favLabel }) {
   return (
     <div className="rp-hero">
-      <RestaurantBanner restaurant={restaurant} height={216} />
+      <RestaurantBanner restaurant={restaurant} height="100%" />
       <div className="rp-hero__shade" aria-hidden="true" />
       <button type="button" className="rp-hbtn rp-hbtn--back" onClick={onBack} aria-label={backLabel}><IcoBack /></button>
       <div className="rp-hero__right">
-        <button type="button" className={`rp-hbtn${isFav ? ' is-fav' : ''}`} onClick={onFav} aria-pressed={isFav} aria-label="♥"><IcoHeart filled={isFav} /></button>
+        <button type="button" className={`rp-hbtn${isFav ? ' is-fav' : ''}`} onClick={onFav} aria-pressed={isFav} aria-label={favLabel}><IcoHeart filled={isFav} /></button>
         <button type="button" className="rp-hbtn" onClick={onMore} aria-label={moreLabel}><IcoDots /></button>
       </div>
     </div>
@@ -53,11 +55,11 @@ export function RestaurantIdentity({ restaurant, isOpen, offToday, hoursLabel, o
     <div className="rp-id" data-testid="rp-identity">
       <div className="rp-logo" aria-hidden="true">
         {logo && String(logo).startsWith('http')
-          ? <img src={logo} alt="" loading="lazy" decoding="async" />
+          ? <img src={logo} alt="" width="88" height="88" loading="lazy" decoding="async" />
           : <span className="rp-logo__mono">{monogram(restaurant.name)}</span>}
       </div>
       <div className="rp-id__main">
-        <h1 className="rp-name" style={{ fontSize: nameFontSize(restaurant.name) }}>
+        <h1 className="rp-name">
           <span className="rp-name__t">{restaurant.name}</span><VerifiedBadge label={t('restVerified')} />
         </h1>
         {restaurant.cuisine && <div className="rp-cuisine"><IcoPin /><span>{restaurant.cuisine}</span></div>}
@@ -74,15 +76,20 @@ export function RestaurantIdentity({ restaurant, isOpen, offToday, hoursLabel, o
   );
 }
 
-/** items: [{ key, tone, icon, value, label, onClick? }] — 3-4 ustun, bo'lmagan ma'lumot ustuni chizilmaydi */
+/**
+ * Har doim 4 ta TENG ustun (yetkazish · reyting · yo'nalish · shartlar).
+ * items: [{ key, tone, icon, value, label, onClick?, disabled? }] — ma'lumot bo'lmasa ustun o'chirilmaydi, xiralashadi (kolonkalar siljimaydi).
+ */
 export function RestaurantStats({ items }) {
   const ico = { time: <IcoClockBig />, star: <IcoStar />, nav: <IcoNav />, info: <IcoInfo /> };
   return (
-    <div className="rp-stats" style={{ '--n': items.length }} data-testid="rp-stats">
+    <div className="rp-stats" data-testid="rp-stats" role="group">
       {items.map((it) => {
-        const Tag = it.onClick ? 'button' : 'div';
+        const interactive = Boolean(it.onClick) && !it.disabled;
+        const Tag = interactive ? 'button' : 'div';
         return (
-          <Tag key={it.key} type={it.onClick ? 'button' : undefined} className={`rp-stat rp-stat--${it.tone}`} onClick={it.onClick}>
+          <Tag key={it.key} type={interactive ? 'button' : undefined} className={`rp-stat rp-stat--${it.tone}${it.disabled ? ' is-off' : ''}`} onClick={interactive ? it.onClick : undefined}
+            aria-label={`${it.value}, ${it.label}`}>
             <span className="rp-stat__ico">{ico[it.icon]}</span>
             <span className="rp-stat__val">{it.value}</span>
             <span className={`rp-stat__lbl${it.accentLabel ? ' is-accent' : ''}`}>{it.label}</span>
@@ -95,10 +102,10 @@ export function RestaurantStats({ items }) {
 
 export function ReserveBanner({ label, onClick }) {
   return (
-    <button type="button" className="rp-reserve" onClick={onClick} data-testid="rp-reserve">
+    <button type="button" className="rp-reserve" onClick={onClick} data-testid="rp-reserve" aria-label={label}>
       <picture className="rp-reserve__pic" aria-hidden="true">
         <source srcSet="/restaurant/reserve-table.webp" type="image/webp" />
-        <img src="/restaurant/reserve-table.png" alt="" loading="lazy" decoding="async" draggable="false" />
+        <img src="/restaurant/reserve-table.png" width="640" height="413" alt="" loading="lazy" decoding="async" draggable="false" />
       </picture>
       <span className="rp-reserve__label"><IcoCalPlus /><b>{label}</b></span>
       <span className="rp-reserve__go" aria-hidden="true"><IcoChevRight /></span>
