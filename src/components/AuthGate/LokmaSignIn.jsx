@@ -7,6 +7,7 @@ import {
 } from '@/lib/tgLinkAuth';
 import './LokmaSignIn.css';
 import { DemoLoginForm } from './DemoLoginForm';
+import { AppleSignInButton } from './AppleSignInButton';   // Sign in with Apple (faqat iOS ilova; Telegram kirishidan mustaqil)
 import { useCapabilities, isNativeApp } from '@/lib/capabilities';
 
 /*
@@ -156,6 +157,17 @@ export function LokmaSignIn({ reason = 'order', onLoggedIn, onOtherMethod }) {
     setTimeout(() => { if (alive.current) doneRef.current?.(profile); }, 900);
   };
 
+  // Apple orqali kirish natijasi (faqat iOS): demo/Telegram bilan bir xil token va profil qo'llash
+  const onAppleOk = (data) => {
+    applyLoginTokens(data);
+    clearTgLoginCache();
+    const profile = profileFromLogin(data);
+    setName(profile.firstName || '');
+    setPhase('success');
+    haptic?.('success');
+    setTimeout(() => { if (alive.current) doneRef.current?.(profile); }, 900);
+  };
+
   if (phase === 'success') {
     return (
       <div className="lsi lsi--center" role="status">
@@ -246,6 +258,7 @@ export function LokmaSignIn({ reason = 'order', onLoggedIn, onOtherMethod }) {
       <button type="button" className="lsi-cta" onClick={go}>
         <Icon name="send" size={19} color="#fff" /><span>{t('lsi_cta')}</span>
       </button>
+      <AppleSignInButton onSuccess={onAppleOk} />
       <p className="lsi-secure"><Icon name="shieldCheck" size={14} color="var(--muted)" /> {t('lsi_secure')}</p>
       {onOtherMethod && <button type="button" className="lsi-link-btn lsi-link-btn--muted" onClick={onOtherMethod}>{t('lsi_other')}</button>}
       {demoAvailable && <button type="button" className="lsi-link-btn lsi-link-btn--muted lsi-link-btn--demo" onClick={() => setShowDemo(true)} data-testid="demo-enter">{t('demo_enter')}</button>}

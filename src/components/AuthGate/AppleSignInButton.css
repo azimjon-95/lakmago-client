@@ -1,0 +1,14 @@
+/* "Apple bilan davom etish" — Telegram CTA ostida (faqat iOS ilovada) */
+.apple-wrap { width: 100%; margin-top: 10px; }
+.apple-btn {
+  width: 100%; min-height: 52px; padding: 0 20px; display: flex; align-items: center; justify-content: center; gap: 9px;
+  border: 0; border-radius: 16px; background: #000; color: #fff; font-size: 17px; font-weight: 600; letter-spacing: -0.01em;
+  box-shadow: 0 10px 22px -12px rgba(0, 0, 0, 0.55); cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.apple-btn:active { transform: scale(0.98); opacity: 0.92; }
+.apple-btn:disabled { opacity: 0.6; }
+.apple-btn__logo { width: 20px; height: 20px; flex: none; margin-top: -2px; }
+.apple-err { margin: 8px 4px 0; font-size: 12.5px; line-height: 1.35; color: #C0362C; text-align: center; }
+@media (prefers-color-scheme: dark) { .apple-btn { background: #fff; color: #000; box-shadow: 0 10px 22px -12px rgba(255, 255, 255, 0.25); } }
+@media (prefers-reduced-motion: reduce) { .apple-btn { transition: none; } }
