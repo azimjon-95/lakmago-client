@@ -20,19 +20,20 @@ export function AppleSignInButton({ onSuccess }) {
   const available = useAppleLoginAvailable();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [code, setCode] = useState('');   // server/native xato kodi (masalan USER_CREATE_DUPLICATE) — qo'llab-quvvatlash uchun
   const busyRef = useRef(false);
   if (!available) return null;
 
   const click = async () => {
     if (busyRef.current) return;
-    busyRef.current = true; setBusy(true); setError('');
+    busyRef.current = true; setBusy(true); setError(''); setCode('');
     haptic?.('light');
     try {
       const data = await signInWithApple();
       onSuccess?.(data);
     } catch (e) {
       if (e?.kind === 'cancelled') { /* foydalanuvchi oynani yopdi — jim; Telegram va mehmon rejimi ishlayveradi */ }
-      else setError(t(e?.kind === 'blocked' ? 'apple_err_blocked' : 'apple_err'));
+      else { setError(t(e?.kind === 'blocked' ? 'apple_err_blocked' : 'apple_err')); setCode(String(e?.detail || e?.kind || '').slice(0, 40)); }
     } finally { busyRef.current = false; setBusy(false); }
   };
 
@@ -41,7 +42,7 @@ export function AppleSignInButton({ onSuccess }) {
       <button type="button" className="apple-btn" onClick={click} disabled={busy} aria-busy={busy} data-testid="apple-signin-btn">
         <AppleLogo /><span>{busy ? t('apple_busy') : t('apple_cta')}</span>
       </button>
-      {error && <p className="apple-err" role="alert">{error}</p>}
+      {error && <p className="apple-err" role="alert">{error}{code && <small className="apple-err__code" data-testid="apple-err-code">Kod: {code}</small>}</p>}
     </div>
   );
 }
