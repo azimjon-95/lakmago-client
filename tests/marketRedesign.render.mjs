@@ -78,6 +78,9 @@ try {
   const order = ['<MarketHero />', '<HomeSections', '<MarketCategories', '<DiscountSlider', 'market-stores-head', '<MarketStoreCard', '<CartBar />'].map((x) => page.indexOf(x));
   check('sahifa tartibi: banner → Lokma kartalari → kategoriyalar → chegirmalar → do‘konlar → savat', order.every((i, n) => i > 0 && (n === 0 || i > order[n - 1])), JSON.stringify(order));
   check('sarlavhada chap tomondagi kichik savat YO‘Q, faqat o‘ngdagi bezakli savat (yuborilgan rasm, 116 px)', !page.includes('market-header__logo') && (page.match(/market-basket-hero\.webp/g) || []).length === 1 && page.includes('width="116" height="63"') && statSync('public/sections/market-basket-hero.webp').size < 40 * 1024);
+  // Skrolda yashil "chaqnash" bo'lmasin: WebView orqa foni har doim sahifa foni (oq), sarlavha esa bo'lim rangida
+  const tgSrc = readFileSync('src/lib/telegram.js', 'utf8');
+  check("Telegram: setBackgroundColor — har doim PAGE_BACKGROUND (oq), bo'lim rangi emas; setHeaderColor — bo'lim rangi", tgSrc.includes("export const PAGE_BACKGROUND = '#FFFFFF'") && tgSrc.includes('tg.setBackgroundColor?.(PAGE_BACKGROUND)') && !tgSrc.includes('tg.setBackgroundColor?.(color)') && tgSrc.includes('tg.setHeaderColor?.(color)'));
   const surf = /market:\s*'(#[0-9a-fA-F]{6})'/.exec(readFileSync('src/lib/telegram.js', 'utf8').split('SECTION_SURFACE =')[1])?.[1];
   const mcss = readFileSync('src/pages/Market/Market.css', 'utf8');
   const hdr = /\.market-header\s*\{[^}]*?background:\s*(#[0-9a-fA-F]{6})/s.exec(mcss)?.[1];
