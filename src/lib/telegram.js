@@ -111,6 +111,13 @@ export function getTelegram() {
  * (Market.css) — Telegram sarlavhasi va sahifa sarlavhasi orasida chegara ko'rinmaydi. Ikkisini BIRGA o'zgartiring (test:market-redesign tekshiradi).
  */
 export const SECTION_SURFACE = { go: '#FFFFFF', market: '#016029' };
+/*
+ * WebView ORQA FONI — har doim sahifa foni (--canvas, oq), bo'lim rangi EMAS.
+ * iOS tez (inersiya) skrolda hali chizilmagan maydonlarni WebView orqa foni bilan to'ldiradi. Avval u Market'da to'q yashil
+ * (#016029) edi — do'kon sahifalarida skrol paytida katta yashil bloklar "paydo bo'lib yo'qolardi". Sarlavha (header) rangi
+ * esa bo'limga qarab qoladi (Market yashil, To'yxonalar o'z rangi) — status bar va "Назад" qatori o'zgarmaydi.
+ */
+export const PAGE_BACKGROUND = '#FFFFFF';
 let surfaceColor = SECTION_SURFACE.go;
 
 /** Bo'limni qo'llash: <html data-section>, CSS ranglar, Telegram tepa qismi. */
@@ -130,7 +137,7 @@ export function setTelegramSurfaceColor(color) {
   if (!tg) return;
   try {
     tg.setHeaderColor?.(color);
-    tg.setBackgroundColor?.(color);
+    tg.setBackgroundColor?.(PAGE_BACKGROUND);   // orqa fon — sahifa rangi (yuqoridagi izohga qarang)
   } catch { /* eski Telegram versiyalarida bo'lmasligi mumkin */ }
 
   // CSS tomoni: status bar ostidagi qatlam ham shu rangda bo'lsin
