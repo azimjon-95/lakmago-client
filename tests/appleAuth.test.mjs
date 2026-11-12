@@ -80,6 +80,7 @@ test('Android/Web: serverga so\'rov ham, tugma ham, native chaqiruv ham YO\'Q (s
   assert.ok(a.includes("Capacitor.getPlatform() === 'ios'") && a.includes('Capacitor.isNativePlatform()') && a.includes('isPluginAvailable'));
   const btn = noComments(src('src/components/AuthGate/AppleSignInButton.jsx'));
   assert.ok(/if \(!available\) return null;/.test(btn));
+  assert.ok(btn.includes('data-testid="apple-err-code"') && btn.includes('setCode(String(e?.detail'), 'xato kodi ko\'rsatiladi');
   // Android loyihasida Apple yo'q; npm bog'liqlik qo'shilmagan
   const andr = (function walk(d) { let out = ''; for (const f of readdirSync(d, { withFileTypes: true })) { const p = `${d}/${f.name}`; if (f.isDirectory()) { if (!['build', '.gradle', 'node_modules'].includes(f.name)) out += walk(p); } else if (/\.(java|kt|gradle|xml|json)$/.test(f.name)) out += readFileSync(p, 'utf8'); } return out; })(new URL('../android', import.meta.url).pathname);
   assert.ok(!/AppleSignIn|applesignin|sign_in_with_apple/i.test(andr), 'Android loyihasida Apple izi bor');
