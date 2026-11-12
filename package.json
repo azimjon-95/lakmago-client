@@ -19,7 +19,8 @@
     "test:market-redesign": "node tests/marketRedesign.render.mjs",
     "test:floating-nav": "node tests/floatingNav.render.mjs",
     "test:backroute": "node --test tests/backRoute.test.mjs",
-    "test:restaurant": "node --test tests/restaurantPage.test.mjs"
+    "test:restaurant": "node --test tests/restaurantPage.test.mjs",
+    "test:apple": "node --test tests/appleAuth.test.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",
