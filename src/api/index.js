@@ -262,6 +262,16 @@ export const api = {
 
   getDishes: (restaurantId, opts) => apiFetch(`/restaurants/${restaurantId}/dishes`, opts),
 
+  // Katta do'kon menyusi: bo'limlar ro'yxati (yengil) va bo'lim bo'yicha kursor-sahifa
+  getMenuIndex: (restaurantId, opts) => apiFetch(`/restaurants/${restaurantId}/menu/index`, opts),
+  getMenuItems: (restaurantId, { section = '', cursor = '', limit = 24, signal } = {}) => {
+    const q = new URLSearchParams();
+    if (section) q.set('section', section);
+    if (cursor) q.set('cursor', cursor);
+    q.set('limit', String(limit));
+    return apiFetch(`/restaurants/${restaurantId}/menu/items?${q}`, { signal });
+  },
+
   /**
    * Bron oldindan buyurtma ekrani (PreOrderScreen) uchun menyu —
    * restoranning o'z narxida (yetkazish ustamasi va mijoz xizmat

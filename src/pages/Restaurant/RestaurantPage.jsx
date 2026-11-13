@@ -1,5 +1,5 @@
 import { isFreeDelivery, hasDeliveryTerms } from '@/lib/deliveryInfo';
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { CATEGORIES } from '@/data/categories';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
@@ -15,14 +15,15 @@ import { SectionChips } from '@/components/RestaurantPage/SectionChips';
 import { brandVars } from '@/lib/restaurantUi';
 import { RestaurantInfoSheet } from '@/components/RestaurantInfoSheet';
 import { useI18n } from '@/i18n';
-import { isDiscountedDish } from '@/lib/discount';
 import { marketCatLabel } from '@/data/market';
 import { DiscountSlider } from '@/components/MarketSlider/DiscountSlider';
 import { useUser } from '@/store/user';
 import { haptic, getTelegram } from '@/lib/telegram';
 import { useClosedAlert, useOpenStatus } from '@/hooks/useOpenStatus';
 import { ClosedAlert } from '@/components/ClosedAlert';
-import { useRestaurant, useDishes, useMarketCategories } from '@/hooks/queries';
+import { useRestaurant, useDishes, useMarketCategories, useStoreMenuIndex, useStoreMenuSection } from '@/hooks/queries';
+import { StoreMenuSection } from '@/components/RestaurantPage/StoreMenuSection';
+import { api } from '@/api';
 import './Restaurant.css';
 
 const REVIEWS_TAB = '__reviews__';
@@ -48,7 +49,6 @@ export function RestaurantPage() {
 
   // Real data — TanStack Query
   const { data: restaurant, isLoading: restLoading, error: restError } = useRestaurant(id);
-  const { data: rawDishes = [], isLoading: dishesLoading } = useDishes(id);
   const restaurantReviews = restaurant?.reviews || [];
 
   /*
@@ -57,6 +57,14 @@ export function RestaurantPage() {
    * "Chegirmalar". Kategoriyalar ro'yxati serverdan (GET /market/categories).
    */
   const isStore = isStoreRestaurant(restaurant);
+  /*
+   * RESTORAN: butun menyu bir so'rovda (odatda ~100 ta). DO'KON: 2000+ mahsulot bo'lishi mumkin — shuning uchun
+   * faqat bo'limlar ro'yxati (yengil) olinadi, mahsulotlar har bo'lim ekranga yaqinlashganda sahifa-sahifa
+   * (components/RestaurantPage/StoreMenuSection.jsx). Do'konda butun ro'yxat HECH QACHON bir yo'la so'ralmaydi.
+   */
+  const { data: rawDishes = [], isLoading: dishesLoading } = useDishes(restaurant && !isStore ? id : '');
+  const { data: menuIndex, isError: indexError, refetch: refetchIndex } = useStoreMenuIndex(id, isStore);
+  const indexLoading = isStore && !menuIndex && !indexError;
   // Havola orqali kirilganda ham bo'lim mazmunga mos bo'ladi (do'kon → Market, restoran → Go): ranglar, pastki menyu, "Назад"
   useSyncSection(restaurant ? isStore : undefined);
   const goBack = useBack();
@@ -120,43 +128,36 @@ export function RestaurantPage() {
   };
 
   // Taomlarga restoran meta'sini biriktiramiz (savatга to'g'ri o'tishi uchun)
-  const restaurantDishes = useMemo(
-    () => rawDishes.map((d) => ({
-      ...d,
-      // Savat aynan shu maydon bo'yicha guruhlaydi — bo'lmasa buyurtma yaratilmaydi
-      restaurantId: d.restaurantId || restaurant?.id || restaurant?._id || id,
-      restaurantName: restaurant?.name,
-      restaurantTint: restaurant?.tint,
-      restaurantIcon: restaurant?.icon,
-      restaurantDeliveryMin: restaurant?.deliveryMin,
-      restaurantDeliveryMax: restaurant?.deliveryMax,
-      restaurantDeliveryFee: restaurant?.deliveryFee,
-      // Naqd qabul qilinadimi — savatda to'lov tanlovi uchun
-      restaurantCashEnabled: restaurant?.cashEnabled,
-    })),
-    [rawDishes, restaurant, id],
-  );
+  const attachMeta = useCallback((d) => ({
+    ...d,
+    // Savat aynan shu maydon bo'yicha guruhlaydi — bo'lmasa buyurtma yaratilmaydi
+    restaurantId: d.restaurantId || restaurant?.id || restaurant?._id || id,
+    restaurantName: restaurant?.name,
+    restaurantTint: restaurant?.tint,
+    restaurantIcon: restaurant?.icon,
+    restaurantDeliveryMin: restaurant?.deliveryMin,
+    restaurantDeliveryMax: restaurant?.deliveryMax,
+    restaurantDeliveryFee: restaurant?.deliveryFee,
+    // Naqd qabul qilinadimi — savatda to'lov tanlovi uchun
+    restaurantCashEnabled: restaurant?.cashEnabled,
+  }), [restaurant, id]);
+  const restaurantDishes = useMemo(() => rawDishes.map(attachMeta), [rawDishes, attachMeta]);
 
   const sections = useMemo(() => {
     if (isStore) {
-      // Kategoriyalar hali yuklanmagan — vaqtincha bitta guruh (skeleton ko'rsatiladi)
-      if (!market) return [[t('otherProducts'), restaurantDishes], [REVIEWS_TAB, []]];
-      const byCat = new Map();
-      restaurantDishes.forEach((d) => {
-        const key = marketCatMap.has(d.marketCategory) ? d.marketCategory : '__other__';
-        if (!byCat.has(key)) byCat.set(key, []);
-        byCat.get(key).push(d);
-      });
+      // Bo'limlar ro'yxati/kategoriyalar hali kelmagan — vaqtincha bitta skeletonli guruh
+      if (!market || !menuIndex) return [[t('otherProducts'), { key: '__loading__', count: 0, loading: true }], [REVIEWS_TAB, []]];
+      const byKey = new Map((menuIndex.sections || []).map((s) => [s.key, s.count]));
       const out = [];
-      const sale = restaurantDishes.filter(isDiscountedDish);
-      if (sale.length) out.push([SALE_TAB, sale]);
+      if (menuIndex.sale > 0) out.push([SALE_TAB, { key: '__sale__', count: menuIndex.sale }]);
       // Market kategoriyalari — serverdagi (barcha do'konda bir xil) tartibda
       (market.categories || []).forEach((c) => {
-        const items = byCat.get(c.value);
-        if (items?.length) out.push([`${c.emoji} ${marketCatLabel(c, lang)}`, items]);
+        const n = byKey.get(c.value);
+        if (n > 0) { out.push([`${c.emoji} ${marketCatLabel(c, lang)}`, { key: c.value, count: n }]); byKey.delete(c.value); }
       });
-      const rest = byCat.get('__other__');
-      if (rest?.length) out.push([t('otherProducts'), rest]);
+      // Ro'yxatda yo'q (eski/boshqa) kalitlar — o'z nomi bilan; kategoriyasizlar — oxirida
+      byKey.forEach((n, key) => { if (key !== '__other__' && n > 0) out.push([key, { key, count: n }]); });
+      if (byKey.get('__other__') > 0) out.push([t('otherProducts'), { key: '__other__', count: byKey.get('__other__') }]);
       out.push([REVIEWS_TAB, []]);
       return out;
     }
@@ -200,12 +201,21 @@ export function RestaurantPage() {
     const list = Array.from(map.entries()).filter(([, items]) => items.length > 0);
     list.push([REVIEWS_TAB, []]);
     return list;
-  }, [restaurantDishes, isStore, market, marketCatMap, lang, t]);
+  }, [restaurantDishes, isStore, market, menuIndex, lang, t]);
 
   // Ulashilган havola bilan kelinса (highlightDish) — o'sha taomni avtomatik ochamiz
   useEffect(() => {
     const targetId = location.state?.highlightDish;
-    if (!targetId || highlightHandled.current || restaurantDishes.length === 0) return;
+    if (!targetId || highlightHandled.current) return;
+    // Do'kon: mahsulotlar sahifa-sahifa — ulashilgan mahsulot to'g'ridan-to'g'ri olinadi (butun ro'yxat kerak emas)
+    if (isStore) {
+      if (!restaurant) return;
+      highlightHandled.current = true;
+      navigate(location.pathname, { replace: true, state: {} });
+      api.getDish(targetId).then((d) => { if (d) setModalDish(attachMeta(d)); }).catch(() => {});
+      return;
+    }
+    if (restaurantDishes.length === 0) return;
     const dish = restaurantDishes.find((d) => (d.id || d._id) === targetId);
     if (dish) {
       highlightHandled.current = true;
@@ -214,7 +224,7 @@ export function RestaurantPage() {
       // State'ни tozalaymiz (qayta ochilmasligi uchun)
       navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [restaurantDishes, location.state, location.pathname, navigate]);
+  }, [restaurantDishes, location.state, location.pathname, navigate, isStore, restaurant, attachMeta]);
 
   const [active, setActive] = useState('');
   // "Barchasini ko'rish": bo'lim karuseldan 2 ustunli setkaga yoyiladi (tanlanmagan bo'lsa — standart qoida pastda)
@@ -229,7 +239,8 @@ export function RestaurantPage() {
    * Bo'limlar 1–2 ta bo'lsa karusel boshidan YOYILGAN (2 ustunli setka) — sahifada bo'sh joy bor, surish shart emas.
    * Mijoz istalgan bo'limni "Barchasini ko'rish" / "Yig'ish" bilan almashtira oladi.
    */
-  const dishSections = sections.filter(([name]) => name !== REVIEWS_TAB && name !== SALE_TAB).length;
+  const dishSectionNames = sections.filter(([name]) => name !== REVIEWS_TAB && name !== SALE_TAB).map(([name]) => name);
+  const dishSections = dishSectionNames.length;
   const defaultExpanded = dishSections > 0 && dishSections <= 2;
   const toggleSection = (name) => { haptic(); setExpanded((m) => ({ ...m, [name]: !(m[name] ?? defaultExpanded) })); };
 
@@ -377,19 +388,24 @@ export function RestaurantPage() {
         {sections.map(([name, list]) => {
           // Chegirmalar — jonli slayder (Lokma Market bilan bir xil), faqat do'konda
           if (name === SALE_TAB) {
-            const closedAll = isOpen ? undefined : new Set(list.map((d) => String(d._id || d.id)));
-            return (
+            const onOpenSale = (d) => {
+              if (!isOpen) { haptic(); showClosed({ name: restaurant?.name, ...alertInfo }); return; }
+              setModalDish(d);
+            };
+            const emojiOf = (d) => marketCatMap.get(d.marketCategory)?.emoji;
+            return isStore ? (
+              <div key={name} id={`sec-${name}`} className="rest-section">
+                <StoreSaleSlider restaurantId={id} title={t('saleTab')} attach={attachMeta} isOpen={isOpen} emojiOf={emojiOf} onOpen={onOpenSale} />
+              </div>
+            ) : (
               <div key={name} id={`sec-${name}`} className="rest-section">
                 <DiscountSlider
                   title={t('saleTab')}
                   items={list}
                   loading={dishesLoading || catsLoading}
-                  closedIds={closedAll}
-                  emojiOf={(d) => marketCatMap.get(d.marketCategory)?.emoji}
-                  onOpen={(d) => {
-                    if (!isOpen) { haptic(); showClosed({ name: restaurant?.name, ...alertInfo }); return; }
-                    setModalDish(d);
-                  }}
+                  closedIds={isOpen ? undefined : new Set(list.map((d) => String(d._id || d.id)))}
+                  emojiOf={emojiOf}
+                  onOpen={onOpenSale}
                 />
               </div>
             );
@@ -441,6 +457,41 @@ export function RestaurantPage() {
             );
           }
           const isExpanded = expanded[name] ?? defaultExpanded;
+          // DO'KON: bo'lim o'z sahifalari bilan (skeleton → 24 ta → surilganda/tushilganda davomi)
+          if (isStore && !Array.isArray(list)) {
+            if (list.loading) {
+              return (
+                <div key={name} id={`sec-${name}`} className="rest-section">
+                  <div className="rp-sec__head"><h2 className="rp-sec__title">{name}</h2></div>
+                  {indexError ? (
+                    <div className="rest-more-error" role="alert"><span>Yuklab bo&apos;lmadi</span><button type="button" onClick={() => refetchIndex()}>Qayta urinish</button></div>
+                  ) : (
+                    <div className="rest-row no-scrollbar" aria-busy="true">{Array.from({ length: 6 }).map((_, i) => <div key={i} className="rest-row__sk" />)}</div>
+                  )}
+                </div>
+              );
+            }
+            return (
+              <StoreMenuSection
+                key={name}
+                restaurantId={id}
+                sectionKey={list.key}
+                name={name}
+                count={list.count}
+                eager={dishSectionNames.indexOf(name) < 2}
+                expanded={isExpanded}
+                canExpand={list.count > 3}
+                onToggle={() => toggleSection(name)}
+                expandLabel={t('marketViewAll')}
+                collapseLabel={t('restCollapse')}
+                attach={attachMeta}
+                onOpen={setModalDish}
+                addLabel={t('addToCart')}
+                disabled={!isOpen}
+                onDisabledTap={() => showClosed({ name: restaurant?.name, ...alertInfo })}
+              />
+            );
+          }
           const canExpand = !(dishesLoading || catsLoading) && list.length > 3;
           return (
             <div key={name} id={`sec-${name}`} className="rest-section">
@@ -555,4 +606,12 @@ function ReviewSummary({ reviews }) {
       </div>
     </div>
   );
+}
+
+/** Do'kon chegirmalari: faqat birinchi sahifa (slayder 10 tagacha ko'rsatadi) — butun ro'yxat yuklanmaydi. */
+function StoreSaleSlider({ restaurantId, title, attach, isOpen, emojiOf, onOpen }) {
+  const { data, isLoading } = useStoreMenuSection(restaurantId, '__sale__', true);
+  const items = useMemo(() => (data?.pages?.[0]?.items || []).map(attach), [data, attach]);
+  const closedIds = useMemo(() => (isOpen ? undefined : new Set(items.map((d) => String(d._id || d.id)))), [isOpen, items]);
+  return <DiscountSlider title={title} items={items} loading={isLoading} closedIds={closedIds} emojiOf={emojiOf} onOpen={onOpen} />;
 }

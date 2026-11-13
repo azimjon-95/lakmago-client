@@ -319,3 +319,17 @@ img.review-card__avatar { object-fit: cover; }
 
 /* Bo'sh/yopiq/rasm holati: matn kontrasti */
 .restaurant .dscard.is-closed .dscard__photo, .restaurant .dscard.is-closed .dscard__name, .restaurant .dscard.is-closed .dscard__price { opacity: 0.5; }
+
+/* Katta do'kon: sahifalash — xato qatori va setka kuzatuvchisi */
+.restaurant .rest-more-error {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin: 4px var(--rp-pad) 8px; padding: 9px 12px; border-radius: 12px;
+  background: #FFF1F1; color: #B4262B; font-size: 12.5px; font-weight: 600;
+}
+.restaurant .rest-more-error button {
+  padding: 6px 12px; border-radius: 999px; background: #fff; color: #B4262B;
+  border: 1px solid rgba(180, 38, 43, 0.3); font-size: 12.5px; font-weight: 700; -webkit-tap-highlight-color: transparent;
+}
+.restaurant .rest-more-error button:active { opacity: 0.6; }
+.restaurant .rest-more-sentinel { height: 1px; }
+.restaurant .rest-grid .rest-row__sk { aspect-ratio: 1 / 1.45; }
