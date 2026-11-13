@@ -139,3 +139,12 @@ test('iOS native: plugin, ro\'yxatdan o\'tkazish, entitlements, Xcode loyihasi, 
   // SPM paket ro'yxati (Capacitor boshqaradigan) o'zgarmagan — Apple uchun paket qo'shilmagan
   assert.ok(!/apple/i.test(src('ios/App/CapApp-SPM/Package.swift')));
 });
+
+test('iOS ilovada kanal obunasi talab qilinmaydi (useRequireSubscription), boshqa muhitda eski xulq (statik)', () => {
+  const src = readFileSync(new URL('../src/hooks/useRequireSubscription.jsx', import.meta.url), 'utf8');
+  assert.match(src, /import \{ Capacitor \} from '@capacitor\/core'/);
+  assert.doesNotMatch(src, /lib\/appleAuth/);   // Apple moduliga bog'liq emas
+  assert.match(src, /if \(isIosNativeApp\(\)\) return Promise\.resolve\(true\);/);
+  assert.ok(src.indexOf('if (isIosNativeApp())') < src.indexOf('sharedPromiseRef.current) return'), 'iOS tekshiruvi eng birinchi');
+  assert.match(src, /setOpen\(true\)/);   // veb/Telegram: modal mantig'i saqlangan
+});

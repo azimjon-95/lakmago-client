@@ -1,5 +1,9 @@
 import { useCallback, useRef, useState } from 'react';
 import { SubscriptionGateModal } from '@/components/AuthGate/SubscriptionGateModal';
+import { Capacitor } from '@capacitor/core';
+
+// Haqiqiy iOS ilovasi (Capacitor native, platform=ios). Brauzer, Android, Telegram Mini App — false.
+const isIosNativeApp = () => { try { return Capacitor.getPlatform() === 'ios' && Capacitor.isNativePlatform(); } catch { return false; } };
 
 /**
  * Order/booking submit vaqtida "kanal obunasi kerakmi" tekshiruvini
@@ -23,6 +27,12 @@ export function useRequireSubscription() {
   const sharedPromiseRef = useRef(null);
 
   const ensureSubscription = useCallback(() => {
+    /*
+     * iOS ilovasida (App Store) Telegram kanaliga obuna TALAB QILINMAYDI: Apple orqali kirgan mijozning Telegram'i yo'q,
+     * Telegram orqali kirganlarni ham kanalga majburlash ilova ichida kerak emas — buyurtma to'xtamaydi.
+     * Veb/Telegram Mini App/Android'da xulq o'zgarmagan.
+     */
+    if (isIosNativeApp()) return Promise.resolve(true);
     if (sharedPromiseRef.current) return sharedPromiseRef.current;
 
     /*
