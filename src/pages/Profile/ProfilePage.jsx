@@ -1,4 +1,4 @@
-import { syncPhoneToServer } from '@/lib/syncPhone';
+import { syncPhoneToServer, syncNameToServer } from '@/lib/syncPhone';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
@@ -79,7 +79,9 @@ export function ProfilePage() {
     } finally { setBusy(false); }
   }
 
-  function saveName() { updateUser({ firstName, lastName }); setEditingField(null); }
+  function saveName() { updateUser({ firstName, lastName }); syncNameToServer(firstName, lastName); setEditingField(null); }
+  // Apple ismni bermagan hisob "Mijoz" bo'lib qoladi — ismni kiritishga undaymiz
+  const needsName = !isGuest && user.firstName === 'Mijoz' && !user.lastName;
   function savePhone() { updateUser({ phone }); syncPhoneToServer(phone); setEditingField(null); }
   function handleAddAddress() {
     addAddress({ title: addrTitle, address: addrText });
@@ -115,7 +117,7 @@ export function ProfilePage() {
             {user.firstName} {user.lastName}
           </div>
           <div className="profile-hero__id">
-            {user.username ? `@${user.username}` : `ID: ${user.telegramId ?? '—'}`}
+            {user.username ? `@${user.username}` : (user.telegramId ? `ID: ${user.telegramId}` : '')}
           </div>
   
           {/* Tez statistika */}
@@ -184,7 +186,7 @@ export function ProfilePage() {
             <Icon name="edit" size={18} color="var(--muted)" />
             <div className="profile-row__body">
               <div className="profile-row__value">{user.firstName} {user.lastName}</div>
-              <div className="profile-row__label">{t('profile')}</div>
+              <div className="profile-row__label" style={needsName ? { color: 'var(--brand)', fontWeight: 700 } : undefined}>{needsName ? t('profileNameHint') : t('profile')}</div>
             </div>
             <Icon name="chevronRight" size={18} color="var(--muted)" />
           </button>
