@@ -71,6 +71,15 @@ try {
   check("marketViewAll — uz/uzc/ru", (readFileSync('src/i18n/translations.js', 'utf8').match(/marketViewAll:/g) || []).length === 3);
   const qhooks = readFileSync('src/hooks/queries.js', 'utf8');
   check("Market kategoriyalari keshi ≤ 60 soniya (admin faol/nofaol tez ko'rinadi)", /queryKey: \['market', 'categories'\][\s\S]{0,300}staleTime: 60_000/.test(qhooks));
+  // "Rasm yo'q": rasm bo'lmasa yoki yuklanmasa aniq belgi (bo'sh joy emas); DishPhoto va slayder kartalari shuni ishlatadi
+  const npl = readFileSync('src/components/ProductImage/NoImage.jsx', 'utf8');
+  check("NoImage: 'Rasm yo'q' belgisi (aria-label, data-testid), kamera ikonkasi", npl.includes("Rasm yo'q") && npl.includes('data-testid="no-image"') && npl.includes('name="camera"'));
+  const pimg = readFileSync('src/components/ProductImage/ProductImg.jsx', 'utf8');
+  check("ProductImg: yuklanmasa (onError) yoki manzil bo'sh bo'lsa NoImage", pimg.includes('onError={() => setFailed(true)}') && pimg.includes('if (!src || failed) return <NoImage'));
+  const dph = readFileSync('src/components/DishPhoto.jsx', 'utf8');
+  check("DishPhoto: haqiqiy rasm ProductImg orqali, rasm yo'q bo'lsa NoImage (eski tint-ikonka olib tashlangan)", dph.includes('<ProductImg') === false || dph.includes('ImgOrNoImage') && dph.includes('<NoImage compact') && !/return \(\s*<div style=\{\{ \.\.\.sz, borderRadius: radius, background: dish\.tint, display: 'flex'/.test(dph.split('eski ko\'rinish')[0]));
+  const mcs = readFileSync('src/components/MarketCatSlider/MarketCatSlider.jsx', 'utf8');
+  check("MarketCatSlider kartasi: rasm ProductImg orqali (to'g'ridan-to'g'ri <img> yo'q)", mcs.includes('<ProductImg src=') && !mcs.includes("? <img src={optimizeCloudinary(real, 240, 'contain')}"));
   // server vaqti kelmasa/yaroqsiz bo'lsa client soatiga tayanadi (NaN → yaroqsiz sana → Intl yiqiladi)
   const openSt = readFileSync('src/hooks/useOpenStatus.js', 'utf8');
   check("useOpenStatus: serverOffset yaroqsiz (NaN) bo'lsa 0", openSt.includes('Number.isFinite(offset) ? offset : 0'));
