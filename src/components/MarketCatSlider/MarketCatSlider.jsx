@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DishPhoto, optimizeCloudinary } from '@/components/DishPhoto';
+import { ProductImg } from '@/components/ProductImage/ProductImg';
 import { formatSomShort } from '@/lib/utils';
 import { isDiscountedDish, discountPercent } from '@/lib/discount';
 import { unitSuffix } from '@/data/market';
@@ -61,7 +62,7 @@ const SliderCard = memo(function SliderCard({ dish, lang, closed, fav, onOpen, o
       </button>
       <div className="mcs-card__photo">
         {real && String(real).startsWith('http')
-          ? <img src={optimizeCloudinary(real, 240, 'contain')} alt="" loading="lazy" decoding="async" draggable="false" />
+          ? <ProductImg src={optimizeCloudinary(real, 240, 'contain')} />
           : <DishPhoto dish={dish} height={46} radius={12} iconSize={22} />}
       </div>
       <div className="mcs-card__name">{name}</div>

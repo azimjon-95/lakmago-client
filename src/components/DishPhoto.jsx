@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 
 import { Icon } from './Icon';
 import { RestaurantBannerFallback } from './RestaurantBannerFallback';
+import { NoImage } from './ProductImage/NoImage';
+import { ProductImg as ImgOrNoImage } from './ProductImage/ProductImg';
 
 // Har bir "photo" kaliti uchun realistik rang sxemasi. Backend integratsiyasida bu komponent
 // ichida <img src={dish.imageUrl}> bilan almashtiriladi; hozircha restoran/taom yuklagan
@@ -43,17 +45,11 @@ export function DishPhoto({ dish, height = 96, radius = 12, iconSize = 34, fill 
   // 1) Haqiqiy rasm bo'lsa (Cloudinary) — uni ko'rsatamiz (optimallashtirilган, lazy)
   const realUrl = dish.imageUrl || (dish.images && dish.images[0]);
   if (realUrl && realUrl.startsWith('http')) {
-    // contain rejimида kattaroq o'lcham so'raymiz (sifat yo'qolmasin)
+    // contain rejimida kattaroq o'lcham so'raymiz (sifat yo'qolmasin)
     const w = fit === 'contain' ? 800 : 400;
     return (
       <div style={boxStyle}>
-        <img
-          src={optimizeCloudinary(realUrl, w, fit)}
-          alt={dish.name || ''}
-          loading="lazy"
-          decoding="async"
-          style={{ width: '100%', height: '100%', objectFit: fit }}
-        />
+        <ImgOrNoImage src={optimizeCloudinary(realUrl, w, fit)} alt={dish.name || ''} fit={fit} />
       </div>
     );
   }
@@ -71,6 +67,13 @@ export function DishPhoto({ dish, height = 96, radius = 12, iconSize = 34, fill 
 
   }
 
+  // Rasm umuman yo'q: aniq "Rasm yo'q" belgisi (oldingi tint+ikonka o'rniga)
+  return (
+    <div style={{ ...sz, borderRadius: radius, position: 'relative', overflow: 'hidden' }}>
+      <NoImage compact={Number(height) < 70 || iconSize < 30} />
+    </div>
+  );
+  // eski ko'rinish (zaxira, ishlatilmaydi):
   return (
     <div style={{ ...sz, borderRadius: radius, background: dish.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
       <Icon name={dish.icon} size={iconSize} color="var(--brand)" />
