@@ -26,18 +26,19 @@ html.is-compact { --cap-h: 46px; --cart-h: 40px; --bar-max: 300px; }
 }
 .bottom-nav .fnav {
   pointer-events: auto;
-  height: var(--cap-h);
-  max-width: var(--bar-max);
-  transition: height 380ms cubic-bezier(0.22, 1, 0.36, 1), max-width 380ms cubic-bezier(0.22, 1, 0.36, 1);
+  /* O'lcham DOIM bir xil (layout o'zgarmaydi); ixchamlash faqat transform — GPU, iOS'da tutilmaydi va "o'ynamaydi" */
+  height: 58px;
+  max-width: 420px;
+  transform-origin: 50% 100%;
+  transform: translateZ(0) scale(1);
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
 }
-.bottom-nav .fnav__tab svg, .bottom-nav .fnav__photo {
-  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), width 320ms, height 320ms;
-}
-html.is-compact .bottom-nav .fnav__tab svg { transform: scale(0.84); }
-html.is-compact .bottom-nav .fnav__photo { width: 22px; height: 22px; }
+/* Pastga scroll: kapsula pastda (Instagram kabi) 0.8 ga kichrayadi: 58 → 46.4 px = --cap-h (savat/operator tayanadi). Yuqoriga — qaytadi */
+html.is-compact .bottom-nav .fnav { transform: translateZ(0) scale(0.8); }
 
 @media (prefers-reduced-motion: reduce) {
-  .bottom-nav .fnav, .bottom-nav .fnav__tab svg, .bottom-nav .fnav__photo { transition: none; }
+  .bottom-nav .fnav { transition: none; }
 }
 
 /* Bo'lim ranglari: Lokma Go (to'q sariq) — standart; Market — yashil */

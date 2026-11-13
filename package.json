@@ -18,6 +18,7 @@
     "test:marketsort": "node --test tests/marketSort.test.mjs",
     "test:market-redesign": "node tests/marketRedesign.render.mjs",
     "test:floating-nav": "node tests/floatingNav.render.mjs",
+    "test:scroll-compact": "node --test tests/scrollCompact.test.mjs",
     "test:backroute": "node --test tests/backRoute.test.mjs",
     "test:restaurant": "node --test tests/restaurantPage.test.mjs",
     "test:store-menu": "node --test tests/storeMenu.test.mjs",

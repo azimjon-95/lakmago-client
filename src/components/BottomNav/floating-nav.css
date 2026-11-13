@@ -12,7 +12,7 @@
 .fnav {
   --fn-accent: #FF5C00;
   --fn-soft: rgba(255, 92, 0, 0.13);
-  --fn-idle: #596070;
+  --fn-idle: #3A4152;
   --fn-h: 58px;
   --fn-pad: 6px;
   position: relative;
@@ -25,18 +25,35 @@
   margin: 0 auto;
   padding: 0 var(--fn-pad);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
-  -webkit-backdrop-filter: blur(22px) saturate(1.8);
-  backdrop-filter: blur(22px) saturate(1.8);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  /*
+   * "LUPA" SHISHASI: orqadagi kontent yo'qolmaydi — yumshoq xiralashib, yorqin va to'yingan holda ko'rinib turadi
+   * (blur oz + saturate/brightness: shisha ostidagi ranglar "yaltirab" turadi). Ustida nur sathi (::before) va qirra yorug'ligi.
+   */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.52) 0%, rgba(255, 255, 255, 0.15) 40%, rgba(255, 255, 255, 0.10) 62%, rgba(255, 255, 255, 0.40) 100%);
+  -webkit-backdrop-filter: blur(10px) saturate(2.2) brightness(1.08) contrast(1.06);
+  backdrop-filter: blur(10px) saturate(2.2) brightness(1.08) contrast(1.06);
+  border: 1px solid rgba(255, 255, 255, 0.62);
   box-shadow:
-    0 12px 28px rgba(16, 24, 40, 0.16),
-    0 2px 6px rgba(16, 24, 40, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    0 14px 30px rgba(16, 24, 40, 0.18),
+    0 2px 8px rgba(16, 24, 40, 0.10),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1.5px 0 rgba(255, 255, 255, 0.40),
+    inset 0 0 22px rgba(255, 255, 255, 0.30);
+}
+/* Shisha yuzasidagi nur: yuqori-chap burchakdan yorug'lik va tepada ingichka yaltiroq chiziq */
+.fnav::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 150% at 16% -30%, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0) 52%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0) 46%);
 }
 /* Shisha effekti (backdrop-filter) bo'lmagan eski brauzerlarda — deyarli to'liq oq */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .fnav { background: rgba(255, 255, 255, 0.97); }
+  .fnav::before { display: none; }
 }
 
 /* Faol tab ortidagi yumshoq "pill": tablar orasida silliq suriladi (--fn-i = faol tab raqami) */
@@ -68,6 +85,8 @@
 .fnav__tab:focus-visible { outline: 2px solid var(--fn-accent); outline-offset: -3px; border-radius: 999px; }
 
 .fnav__ic { position: relative; display: flex; }
+/* Shisha ustida ikonka har qanday fonda o'qilsin: yengil oq halo */
+.fnav__ic svg { filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.75)); }
 .fnav__photo {
   width: 26px; height: 26px; display: block; border-radius: 50%; object-fit: cover;
   box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.08);
