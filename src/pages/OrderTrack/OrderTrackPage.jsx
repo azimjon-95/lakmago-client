@@ -411,7 +411,7 @@ export function OrderTrackPage() {
                 {tr.items.map((it, i) => (
                   <div key={i} className="ot-sum__item">
                     {it.imageUrl ? <img src={it.imageUrl} alt="" className="ot-sum__img" /> : <span className="ot-sum__img ot-sum__img--ph"><Icon name="bag" size={20} color="var(--muted)" /></span>}
-                    <div className="ot-sum__name"><b>{it.name}</b><span>{it.quantity} × {formatSom(it.unitPrice)}</span></div>
+                    <div className="ot-sum__name"><b>{it.name}{it.variant ? ` · ${it.variant}` : ''}</b>{it.addons?.length > 0 && <span>+ {it.addons.join(', ')}</span>}<span>{it.quantity} × {formatSom(it.unitPrice)}</span></div>
                     <b className="ot-sum__price">{formatSom(it.total)}</b>
                   </div>
                 ))}

@@ -257,8 +257,13 @@ function OrderCard({ order: o, open, onToggle, onRepeat, highlight }) {
             {(o.items || []).map((it, i) => (
               <div key={i} className="ord-item">
                 <span className="ord-item__qty">{it.quantity}×</span>
-                <span className="ord-item__name">{it.name}</span>
-                <span className="ord-item__price">{formatSom(it.unitPrice * it.quantity)}</span>
+                {/* Hajm (40 sm) va qo'shimchalar; narx — mijoz to'lagan (customerUnitPrice), eski buyurtmada restoran narxi */}
+                <span className="ord-item__name">
+                  {it.name}
+                  {(it.selectedOptions || []).some((x) => x.variant) && ` · ${(it.selectedOptions || []).filter((x) => x.variant).map((x) => x.name).join(', ')}`}
+                  {(it.selectedOptions || []).some((x) => !x.variant) && ` + ${(it.selectedOptions || []).filter((x) => !x.variant).map((x) => x.name).join(', ')}`}
+                </span>
+                <span className="ord-item__price">{formatSom((it.customerUnitPrice ?? it.unitPrice) * it.quantity)}</span>
               </div>
             ))}
             {/* LokmaGo sovg'a-bonusi: mijozga bepul */}
