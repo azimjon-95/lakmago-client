@@ -5,6 +5,7 @@ Lokma mijoz ilovasi kodida emas, **sayt repozitoriysida** o'zgartiriladi. Bu pap
 
 | Fayl | Vazifasi |
 |---|---|
+| `liquidGlass.js` | Sinish (SVG displacement, Chromium) va prujina kadrlari — `FloatingNav.jsx` import qiladi. Go/Market'dagi `components/BottomNav/liquidGlass.js` bilan bir xil nusxa. |
 | `floating-nav.css` | Menyu dizayni (kapsula, shisha effekti, silliq suriluvchi "pill"). **Lokma Go va Market'dagi fayl bilan bir xil nusxa.** |
 | `theme-wedding.css` | To'yxonalar rangi: `#A61E4D` (to'q qizil), nishon — oltin `#D1A65E` |
 | `FloatingNav.jsx` | Tayyor React komponent (bog'liqliksiz) |

@@ -19,7 +19,7 @@ try {
   const render = (path) => renderToString(h(MemoryRouter, { initialEntries: [path] }, h(I18nProvider, null, h(BottomNav)))).replace(/<!-- -->/g, '');
 
   let html = render('/orders');
-  check('4 ta tab, faqat ikonkalar (ko‘rinadigan matn yo‘q), nomlari aria-label/title da', (html.match(/<button/g) || []).length === 4 && ['Bosh', 'Qidiruv', 'Buyurtmalar', 'Profil'].every((x) => html.includes(`aria-label="${x}"`) && html.includes(`title="${x}"`)) && !/<span>(Bosh|Qidiruv|Buyurtmalar|Profil)<\/span>/.test(html));
+  check('4 ta tab: ikonka + yorliq (fnav__lb), nomlari aria-label/title da', (html.match(/<button/g) || []).length === 4 && ['Bosh', 'Qidiruv', 'Buyurtmalar', 'Profil'].every((x) => html.includes(`aria-label="${x}"`) && html.includes(`title="${x}"`) && html.includes(`class="fnav__lb">${x}<`)));
   check('faol tab (Buyurtmalar) belgilanadi: aria-current, pill 3-o‘rinda (--fn-i: 2)', html.includes('aria-current="page"') && html.includes('--fn-i:2') && html.includes('data-active="true"') && (html.match(/aria-current="page"/g) || []).length === 1);
   html = render('/restaurant/abc');
   check('menyuda yo‘q sahifada pill yashirin (data-active=false)', html.includes('data-active="false"') && !html.includes('aria-current'));
@@ -39,8 +39,8 @@ try {
   const css = readFileSync('src/components/BottomNav/floating-nav.css', 'utf8');
   const nav = readFileSync('src/components/BottomNav/BottomNav.css', 'utf8');
   const px = (re, s = css) => Number((re.exec(s) || [])[1]);
-  check('Instagram uslubi: kapsula 58 px, to‘liq yumaloq, lupa-shisha (blur 10px + saturate), max-kenglik 420 px', px(/--fn-h:\s*(\d+)px/) === 58 && css.includes('border-radius: 999px') && css.includes('backdrop-filter: blur(10px) saturate(2.2)') && px(/max-width:\s*(\d+)px/) === 420);
-  check('faol "pill" silliq suriladi (transform + 360 ms), harakat kamaytirilsa animatsiyasiz', css.includes('translateX(calc(var(--fn-i, 0) * 100%))') && css.includes('transform 360ms') && css.includes('prefers-reduced-motion'));
+  check('Instagram uslubi: kapsula 58 px, to‘liq yumaloq, lupa-shisha (blur 6px + saturate), sinish filtri (--fn-refract), max-kenglik 420 px', px(/--fn-h:\s*(\d+)px/) === 58 && css.includes('border-radius: 999px') && css.includes('backdrop-filter: blur(6px) saturate(2)') && css.includes('var(--fn-refract)') && px(/max-width:\s*(\d+)px/) === 420);
+  check('faol kapsula prujinali suriladi (WAAPI), cho‘ziladi + yorug‘ chiziq ergashadi, yorliq paydo bo‘ladi, harakat kamaytirilsa animatsiyasiz', css.includes('translateX(calc(var(--fn-i, 0) * 100%))') && css.includes('.fnav__pill-in') && css.includes('.fnav__pill-gl') && css.includes('@keyframes fnLb') && css.includes('prefers-reduced-motion'));
   check("pastki oraliq: --nav-gap = 10px + zona × 0.35 (iOS'da Instagram kabi, Android'da 10px); menyu balandligi qat'iy", nav.includes('--nav-gap: calc(10px + var(--tg-bottom-offset, 0px) * 0.35)') && nav.includes('padding: 0 20px var(--nav-gap);') && nav.includes('height: 58px;') && nav.includes('html.is-compact .bottom-nav .fnav { transform: translateZ(0) scale(0.8); }') && !/transition:[^;]*(height|max-width)/.test(nav));
   const cssVal = 'calc(74px - var(--tg-bottom-offset, 0px) * 0.65)';
   check("--bottom-nav-h izchil: 74px − zona × 0.65 (consumer + zona = 74 + 0.35×zona)", BOTTOM_NAV_H === cssVal);
@@ -52,6 +52,7 @@ try {
   const th = readFileSync(`${dir}/theme-wedding.css`, 'utf8');
   check("To'yxonalar rangi: #A61E4D (to‘q qizil), nishon oltin #D1A65E; faqat rang o‘zgaradi", th.includes('--fn-accent: #A61E4D') && th.includes('#D1A65E') && !/(height|width|radius|blur)/.test(th.replace(/\/\*[\s\S]*?\*\//g, '')));
   const comp = readFileSync(`${dir}/FloatingNav.jsx`, 'utf8');
+  check("liquidGlass.js Go bilan bir xil nusxa", readFileSync(`${dir}/liquidGlass.js`, 'utf8') === readFileSync('src/components/BottomNav/liquidGlass.js', 'utf8'));
   check('React komponent bog‘liqliksiz va Go bilan bir xil tuzilma (fnav, fnav__pill, fnav__tab, --fn-i)', !/from '@\//.test(comp) && ['fnav__pill', 'fnav__tab', '--fn-i', '--fn-n', 'aria-current'].every((x) => comp.includes(x)));
   const rd = readFileSync(`${dir}/README.md`, 'utf8');
   check("yo‘riqnoma: 3 bo‘lim ranglari, pastki oraliq qoidasi, sticky o‘rovchi", ['#FF5C00', '#148A43', '#A61E4D', 'max(10px, calc(env(safe-area-inset-bottom, 0px) - 12px))', 'position: sticky'].every((x) => rd.includes(x)));

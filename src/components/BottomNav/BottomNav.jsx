@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { installScrollCompact } from '@/lib/scrollCompact';
+import { attachRefraction, springKeyframes } from './liquidGlass';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Icon } from '../Icon';
 import { useCart } from '@/store/cart';
@@ -27,6 +28,8 @@ const tabs = [
 // Pastki oraliq: 10px + zona × 0.35 (iOS home indikatoriga qarab; Android'da zona 0 → 10px). Savat paneli shu bilan hisoblanadi:
 // balandlik (6 + 58 + oraliq) − zona  →  CSS: 74px − zona × 0.65 ; consumer'lar `+ zona` qo'shadi.
 export const BOTTOM_NAV_H = 'calc(74px - var(--tg-bottom-offset, 0px) * 0.65)';
+// Oxirgi faol tab (sahifalar o'rtasida eslab qolinadi: menyu har sahifada qayta chiziladi)
+let lastActive = -1;
 export function BottomNav() {
   useEffect(() => { installScrollCompact(); }, []);
   // Menyu bor sahifada savat/operator kapsula ustida turadi; menyusiz sahifada (restoran, savat) pastga tushadi
@@ -56,10 +59,48 @@ export function BottomNav() {
   const targetOf = (tab) => (tab.path === '/' ? homePath : tab.path);
   const activeIndex = tabs.findIndex((tab) => pathname === targetOf(tab));
 
+  // Har sahifa o'z menyusini chizadi (menyu qayta yaratiladi) — shuning uchun kapsula oldingi faol tabdan boshlanadi va yangisiga
+  // PRUJINA bilan suriladi: bitta menyu bo'lib ko'rinadi, almashish "hip" bo'ladi. Harakat paytida shisha suyuq egiladi.
+  const [shown, setShown] = useState(lastActive >= 0 && activeIndex >= 0 ? lastActive : activeIndex);
+  const navRef = useRef(null);
+  const pillRef = useRef(null);
+  const pillIn = useRef(null);
+  const glare = useRef(null);
+  const glass = useRef(null);
+  useEffect(() => {
+    glass.current = attachRefraction(navRef.current);
+    return () => { glass.current?.dispose(); glass.current = null; };
+  }, []);
+  useEffect(() => {
+    if (activeIndex < 0) return undefined;
+    if (shown === activeIndex) { lastActive = activeIndex; return undefined; }
+    const from = shown;
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        setShown(activeIndex);
+        lastActive = activeIndex;
+        const wrap = pillRef.current; const el = pillIn.current; const gl = glare.current;
+        if (!wrap || typeof wrap.animate !== 'function' || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+        const sp = springKeyframes(from, activeIndex);
+        const opt = { duration: sp.ms, easing: 'linear' };
+        wrap.animate(sp.move, opt);
+        el?.animate(sp.stretch, opt);
+        const dir = activeIndex > from ? 1 : -1;
+        gl?.animate(
+          [{ opacity: 0, transform: `translateX(${-70 * dir}%)` }, { opacity: 1, offset: 0.35 }, { opacity: 0, transform: `translateX(${70 * dir}%)` }],
+          { duration: 560, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+        );
+        glass.current?.pulse(sp.ms);
+      });
+    });
+    return () => { cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
+  }, [activeIndex, shown]);
+
   return (
     <nav className="bottom-nav" aria-label="Lokma">
-      <div className="fnav" style={{ '--fn-i': Math.max(activeIndex, 0), '--fn-n': tabs.length }} data-active={activeIndex >= 0 ? 'true' : 'false'} data-testid="floating-nav">
-        <span className="fnav__pill" aria-hidden="true" />
+      <div ref={navRef} className="fnav" style={{ '--fn-i': Math.max(shown, 0), '--fn-n': tabs.length }} data-active={activeIndex >= 0 ? 'true' : 'false'} data-testid="floating-nav">
+        <span ref={pillRef} className="fnav__pill" aria-hidden="true"><span ref={pillIn} className="fnav__pill-in"><span ref={glare} className="fnav__pill-gl" /></span></span>
         {tabs.map((tab, i) => {
           const active = i === activeIndex;
           const label = t(tab.key);
@@ -78,10 +119,11 @@ export function BottomNav() {
                 {tab.path === '/profile' && photoUrl ? (
                   <img src={photoUrl} alt="" className="fnav__photo" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                 ) : (
-                  <Icon name={tab.icon} size={26} strokeWidth={active ? 2.3 : 1.9} />
+                  <Icon name={tab.icon} size={23} strokeWidth={active ? 2.3 : 1.9} />
                 )}
                 {tab.path === '/orders' && cartCount > 0 && <span className="fnav__badge">{cartCount > 99 ? '99+' : cartCount}</span>}
               </span>
+              <span className="fnav__lb">{label}</span>
             </button>
           );
         })}
