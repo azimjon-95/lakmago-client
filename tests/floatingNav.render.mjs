@@ -39,8 +39,8 @@ try {
   const css = readFileSync('src/components/BottomNav/floating-nav.css', 'utf8');
   const nav = readFileSync('src/components/BottomNav/BottomNav.css', 'utf8');
   const px = (re, s = css) => Number((re.exec(s) || [])[1]);
-  check('Instagram uslubi: kapsula 58 px, to‘liq yumaloq, lupa-shisha (blur 10px + saturate), max-kenglik 420 px', px(/--fn-h:\s*(\d+)px/) === 58 && css.includes('border-radius: 999px') && css.includes('backdrop-filter: blur(10px) saturate(2.2)') && px(/max-width:\s*(\d+)px/) === 420);
-  check('faol "pill" silliq suriladi (transform + 360 ms), harakat kamaytirilsa animatsiyasiz', css.includes('translateX(calc(var(--fn-i, 0) * 100%))') && css.includes('transform 360ms') && css.includes('prefers-reduced-motion'));
+  check('Instagram uslubi: kapsula 58 px, to‘liq yumaloq, lupa-shisha (blur 9px + saturate, qalin qirra), max-kenglik 420 px', px(/--fn-h:\s*(\d+)px/) === 58 && css.includes('border-radius: 999px') && css.includes('backdrop-filter: blur(9px) saturate(1.9)') && px(/max-width:\s*(\d+)px/) === 420);
+  check('faol "pill" suyuq suriladi (transform + 520 ms, sakrovchi egri, ichki qatlam cho‘ziladi), harakat kamaytirilsa animatsiyasiz', css.includes('translateX(calc(var(--fn-i, 0) * 100%))') && css.includes('transform 520ms cubic-bezier(0.34') && css.includes('.fnav__pill-in') && css.includes('.fnav::after') && css.includes('prefers-reduced-motion'));
   check("pastki oraliq: --nav-gap = 10px + zona × 0.35 (iOS'da Instagram kabi, Android'da 10px); menyu balandligi qat'iy", nav.includes('--nav-gap: calc(10px + var(--tg-bottom-offset, 0px) * 0.35)') && nav.includes('padding: 0 20px var(--nav-gap);') && nav.includes('height: 58px;') && nav.includes('html.is-compact .bottom-nav .fnav { transform: translateZ(0) scale(0.8); }') && !/transition:[^;]*(height|max-width)/.test(nav));
   const cssVal = 'calc(74px - var(--tg-bottom-offset, 0px) * 0.65)';
   check("--bottom-nav-h izchil: 74px − zona × 0.65 (consumer + zona = 74 + 0.35×zona)", BOTTOM_NAV_H === cssVal);

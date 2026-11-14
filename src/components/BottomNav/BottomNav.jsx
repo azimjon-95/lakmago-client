@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { installScrollCompact } from '@/lib/scrollCompact';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Icon } from '../Icon';
@@ -27,6 +27,8 @@ const tabs = [
 // Pastki oraliq: 10px + zona × 0.35 (iOS home indikatoriga qarab; Android'da zona 0 → 10px). Savat paneli shu bilan hisoblanadi:
 // balandlik (6 + 58 + oraliq) − zona  →  CSS: 74px − zona × 0.65 ; consumer'lar `+ zona` qo'shadi.
 export const BOTTOM_NAV_H = 'calc(74px - var(--tg-bottom-offset, 0px) * 0.65)';
+// Oxirgi faol tab (sahifalar o'rtasida eslab qolinadi: menyu har sahifada qayta chiziladi)
+let lastActive = -1;
 export function BottomNav() {
   useEffect(() => { installScrollCompact(); }, []);
   // Menyu bor sahifada savat/operator kapsula ustida turadi; menyusiz sahifada (restoran, savat) pastga tushadi
@@ -56,10 +58,35 @@ export function BottomNav() {
   const targetOf = (tab) => (tab.path === '/' ? homePath : tab.path);
   const activeIndex = tabs.findIndex((tab) => pathname === targetOf(tab));
 
+  // Har sahifa o'z menyusini chizadi (menyu qayta yaratiladi) — shuning uchun pill oldingi faol tabdan boshlanadi va yangisiga
+  // suyuq-jele kabi suriladi (Instagram "liquid glass"): bitta menyu bo'lib ko'rinadi, almashish "hip" bo'ladi.
+  const [shown, setShown] = useState(lastActive >= 0 && activeIndex >= 0 ? lastActive : activeIndex);
+  const pillIn = useRef(null);
+  useEffect(() => {
+    if (activeIndex < 0) return undefined;
+    if (shown === activeIndex) { lastActive = activeIndex; return undefined; }
+    const from = shown;
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        setShown(activeIndex);
+        lastActive = activeIndex;
+        const el = pillIn.current;
+        if (!el || typeof el.animate !== 'function' || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+        const stretch = 1 + Math.min(Math.abs(activeIndex - from), 3) * 0.16;
+        el.animate(
+          [{ transform: 'scale(1, 1)' }, { transform: `scale(${stretch}, 0.9)`, offset: 0.38 }, { transform: 'scale(0.96, 1.05)', offset: 0.72 }, { transform: 'scale(1, 1)' }],
+          { duration: 520, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+        );
+      });
+    });
+    return () => { cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
+  }, [activeIndex, shown]);
+
   return (
     <nav className="bottom-nav" aria-label="Lokma">
-      <div className="fnav" style={{ '--fn-i': Math.max(activeIndex, 0), '--fn-n': tabs.length }} data-active={activeIndex >= 0 ? 'true' : 'false'} data-testid="floating-nav">
-        <span className="fnav__pill" aria-hidden="true" />
+      <div className="fnav" style={{ '--fn-i': Math.max(shown, 0), '--fn-n': tabs.length }} data-active={activeIndex >= 0 ? 'true' : 'false'} data-testid="floating-nav">
+        <span className="fnav__pill" aria-hidden="true"><span ref={pillIn} className="fnav__pill-in" /></span>
         {tabs.map((tab, i) => {
           const active = i === activeIndex;
           const label = t(tab.key);
