@@ -22,7 +22,8 @@
     "test:backroute": "node --test tests/backRoute.test.mjs",
     "test:restaurant": "node --test tests/restaurantPage.test.mjs",
     "test:store-menu": "node --test tests/storeMenu.test.mjs",
-    "test:apple": "node --test tests/appleAuth.test.mjs"
+    "test:apple": "node --test tests/appleAuth.test.mjs",
+    "test:liquid-glass": "node --test tests/liquidGlass.test.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",
