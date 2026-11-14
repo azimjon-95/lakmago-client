@@ -38,7 +38,7 @@ Lokma mijoz ilovasi kodida emas, **sayt repozitoriysida** o'zgartiriladi. Bu pap
 
 - Kapsula: balandligi **58 px**, yon chetlardan **20 px**, kengligi ≤ **420 px**, burchak to'liq yumaloq; pastdan **max(10 px, xavfsiz zona − 12 px)** (Lokma ichida: host bergan zona + 2 px).
 - Fon: oq 72% shaffoflik + `backdrop-filter: blur(22px) saturate(1.8)` (shisha); soya yumshoq; ichki yuqori yorug' chiziq.
-- Faqat ikonkalar (matn yo'q). Faol tab: qora ikonka + ortida **kulrang shisha "pill"**, u tablar orasida 520 ms suyuq-jele kabi suriladi (harakat paytida cho'ziladi).
+- Faqat ikonkalar (matn yo'q). Faol tab: faol rangdagi ikonka + ortida **yumshoq rangli "pill"**, u tablar orasida 360 ms silliq suriladi.
 - Bosilganda tab `scale(.88)`. "Harakatni kamaytirish" yoqilgan qurilmada animatsiyasiz.
 - Nishon (savat soni / saralanganlar): doira, faol rangda (To'yxonalarda oltin).
 
