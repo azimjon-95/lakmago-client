@@ -35,6 +35,7 @@ import {
 } from '@/data/categories';
 
 import { AddressSheet } from '@/components/AddressSheet';
+import { DistrictChip } from '@/components/DistrictSelector/DistrictSelector';
 import './Home.css';
 import { placePinned } from '@/lib/restaurantPins';
 
@@ -399,6 +400,8 @@ export function HomePage() {
           <LangSwitch compact />
         </div>
       </header>
+      {/* Katalog hududi (tuman) — manzil tanlagichidan alohida; flag/server o'chiq bo'lsa chizilmaydi */}
+      <DistrictChip />
 
       <BannerSlider banners={slidesWithAds} onAdClick={openAdModal} />
 
