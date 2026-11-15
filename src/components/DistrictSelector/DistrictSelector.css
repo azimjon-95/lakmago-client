@@ -1,14 +1,18 @@
-/* Header tuman tanlagichi — manzil tanlagichi ostida ixcham "chip" */
+/* Header tuman tanlagichi — manzil va til orasida, bitta qatorda ixcham "Pop tumani ▼".
+   Joy yetmasa nomi qisqaradi (…), ikonkalar siqilmaydi; manzil esa o'zi ko'proq qisqaradi (flex: 1 1 0). */
 .dsel-chip {
-  display: inline-flex; align-items: center; gap: 6px; max-width: 100%;
-  margin: 2px 16px 6px; padding: 6px 10px; border-radius: 999px;
-  background: var(--surface, #fff); border: 1px solid var(--line, #ececec);
-  font-size: 12.5px; font-weight: 600; color: var(--ink, #111);
+  display: inline-flex; align-items: center; gap: 5px;
+  flex: 0 1 auto; min-width: 74px; max-width: 46%; margin: 0; padding: 7px 10px; border-radius: 999px;
+  background: var(--brand-tint, #fff4ec); border: 1px solid var(--line, #ececec);
+  font-size: 13px; font-weight: 600; color: var(--ink, #111); white-space: nowrap;
 }
 .dsel-chip:active { transform: scale(0.98); }
-.dsel-chip__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dsel-chip__mode { font-size: 11px; font-weight: 600; color: #2563EB; background: #EEF4FF; border-radius: 999px; padding: 2px 7px; white-space: nowrap; }
-.dsel-chip__mode.is-manual { color: #7A5A00; background: #FFF6DB; }
+.dsel-chip > svg { flex: none; }
+.dsel-chip__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Avto-aniqlash ketayotganda — sezilar-sezilmas pulsatsiya (matnsiz) */
+.dsel-chip.is-resolving { animation: dsel-pulse 1.1s ease-in-out infinite; }
+@keyframes dsel-pulse { 50% { opacity: 0.6; } }
+@media (prefers-reduced-motion: reduce) { .dsel-chip.is-resolving { animation: none; } }
 
 .dsel-sheet {
   position: absolute; left: 0; right: 0; bottom: 0; max-height: 86vh; display: flex; flex-direction: column;

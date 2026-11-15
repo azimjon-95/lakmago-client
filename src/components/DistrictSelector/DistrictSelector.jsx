@@ -32,10 +32,17 @@ export function DistrictChip() {
   const active = meta.supported.includes(activeId) ? districts.find((d) => d.id === activeId) : null;
   return (
     <>
-      <button type="button" className="dsel-chip" onClick={() => setOpen(true)} data-testid="district-chip" aria-haspopup="dialog">
-        <Icon name="navigation" size={13} color="var(--brand)" />
+      {/* Ixcham: faqat "Pop tumani ▼". Rejim (Avtomatik/Qo'lda) matni ko'rsatilmaydi — ekran o'qigichlar uchun aria-label'da */}
+      <button
+        type="button"
+        className={`dsel-chip${resolving ? ' is-resolving' : ''}`}
+        onClick={() => setOpen(true)}
+        data-testid="district-chip"
+        aria-haspopup="dialog"
+        aria-label={active ? `${nameOf(active, lang)} · ${resolving ? t('districtDetecting') : (mode === 'manual' ? t('districtManual') : t('districtAuto'))}` : t('districtNotSelected')}
+      >
+        <Icon name="pin" size={14} color="var(--brand)" />
         <span className="dsel-chip__name">{active ? nameOf(active, lang) : t('districtNotSelected')}</span>
-        {active && <span className={`dsel-chip__mode ${mode === 'manual' ? 'is-manual' : ''}`}>{resolving ? t('districtDetecting') : (mode === 'manual' ? t('districtManual') : t('districtAuto'))}</span>}
         <Icon name="chevronDown" size={13} color="var(--muted)" />
       </button>
       {open && <DistrictSheet onClose={() => setOpen(false)} />}

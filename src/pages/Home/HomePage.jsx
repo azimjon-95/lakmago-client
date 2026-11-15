@@ -384,24 +384,17 @@ export function HomePage() {
             <Icon name="pin" size={12} color="var(--brand)" /> {t('deliveryAddress')}
           </span>
           <span className="home-header__addr-value">
-            {defaultAddress ? `${defaultAddress.title}, ${defaultAddress.address}`.slice(0, 26) : t('address')}
+            {/* Uzun manzil qo'lda kesilmaydi — CSS (text-overflow: ellipsis) ekran kengligiga qarab qisqartiradi */}
+            <span className="home-header__addr-text">{defaultAddress ? `${defaultAddress.title}, ${defaultAddress.address}` : t('address')}</span>
             <Icon name="chevronDown" size={13} color="var(--muted)" />
           </span>
         </button>
+        {/* Katalog hududi (tuman) — o'rtada ixcham; manzil tanlagichidan alohida. Flag/server o'chiq bo'lsa chizilmaydi */}
+        <DistrictChip />
         <div className="home-header__right">
-          {/* Qidiruv — ikonka, joyni tejaydi */}
-          <button
-            onClick={() => navigate('/search')}
-            className="home-header__icon-btn"
-            aria-label={t('search')}
-          >
-            <Icon name="search" size={19} color="var(--ink)" />
-          </button>
           <LangSwitch compact />
         </div>
       </header>
-      {/* Katalog hududi (tuman) — manzil tanlagichidan alohida; flag/server o'chiq bo'lsa chizilmaydi */}
-      <DistrictChip />
 
       <BannerSlider banners={slidesWithAds} onAdClick={openAdModal} />
 
