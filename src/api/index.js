@@ -1,6 +1,7 @@
 // LokmaGo API mijozi — faqat real backend (Express + MongoDB).
 // Mock/demo rejim yo'q: barcha ma'lumot serverdan keladi.
 
+import { withCatalogDistrict } from '@/lib/catalogDistrict';
 import { useRestrictions } from '@/store/restrictions';
 import { resilientFetch } from '@/lib/resilientFetch';
 
@@ -166,7 +167,9 @@ async function refreshAccessToken() {
   return refreshPromise;
 }
 
-async function apiFetch(path, opts = {}) {
+async function apiFetch(rawPath, opts = {}) {
+  // Katalog ro'yxatlariga tanlangan tuman (flaglar yoqilgan bo'lsa); aks holda path AYNAN o'zgarmaydi — lib/catalogDistrict.js
+  const path = withCatalogDistrict(rawPath, opts.method);
   let res = await doFetch(path, opts);
 
   /*
@@ -324,6 +327,9 @@ export const api = {
   // ===== Lokma Market (do'konlar) va bo'lim ruxsatlari =====
   // Qaysi bo'limlar shu mijozga ochiq — server .env: LOKMA_MARKET_ACCESS / LOKMA_WEDDING_ACCESS
   getFeatures: (opts) => apiFetch('/features', opts),
+  // Tumanlar ro'yxati (+ server yoqgan bo'lsa ixtiyoriy `boundaries` metama'lumoti) va koordinata → tuman
+  getDistricts: (opts) => apiFetch('/districts', opts),
+  resolveDistrict: (lat, lng, { lang, signal } = {}) => apiFetch(`/location/resolve?lat=${Number(lat).toFixed(6)}&lng=${Number(lng).toFixed(6)}${lang ? `&lang=${lang}` : ''}`, { signal }),
   // Mijozning o'z to'yxona bronlari (Lokma profilidagi telefon bo'yicha, server tekshiradi)
   getWeddingBookings: () => apiFetch('/weddings/my-bookings'),
   cancelWeddingBooking: (id) => apiFetch(`/weddings/my-bookings/${id}/cancel`, { method: 'POST' }),
