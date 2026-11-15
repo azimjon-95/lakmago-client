@@ -36,6 +36,8 @@ import { WeddingHost } from '@/components/WeddingHost/WeddingHost';
 import { maybeAskContactOnce } from '@/lib/contactVerify';
 import { BlockedGate } from '@/components/Restrictions/Restrictions';
 import { initSectionTheme } from '@/store/section';
+import { DISTRICT_SELECTOR_ENABLED } from '@/lib/districtFlags';
+import { DistrictEngine } from '@/hooks/useDistrictEngine';
 
 
 // Global suzuvchi elementlar (buyurtma nishoni + chat) — faqat
@@ -223,6 +225,8 @@ function AppInner({ authMode = 'telegram' }) {
         <ErrorBoundary>
         <Suspense fallback={<div className="app-shell" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="spinner" /></div>}>
           <StartParamHandler />
+          {/* Katalog tumani (flag o'chiq bo'lsa umuman chizilmaydi — ilova avvalgidek). Ilova ochilishida hech narsa so'ralmaydi. */}
+          {DISTRICT_SELECTOR_ENABLED && <DistrictEngine />}
           <TelegramBackHandler />
           {/* Reklama oynalari: splash tugagach, bosh sahifada (kuniga bir marta, navbat bilan) */}
           {!showSplash && <PromoModals />}
