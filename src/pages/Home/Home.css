@@ -2,20 +2,23 @@
 .home { padding-bottom: 0; }
 
 /* Header */
+/* Bitta qator: manzil (chap, qisqaradi) · tuman (o'rta, ixcham) · til (o'ng). Hech qachon o'ramaydi va gorizontal skroll bermaydi. */
 .home-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 16px 8px;
+  display: flex; align-items: center; flex-wrap: nowrap; gap: 8px;
+  padding: 14px 16px 8px; min-width: 0;
 }
-.home-header__addr { text-align: left; }
+.home-header__addr { text-align: left; flex: 1 1 0; min-width: 0; }
 .home-header__addr-label {
-  display: flex; align-items: center; gap: 4px;
-  font-size: 11px; color: var(--muted);
+  display: flex; align-items: center; gap: 4px; min-width: 0;
+  font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .home-header__addr-value {
-  display: flex; align-items: center; gap: 4px;
+  display: flex; align-items: center; gap: 4px; min-width: 0;
   font-size: 14px; font-weight: 500; color: var(--ink); margin-top: 2px;
 }
-.home-header__right { display: flex; align-items: center; gap: 8px; }
+.home-header__addr-text { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.home-header__addr-value > svg { flex: none; }
+.home-header__right { display: flex; align-items: center; gap: 8px; flex: none; }
 .home-header__avatar {
   width: 36px; height: 36px; border-radius: 50%;
   background: var(--brand-tint); color: var(--brand-100);
