@@ -401,7 +401,7 @@ export function HomePage() {
         onOpenAddresses={() => (user.addresses.length ? setShowAddressSheet(true) : setShowAddressFlow(true))}
       />
 
-      <BannerSlider banners={slidesWithAds} onAdClick={openAdModal} />
+      <BannerSlider banners={slidesWithAds} onAdClick={openAdModal} shuffleKey={recResetKey} />
 
       <HomeSections market={Boolean(features?.market)} wedding={Boolean(features?.wedding)} />
 

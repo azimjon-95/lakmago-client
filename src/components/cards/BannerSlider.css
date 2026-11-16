@@ -7,62 +7,46 @@
   isolation: isolate;
 }
 
+/* Birinchi ochilishda butun banner yumshoq paydo bo'ladi */
+.banner-slider { animation: banner-in 0.6s ease-out both; background: #f1ece8; }
+@keyframes banner-in { from { opacity: 0; } to { opacity: 1; } }
+
+/*
+ * Slaydlar ustma-ust. Yangi (is-active) eskisining (is-prev) USTIDA 0,9 s da paydo bo'ladi; eski shu vaqt to'liq ko'rinib
+ * turadi, keyin (yashiringan holda) o'chadi — ikki yarim-shaffof rasm aralashib "xiralashmaydi", oq fon ko'rinmaydi.
+ */
 .banner-slide {
   position: absolute;
   inset: 0;
-
   height: 130px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 18px;
-
-  animation:
-    banner-enter 0.8s cubic-bezier(.22, 1, .36, 1) both;
-
-  transform-origin: center;
-  will-change: transform, opacity, filter;
+  overflow: hidden;
+  opacity: 0;
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity 0s linear 0.95s;
+}
+.banner-slide.is-prev { opacity: 1; z-index: 1; transition: none; }
+.banner-slide.is-active {
+  opacity: 1; z-index: 2; pointer-events: auto;
+  transition: opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Yangi banner yumshoq zoom + yuqoridan/pastdan ozgina siljib kiradi */
-@keyframes banner-enter {
-  0% {
-    opacity: 0;
-    transform: scale(1.08) translateX(18px);
-    filter: blur(5px);
-  }
-
-  45% {
-    opacity: 0.75;
-    filter: blur(1.5px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(1) translateX(0);
-    filter: blur(0);
-  }
+/* Rasm qatlami: sekin "kino" zoom — transform (GPU), background-size emas (silliq, sakrashsiz) */
+.banner-slide__img {
+  position: absolute; inset: 0; z-index: 0;
+  background-position: center; background-size: cover; background-repeat: no-repeat;
+  transform: scale(1.06);
+  transition: transform 0s linear 1s;
+  will-change: transform;
 }
-
-/* Rasmning o'zi uchun juda sekin cinematic zoom */
-.banner-slide[style*="url"] {
-  background-size: 105% !important;
-  animation:
-    banner-enter 0.8s cubic-bezier(.22, 1, .36, 1) both,
-    banner-image-zoom 4s ease-out 0.2s forwards;
-}
-
-@keyframes banner-image-zoom {
-  0% {
-    background-size: 105%;
-    background-position: 52% 50%;
-  }
-
-  100% {
-    background-size: 100%;
-    background-position: 50% 50%;
-  }
-}
+.banner-slide.is-active .banner-slide__img,
+.banner-slide.is-prev .banner-slide__img { transform: scale(1); }
+.banner-slide.is-active .banner-slide__img { transition: transform 4.6s cubic-bezier(0.22, 1, 0.36, 1); }
+.banner-slide.is-prev .banner-slide__img { transition: none; }
 
 .banner-slide__eyebrow {
   font-size: 11px;
@@ -119,8 +103,11 @@
   position: relative;
   z-index: 2;
 
-  animation: banner-content 0.7s cubic-bezier(.22, 1, .36, 1) 0.12s both;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.6s ease 0.2s, transform 0.7s cubic-bezier(.22, 1, .36, 1) 0.2s;
 }
+.banner-slide.is-active .banner-slide__body { opacity: 1; transform: none; }
 
 @keyframes banner-content {
   0% {
@@ -157,8 +144,9 @@
   cursor: pointer;
 }
 
-.banner-slide[role="button"]:active {
+.banner-slide[role="button"]:active .banner-slide__img {
   transform: scale(0.99);
+  transition: transform 0.15s ease;
 }
 
 /* Reklama belgisi */
@@ -196,10 +184,8 @@
 
 /* Telefonlarda animationni o'chirishni xohlagan foydalanuvchilar uchun */
 @media (prefers-reduced-motion: reduce) {
-  .banner-slide,
-  .banner-slide[style*="url"],
-  .banner-slide__body,
-  .banner-slide__ad-tag {
-    animation: none !important;
-  }
+  .banner-slider { animation: none; }
+  .banner-slide.is-active { transition: opacity 0.3s linear; }
+  .banner-slide__img, .banner-slide.is-active .banner-slide__img { transform: none; transition: none; }
+  .banner-slide__body, .banner-slide__ad-tag { animation: none !important; transition: none; }
 }
