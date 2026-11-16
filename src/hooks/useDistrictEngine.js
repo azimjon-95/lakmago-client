@@ -75,7 +75,8 @@ export function useDistrictEngine() {
     const tr = tracker.current;
     if (!tr) return null;
     const problem = fixProblem(fix, { minAccuracyMeters: meta?.autoDetect?.minAccuracyMeters ?? DEFAULTS.minAccuracyMeters });
-    if (problem) { useDistrict.getState().setStatus(problem === 'LOW_ACCURACY' ? 'low_accuracy' : 'idle'); return null; }
+    // Past aniqlik (sovuq GPS'da birinchi o'lchov ko'pincha 100 m+): tekshiruv TO'XTAMAYDI — aniqroq o'lchov kutiladi
+    if (problem) { useDistrict.getState().setStatus(problem === 'LOW_ACCURACY' ? 'low_accuracy' : 'idle', true); return { status: 'ignored' }; }
     if (!tr.shouldResolve(fix)) return { status: 'skipped' };
     const my = ++seq.current;
     try {
@@ -117,9 +118,9 @@ export function useDistrictEngine() {
     const startedAt = Date.now();
     try {
       let fix = await source.first();
-      let lastStatus = null; let freshUsed = false; let lastAt = null;
+      let lastStatus = null; let freshUsed = 0; let lastAt = null;
       // Mijoz bosganda: qurilma keshidagi ESKI nuqta (maximumAge) emas, faqat bosilgandan keyingi yangi o'lchovlar
-      for (let i = 0; i < 5 && fix && alive(); i += 1) {
+      for (let i = 0; i < 7 && fix && alive(); i += 1) {
         const f = { lat: fix.lat, lng: fix.lng, accuracy: fix.accuracy, at: fix.ts ?? Date.now() };
         const cachedOld = interactive && Number.isFinite(f.at) && f.at < startedAt - 1000;
         if (!cachedOld) {
@@ -128,7 +129,7 @@ export function useDistrictEngine() {
           if (!alive() || !out) break;
           lastStatus = out.status; lastAt = f.at;
           // tasdiqlandi / o'sha / noaniq — yetarli; 'pending' — ikkinchi o'lchov kerak; 'skipped' (siljimagan) — fonda to'xtaymiz
-          if (out.status !== 'pending' && !(interactive && out.status === 'skipped')) break;
+          if (out.status !== 'pending' && out.status !== 'ignored' && !(interactive && out.status === 'skipped')) break;
         }
         // Nomzod kutilayotgan bo'lsa ko'p kutmaymiz (ikkinchi o'lchov ≥1,5 s keyin yetarli) — birinchi aniqlash tez bo'lsin
         fix = await source.next(lastStatus === 'pending' ? 50 : READ_GAP_MS + 2000);   // navbatda tayyor nuqta bo'lsa — darhol
@@ -136,9 +137,9 @@ export function useDistrictEngine() {
          * Qimirlamay turgan telefonda GPS oqimi yangi nuqta bermasligi mumkin — 1 ta o'lchov bilan tuman hech qachon
          * tasdiqlanmay qolardi. Nomzod kutilayotgan bo'lsa: BIR MARTA yangi (keshsiz) o'lchov so'raymiz.
          */
-        if (!fix && !freshUsed && lastStatus === 'pending' && alive()) { freshUsed = true; fix = await freshFix(READ_GAP_MS + 4000, lastAt); }
+        if (!fix && freshUsed < 2 && (lastStatus === 'pending' || lastStatus === 'ignored') && alive()) { freshUsed += 1; fix = await freshFix(READ_GAP_MS + 4000, lastAt); }
       }
-      if (alive() && useDistrict.getState().autoStatus === 'checking') useDistrict.getState().setStatus('idle');
+      if (alive() && useDistrict.getState().autoStatus === 'checking') useDistrict.getState().setStatus(lastStatus === 'ignored' ? 'low_accuracy' : 'idle');
     } catch (e) {
       if (alive()) useDistrict.getState().setStatus(e?.code === 'denied' ? 'denied' : 'error');
     } finally {
@@ -166,10 +167,19 @@ export function useDistrictEngine() {
     (async () => {
       const perm = await locationPermissionState();
       if (cancelled) return;
-      if (perm === 'granted') { checkNow(); return; }
+      // Birinchi urinish signal topmasa (timeout/GPS sovuq) — 2,5 s keyin BIR MARTA qayta (ruxsat rad etilgan bo'lsa emas)
+      const retryOnce = async () => {
+        if (cancelled) return;
+        const st = useDistrict.getState();
+        if (st.autoStatus !== 'error' && st.autoStatus !== 'low_accuracy') return;
+        await new Promise((r) => setTimeout(r, 2500));
+        if (!cancelled && useDistrict.getState().selectionMode === 'auto') await checkNow({ interactive: true });
+      };
+      if (perm === 'granted') { await checkNow({ interactive: true }); await retryOnce(); return; }
       if ((perm === 'prompt' || perm === 'unknown') && startupAskAllowed()) {
         markStartupAsk();
-        checkNow({ interactive: true });
+        await checkNow({ interactive: true });
+        await retryOnce();
         return;
       }
       useDistrict.getState().setStatus(perm === 'denied' ? 'denied' : 'no_permission');

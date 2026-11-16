@@ -19,6 +19,19 @@ const STATUS_KEY = {
 };
 
 const nameOf = (d, lang) => (d ? (d[lang] || d.uz || d.id) : '');
+/*
+ * Header uchun QISQA nom: "Pop tumani" → "Pop", "Чустский район" → "Чустский". Ro'yxatda to'liq nom qoladi.
+ * Qisqartma boshqa hudud nomi bilan adashsa (Namangan tumani ↔ Namangan shahri) — to'liq nom qoldiriladi.
+ */
+const SHORT_SUFFIX = /\s+(tumani|тумани|район)$/i;
+export function shortNameOf(d, lang, all = []) {
+  const full = nameOf(d, lang);
+  const base = full.replace(SHORT_SUFFIX, '').trim();
+  if (!base || base === full) return full;
+  const root = base.toLowerCase().slice(0, Math.min(6, base.length));
+  const clash = all.some((o) => o && o.id !== d.id && nameOf(o, lang).toLowerCase().includes(root));
+  return clash ? full : base;
+}
 const norm = (s) => String(s || '').toLowerCase().replace(/[ʻʼ'`‘’]/g, '');
 
 export function DistrictChip() {
@@ -43,7 +56,7 @@ export function DistrictChip() {
         aria-label={active ? `${nameOf(active, lang)} · ${resolving ? t('districtDetecting') : (mode === 'manual' ? t('districtManual') : t('districtAuto'))}` : t('districtNotSelected')}
       >
         <Icon name="pin" size={14} color="var(--brand)" />
-        <span className="dsel-chip__name">{active ? nameOf(active, lang) : t('districtShort')}</span>
+        <span className="dsel-chip__name">{active ? shortNameOf(active, lang, districts) : t('districtShort')}</span>
         <Icon name="chevronDown" size={13} color="var(--muted)" />
       </button>
       {open && <DistrictSheet onClose={() => setOpen(false)} />}
