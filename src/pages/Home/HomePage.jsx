@@ -35,7 +35,7 @@ import {
 } from '@/data/categories';
 
 import { AddressSheet } from '@/components/AddressSheet';
-import { DistrictChip } from '@/components/DistrictSelector/DistrictSelector';
+import { DistrictChip, DistrictAddressHint } from '@/components/DistrictSelector/DistrictSelector';
 import './Home.css';
 import { placePinned } from '@/lib/restaurantPins';
 
@@ -395,6 +395,11 @@ export function HomePage() {
           <LangSwitch compact iconOnly />
         </div>
       </header>
+      {/* GPS boshqa tumanni ko'rsatsa — saqlangan manzil O'ZGARMAYDI, faqat eslatma (bosilsa manzil tanlanadi) */}
+      <DistrictAddressHint
+        address={defaultAddress}
+        onOpenAddresses={() => (user.addresses.length ? setShowAddressSheet(true) : setShowAddressFlow(true))}
+      />
 
       <BannerSlider banners={slidesWithAds} onAdClick={openAdModal} />
 

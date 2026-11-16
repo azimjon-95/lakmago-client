@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Icon } from '@/components/Icon';
 import { useI18n } from '@/i18n';
 import { useSheetDrag } from '@/hooks/useSheetDrag';
 import { useDistrict, useDistrictMeta } from '@/store/district';
 import { DISTRICT_SELECTOR_ENABLED, DISTRICT_AUTO_DETECT_ENABLED } from '@/lib/districtFlags';
 import { requestDistrictCheck } from '@/hooks/useDistrictEngine';
+import { api } from '@/api';
 import './DistrictSelector.css';
 
 /*
@@ -111,6 +112,59 @@ export function DistrictSheet({ onClose }) {
           {!groups.length && <div className="dsel-empty">{t('districtNoResults')}</div>}
         </div>
       </div>
+    </div>
+  );
+}
+
+/*
+ * ═══ MANZIL ↔ TUMAN ESLATMASI ═══
+ * Saqlangan yetkazish manzili O'ZGARTIRILMAYDI (CLAUDE.md 6-qoida). Faqat: GPS (avto rejim) mijozni bir tumanda aniqlagan,
+ * tanlangan saqlangan manzil esa boshqa tumanda bo'lsa — kichik eslatma; bosilsa manzil tanlash oynasi ochiladi.
+ * Manzil tumani serverdan bir marta aniqlanadi (xotirada kesh; koordinata hech qayerga yozilmaydi/log qilinmaydi).
+ */
+const addrDistrictCache = new Map();   // "lat,lng" (5 xona) → districtId | null
+const HINT_DISMISS_KEY = 'lokma-district-hint-dismissed';
+
+export function DistrictAddressHint({ address, onOpenAddresses }) {
+  const { t, lang } = useI18n();
+  const meta = useDistrictMeta((s) => s.meta);
+  const districts = useDistrictMeta((s) => s.districts);
+  const mode = useDistrict((s) => s.selectionMode);
+  const here = useDistrict((s) => s.lastAutoDetectedDistrictId);
+  const active = useDistrict((s) => s.activeDistrictId);
+  const lat = Number(address?.lat); const lng = Number(address?.lng);
+  const hasCoords = Number.isFinite(lat) && Number.isFinite(lng) && !(lat === 0 && lng === 0);
+  const key = hasCoords ? `${lat.toFixed(5)},${lng.toFixed(5)}` : null;
+  const enabled = DISTRICT_SELECTOR_ENABLED && DISTRICT_AUTO_DETECT_ENABLED && !!meta?.autoDetect?.enabled;
+  const [addrDistrict, setAddrDistrict] = useState(() => (key && addrDistrictCache.has(key) ? addrDistrictCache.get(key) : undefined));
+  const [dismissed, setDismissed] = useState(() => { try { return sessionStorage.getItem(HINT_DISMISS_KEY) || ''; } catch { return ''; } });
+
+  useEffect(() => {
+    if (!enabled || !key) { setAddrDistrict(undefined); return undefined; }
+    if (addrDistrictCache.has(key)) { setAddrDistrict(addrDistrictCache.get(key)); return undefined; }
+    let alive = true;
+    api.resolveDistrict(lat, lng, { lang }).then((r) => {
+      const id = r?.data?.matched ? r.data.districtId : null;   // noaniq/tashqarida — eslatma yo'q
+      addrDistrictCache.set(key, id);
+      if (alive) setAddrDistrict(id);
+    }).catch(() => { /* jim — eslatma ko'rsatilmaydi */ });
+    return () => { alive = false; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, key]);
+
+  const pair = `${key}|${here}`;
+  if (!enabled || mode !== 'auto' || !here || active !== here || !addrDistrict || addrDistrict === here || dismissed === pair) return null;
+  const nm = (id) => nameOf(districts.find((d) => d.id === id), lang) || id;
+  const dismiss = () => { setDismissed(pair); try { sessionStorage.setItem(HINT_DISMISS_KEY, pair); } catch { /* */ } };
+  return (
+    <div className="dsel-hint" role="status" data-testid="district-address-hint">
+      <button type="button" className="dsel-hint__text" onClick={onOpenAddresses}>
+        <Icon name="info" size={15} color="var(--brand)" />
+        <span>{t('districtAddressMismatch', { addr: nm(addrDistrict), here: nm(here) })}</span>
+      </button>
+      <button type="button" className="dsel-hint__close" onClick={dismiss} aria-label={t('close')}>
+        <Icon name="x" size={14} color="var(--muted)" />
+      </button>
     </div>
   );
 }

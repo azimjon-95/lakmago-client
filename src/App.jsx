@@ -225,7 +225,8 @@ function AppInner({ authMode = 'telegram' }) {
         <ErrorBoundary>
         <Suspense fallback={<div className="app-shell" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="spinner" /></div>}>
           <StartParamHandler />
-          {/* Katalog tumani (flag o'chiq bo'lsa umuman chizilmaydi — ilova avvalgidek). Ilova ochilishida hech narsa so'ralmaydi. */}
+          {/* Katalog tumani (flag o'chiq bo'lsa umuman chizilmaydi). Splash bilan parallel ishlaydi va uni kuttirmaydi; avto rejimda
+              ruxsat so'ralmagan bo'lsa GPS oynasi 24 soatda bir marta (CLAUDE.md 2-qoida istisnosi). */}
           {DISTRICT_SELECTOR_ENABLED && <DistrictEngine />}
           <TelegramBackHandler />
           {/* Reklama oynalari: splash tugagach, bosh sahifada (kuniga bir marta, navbat bilan) */}

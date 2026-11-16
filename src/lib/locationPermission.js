@@ -4,9 +4,9 @@ import { getTelegram } from './telegram';
 import { withTimeout } from './location';
 
 /*
- * Joylashuv ruxsati ALLAQACHON berilganmi — HECH QANDAY oyna ko'rsatmasdan tekshiradi (guest-first: ilova ochilishida
- * ruxsat so'ralmaydi). Avtomatik tuman aniqlash faqat 'granted' bo'lsa jim ishlaydi; aks holda mijoz header'dagi
- * "Joyimni aniqlash" tugmasini bosadi (o'shanda ruxsat so'raladi).
+ * Joylashuv ruxsati ALLAQACHON berilganmi — HECH QANDAY oyna ko'rsatmasdan tekshiradi.
+ * 'granted' → avto-aniqlash jim ishlaydi; 'prompt'/'unknown' → useDistrictEngine ochilishda (24 soatda bir marta) tizim
+ * oynasini ko'rsatadi (CLAUDE.md 2-qoida istisnosi); 'denied' → so'ralmaydi.
  * Qaytaradi: 'granted' | 'denied' | 'prompt' | 'unknown'
  */
 export async function locationPermissionState() {
