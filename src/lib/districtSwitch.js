@@ -32,6 +32,21 @@ export function fixProblem(fix, { minAccuracyMeters = DEFAULTS.minAccuracyMeters
   return null;
 }
 
+/**
+ * PAST ANIQLIKDAGI (tarmoq bo'yicha, 50–3000 m) nuqtani qabul qilish — faqat server BUTUN aniqlik doirasi bitta tuman
+ * ichida deb tasdiqlasa: so'rovda `acc` yuborilgan va javobdagi `bufferMeters` ≥ aniqlik. Eski server `bufferMeters`
+ * bermaydi → qabul qilinmaydi (noto'g'ri tuman tanlanmaydi). Qaytaradi: districtId | null.
+ */
+export function coarseAccept(fix, result, { maxCoarseMeters = 3000 } = {}) {
+  if (!fix || !Number.isFinite(fix.lat) || !Number.isFinite(fix.lng)) return null;
+  const acc = Number(fix.accuracy);
+  if (!Number.isFinite(acc) || acc <= 0 || acc > maxCoarseMeters) return null;
+  if (!result?.matched || !result.districtId) return null;
+  const buf = Number(result.bufferMeters);
+  if (!Number.isFinite(buf) || buf < acc) return null;
+  return result.districtId;
+}
+
 export function createDistrictTracker(opts = {}) {
   const o = { ...DEFAULTS, ...opts };
   let current = o.current ?? null;   // oxirgi ishonchli (tasdiqlangan) tuman
