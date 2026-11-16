@@ -49,3 +49,11 @@
   border-color: var(--brand);
   font-weight: 500;
 }
+
+/* Faqat ikonka varianti (header kapsulasi): 🌐 ▼, ramkasiz */
+.lang-switch__trigger--icon {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: transparent; border: 0; border-radius: 999px;
+  padding: 0 10px 0 12px; height: 40px;
+}
+.lang-switch__trigger--icon > svg { flex: none; }
