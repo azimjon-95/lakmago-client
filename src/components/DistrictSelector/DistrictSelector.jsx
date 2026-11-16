@@ -43,7 +43,7 @@ export function DistrictChip() {
         aria-label={active ? `${nameOf(active, lang)} · ${resolving ? t('districtDetecting') : (mode === 'manual' ? t('districtManual') : t('districtAuto'))}` : t('districtNotSelected')}
       >
         <Icon name="pin" size={14} color="var(--brand)" />
-        <span className="dsel-chip__name">{active ? nameOf(active, lang) : t('districtNotSelected')}</span>
+        <span className="dsel-chip__name">{active ? nameOf(active, lang) : t('districtShort')}</span>
         <Icon name="chevronDown" size={13} color="var(--muted)" />
       </button>
       {open && <DistrictSheet onClose={() => setOpen(false)} />}
