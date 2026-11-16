@@ -45,10 +45,17 @@ tayyorlab jo'natdi → **restoran zarar ko'rdi.**
 ## 2-QOIDA — Guest-first: ilova ochilishida hech narsa so'ralmaydi
 
 Ism, familiya, telefon, manzil, geolokatsiya, Telegram kanaliga obuna —
-**bularning HECH BIRI** ilova ochilganda so'ralmaydi.
+**bularning HECH BIRI** ilova ochilganda so'ralmaydi (geolokatsiya uchun pastdagi yagona istisno bor).
 
 `App.jsx` guest foydalanuvchini HECH QACHON bloklamasligi kerak —
 na Telegram ichida, na brauzerda. Main Page har doim darhol ochiladi.
+
+**Yagona istisno — tuman avto-aniqlash GPS so'rovi (egasi qarori, 2026-11-16):**
+`VITE_DISTRICT_AUTO_DETECT_ENABLED=true` va server `autoDetect.enabled` bo'lsa, tuman rejimi `auto` va ruxsat holati
+`prompt` bo'lsa, ilova ochilganda (splash bilan parallel) tizim geolokatsiya oynasi ko'rsatiladi — **24 soatda ko'pi bilan
+bir marta** (`useDistrictEngine.js` → `startupAskAllowed`). Bu so'rov ilovani/splash'ni **BLOKLAMAYDI**, rad etilsa qayta
+so'ralmaydi va ilova to'liq ishlayveradi. Koordinata faqat tumanni aniqlash uchun; **manzilga yozilmaydi** (6-qoida).
+Ism, telefon, manzil, obuna va boshqa hech narsa ochilishda so'ralmaydi — istisno faqat shu.
 
 Auth va obuna faqat **transactional nuqtada** so'raladi:
 
@@ -118,7 +125,7 @@ chegaralarini hisobga oladigan usul ishlatiladi.
 - Buyurtma yaratilgach (`placeOrder` `.then`) **`clearOneTime()`** — keyingi buyurtmada avtomatik tanlanmaydi.
   Buyurtma xato bo'lsa tozalanmaydi (mijoz qayta urina oladi).
 - Saqlangan manzil tanlansa yoki yangisi qo'shilsa — bir martalik o'chadi (ikkalasi bir vaqtda faol bo'lmaydi).
-- GPS faqat mijoz tugmani bosganda so'raladi (2-qoida: ilova ochilishida hech narsa so'ralmaydi).
+- «Hozirgi joyimga yetkazish» GPS'i faqat mijoz tugmani bosganda so'raladi. (Tuman avto-aniqlash so'rovi — 2-qoidadagi yagona istisno; u ham manzilga hech narsa yozmaydi: GPS tumani boshqa bo'lsa faqat `DistrictAddressHint` eslatmasi.)
 - Server buyurtmada `address` matni + `addressLat/addressLng` ni saqlangan manzilsiz qabul qiladi (server o'zgarmagan).
 
 Tekshiruv: `npm run test:once` (mantiq + aralashmaslik kafolatlari), `npm run test:once:render` (interfeys render).

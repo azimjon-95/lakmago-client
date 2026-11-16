@@ -8,6 +8,7 @@ import { DISTRICT_SELECTOR_ENABLED, DISTRICT_AUTO_DETECT_ENABLED } from '@/lib/d
 import { activeCatalogDistrict, CATALOG_QUERY_PREFIXES } from '@/lib/catalogDistrict';
 import { createDistrictTracker, fixProblem, DEFAULTS } from '@/lib/districtSwitch';
 import { createFixSource } from '@/lib/gpsSource';
+import { getCurrentPosition, watchFixes } from '@/lib/location';
 import { locationPermissionState } from '@/lib/locationPermission';
 
 /*
@@ -116,6 +117,7 @@ export function useDistrictEngine() {
     const startedAt = Date.now();
     try {
       let fix = await source.first();
+      let lastStatus = null; let freshUsed = false; let lastAt = null;
       // Mijoz bosganda: qurilma keshidagi ESKI nuqta (maximumAge) emas, faqat bosilgandan keyingi yangi o'lchovlar
       for (let i = 0; i < 5 && fix && alive(); i += 1) {
         const f = { lat: fix.lat, lng: fix.lng, accuracy: fix.accuracy, at: fix.ts ?? Date.now() };
@@ -124,10 +126,17 @@ export function useDistrictEngine() {
           useDeviceLocation.getState().set(f);
           const out = await processFix(f);
           if (!alive() || !out) break;
+          lastStatus = out.status; lastAt = f.at;
           // tasdiqlandi / o'sha / noaniq — yetarli; 'pending' — ikkinchi o'lchov kerak; 'skipped' (siljimagan) — fonda to'xtaymiz
           if (out.status !== 'pending' && !(interactive && out.status === 'skipped')) break;
         }
-        fix = await source.next(READ_GAP_MS + 2000);
+        // Nomzod kutilayotgan bo'lsa ko'p kutmaymiz (ikkinchi o'lchov ≥1,5 s keyin yetarli) — birinchi aniqlash tez bo'lsin
+        fix = await source.next(lastStatus === 'pending' ? 50 : READ_GAP_MS + 2000);   // navbatda tayyor nuqta bo'lsa — darhol
+        /*
+         * Qimirlamay turgan telefonda GPS oqimi yangi nuqta bermasligi mumkin — 1 ta o'lchov bilan tuman hech qachon
+         * tasdiqlanmay qolardi. Nomzod kutilayotgan bo'lsa: BIR MARTA yangi (keshsiz) o'lchov so'raymiz.
+         */
+        if (!fix && !freshUsed && lastStatus === 'pending' && alive()) { freshUsed = true; fix = await freshFix(READ_GAP_MS + 4000, lastAt); }
       }
       if (alive() && useDistrict.getState().autoStatus === 'checking') useDistrict.getState().setStatus('idle');
     } catch (e) {
@@ -145,7 +154,26 @@ export function useDistrictEngine() {
   // 3) Triggerlar: ochilish, resume, 10 daqiqalik yangilash (faqat ko'rinib turganda), boshqa oqimlardan kelgan nuqtalar
   useEffect(() => {
     if (!autoOn || mode !== 'auto') return undefined;
-    checkNow();
+    /*
+     * OCHILISH (splash bilan parallel — dvigatel splash ostida chiziladi, splash'ni KUTTIRMAYDI):
+     *   ruxsat bor        → jim tekshiruv;
+     *   ruxsat so'ralmagan → tizim oynasi DARHOL ko'rsatiladi (egasi qarori, 2026-11; CLAUDE.md 2/6-qoida istisnosi),
+     *                        lekin 24 soatda ko'pi bilan BIR MARTA (iOS "bir marta ruxsat" keyingi kunlari qayta so'raydi);
+     *   rad etilgan       → so'ralmaydi; oxirgi saqlangan tuman / qo'lda tanlash ishlaydi.
+     * Qo'lda tanlangan rejimda (mode !== 'auto') bu effekt umuman ishlamaydi — qo'lda tanlov doim ustun.
+     */
+    let cancelled = false;
+    (async () => {
+      const perm = await locationPermissionState();
+      if (cancelled) return;
+      if (perm === 'granted') { checkNow(); return; }
+      if ((perm === 'prompt' || perm === 'unknown') && startupAskAllowed()) {
+        markStartupAsk();
+        checkNow({ interactive: true });
+        return;
+      }
+      useDistrict.getState().setStatus(perm === 'denied' ? 'denied' : 'no_permission');
+    })();
     const onVis = () => { if (document.visibilityState === 'visible') checkNow(); };
     document.addEventListener('visibilitychange', onVis);
     const timer = setInterval(() => { if (document.visibilityState === 'visible') checkNow(); }, DEFAULTS.refreshMs);
@@ -153,12 +181,56 @@ export function useDistrictEngine() {
       if (s.fix && s.fix !== prev.fix && !busy.current) processFix(s.fix);
     });
     return () => {
+      cancelled = true;
       document.removeEventListener('visibilitychange', onVis); clearInterval(timer); unsub();
       runGen.current += 1; sourceRef.current?.close(); sourceRef.current = null; busy.current = false;   // GPS oqimi qolib ketmasin
     };
   }, [autoOn, mode, checkNow, processFix]);
 
   return { checkNow, autoOn };
+}
+
+/**
+ * Bitta YANGI o'lchov (avvalgisidan kamida minGapMs keyin): yangi kuzatuv (maximumAge 0) VA getCurrentPosition PARALLEL;
+ * vaqt belgisi avvalgi o'lchovdan keyingi BIRINCHI natija olinadi (keshdagi eski nuqta ikkinchi tasdiq bo'lmaydi).
+ * Qaytaradi: fix | null. Kuzatuv albatta yopiladi (batareya).
+ */
+async function freshFix(timeoutMs, prevAt) {
+  await new Promise((r) => setTimeout(r, DEFAULTS.minGapMs + 200));
+  return new Promise((resolve) => {
+    let stop = null; let done = false; let pending = 2;
+    const ctl = new AbortController();
+    const finish = (v) => {
+      if (done) return; done = true; clearTimeout(t); ctl.abort();
+      try { stop?.(); } catch { /* */ }
+      resolve(v);
+    };
+    const offer = (f) => {
+      const fix = f ? { ...f, ts: f.ts ?? Date.now() } : null;
+      if (fix && (!Number.isFinite(prevAt) || fix.ts > prevAt + 1000)) return finish(fix);
+      pending -= 1; if (pending <= 0) finish(null);
+    };
+    const t = setTimeout(() => finish(null), timeoutMs);
+    try { stop = watchFixes((f) => offer(f), () => offer(null)); } catch { offer(null); }
+    if (done) { try { stop?.(); } catch { /* */ } }
+    getCurrentPosition({ signal: ctl.signal }).then(offer, () => offer(null));
+  });
+}
+
+/** Ochilishdagi GPS so'rovi: 24 soatda ko'pi bilan bir marta (localStorage bo'lmasa — sessiyada bir marta). */
+const ASK_KEY = 'lokma-district-gps-asked-at';
+const ASK_GAP_MS = 24 * 60 * 60 * 1000;
+let askedThisSession = false;
+export function startupAskAllowed(now = Date.now()) {
+  if (askedThisSession) return false;
+  try {
+    const at = Number(localStorage.getItem(ASK_KEY));
+    return !(Number.isFinite(at) && at > 0 && now - at < ASK_GAP_MS);
+  } catch { return true; }
+}
+function markStartupAsk(now = Date.now()) {
+  askedThisSession = true;
+  try { localStorage.setItem(ASK_KEY, String(now)); } catch { /* xususiy rejim — sessiya bayrog'i yetarli */ }
 }
 
 /** Header komponentlari uchun: dvigatelning "hozir tekshir" funksiyasiga kirish (App'dagi yagona nusxa). */
