@@ -38,6 +38,7 @@ import { BlockedGate } from '@/components/Restrictions/Restrictions';
 import { initSectionTheme } from '@/store/section';
 import { DISTRICT_SELECTOR_ENABLED } from '@/lib/districtFlags';
 import { DistrictEngine } from '@/hooks/useDistrictEngine';
+import { LocationPrompt } from '@/components/LocationPrompt/LocationPrompt';
 
 
 // Global suzuvchi elementlar (buyurtma nishoni + chat) — faqat
@@ -231,6 +232,8 @@ function AppInner({ authMode = 'telegram' }) {
           <TelegramBackHandler />
           {/* Reklama oynalari: splash tugagach, bosh sahifada (kuniga bir marta, navbat bilan) */}
           {!showSplash && <PromoModals />}
+          {/* Joylashuv olinmagan bo'lsa — bosh sahifada kichik «ulashasizmi?» oynasi (bloklamaydi) */}
+          {!showSplash && DISTRICT_SELECTOR_ENABLED && <LocationPrompt />}
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/restaurant/:id" element={<RestaurantPage />} />

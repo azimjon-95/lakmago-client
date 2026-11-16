@@ -104,6 +104,12 @@ export function PromoModals() {
     return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
   }, [visible, close]);
 
+  // Boshqa oynalar (joylashuv so'rovi) reklama ustiga chiqmasin — ko'rinayotganini belgilaymiz
+  useEffect(() => {
+    document.documentElement.dataset.promoOpen = visible ? '1' : '';
+    return () => { document.documentElement.dataset.promoOpen = ''; };
+  }, [visible]);
+
   // Boshqa sahifaga o'tilsa — jimgina yopiladi
   useEffect(() => { if (!onHome && visible) { setPhase('idle'); setQueue([]); } }, [onHome, visible]);
 
