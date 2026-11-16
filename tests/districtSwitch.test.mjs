@@ -1,7 +1,7 @@
 /* Tuman avtomatik almashishi: 2 ta ishonchli o'lchov, gisterezis, tebranish, past aniqlik. npm run test:district */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createDistrictTracker, fixProblem, metersBetween } from '../src/lib/districtSwitch.js';
+import { createDistrictTracker, fixProblem, metersBetween, coarseAccept } from '../src/lib/districtSwitch.js';
 
 const POP = { lat: 40.8736, lng: 71.1085 };
 const CHUST = { lat: 41.0035, lng: 71.2378 };
@@ -74,4 +74,15 @@ test('Nomzod bor bo‘lsa — kichik siljishda ham tasdiqlash uchun so‘raydi',
   const t = createDistrictTracker({ current: 'pop' });
   t.step(fix(CHUST, 1000), ok('chust'), 1000);
   assert.equal(t.shouldResolve(fix(CHUST, 5000), 5000), true);
+});
+
+test('Past aniqlik: faqat server butun doirani bitta tumanda tasdiqlasa qabul qilinadi', () => {
+  const f = (acc) => ({ ...CHUST, accuracy: acc, at: Date.now() });
+  const res = (buf, matched = true) => ({ districtId: matched ? 'chust' : null, matched, bufferMeters: buf });
+  assert.equal(coarseAccept(f(400), res(400)), 'chust', 'bufer = aniqlik → qabul');
+  assert.equal(coarseAccept(f(400), res(50)), null, 'bufer kichik (server acc ni hisobga olmagan) → rad');
+  assert.equal(coarseAccept(f(400), { districtId: 'chust', matched: true }), null, 'eski server (bufferMeters yo‘q) → rad');
+  assert.equal(coarseAccept(f(400), res(400, false)), null, 'noaniq → rad');
+  assert.equal(coarseAccept(f(5000), res(5000)), null, '3 km dan yomon → rad');
+  assert.equal(coarseAccept(f(NaN), res(400)), null, 'aniqlik noma‘lum → rad');
 });

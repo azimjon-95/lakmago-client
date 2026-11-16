@@ -1,30 +1,59 @@
-/* Kichik joylashuv oynasi — pastki menyu ustida, ilovani bloklamaydi (fon qorong'ilashmaydi) */
-.locask {
-  position: fixed; left: 0; right: 0; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); z-index: 60;
-  display: flex; justify-content: center; padding: 0 12px; pointer-events: none;
-  animation: locask-in 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+/* «Joylashuvingizni ulashing» — pastdan chiquvchi oyna (dizayn: 3D rasm, 3 afzallik, bitta tugma) */
+.locm { position: fixed; inset: 0; z-index: 1200; display: flex; align-items: flex-end; justify-content: center; }
+.locm__backdrop {
+  position: absolute; inset: 0; background: rgba(20, 16, 12, 0.38);
+  animation: locm-fade 0.25s ease-out both;
 }
-.locask__card {
-  pointer-events: auto; position: relative; width: 100%; max-width: 420px;
-  display: flex; gap: 12px; padding: 14px 14px 12px; border-radius: 18px;
-  background: var(--surface, #fff); border: 0.5px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+.locm__sheet {
+  position: relative; width: 100%; max-width: 520px; max-height: 92vh; overflow-y: auto;
+  padding: 18px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+  border-radius: 28px 28px 0 0;
+  background: linear-gradient(180deg, #ffffff 0%, #fffaf7 100%);
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.18);
+  text-align: center;
+  animation: locm-up 0.42s cubic-bezier(0.2, 0.9, 0.25, 1) both;
 }
-.locask__icon {
-  flex: none; width: 38px; height: 38px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center; background: #fff3ea;
+.locm__close {
+  position: absolute; top: 14px; right: 14px; z-index: 2; width: 34px; height: 34px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.05);
 }
-.locask__body { flex: 1; min-width: 0; padding-right: 18px; }
-.locask__title { font-size: 15px; font-weight: 700; color: var(--ink); line-height: 1.25; }
-.locask__text { margin-top: 3px; font-size: 13px; color: var(--muted); line-height: 1.35; }
-.locask__hint { margin-top: 6px; font-size: 12.5px; color: var(--ink); line-height: 1.35; background: #f6f6f8; border-radius: 10px; padding: 7px 9px; }
-.locask__actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
-.locask__btn {
-  height: 34px; padding: 0 14px; border-radius: 999px; font-size: 13.5px; font-weight: 600;
-  background: var(--brand, #ff6a00); color: #fff;
+.locm__hero {
+  display: block; width: min(84%, 380px); height: auto; margin: 4px auto 6px;
+  filter: drop-shadow(0 10px 18px rgba(255, 106, 0, 0.16));
+  animation: locm-float 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.08s both;
 }
-.locask__btn:disabled { opacity: 0.7; }
-.locask__btn--ghost { background: transparent; color: var(--muted); font-weight: 500; }
-.locask__close { position: absolute; top: 8px; right: 8px; padding: 4px; border-radius: 999px; display: inline-flex; }
-@keyframes locask-in { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .locask { animation: none; } }
+.locm__title { margin: 6px 0 0; font-size: 24px; line-height: 1.2; font-weight: 800; letter-spacing: -0.3px; color: var(--ink, #14161f); }
+.locm__text { margin: 8px auto 0; max-width: 340px; font-size: 14.5px; line-height: 1.45; color: var(--muted, #6b6f7a); }
+.locm__perks {
+  display: grid; grid-template-columns: repeat(3, 1fr); margin: 18px 0 0; padding: 14px 6px;
+  border-radius: 20px; background: #fff3ea;
+}
+.locm__perk {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0 4px;
+  font-size: 13px; font-weight: 600; line-height: 1.25; color: var(--ink, #14161f);
+}
+.locm__perk + .locm__perk { border-left: 1px solid rgba(255, 106, 0, 0.18); }
+.locm__hint {
+  margin: 12px 0 0; padding: 10px 12px; border-radius: 14px; background: #f5f5f7;
+  font-size: 13px; line-height: 1.4; color: var(--ink, #14161f); text-align: left;
+}
+.locm__btn {
+  margin: 16px 0 0; width: 100%; height: 54px; border-radius: 18px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  background: linear-gradient(180deg, #ff7a1a 0%, #f25a00 100%); color: #fff;
+  font-size: 17px; font-weight: 700; box-shadow: 0 10px 22px rgba(242, 90, 0, 0.3);
+}
+.locm__btn:active { transform: scale(0.985); }
+.locm__btn:disabled { opacity: 0.85; }
+.locm__btn > svg { flex: none; transform: rotate(-12deg); }
+.locm__spin {
+  width: 18px; height: 18px; border-radius: 50%; border: 2.5px solid rgba(255, 255, 255, 0.45); border-top-color: #fff;
+  animation: locm-spin 0.8s linear infinite;
+}
+@keyframes locm-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes locm-up { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes locm-float { from { opacity: 0; transform: translateY(10px) scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes locm-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .locm__backdrop, .locm__sheet, .locm__hero { animation: none; }
+}

@@ -6,10 +6,11 @@ import { useDistrict, useDistrictMeta } from '@/store/district';
 import { useDeviceLocation } from '@/store/deviceLocation';
 import { DISTRICT_SELECTOR_ENABLED, DISTRICT_AUTO_DETECT_ENABLED } from '@/lib/districtFlags';
 import { activeCatalogDistrict, CATALOG_QUERY_PREFIXES } from '@/lib/catalogDistrict';
-import { createDistrictTracker, fixProblem, DEFAULTS } from '@/lib/districtSwitch';
+import { createDistrictTracker, fixProblem, coarseAccept, DEFAULTS } from '@/lib/districtSwitch';
 import { createFixSource } from '@/lib/gpsSource';
 import { getCurrentPosition, watchFixes } from '@/lib/location';
 import { locationPermissionState } from '@/lib/locationPermission';
+import { probeAccess, coarsePosition, classifyError } from '@/lib/geoService';
 
 /*
  * ═══ TUMAN DVIGATELI (App'da BIR MARTA) ═══
@@ -120,7 +121,8 @@ export function useDistrictEngine() {
       let fix = await source.first();
       let lastStatus = null; let freshUsed = 0; let lastAt = null;
       // Mijoz bosganda: qurilma keshidagi ESKI nuqta (maximumAge) emas, faqat bosilgandan keyingi yangi o'lchovlar
-      for (let i = 0; i < 7 && fix && alive(); i += 1) {
+      // Aniq GPS bosqichi vaqt bilan cheklangan: past aniqlik davom etsa — zaxira (tarmoq) bosqichiga o'tamiz
+      for (let i = 0; i < 7 && fix && alive() && Date.now() - startedAt < HIGH_ACCURACY_BUDGET_MS; i += 1) {
         const f = { lat: fix.lat, lng: fix.lng, accuracy: fix.accuracy, at: fix.ts ?? Date.now() };
         const cachedOld = interactive && Number.isFinite(f.at) && f.at < startedAt - 1000;
         if (!cachedOld) {
@@ -139,9 +141,11 @@ export function useDistrictEngine() {
          */
         if (!fix && freshUsed < 2 && (lastStatus === 'pending' || lastStatus === 'ignored') && alive()) { freshUsed += 1; fix = await freshFix(READ_GAP_MS + 4000, lastAt); }
       }
-      if (alive() && useDistrict.getState().autoStatus === 'checking') useDistrict.getState().setStatus(lastStatus === 'ignored' ? 'low_accuracy' : 'idle');
+      // Hech bitta o'lchov kelmagan bo'lsa — bu muvaffaqiyat EMAS ('idle' emas): oyna/zaxira urinish uchun 'error'
+      if (alive() && useDistrict.getState().autoStatus === 'checking') useDistrict.getState().setStatus(lastStatus === null ? 'error' : lastStatus === 'ignored' ? 'low_accuracy' : 'idle');
     } catch (e) {
-      if (alive()) useDistrict.getState().setStatus(e?.code === 'denied' ? 'denied' : 'error');
+      const st = await classifyError(e);   // denied | services_off | error
+      if (alive()) useDistrict.getState().setStatus(st);
     } finally {
       source.close();
       if (alive()) {
@@ -151,6 +155,69 @@ export function useDistrictEngine() {
       }
     }
   }, [processFix]);
+
+  /**
+   * ZAXIRA: pastroq aniqlik (tarmoq bo'yicha joy). Server `acc` bilan butun doirani tekshiradi; faqat doira bitta
+   * tuman ichida bo'lsa qo'llanadi (coarseAccept). Aks holda 'low_accuracy' — noto'g'ri tuman tanlanmaydi.
+   */
+  const coarseCheck = useCallback(async () => {
+    const tr = tracker.current;
+    if (!tr) return;
+    const myRun = ++runGen.current;
+    const alive = () => runGen.current === myRun;
+    useDistrict.getState().setStatus('checking', true);
+    let status = 'error';
+    try {
+      const fix = await coarsePosition(10_000);
+      if (!alive()) return;
+      if (fix) {
+        const res = await api.resolveDistrict(fix.lat, fix.lng, { lang, acc: fix.accuracy });
+        if (!alive()) return;
+        const id = coarseAccept(fix, res?.data);
+        if (id) {
+          tr.setCurrent(id);
+          useDistrict.getState().applyAuto(id, res?.data?.boundaryVersion);
+          status = 'idle';
+        } else {
+          status = res?.data?.reason === 'OUTSIDE_COVERAGE' && Number(res?.data?.bufferMeters) >= Number(fix.accuracy) ? 'outside' : 'low_accuracy';
+        }
+      }
+    } catch (e) {
+      status = await classifyError(e);
+    }
+    if (alive()) useDistrict.getState().setStatus(status, false);
+  }, [lang]);
+
+  /**
+   * TO'LIQ AVTOMATIK KETMA-KETLIK (ochilishda, oynadagi tugmada, sozlamalardan qaytganda):
+   *   1) GPS o'chiq bo'lsa — darhol 'services_off' (kutib o'tirmaymiz);
+   *   2) aniq GPS (2 o'lchov bilan tasdiq);
+   *   3) natija bo'lmasa (signal/aniqlik) — 1,5 s keyin yana bir marta;
+   *   4) baribir bo'lmasa — pastroq aniqlik (tarmoq), faqat butun doira bitta tumanda bo'lsa.
+   * Ruxsat rad etilsa — qayta urinishlar YO'Q (foydalanuvchini bezovta qilmaymiz). Oraliqda holat 'checking' (oyna chiqmaydi).
+   */
+  const fullCheck = useCallback(async ({ interactive = true, stopped = () => false } = {}) => {
+    // `stopped` — chaqiruvchi bekor qilingan bo'lsa (effekt tozalandi) ketma-ketlik davom etmaydi va yangi tekshiruvni buzmaydi
+    const off = () => stopped() || useDistrict.getState().selectionMode !== 'auto';
+    if (!tracker.current || off()) return;
+    useDistrict.getState().setStatus('checking', true);
+    const pr = await probeAccess();
+    if (off()) return;
+    if (pr.services === 'off') { useDistrict.getState().setStatus('services_off', false); return; }
+    const st = () => useDistrict.getState().autoStatus;
+    await checkNow({ interactive });
+    if (off()) return;
+    // Umuman o'lchov kelmadi (signal yo'q / vaqt tugadi) — 1,5 s keyin aniq GPS bilan yana bir marta
+    if (st() === 'error') {
+      useDistrict.getState().setStatus('checking', true);
+      await new Promise((r) => setTimeout(r, 1500));
+      if (off()) return;
+      await checkNow({ interactive: true });
+      if (off()) return;
+    }
+    // O'lchov bor-u aniqligi yetmadi, yoki baribir kelmadi — pastroq aniqlik (tarmoq) bilan zaxira
+    if (st() === 'error' || st() === 'low_accuracy') await coarseCheck();
+  }, [checkNow, coarseCheck]);
 
   // 3) Triggerlar: ochilish, resume, 10 daqiqalik yangilash (faqat ko'rinib turganda), boshqa oqimlardan kelgan nuqtalar
   useEffect(() => {
@@ -167,22 +234,13 @@ export function useDistrictEngine() {
     (async () => {
       const perm = await locationPermissionState();
       if (cancelled) return;
-      // Birinchi urinish signal topmasa (timeout/GPS sovuq) — 2,5 s keyin BIR MARTA qayta (ruxsat rad etilgan bo'lsa emas)
-      const retryOnce = async () => {
-        if (cancelled) return;
-        const st = useDistrict.getState();
-        if (st.autoStatus !== 'error' && st.autoStatus !== 'low_accuracy') return;
-        await new Promise((r) => setTimeout(r, 2500));
-        if (!cancelled && useDistrict.getState().selectionMode === 'auto') await checkNow({ interactive: true });
-      };
-      if (perm === 'granted') { await checkNow({ interactive: true }); await retryOnce(); return; }
-      if ((perm === 'prompt' || perm === 'unknown') && startupAskAllowed()) {
-        markStartupAsk();
-        await checkNow({ interactive: true });
-        await retryOnce();
-        return;
-      }
-      useDistrict.getState().setStatus(perm === 'denied' ? 'denied' : 'no_permission');
+      const stopped = () => cancelled;
+      if (perm === 'granted') { await fullCheck({ stopped }); return; }
+      if ((perm === 'prompt' || perm === 'unknown') && startupAskAllowed()) { markStartupAsk(); await fullCheck({ stopped }); return; }
+      if (perm === 'denied') { useDistrict.getState().setStatus('denied'); return; }
+      // So'rash vaqti emas (24 soat) — lekin GPS o'chiq bo'lsa shuni bildiramiz (oyna to'g'ri sababni ko'rsatsin)
+      const pr = await probeAccess();
+      if (!cancelled) useDistrict.getState().setStatus(pr.services === 'off' ? 'services_off' : 'no_permission');
     })();
     const onVis = () => { if (document.visibilityState === 'visible') checkNow(); };
     document.addEventListener('visibilitychange', onVis);
@@ -195,9 +253,9 @@ export function useDistrictEngine() {
       document.removeEventListener('visibilitychange', onVis); clearInterval(timer); unsub();
       runGen.current += 1; sourceRef.current?.close(); sourceRef.current = null; busy.current = false;   // GPS oqimi qolib ketmasin
     };
-  }, [autoOn, mode, checkNow, processFix]);
+  }, [autoOn, mode, checkNow, fullCheck, processFix]);
 
-  return { checkNow, autoOn };
+  return { checkNow, fullCheck, autoOn };
 }
 
 /**
@@ -227,6 +285,8 @@ async function freshFix(timeoutMs, prevAt) {
   });
 }
 
+const HIGH_ACCURACY_BUDGET_MS = 9000;
+
 /** Ochilishdagi GPS so'rovi: 24 soatda ko'pi bilan bir marta (localStorage bo'lmasa — sessiyada bir marta). */
 const ASK_KEY = 'lokma-district-gps-asked-at';
 const ASK_GAP_MS = 24 * 60 * 60 * 1000;
@@ -249,8 +309,8 @@ export const requestDistrictCheck = (opts) => engineCheck?.(opts);
 
 /** App ichida BIR MARTA chiziladi (hech narsa ko'rsatmaydi). Flag o'chiq bo'lsa — hook ichida hech narsa qilinmaydi. */
 export function DistrictEngine() {
-  const { checkNow } = useDistrictEngine();
-  useEffect(() => { engineCheck = checkNow; return () => { if (engineCheck === checkNow) engineCheck = null; }; }, [checkNow]);
+  const { fullCheck } = useDistrictEngine();
+  useEffect(() => { engineCheck = fullCheck; return () => { if (engineCheck === fullCheck) engineCheck = null; }; }, [fullCheck]);
   return null;
 }
 export { activeCatalogDistrict };

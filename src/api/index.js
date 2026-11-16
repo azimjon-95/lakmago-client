@@ -329,7 +329,8 @@ export const api = {
   getFeatures: (opts) => apiFetch('/features', opts),
   // Tumanlar ro'yxati (+ server yoqgan bo'lsa ixtiyoriy `boundaries` metama'lumoti) va koordinata → tuman
   getDistricts: (opts) => apiFetch('/districts', opts),
-  resolveDistrict: (lat, lng, { lang, signal } = {}) => apiFetch(`/location/resolve?lat=${Number(lat).toFixed(6)}&lng=${Number(lng).toFixed(6)}${lang ? `&lang=${lang}` : ''}`, { signal }),
+  // acc (ixtiyoriy) — past aniqlikdagi nuqta: server butun doira bitta tumanda bo'lsagina matched qaytaradi
+  resolveDistrict: (lat, lng, { lang, signal, acc } = {}) => apiFetch(`/location/resolve?lat=${Number(lat).toFixed(6)}&lng=${Number(lng).toFixed(6)}${lang ? `&lang=${lang}` : ''}${Number.isFinite(acc) && acc > 0 ? `&acc=${Math.min(Math.ceil(acc), 3000)}` : ''}`, { signal }),
   // Mijozning o'z to'yxona bronlari (Lokma profilidagi telefon bo'yicha, server tekshiradi)
   getWeddingBookings: () => apiFetch('/weddings/my-bookings'),
   cancelWeddingBooking: (id) => apiFetch(`/weddings/my-bookings/${id}/cancel`, { method: 'POST' }),

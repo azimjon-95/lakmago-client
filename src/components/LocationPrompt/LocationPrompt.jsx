@@ -5,25 +5,31 @@ import { useI18n } from '@/i18n';
 import { useDistrict, useDistrictMeta } from '@/store/district';
 import { DISTRICT_SELECTOR_ENABLED, DISTRICT_AUTO_DETECT_ENABLED } from '@/lib/districtFlags';
 import { requestDistrictCheck } from '@/hooks/useDistrictEngine';
-import { locationPermissionState } from '@/lib/locationPermission';
+import { probeAccess } from '@/lib/geoService';
 import { locationPlatform, openAppLocationSettings } from '@/lib/locationSettings';
+import hero from '@/assets/location-hero.webp';
 import './LocationPrompt.css';
 
 /*
- * ═══ «JOYLASHUVINGIZNI ULASHASIZMI?» — KICHIK OYNA ═══
+ * ═══ «JOYLASHUVINGIZNI ULASHING» OYNASI ═══
  *
- * Splash vaqtidagi avto-aniqlash joylashuvni OLA OLMAGAN bo'lsa (ruxsat yo'q / rad etilgan / GPS signal topilmadi),
- * bosh sahifa ochilganda pastda kichik oyna chiqadi:
- *   ask    — ruxsat so'ralmagan: «Ha» → tizim oynasi (requestDistrictCheck interactive)
- *   denied — ruxsat rad etilgan: «Sozlamalarni ochish» (Telegram/iOS/Android) yoki yo'riqnoma (brauzer)
- *   gps    — ruxsat bor, lekin signal yo'q (GPS o'chiq / bino ichida): «Qayta urinish» + GPS'ni yoqish eslatmasi
- * Qoidalar: faqat avto rejimda (qo'lda tanlov ustun), faqat bosh sahifada, reklama oynasi ustiga chiqmaydi,
- * «Keyinroq» — shu sessiyada qayta chiqmaydi. Joylashuv aniqlansa oyna o'zi yopiladi. Ilova hech qachon bloklanmaydi.
+ * AVVAL AVTOMATIK: splash vaqtida dvigatel (useDistrictEngine.fullCheck) aniq GPS → qayta urinish → pastroq aniqlik
+ * bilan joyni olishga harakat qiladi. Oyna FAQAT hammasi muvaffaqiyatsiz tugagach chiqadi (holat: GPS o'chiq,
+ * ruxsat yo'q/rad etilgan, signal/aniqlik yetmadi). Joy olingan bo'lsa — umuman chiqmaydi.
+ *
+ * «Joylashuvni ulashish»:
+ *   GPS o'chiq    → Android: tizimning Joylashuv sozlamasi; iOS/Web/Telegram: qisqa yo'riqnoma (dastur GPS'ni yoqa olmaydi)
+ *   ruxsat rad    → Android: ruxsat qayta so'raladi → App info; iOS: ilova sozlamalari; Telegram: bot sozlamasi;
+ *                   Web: sayt sozlamalari yo'riqnomasi
+ *   so'ralmagan   → tizim ruxsat oynasi (to'liq avtomatik ketma-ketlik bilan)
+ * Sozlamalardan qaytilganda (foreground) holat qayta tekshiriladi va joy olinsa oyna o'zi yopiladi.
+ * X — yopadi (shu sessiyada qayta chiqmaydi), lekin avtomatik tekshiruv keyingi imkoniyatda (resume/qayta ochish) davom etadi.
+ * «Keyinroq» tugmasi YO'Q (TZ). Faqat avto rejimda, bosh sahifada, reklama oynasi ustiga chiqmaydi.
  */
 const DISMISS_KEY = 'lokma-locprompt-dismissed';
-const NEED = { no_permission: 'ask', denied: 'denied', error: 'gps', low_accuracy: 'gps' };
-
+const NEED = new Set(['no_permission', 'denied', 'error', 'low_accuracy', 'services_off']);
 const readDismissed = () => { try { return sessionStorage.getItem(DISMISS_KEY) === '1'; } catch { return false; } };
+const isIOSDevice = () => typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent || '');
 
 export function LocationPrompt() {
   const { t } = useI18n();
@@ -32,84 +38,128 @@ export function LocationPrompt() {
   const mode = useDistrict((s) => s.selectionMode);
   const status = useDistrict((s) => s.autoStatus);
   const resolving = useDistrict((s) => s.isResolving);
-  const detected = useDistrict((s) => s.lastAutoDetectedDistrictId);
-  const [phase, setPhase] = useState(null);       // null | 'ask' | 'denied' | 'gps'
+  const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [showHint, setShowHint] = useState(false);
+  const [hint, setHint] = useState(null);          // null | 'denied' | 'services' | 'gps'
   const [dismissed, setDismissed] = useState(readDismissed);
-  const shownFor = useRef(null);                   // oyna ochilgandagi aniqlangan tuman (o'zgarsa — yopamiz)
+  const busyRef = useRef(false);
 
   const enabled = DISTRICT_SELECTOR_ENABLED && DISTRICT_AUTO_DETECT_ENABLED && !!meta?.autoDetect?.enabled;
-  const want = enabled && !dismissed && pathname === '/' && mode === 'auto' && !resolving ? NEED[status] : null;
+  const failed = NEED.has(status) && !resolving;
+  const want = enabled && !dismissed && pathname === '/' && mode === 'auto' && failed;
 
-  // Ochish: holat barqaror bo'lsin (splash/animatsiyadan keyin 900 ms) va reklama oynasi ko'rinmasin
+  // Ochish: avtomatik urinishlar tugagach (holat barqaror 900 ms), reklama oynasi ko'rinmasa
   useEffect(() => {
-    if (phase || !want) return undefined;
+    if (open || !want) return undefined;
     let timer = null;
     const tryOpen = () => {
       if (document.documentElement.dataset.promoOpen === '1') { timer = setTimeout(tryOpen, 1500); return; }
-      shownFor.current = useDistrict.getState().lastAutoDetectedDistrictId;
-      setPhase(want); setShowHint(false);
+      const st = useDistrict.getState().autoStatus;
+      setHint(st === 'denied' ? 'denied' : st === 'services_off' ? 'services' : null);
+      setOpen(true);
     };
     timer = setTimeout(tryOpen, 900);
     return () => clearTimeout(timer);
-  }, [want, phase]);
+  }, [want, open]);
 
-  // Joylashuv aniqlandi (sozlamalardan qaytgach ham) yoki qo'lda tanlandi / sahifa almashdi — yopiladi
+  // Muvaffaqiyat (joy olindi / tashqarida / chegarada) yoki qo'lda tanlov / boshqa sahifa — avtomatik yopiladi
   useEffect(() => {
-    if (!phase) return;
-    if (mode !== 'auto' || pathname !== '/' || (detected && detected !== shownFor.current) || (status === 'idle' && !resolving && detected)) setPhase(null);
-  }, [phase, mode, pathname, detected, status, resolving]);
+    if (!open) return;
+    const ok = !NEED.has(status) && status !== 'checking' && !resolving;
+    if (ok || mode !== 'auto' || pathname !== '/') setOpen(false);
+  }, [open, status, resolving, mode, pathname]);
 
-  if (!phase) return null;
+  // Sozlamalardan qaytish (foreground): ruxsat/GPS holatini qayta tekshirib, imkon bo'lsa joyni avtomatik olamiz
+  useEffect(() => {
+    if (!open) return undefined;
+    let t = null;
+    const onVis = () => {
+      if (document.visibilityState !== 'visible' || busyRef.current) return;
+      clearTimeout(t);
+      t = setTimeout(async () => {
+        const pr = await probeAccess();
+        if (pr.services === 'off') { setHint('services'); return; }
+        if (pr.permission === 'denied') { setHint('denied'); return; }
+        if (pr.permission === 'granted') await run(() => requestDistrictCheck({ interactive: true }));
+      }, 600);
+    };
+    document.addEventListener('visibilitychange', onVis);
+    window.addEventListener('focus', onVis);
+    return () => { clearTimeout(t); document.removeEventListener('visibilitychange', onVis); window.removeEventListener('focus', onVis); };
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const later = () => {
-    setPhase(null); setDismissed(true);
+  // Ochiq paytda fon aylanmasin; Escape — yopish
+  useEffect(() => {
+    if (!open) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    window.addEventListener('keydown', onKey);
+    return () => { document.body.style.overflow = prev; window.removeEventListener('keydown', onKey); };
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function run(fn) {
+    if (busyRef.current) return;
+    busyRef.current = true; setBusy(true);
+    try { await fn(); } finally { busyRef.current = false; setBusy(false); }
+    const st = useDistrict.getState().autoStatus;
+    if (st === 'denied') setHint('denied');
+    else if (st === 'services_off') setHint('services');
+    else if (st === 'error' || st === 'low_accuracy') setHint('gps');
+  }
+
+  function close() {
+    setOpen(false); setDismissed(true);
     try { sessionStorage.setItem(DISMISS_KEY, '1'); } catch { /* */ }
-  };
-  const share = async () => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      const perm = await locationPermissionState();
-      if (perm === 'denied') { setPhase('denied'); return; }
-      await requestDistrictCheck({ interactive: true });
-      const st = useDistrict.getState().autoStatus;
-      if (st === 'denied') setPhase('denied');
-      else if (st === 'error' || st === 'low_accuracy') setPhase('gps');
-    } finally { setBusy(false); }
-  };
-  const openSettings = async () => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      const r = await openAppLocationSettings();
+  }
+
+  const share = () => run(async () => {
+    const pr = await probeAccess();
+    if (pr.services === 'off') {
+      setHint('services');
+      await openAppLocationSettings('services');   // Android: Joylashuv sozlamasi; boshqalarda — yo'riqnoma ko'rinadi
+      return;
+    }
+    if (pr.permission === 'denied') {
+      const r = await openAppLocationSettings('permission');
       if (r === 'granted') { await requestDistrictCheck({ interactive: true }); return; }
-      setShowHint(true);   // ochilmasa yoki qaytib kelsa — qo'lda qilish yo'riqnomasi ko'rinib tursin
-    } finally { setBusy(false); }
-  };
+      setHint('denied');
+      if (r === 'manual') await requestDistrictCheck({ interactive: true });   // Web: sayt sozlamasini o'zgartirgan bo'lsa
+      return;
+    }
+    await requestDistrictCheck({ interactive: true });
+  });
+
+  if (!open) return null;
 
   const platform = locationPlatform();
-  const hintKey = { telegram: 'locAskHintTelegram', ios: 'locAskHintIos', android: 'locAskHintAndroid', web: 'locAskHintWeb' }[platform];
-  const text = phase === 'denied' ? t('locAskDeniedText') : phase === 'gps' ? t('locAskGpsText') : t('locAskText');
+  const ios = platform === 'ios' || isIOSDevice();
+  const hintText = hint === 'denied'
+    ? `${t('locAskDeniedText')} ${t({ telegram: 'locAskHintTelegram', ios: 'locAskHintIos', android: 'locAskHintAndroid', web: 'locAskHintWeb' }[platform])}`
+    : hint === 'services'
+      ? `${t('locServicesOffText')} ${t(ios ? 'locHintServicesIos' : 'locHintServicesAndroid')}`
+      : hint === 'gps' ? t('locGpsText') : null;
 
   return (
-    <div className="locask" role="dialog" aria-modal="false" aria-labelledby="locask-title" data-testid="location-prompt">
-      <div className="locask__card">
-        <div className="locask__icon" aria-hidden="true"><Icon name="pin" size={20} color="var(--brand)" /></div>
-        <div className="locask__body">
-          <div id="locask-title" className="locask__title">{t('locAskTitle')}</div>
-          <div className="locask__text">{text}</div>
-          {(phase === 'denied' && (showHint || platform === 'web')) && <div className="locask__hint">{t(hintKey)}</div>}
-          <div className="locask__actions">
-            <button type="button" className="locask__btn locask__btn--ghost" onClick={later}>{t('locAskLater')}</button>
-            {phase === 'ask' && <button type="button" className="locask__btn" onClick={share} disabled={busy}>{busy ? t('districtDetecting') : t('locAskYes')}</button>}
-            {phase === 'gps' && <button type="button" className="locask__btn" onClick={share} disabled={busy}>{busy ? t('districtDetecting') : t('locAskRetry')}</button>}
-            {phase === 'denied' && platform !== 'web' && <button type="button" className="locask__btn" onClick={openSettings} disabled={busy}>{t('locAskOpenSettings')}</button>}
-            {phase === 'denied' && platform === 'web' && <button type="button" className="locask__btn" onClick={share} disabled={busy}>{t('locAskRetry')}</button>}
-          </div>
+    <div className="locm" role="dialog" aria-modal="true" aria-labelledby="locm-title" data-testid="location-prompt">
+      <div className="locm__backdrop" onClick={close} />
+      <div className="locm__sheet">
+        <button type="button" className="locm__close" onClick={close} aria-label={t('close')}>
+          <Icon name="x" size={18} color="var(--muted)" />
+        </button>
+        <img className="locm__hero" src={hero} alt="" width="720" height="431" decoding="async" />
+        <h2 id="locm-title" className="locm__title">{t('locTitle')}</h2>
+        <p className="locm__text">{t('locSubtitle')}</p>
+        <div className="locm__perks">
+          <div className="locm__perk"><Icon name="pin" size={24} color="var(--brand)" /><span>{t('locBenefitNear')}</span></div>
+          <div className="locm__perk"><Icon name="zap" size={24} color="var(--brand)" /><span>{t('locBenefitFast')}</span></div>
+          <div className="locm__perk"><Icon name="locateFixed" size={24} color="var(--brand)" /><span>{t('locBenefitExact')}</span></div>
         </div>
-        <button type="button" className="locask__close" onClick={later} aria-label={t('close')}><Icon name="x" size={16} color="var(--muted)" /></button>
+        {hintText && <div className="locm__hint" role="status">{hintText}</div>}
+        <button type="button" className="locm__btn" onClick={share} disabled={busy}>
+          {busy ? <span className="locm__spin" aria-hidden="true" /> : <Icon name="send" size={20} color="#fff" />}
+          <span>{busy ? t('districtDetecting') : t('locShareBtn')}</span>
+        </button>
       </div>
     </div>
   );
