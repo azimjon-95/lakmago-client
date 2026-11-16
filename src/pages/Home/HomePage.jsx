@@ -389,10 +389,10 @@ export function HomePage() {
             <Icon name="chevronDown" size={13} color="var(--muted)" />
           </span>
         </button>
-        {/* Katalog hududi (tuman) — o'rtada ixcham; manzil tanlagichidan alohida. Flag/server o'chiq bo'lsa chizilmaydi */}
-        <DistrictChip />
-        <div className="home-header__right">
-          <LangSwitch compact />
+        {/* O'ng kapsula: tuman tanlagichi | 🌐 til. Tuman flag/server o'chiq bo'lsa chizilmaydi — kapsulada faqat 🌐 qoladi */}
+        <div className="home-header__capsule">
+          <DistrictChip />
+          <LangSwitch compact iconOnly />
         </div>
       </header>
 

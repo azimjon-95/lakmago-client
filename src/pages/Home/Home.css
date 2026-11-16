@@ -19,6 +19,25 @@
 .home-header__addr-text { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .home-header__addr-value > svg { flex: none; }
 .home-header__right { display: flex; align-items: center; gap: 8px; flex: none; }
+/* Tuman + til umumiy kapsulasi. Manzil asosiy joyni oladi; kapsula torayganda tuman nomi … bilan qisqaradi */
+.home-header__capsule {
+  display: flex; align-items: center; flex: 0 1 auto; min-width: 0; max-width: 58%;
+  height: 44px; padding: 0 4px; border-radius: 999px;
+  background: var(--brand-tint, #fff6f0); border: 1px solid #fbe0cf;
+  box-shadow: 0 2px 8px rgba(255, 106, 0, 0.06);
+}
+/* Kapsula ichidagi tuman chipi — o'z ramkasiz */
+.home-header__capsule .dsel-chip {
+  flex: 1 1 auto; min-width: 0; max-width: none; height: 100%;
+  background: transparent; border: 0; padding: 0 8px 0 10px; gap: 6px; font-size: 14px;
+}
+.home-header__capsule .dsel-chip > svg:last-child { display: none; }  /* chip o'z ▼ ini yashiradi — bitta ▼ (globe yonida) */
+/* Ajratgich faqat tuman bor bo'lsa */
+.home-header__capsule .dsel-chip + .lang-switch::before {
+  content: ''; position: absolute; left: 0; top: 50%; width: 1px; height: 22px; transform: translateY(-50%);
+  background: #f3cdb6;
+}
+.home-header__capsule .lang-switch { flex: none; }
 .home-header__avatar {
   width: 36px; height: 36px; border-radius: 50%;
   background: var(--brand-tint); color: var(--brand-100);
