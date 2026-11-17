@@ -24,7 +24,8 @@
     "test:store-menu": "node --test tests/storeMenu.test.mjs",
     "test:apple": "node --test tests/appleAuth.test.mjs",
     "test:liquid-glass": "node --test tests/liquidGlass.test.mjs",
-    "test:district": "node --test tests/districtSwitch.test.mjs"
+    "test:district": "node --test tests/districtSwitch.test.mjs",
+    "test:fastloc": "node --test tests/fixCollector.test.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",

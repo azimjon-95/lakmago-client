@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Icon } from '@/components/Icon';
-import { searchAddress, getCurrentPosition, reverseGeocode } from '@/lib/location';
+import { searchAddress, reverseGeocode } from '@/lib/location';
+import { quickPosition as getCurrentPosition } from '@/lib/quickFix';
 import { haptic } from '@/lib/telegram';
 import { useT } from '@/i18n';
 
