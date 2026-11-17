@@ -35,7 +35,7 @@ import {
 } from '@/data/categories';
 
 import { AddressSheet } from '@/components/AddressSheet';
-import { DistrictChip, DistrictAddressHint } from '@/components/DistrictSelector/DistrictSelector';
+import { DistrictChip, DistrictAddressHint, DistrictStatusHint } from '@/components/DistrictSelector/DistrictSelector';
 import './Home.css';
 import { placePinned } from '@/lib/restaurantPins';
 
@@ -396,6 +396,8 @@ export function HomePage() {
         </div>
       </header>
       {/* GPS boshqa tumanni ko'rsatsa — saqlangan manzil O'ZGARMAYDI, faqat eslatma (bosilsa manzil tanlanadi) */}
+      {/* Avtomatik aniqlash tuman qo'ya olmadi (hudud tashqarisi / chegara) — jim qolmaydi, tanlashni taklif qiladi */}
+      <DistrictStatusHint />
       <DistrictAddressHint
         address={defaultAddress}
         onOpenAddresses={() => (user.addresses.length ? setShowAddressSheet(true) : setShowAddressFlow(true))}

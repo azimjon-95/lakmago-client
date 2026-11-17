@@ -697,6 +697,9 @@ export const translations = {
     districtStatusOutside: "Siz xizmat hududidan tashqaridasiz — oxirgi hudud saqlandi",
     districtStatusUncertain: "Siz tumanlar chegarasidasiz — oxirgi hudud saqlandi",
     districtStatusError: "Hududni aniqlab bo'lmadi — keyinroq urinib ko'ring",
+    districtNoneOutside: "Joylashuvingiz xizmat hududidan (Namangan viloyati) tashqarida — tumanni tanlang",
+    districtNoneUncertain: "Siz ikki tuman chegarasidasiz — tumanni tanlang",
+    districtNoneLowAcc: "Joylashuv aniqligi past — tumanni tanlang yoki qayta urinib ko'ring",
     districtNoResults: "Topilmadi",
   },
 
@@ -1362,6 +1365,9 @@ export const translations = {
     districtStatusOutside: "Сиз хизмат ҳудудидан ташқаридасиз — охирги ҳудуд сақланди",
     districtStatusUncertain: "Сиз туманлар чегарасидасиз — охирги ҳудуд сақланди",
     districtStatusError: "Ҳудудни аниқлаб бўлмади — кейинроқ уриниб кўринг",
+    districtNoneOutside: "Жойлашувингиз хизмат ҳудудидан (Наманган вилояти) ташқарида — туманни танланг",
+    districtNoneUncertain: "Сиз икки туман чегарасидасиз — туманни танланг",
+    districtNoneLowAcc: "Жойлашув аниқлиги паст — туманни танланг ёки қайта уриниб кўринг",
     districtNoResults: "Топилмади",
   },
 
@@ -2025,6 +2031,9 @@ export const translations = {
     districtStatusOutside: "Вы вне зоны обслуживания — оставлен последний район",
     districtStatusUncertain: "Вы на границе районов — оставлен последний район",
     districtStatusError: "Не удалось определить район — попробуйте позже",
+    districtNoneOutside: "Вы вне зоны обслуживания (Наманганская область) — выберите район",
+    districtNoneUncertain: "Вы на границе двух районов — выберите район",
+    districtNoneLowAcc: "Низкая точность геолокации — выберите район или попробуйте снова",
     districtNoResults: "Ничего не найдено",
   },
 };
