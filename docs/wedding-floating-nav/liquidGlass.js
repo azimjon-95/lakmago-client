@@ -124,3 +124,124 @@ export function springKeyframes(from, to, { stiffness = 300, damping = 28, steps
   }
   return { move, stretch, ms: maxMs };
 }
+
+/*
+ * ═══ LINZA (iOS 26 Liquid Glass tab bar) — HAMMA dvigatelda bir xil (WebKit/iOS, Chromium/Android, Telegram) ═══
+ * Tab bosilganda yoki menyu bo'ylab barmoq surilganda tanlov kapsulasi TINIQ SHISHA TOMCHIGA (linza) aylanadi:
+ *   • linza menyudan sal kattaroq (yuqori/pastga chiqib turadi), barmoqqa ergashadi;
+ *   • ostidagi ikonka va yorliqlar KATTALASHADI (lupa) — masofaga qarab silliq (lensScales);
+ *   • har yangi tab ustiga o'tganda — yengil tebranish (haptic);
+ *   • qo'yib yuborilganda eng yaqin tabga prujina bilan o'tiradi va oddiy kapsulaga qaytadi; surilgan bo'lsa — o'sha tab ochiladi.
+ * Nega shunday: iOS'dagi WebKit sahifa ORTIDAGI kontentni egishni (`backdrop-filter: url()`) qo'llamaydi. Linza esa
+ * menyuning O'Z kontentini (ikonkalar) transform bilan kattalashtiradi — bu har bir dvigatelda bir xil ishlaydi.
+ * Harakat kamaytirilgan (prefers-reduced-motion) bo'lsa linza o'chiq — oddiy bosish ishlaydi.
+ */
+const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
+
+/** Linza markazi x da bo'lsa har tabning kattalashishi: 1 … 1+peak (radius tashqarisida 1). */
+export function lensScales(x, centers, radius, peak = 0.24) {
+  return centers.map((c) => {
+    const t = clamp(1 - Math.abs(x - c) / radius, 0, 1);
+    return 1 + peak * t * t * (3 - 2 * t);
+  });
+}
+
+/** x ga eng yaqin tab raqami. */
+export function nearestIndex(x, centers) {
+  let best = 0;
+  centers.forEach((c, i) => { if (Math.abs(x - c) < Math.abs(x - centers[best])) best = i; });
+  return best;
+}
+
+export function attachLens(nav, { onSelect, haptic, dragThreshold = 8 } = {}) {
+  const noop = { dispose() {} };
+  if (!nav || typeof window === 'undefined' || typeof nav.addEventListener !== 'function') return noop;
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return noop;
+  const lens = document.createElement('span');
+  lens.className = 'fnav__lens';
+  lens.setAttribute('aria-hidden', 'true');
+  lens.innerHTML = '<span class="fnav__lens-gl"></span>';
+  nav.append(lens);
+
+  let st = null; let suppressClick = false; let settle = 0;
+  const tabsOf = () => Array.from(nav.querySelectorAll('.fnav__tab'));
+  const geo = () => {
+    const r = nav.getBoundingClientRect();
+    const ts = tabsOf();
+    const cs = ts.map((t) => { const b = t.getBoundingClientRect(); return b.left - r.left + b.width / 2; });
+    const w = ts[0] ? ts[0].getBoundingClientRect().width : r.width / 4;
+    return { r, ts, cs, w };
+  };
+  const place = (x, g) => {
+    lens.style.width = `${g.w}px`;
+    lens.style.setProperty('--fn-lx', `${(x - g.w / 2).toFixed(1)}px`);
+    const s = lensScales(x, g.cs, g.w * 0.95);
+    g.ts.forEach((t, i) => t.style.setProperty('--fn-mag', s[i].toFixed(3)));
+  };
+  const release = () => {
+    clearTimeout(settle);
+    nav.classList.remove('is-dragging');
+    settle = setTimeout(() => {
+      nav.classList.remove('is-lens');
+      tabsOf().forEach((t) => t.style.removeProperty('--fn-mag'));
+    }, 220);
+  };
+
+  const onDown = (e) => {
+    if (e.button > 0 || e.isPrimary === false) return;
+    const tab = e.target.closest?.('.fnav__tab');
+    if (!tab) return;
+    const g = geo();
+    const i = g.ts.indexOf(tab);
+    if (i < 0) return;
+    clearTimeout(settle);
+    st = { id: e.pointerId, x0: e.clientX, dragging: false, idx: i, g };
+    place(g.cs[i], g);
+    nav.classList.add('is-lens');
+  };
+  const onMove = (e) => {
+    if (!st || e.pointerId !== st.id) return;
+    if (!st.dragging) {
+      if (Math.abs(e.clientX - st.x0) < dragThreshold) return;
+      st.dragging = true;
+      nav.classList.add('is-dragging');
+      try { nav.setPointerCapture(e.pointerId); } catch { /* */ }
+    }
+    const g = st.g;
+    const x = clamp(e.clientX - g.r.left, g.cs[0], g.cs[g.cs.length - 1]);
+    place(x, g);
+    const i = nearestIndex(x, g.cs);
+    if (i !== st.idx) { st.idx = i; try { haptic?.(); } catch { /* */ } }
+  };
+  const onUp = (e) => {
+    if (!st || e.pointerId !== st.id) return;
+    const s = st; st = null;
+    place(s.g.cs[s.idx], s.g);              // eng yaqin tabga o'tiradi (CSS prujina)
+    release();
+    if (s.dragging) {
+      suppressClick = true;                 // surishdan keyingi "click" ikkinchi marta ochmasin
+      setTimeout(() => { suppressClick = false; }, 400);
+      onSelect?.(s.idx);
+    }
+  };
+  const onCancel = (e) => { if (st && e.pointerId === st.id) { st = null; release(); } };
+  const onClick = (e) => { if (suppressClick) { suppressClick = false; e.preventDefault(); e.stopPropagation(); } };
+
+  nav.addEventListener('pointerdown', onDown);
+  nav.addEventListener('pointermove', onMove);
+  nav.addEventListener('pointerup', onUp);
+  nav.addEventListener('pointercancel', onCancel);
+  nav.addEventListener('click', onClick, true);
+  return {
+    dispose() {
+      clearTimeout(settle);
+      nav.removeEventListener('pointerdown', onDown);
+      nav.removeEventListener('pointermove', onMove);
+      nav.removeEventListener('pointerup', onUp);
+      nav.removeEventListener('pointercancel', onCancel);
+      nav.removeEventListener('click', onClick, true);
+      lens.remove();
+      nav.classList.remove('is-lens', 'is-dragging');
+    },
+  };
+}

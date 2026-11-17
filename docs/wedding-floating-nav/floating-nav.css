@@ -25,6 +25,7 @@
   margin: 0 auto;
   padding: 0 var(--fn-pad);
   border-radius: 999px;
+  touch-action: none;   /* menyu bo'ylab barmoq surish — linza (iOS 26), sahifa aylanmaydi */
   /*
    * "LUPA" SHISHASI: orqadagi kontent yo'qolmaydi — yumshoq xiralashib, yorqin va to'yingan holda ko'rinib turadi
    * (blur oz + saturate/brightness: shisha ostidagi ranglar "yaltirab" turadi). Ustida nur sathi (::before) va qirra yorug'ligi.
@@ -57,10 +58,25 @@
     radial-gradient(120% 150% at 16% -30%, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0) 52%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0) 46%);
 }
+/*
+ * Qirra yorug'ligi (Apple Liquid Glass "specular rim"): 1.5 px halqa, yuqori-chapda yorqin, pastki-o'ngda havorang aks.
+ * Maska bilan faqat halqa qoladi — backdrop-filter ishlatilmaydi, shuning uchun iOS (WebKit) va Android'da AYNAN bir xil.
+ */
+.fnav::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  pointer-events: none;
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.18) 28%, rgba(255, 255, 255, 0) 52%, rgba(160, 225, 255, 0.5) 80%, rgba(255, 255, 255, 0.85) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
 /* Shisha effekti (backdrop-filter) bo'lmagan eski brauzerlarda — deyarli to'liq oq */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .fnav { background: rgba(255, 255, 255, 0.97); }
-  .fnav::before { display: none; }
+  .fnav::before, .fnav::after { display: none; }
 }
 
 /* Faol tab ortidagi yumshoq shisha kapsula (--fn-soft = bo'lim rangi): tablar orasida PRUJINALI suriladi (BottomNav.jsx, WAAPI),
@@ -107,13 +123,18 @@
 .fnav__tab.is-active { color: var(--fn-accent); }
 .fnav__tab:focus-visible { outline: 2px solid var(--fn-accent); outline-offset: -3px; border-radius: 999px; }
 
-.fnav__ic { position: relative; display: flex; }
+.fnav__ic {
+  position: relative; display: flex;
+  transform: scale(var(--fn-mag, 1));
+  transition: transform 300ms cubic-bezier(0.34, 1.4, 0.64, 1);
+}
 /* Yorliq: faol — asosiy rangda va yengil paydo bo'ladi; faolsiz — betaraf. Pastga scroll (ixcham) — yorliqlar yashirinadi */
 .fnav__lb {
   font-size: 10.5px; line-height: 1; font-weight: 600; letter-spacing: 0.01em;
   max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   max-height: 14px;
-  transition: opacity 220ms ease, max-height 260ms cubic-bezier(0.22, 1, 0.36, 1), margin 260ms cubic-bezier(0.22, 1, 0.36, 1), color 200ms ease;
+  transform: scale(calc(1 + (var(--fn-mag, 1) - 1) * 0.6));
+  transition: opacity 220ms ease, max-height 260ms cubic-bezier(0.22, 1, 0.36, 1), margin 260ms cubic-bezier(0.22, 1, 0.36, 1), color 200ms ease, transform 300ms cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 .fnav__tab:not(.is-active) .fnav__lb { opacity: 0.72; }
 .fnav__tab.is-active .fnav__lb { font-weight: 700; animation: fnLb 420ms cubic-bezier(0.22, 1, 0.36, 1); }
@@ -135,8 +156,59 @@ html.is-compact .fnav__lb { opacity: 0; max-height: 0; margin-top: -3px; }
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.96);
 }
 
+/*
+ * ═══ LINZA — iOS 26 tab bar tomchisi (liquidGlass.js → attachLens) ═══
+ * Bosilganda/surilganda tanlov kapsulasi tiniq shisha tomchiga aylanadi: menyudan 5 px yuqori/pastga chiqib turadi,
+ * qirrasida yorug'lik va xromatik (havorang/pushti) aks, ostidagi ikonkalar kattalashadi (--fn-mag).
+ * Paydo bo'lish/o'tirish — prujina (overshoot) egri chizig'i; surish paytida barmoqqa kechikishsiz ergashadi.
+ */
+.fnav__lens {
+  position: absolute; z-index: 2;
+  top: -5px; bottom: -5px; left: 0;
+  width: 25%;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(var(--fn-lx, 0px)) scale(0.62, 0.7);
+  /* Tiniq: tana deyarli shaffof (ostidagi ikonka aniq va kattalashgan ko'rinadi), faqat qirralar yorug' */
+  background:
+    radial-gradient(140% 120% at 50% 50%, rgba(255, 255, 255, 0) 58%, rgba(255, 255, 255, 0.22) 100%),
+    rgba(255, 255, 255, 0.04);
+  -webkit-backdrop-filter: saturate(1.5) brightness(1.04);
+  backdrop-filter: saturate(1.5) brightness(1.04);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.78),
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.98),
+    inset 0 -2px 6px rgba(255, 255, 255, 0.38),
+    inset 3px 0 4px -2px rgba(110, 215, 255, 0.55),
+    inset -3px 0 4px -2px rgba(255, 130, 200, 0.40),
+    0 10px 24px rgba(16, 24, 40, 0.20),
+    0 2px 6px rgba(16, 24, 40, 0.10);
+  transition: opacity 160ms ease, transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1), width 0ms;
+  will-change: transform, opacity;
+}
+/* Yuqori yaltiroq chiziq (specular) — ingichka, ikonkani yopmaydi */
+.fnav__lens-gl {
+  position: absolute; top: 2px; left: 18%; right: 18%; height: 7px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+}
+.fnav.is-lens .fnav__lens { opacity: 1; transform: translateX(var(--fn-lx, 0px)) scale(1); }
+.fnav.is-lens .fnav__pill { opacity: 0; transition: opacity 120ms ease; }
+/* Surish: linza va kattalashish barmoqqa kechikishsiz ergashadi */
+.fnav.is-dragging .fnav__lens { transition: opacity 160ms ease, transform 0ms; }
+.fnav.is-dragging .fnav__ic, .fnav.is-dragging .fnav__lb { transition: none; }
+
 @media (prefers-reduced-motion: reduce) {
-  .fnav__pill, .fnav__tab, .fnav__photo, .fnav__lb { transition: none; }
+  .fnav__pill, .fnav__tab, .fnav__photo, .fnav__lb, .fnav__ic, .fnav__lens { transition: none; }
+  .fnav__lens { display: none; }
   .fnav__tab.is-active .fnav__lb { animation: none; }
   .fnav__tab:active { transform: none; }
+}
+
+/* Qurilmada «Shaffoflikni kamaytirish» yoqilgan bo'lsa (Apple HIG talabi) — shisha o'rniga deyarli oq, o'qilishi aniq */
+@media (prefers-reduced-transparency: reduce) {
+  .fnav, .fnav--refract { background: rgba(250, 250, 252, 0.97); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .fnav::before { display: none; }
+  .fnav__lens { background: rgba(255, 255, 255, 0.98); -webkit-backdrop-filter: none; backdrop-filter: none; }
 }

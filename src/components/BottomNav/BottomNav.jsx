@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { installScrollCompact } from '@/lib/scrollCompact';
-import { attachRefraction, springKeyframes } from './liquidGlass';
+import { attachRefraction, attachLens, springKeyframes } from './liquidGlass';
+import { getTelegram } from '@/lib/telegram';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Icon } from '../Icon';
 import { useCart } from '@/store/cart';
@@ -30,6 +31,13 @@ const tabs = [
 export const BOTTOM_NAV_H = 'calc(74px - var(--tg-bottom-offset, 0px) * 0.65)';
 // Oxirgi faol tab (sahifalar o'rtasida eslab qolinadi: menyu har sahifada qayta chiziladi)
 let lastActive = -1;
+
+/* Tanlov tebranishi (iOS 26 linzasi tab ustidan o'tganda): Telegram'da — HapticFeedback, Android brauzerda — 6 ms vibratsiya */
+function selectionHaptic() {
+  const hf = getTelegram()?.HapticFeedback;
+  if (hf?.selectionChanged) { hf.selectionChanged(); return; }
+  try { navigator.vibrate?.(6); } catch { /* iOS Safari vibratsiyani qo'llamaydi */ }
+}
 export function BottomNav() {
   useEffect(() => { installScrollCompact(); }, []);
   // Menyu bor sahifada savat/operator kapsula ustida turadi; menyusiz sahifada (restoran, savat) pastga tushadi
@@ -70,6 +78,13 @@ export function BottomNav() {
   useEffect(() => {
     glass.current = attachRefraction(navRef.current);
     return () => { glass.current?.dispose(); glass.current = null; };
+  }, []);
+  // iOS 26 linzasi: barmoq bilan surib tanlash (hamma qurilmada bir xil). Eng so'nggi navigatsiya funksiyasi ref'da
+  const selectRef = useRef(null);
+  selectRef.current = (i) => { const tab = tabs[i]; if (tab) navigate(targetOf(tab)); };
+  useEffect(() => {
+    const lens = attachLens(navRef.current, { onSelect: (i) => selectRef.current?.(i), haptic: selectionHaptic });
+    return () => lens.dispose();
   }, []);
   useEffect(() => {
     if (activeIndex < 0) return undefined;
