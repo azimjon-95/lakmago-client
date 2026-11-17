@@ -104,7 +104,23 @@ export default function App() {
   );
 }
 
+/*
+ * Menyu tablari sahifalarining kodi ilova ochilgach FONDA oldindan yuklanadi (bo'sh vaqtda, ~3 s keyin):
+ * tab bosilganda sahifa Telegram'dagidek DARHOL almashadi — tarmoqdan kod kutilmaydi (lazy bo'lib qoladi,
+ * birinchi ochilish tezligiga ta'sir qilmaydi).
+ */
+function preloadTabPages() {
+  const run = () => {
+    import('@/pages/Search/SearchPage');
+    import('@/pages/Orders/OrdersPage');
+    import('@/pages/Profile/ProfilePage');
+  };
+  const idle = typeof window !== 'undefined' && window.requestIdleCallback;
+  setTimeout(() => (idle ? idle(run, { timeout: 4000 }) : run()), 3000);
+}
+
 function AppInner({ authMode = 'telegram' }) {
+  useEffect(() => { preloadTabPages(); }, []);
   const updateUser = useUser((s) => s.updateUser);
   const setAuthStatus = useUser((s) => s.setAuthStatus);
 

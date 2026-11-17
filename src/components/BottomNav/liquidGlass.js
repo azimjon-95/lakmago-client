@@ -164,7 +164,7 @@ export function nearestIndex(x, centers) {
   return best;
 }
 
-export function attachLens(nav, { onSelect, haptic, dragThreshold = 8, slideMs = 560 } = {}) {
+export function attachLens(nav, { onSelect, haptic, getActive, dragThreshold = 8, slideMs = 240 } = {}) {
   const noop = { slide() { return false; }, dispose() {} };
   if (!nav || typeof window === 'undefined' || typeof nav.addEventListener !== 'function') return noop;
   if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return noop;
@@ -189,17 +189,19 @@ export function attachLens(nav, { onSelect, haptic, dragThreshold = 8, slideMs =
     const s = lensScales(x, g.cs, g.w * 0.95);
     g.ts.forEach((t, i) => t.style.setProperty('--fn-mag', s[i].toFixed(3)));
   };
-  const show = () => { clearTimeout(settle); nav.classList.add('is-lens', 'is-dragging'); };
-  const release = () => {
+  // Telegram/iOS 26 ritmi: bosilganda tomchi darhol paydo bo'lib kattalashadi (is-press), suriladi, sal kattaroq
+  // qo'nadi (is-land) va ~140 ms da rangli kapsulaga aylanadi. Butun yo'l ≈ 0,5 s (avval ~0,8 s).
+  const show = () => { clearTimeout(settle); nav.classList.remove('is-land'); nav.classList.add('is-lens', 'is-press'); };
+  const release = (land = true) => {
     cancelAnimationFrame(anim);
     clearTimeout(settle);
-    nav.classList.remove('is-dragging');
+    nav.classList.remove('is-dragging', 'is-press');
+    if (land) nav.classList.add('is-land');
     settle = setTimeout(() => {
-      nav.classList.remove('is-lens');
+      nav.classList.remove('is-lens', 'is-land');
       tabsOf().forEach((t) => t.style.removeProperty('--fn-mag'));
-    }, 200);
+    }, land ? 90 : 60);
   };
-
   /** Tanlovni from → to tabga tomchi bilan suradi. true — linza ko'rsatildi (kapsula yashirin turishi kerak). */
   const slide = (from, to) => {
     if (skipSlideTo === to) { skipSlideTo = -1; return false; }  // surib tanlangan — tomchi allaqachon o'sha yerda
@@ -208,12 +210,13 @@ export function attachLens(nav, { onSelect, haptic, dragThreshold = 8, slideMs =
     if (!g.cs[from] && g.cs[from] !== 0) return false;
     cancelAnimationFrame(anim);
     show();
+    nav.classList.add('is-dragging');
     const x0 = g.cs[from]; const x1 = g.cs[to];
     place(x0, g);
     const t0 = performance.now();
     const tick = (now) => {
       const k = Math.min(1, (now - t0) / slideMs);
-      place(x0 + (x1 - x0) * springPos((k * slideMs) / 1000), g);
+      place(x0 + (x1 - x0) * springPos((k * slideMs) / 1000, 520, 36), g);
       if (k < 1) anim = requestAnimationFrame(tick); else { place(x1, g); release(); }
     };
     anim = requestAnimationFrame(tick);
@@ -228,6 +231,9 @@ export function attachLens(nav, { onSelect, haptic, dragThreshold = 8, slideMs =
     const i = g.ts.indexOf(tab);
     if (i < 0) return;
     st = { id: e.pointerId, x0: e.clientX, dragging: false, idx: i, g };
+    // Barmoq tekkan zahoti: tomchi joriy tanlov ustida paydo bo'lib kattalashadi (sahifa yuklanishini kutmaydi)
+    const cur = typeof getActive === 'function' ? getActive() : -1;
+    if (cur >= 0 && g.cs[cur] !== undefined) { cancelAnimationFrame(anim); place(g.cs[cur], g); show(); }
   };
   const onMove = (e) => {
     if (!st || e.pointerId !== st.id) return;
@@ -236,6 +242,7 @@ export function attachLens(nav, { onSelect, haptic, dragThreshold = 8, slideMs =
       st.dragging = true;
       cancelAnimationFrame(anim);
       show();
+      nav.classList.add('is-dragging');
       try { nav.setPointerCapture(e.pointerId); } catch { /* */ }
     }
     const g = st.g;
@@ -247,7 +254,13 @@ export function attachLens(nav, { onSelect, haptic, dragThreshold = 8, slideMs =
   const onUp = (e) => {
     if (!st || e.pointerId !== st.id) return;
     const s = st; st = null;
-    if (!s.dragging) return;                 // oddiy bosish — click navigatsiya qiladi, tomchi slide() bilan suriladi
+    if (!s.dragging) {
+      // Oddiy bosish: click tanlovni o'zgartiradi → slide() tomchini suradi. O'sha tabning o'zi bo'lsa — joyida qo'nadi.
+      const cur = typeof getActive === 'function' ? getActive() : -1;
+      if (s.idx === cur) release();
+      else settle = setTimeout(() => { if (!nav.classList.contains('is-dragging')) release(); }, 250);
+      return;
+    }
     place(s.g.cs[s.idx], s.g);
     release();
     suppressClick = true;                    // surishdan keyingi "click" ikkinchi marta ochmasin
@@ -256,7 +269,7 @@ export function attachLens(nav, { onSelect, haptic, dragThreshold = 8, slideMs =
     setTimeout(() => { if (skipSlideTo === s.idx) skipSlideTo = -1; }, 1500);
     onSelect?.(s.idx);
   };
-  const onCancel = (e) => { if (st && e.pointerId === st.id) { const was = st.dragging; st = null; if (was) release(); } };
+  const onCancel = (e) => { if (st && e.pointerId === st.id) { st = null; release(false); } };
   const onClick = (e) => { if (suppressClick) { suppressClick = false; e.preventDefault(); e.stopPropagation(); } };
 
   nav.addEventListener('pointerdown', onDown);
