@@ -34,11 +34,28 @@ html.is-compact { --cap-h: 46px; --cart-h: 40px; --bar-max: 300px; }
   transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
+/*
+ * ═══ DOIMIY MENYU (NavHost, App'da bitta) va SAHIFADAGI O'RNI (spacer) ═══
+ * Sahifadagi .bottom-nav--slot — bo'sh, faqat joy egallaydi (kontent menyu ostida qolmasin). Haqiqiy menyu —
+ * .bottom-nav--host: ekran pastiga qotirilgan (fixed), ilova kengligida markazda, sahifa almashganda o'chmaydi.
+ */
+.bottom-nav--slot { position: relative; z-index: auto; visibility: hidden; }
+.bottom-nav--host {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  margin: 0 auto;
+  max-width: var(--app-width);
+  transition: opacity 180ms ease, transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* Menyusiz sahifa (savat, taom) yoki iOS'da klaviatura ochiq — pastga yashirinadi */
+.bottom-nav--host.is-hidden { opacity: 0; transform: translateY(28px); pointer-events: none; }
+.bottom-nav--host.is-hidden .fnav { pointer-events: none; }
+
 /* Pastga scroll: kapsula pastda (Instagram kabi) 0.8 ga kichrayadi: 58 → 46.4 px = --cap-h (savat/operator tayanadi). Yuqoriga — qaytadi */
 html.is-compact .bottom-nav .fnav { transform: translateZ(0) scale(0.8); }
 
 @media (prefers-reduced-motion: reduce) {
-  .bottom-nav .fnav { transition: none; }
+  .bottom-nav .fnav, .bottom-nav--host { transition: none; }
 }
 
 /* Bo'lim ranglari: Lokma Go (to'q sariq) — standart; Market — yashil */

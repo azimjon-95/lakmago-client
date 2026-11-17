@@ -54,3 +54,11 @@ test('linza: eng yaqin tab va Node muhitida xatosiz (DOM yo‘q)', () => {
   assert.equal(nearestIndex(0, cs), 0); assert.equal(nearestIndex(159, cs), 1); assert.equal(nearestIndex(161, cs), 2); assert.equal(nearestIndex(999, cs), 3);
   const h = attachLens(null); h.dispose();
 });
+
+test('prujina holati 0 → 1 ga o‘rnashadi; iOS aniqlash Node’da false; linza slide() Node’da xatosiz', async () => {
+  const { springPos, isIOSDevice } = await import('../src/components/BottomNav/liquidGlass.js');
+  assert.equal(springPos(0), 0);
+  assert.ok(Math.abs(springPos(0.6) - 1) < 0.02);
+  assert.equal(isIOSDevice(), false);
+  const h = attachLens(null); assert.equal(h.slide(0, 2), false); h.dispose();
+});
