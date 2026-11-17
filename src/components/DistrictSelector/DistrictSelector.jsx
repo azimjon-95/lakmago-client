@@ -18,6 +18,9 @@ const STATUS_KEY = {
   outside: 'districtStatusOutside', uncertain: 'districtStatusUncertain', error: 'districtStatusError',
 };
 
+// Hali hech qaysi tuman tanlanmagan bo'lsa "oxirgi hudud saqlandi" noto'g'ri — "tanlang" deymiz
+const NONE_KEY = { outside: 'districtNoneOutside', uncertain: 'districtNoneUncertain', low_accuracy: 'districtNoneLowAcc' };
+
 const nameOf = (d, lang) => (d ? (d[lang] || d.uz || d.id) : '');
 /*
  * Header uchun QISQA nom: "Pop tumani" → "Pop", "Чустский район" → "Чустский". Ro'yxatda to'liq nom qoladi.
@@ -104,7 +107,7 @@ export function DistrictSheet({ onClose }) {
               <Icon name="navigation" size={18} color="#2563EB" />
               <span>{resolving ? t('districtDetecting') : (mode === 'manual' ? t('districtBackToAuto') : t('districtDetect'))}</span>
             </button>
-            {STATUS_KEY[status] && <div className="dsel-status" role="status">{t(STATUS_KEY[status])}</div>}
+            {STATUS_KEY[status] && <div className="dsel-status" role="status">{t(!activeId && NONE_KEY[status] ? NONE_KEY[status] : STATUS_KEY[status])}</div>}
           </div>
         )}
 
@@ -179,5 +182,47 @@ export function DistrictAddressHint({ address, onOpenAddresses }) {
         <Icon name="x" size={14} color="var(--muted)" />
       </button>
     </div>
+  );
+}
+
+/*
+ * ═══ ANIQLASH NATIJASI ESLATMASI (header ostida) ═══
+ * Avtomatik aniqlash tuman qo'ya olmagan holatlar JIM qolmasin (mijoz "Tuman" yozuviga qarab nima bo'lganini bilmasdi):
+ *   outside   — joylashuv xizmat hududidan tashqarida;
+ *   uncertain — ikki tuman chegarasida (aniq bitta tumanni aytib bo'lmaydi).
+ * Bosilsa — tumanlar ro'yxati ochiladi. X — shu sessiyada yopiladi. Ruxsat/GPS muammolari — LocationPrompt oynasida.
+ */
+const STATUS_HINT_DISMISS = 'lokma-district-status-dismissed';
+export function DistrictStatusHint() {
+  const { t } = useI18n();
+  const meta = useDistrictMeta((s) => s.meta);
+  const mode = useDistrict((s) => s.selectionMode);
+  const status = useDistrict((s) => s.autoStatus);
+  const resolving = useDistrict((s) => s.isResolving);
+  const activeId = useDistrict((s) => s.activeDistrictId);
+  const [open, setOpen] = useState(false);
+  const [dismissed, setDismissed] = useState(() => { try { return sessionStorage.getItem(STATUS_HINT_DISMISS) || ''; } catch { return ''; } });
+  const enabled = DISTRICT_AUTO_DETECT_ENABLED && !!meta?.autoDetect?.enabled;
+  const show = enabled && mode === 'auto' && !resolving && (status === 'outside' || status === 'uncertain') && dismissed !== status;
+  if (!show && !open) return null;
+  const key = status === 'outside'
+    ? (activeId ? 'districtStatusOutside' : 'districtNoneOutside')
+    : (activeId ? 'districtStatusUncertain' : 'districtNoneUncertain');
+  const dismiss = () => { setDismissed(status); try { sessionStorage.setItem(STATUS_HINT_DISMISS, status); } catch { /* */ } };
+  return (
+    <>
+      {show && (
+        <div className="dsel-hint" role="status" data-testid="district-status-hint">
+          <button type="button" className="dsel-hint__text" onClick={() => setOpen(true)}>
+            <Icon name="info" size={15} color="var(--brand)" />
+            <span>{t(key)}</span>
+          </button>
+          <button type="button" className="dsel-hint__close" onClick={dismiss} aria-label={t('close')}>
+            <Icon name="x" size={14} color="var(--muted)" />
+          </button>
+        </div>
+      )}
+      {open && <DistrictSheet onClose={() => setOpen(false)} />}
+    </>
   );
 }

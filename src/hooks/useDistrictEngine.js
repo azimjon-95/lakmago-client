@@ -11,6 +11,7 @@ import { createFixSource } from '@/lib/gpsSource';
 import { getCurrentPosition, watchFixes } from '@/lib/location';
 import { locationPermissionState } from '@/lib/locationPermission';
 import { probeAccess, coarsePosition, classifyError } from '@/lib/geoService';
+import { quickPosition } from '@/lib/quickFix';
 
 /*
  * ═══ TUMAN DVIGATELI (App'da BIR MARTA) ═══
@@ -189,25 +190,70 @@ export function useDistrictEngine() {
   }, [lang]);
 
   /**
-   * TO'LIQ AVTOMATIK KETMA-KETLIK (ochilishda, oynadagi tugmada, sozlamalardan qaytganda):
-   *   1) GPS o'chiq bo'lsa — darhol 'services_off' (kutib o'tirmaymiz);
-   *   2) aniq GPS (2 o'lchov bilan tasdiq);
-   *   3) natija bo'lmasa (signal/aniqlik) — 1,5 s keyin yana bir marta;
-   *   4) baribir bo'lmasa — pastroq aniqlik (tarmoq), faqat butun doira bitta tumanda bo'lsa.
-   * Ruxsat rad etilsa — qayta urinishlar YO'Q (foydalanuvchini bezovta qilmaymiz). Oraliqda holat 'checking' (oyna chiqmaydi).
+   * TEZ ANIQLASH (bitta qadam): aniq GPS + tarmoq (Wi-Fi/uyali) PARALLEL (lib/quickFix → fixCollector) → server `acc`
+   * bilan tekshiradi: butun aniqlik doirasi bitta tuman ichida bo'lsa — DARHOL qo'llanadi (2–5 s; avval 9–25 s edi).
+   * Qaytaradi: 'applied' | 'outside' | 'refine' (chegara/eski server — aniq GPS bilan aniqlashtirish kerak) | holat ('denied'...).
+   * Koordinatalar log qilinmaydi.
+   */
+  const quickDetect = useCallback(async ({ alive }) => {
+    const tr = tracker.current;
+    if (!tr) return 'refine';
+    let fix;
+    try {
+      fix = await quickPosition();
+    } catch (e) {
+      return classifyError(e);   // denied | services_off | error
+    }
+    if (!alive()) return null;
+    const f = { lat: fix.lat, lng: fix.lng, accuracy: fix.accuracy, at: Date.now() };
+    useDeviceLocation.getState().set(f);
+    let data = null;
+    try {
+      data = (await api.resolveDistrict(f.lat, f.lng, { lang, acc: Number.isFinite(f.accuracy) ? Math.min(f.accuracy, 3000) : undefined }))?.data;
+    } catch { return 'error'; }
+    if (!alive()) return null;
+    const id = coarseAccept(f, data);
+    if (id) {
+      tr.setCurrent(id);
+      useDistrict.getState().applyAuto(id, data?.boundaryVersion);
+      return 'applied';
+    }
+    // Aniq tashqarida: doira butunlay qamrovdan tashqarida (yoki aniq GPS bilan o'lchangan)
+    const buf = Number(data?.bufferMeters);
+    if (data?.reason === 'OUTSIDE_COVERAGE' && ((Number.isFinite(buf) && buf >= f.accuracy) || f.accuracy <= DEFAULTS.minAccuracyMeters)) return 'outside';
+    if (data?.reason === 'BOUNDARY_UNCERTAIN' && f.accuracy <= DEFAULTS.minAccuracyMeters) return 'uncertain';
+    return 'refine';
+  }, [lang]);
+
+  /**
+   * TO'LIQ AVTOMATIK KETMA-KETLIK (ochilishda — splash bilan parallel, «Men turgan joyni aniqlash», oynadagi tugma,
+   * sozlamalardan qaytganda):
+   *   1) GPS o'chiq bo'lsa — darhol 'services_off' (ogohlantirish oynasi → sozlamalar);
+   *   2) TEZ: GPS + tarmoq parallel, server doirani tasdiqlasa darhol qo'llanadi;
+   *   3) chegaraga yaqin / eski server: aniq GPS (2 o'lchov bilan tasdiq, ≤9 s) → bo'lmasa yana bir marta → tarmoq zaxirasi.
+   * Ruxsat rad etilsa — qayta urinishlar YO'Q. Har bir natija holatda aks etadi (jim tugash yo'q):
+   *   'idle' (tuman qo'yildi) | 'outside' | 'uncertain' | 'denied' | 'no_permission' | 'services_off' | 'low_accuracy' | 'error'.
    */
   const fullCheck = useCallback(async ({ interactive = true, stopped = () => false } = {}) => {
     // `stopped` — chaqiruvchi bekor qilingan bo'lsa (effekt tozalandi) ketma-ketlik davom etmaydi va yangi tekshiruvni buzmaydi
     const off = () => stopped() || useDistrict.getState().selectionMode !== 'auto';
     if (!tracker.current || off()) return;
+    const myRun = ++runGen.current;
+    const alive = () => runGen.current === myRun && !off();
     useDistrict.getState().setStatus('checking', true);
     const pr = await probeAccess();
-    if (off()) return;
+    if (!alive()) return;
     if (pr.services === 'off') { useDistrict.getState().setStatus('services_off', false); return; }
+
+    const q = await quickDetect({ alive });
+    if (!alive() || q === null) return;
+    if (q === 'applied') { useDistrict.getState().setStatus('idle', false); return; }
+    if (q !== 'refine') { useDistrict.getState().setStatus(q, false); return; }
+
+    // Aniqlashtirish: aniq GPS bilan (eski, qat'iy yo'l)
     const st = () => useDistrict.getState().autoStatus;
-    await checkNow({ interactive });
+    await checkNow({ interactive: true });
     if (off()) return;
-    // Umuman o'lchov kelmadi (signal yo'q / vaqt tugadi) — 1,5 s keyin aniq GPS bilan yana bir marta
     if (st() === 'error') {
       useDistrict.getState().setStatus('checking', true);
       await new Promise((r) => setTimeout(r, 1500));
@@ -215,9 +261,8 @@ export function useDistrictEngine() {
       await checkNow({ interactive: true });
       if (off()) return;
     }
-    // O'lchov bor-u aniqligi yetmadi, yoki baribir kelmadi — pastroq aniqlik (tarmoq) bilan zaxira
     if (st() === 'error' || st() === 'low_accuracy') await coarseCheck();
-  }, [checkNow, coarseCheck]);
+  }, [checkNow, coarseCheck, quickDetect]);
 
   // 3) Triggerlar: ochilish, resume, 10 daqiqalik yangilash (faqat ko'rinib turganda), boshqa oqimlardan kelgan nuqtalar
   useEffect(() => {
