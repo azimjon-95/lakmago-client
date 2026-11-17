@@ -1,7 +1,7 @@
 /* Pastki menyu: prujina kadrlari (liquidGlass.js) — boshi/oxiri aniq, ortiqcha sakramaydi, cho'zilish chegaralangan. npm run test:liquid-glass */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { springKeyframes, supportsRefraction } from '../src/components/BottomNav/liquidGlass.js';
+import { springKeyframes, supportsRefraction, lensScales, nearestIndex, attachLens } from '../src/components/BottomNav/liquidGlass.js';
 
 const px = (k) => Number(/translateX\((-?[\d.]+)%\)/.exec(k.transform)[1]);
 
@@ -37,4 +37,20 @@ test('kadrlar: offset 0…1 o‘sib boradi; Node (brauzersiz) muhitda sinish o�
   assert.equal(move[0].offset, 0); assert.equal(move.at(-1).offset, 1);
   assert.ok(move.every((k, i) => i === 0 || k.offset > move[i - 1].offset));
   assert.equal(supportsRefraction(), false);
+});
+
+test('linza: markazdagi tab eng katta (1.24), qo‘shnilari kamroq, radiusdan tashqari 1', () => {
+  const cs = [40, 120, 200, 280];
+  const s = lensScales(120, cs, 80);
+  assert.ok(Math.abs(s[1] - 1.24) < 1e-9);
+  assert.equal(s[0], 1); assert.equal(s[2], 1); assert.equal(s[3], 1);
+  const mid = lensScales(160, cs, 80);   // ikki tab o'rtasida — ikkalasi teng, yarim kattalashgan
+  assert.ok(Math.abs(mid[1] - mid[2]) < 1e-9 && mid[1] > 1 && mid[1] < 1.24);
+  assert.ok(lensScales(0, cs, 80).every((v) => v >= 1 && v <= 1.24));
+});
+
+test('linza: eng yaqin tab va Node muhitida xatosiz (DOM yo‘q)', () => {
+  const cs = [40, 120, 200, 280];
+  assert.equal(nearestIndex(0, cs), 0); assert.equal(nearestIndex(159, cs), 1); assert.equal(nearestIndex(161, cs), 2); assert.equal(nearestIndex(999, cs), 3);
+  const h = attachLens(null); h.dispose();
 });

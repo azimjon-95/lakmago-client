@@ -6,6 +6,20 @@
     <title>LokmaGo</title>
     <meta name="theme-color" content="#FFFFFF" />
     <!--
+      iOS / Apple talablari:
+      • color-scheme light — ilova faqat yorug' dizaynda; iOS qorong'i rejimda tugma/kiritish maydonlarini o'zi qoraytirmaydi
+        va pastki menyu shishasi har doim to'g'ri ranglarda ko'rinadi.
+      • format-detection — iOS narxlarni ("59 850") telefon raqami deb ko'k havolaga aylantirmasin.
+      • apple-mobile-web-app-* — "Bosh ekranga qo'shish"da ilova to'liq ekranda, o'z nomi bilan ochiladi; status bar oq fonda to'q.
+    -->
+    <meta name="color-scheme" content="light" />
+    <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="LokmaGo" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!--
       MUHIM: index.html HECH QACHON keshlanmasligi kerak — u har
       deploy'da yangi hash'langan JS/CSS fayllarga ishora qiladi
       (masalan index-b0dff25.js). Agar index.html'ning o'zi eskirib

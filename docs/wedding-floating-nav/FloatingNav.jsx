@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { attachRefraction, springKeyframes } from './liquidGlass';
+import { attachRefraction, attachLens, springKeyframes } from './liquidGlass';
 
 /*
  * Lokma To'yxonalar saytiga (wedding.lokma.uz) qo'yiladigan SUZUVCHI PASTKI MENYU — Lokma Go va Market bilan bir xil dizayn.
@@ -16,13 +16,24 @@ import { attachRefraction, springKeyframes } from './liquidGlass';
  *     ]}
  *   />
  * Ikonkalar 23×23, stroke="currentColor" (faol/faolsiz rangni menyu o'zi beradi). Ikonka tagida yorliq (label) ko'rinadi.
- * liquidGlass.js — sinish filtri (Chromium) va prujina; floating-nav.css bilan birga nusxalanadi.
+ * liquidGlass.js — sinish filtri (Chromium), iOS 26 linzasi (hamma qurilmada) va prujina; floating-nav.css bilan birga nusxalanadi.
+ * haptic — ixtiyoriy: linza yangi tab ustiga o'tganda chaqiriladi (masalan Telegram HapticFeedback.selectionChanged).
  */
-export function FloatingNav({ tabs, active, onSelect, theme = 'wedding' }) {
+export function FloatingNav({ tabs, active, onSelect, haptic, theme = 'wedding' }) {
   const activeIndex = tabs.findIndex((t) => t.id === active);
   const [shown, setShown] = useState(activeIndex);
   const navRef = useRef(null); const pillRef = useRef(null); const pillIn = useRef(null); const glare = useRef(null); const glass = useRef(null);
   useEffect(() => { glass.current = attachRefraction(navRef.current); return () => { glass.current?.dispose(); glass.current = null; }; }, []);
+  // iOS 26 linzasi: barmoq bilan surib tanlash (Lokma Go/Market bilan bir xil)
+  const latest = useRef(null);
+  latest.current = { tabs, onSelect, haptic };
+  useEffect(() => {
+    const lens = attachLens(navRef.current, {
+      onSelect: (i) => { const { tabs: ts, onSelect: cb } = latest.current; if (ts[i]) cb?.(ts[i].id); },
+      haptic: () => latest.current.haptic?.(),
+    });
+    return () => lens.dispose();
+  }, []);
   // Tab almashganda kapsula prujina bilan suriladi, suyuq cho'ziladi, yorug' chiziq ergashadi, shisha egiladi (Lokma Go/Market bilan bir xil)
   useEffect(() => {
     if (activeIndex < 0 || shown === activeIndex) return;
