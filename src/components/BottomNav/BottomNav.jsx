@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { installScrollCompact } from '@/lib/scrollCompact';
-import { attachRefraction, attachLens, springKeyframes } from './liquidGlass';
-import { getTelegram } from '@/lib/telegram';
+import { attachRefraction, attachLens, springKeyframes, isIOSDevice } from './liquidGlass';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Icon } from '../Icon';
 import { useCart } from '@/store/cart';
 import { useUser } from '@/store/user';
 import { useT } from '@/i18n';
 import { useSection } from '@/store/section';
+import { getTelegram } from '@/lib/telegram';
 import './BottomNav.css';
 
 const tabs = [
@@ -18,48 +18,99 @@ const tabs = [
 ];
 
 /*
- * Pastki menyu — Instagram uslubidagi suzuvchi shisha kapsula (floating-nav.css). Faqat ikonkalar (nomi aria-label'da),
- * faol tab ortida silliq suriluvchi yumshoq "pill"; rang bo'limga qarab (Go — to'q sariq, Market — yashil).
- * To'yxonalar bo'limi alohida saytda — u uchun bir xil dizayn paketi: docs/wedding-floating-nav/.
+ * ═══ PASTKI MENYU: ILOVADA BITTA, DOIMIY (NavHost) ═══
+ *
+ * MUAMMO (video, 2026-11-17): menyu har sahifaning ICHIDA chizilardi. Sahifa almashganda u o'chib-yonardi:
+ *   • lazy sahifa yuklanguncha Suspense oq ekran ko'rsatardi — menyu 100–300 ms butunlay yo'qolardi;
+ *   • yangi sahifadagi menyu noldan yaratilib, kapsula/linza animatsiyalari har safar qaytadan boshlanardi
+ *     (iOS'da eski prujinali kapsula + linza — ikki shakl bir vaqtda).
+ *
+ * YECHIM:
+ *   • <NavHost/> App'da Suspense'DAN TASHQARIDA bitta marta chiziladi va hech qachon qayta yaratilmaydi
+ *     (position: fixed). Sahifalardagi <BottomNav/> endi faqat JOY EGALLOVCHI (spacer) — u kontent menyu ostida
+ *     qolmasligini ta'minlaydi va "bu sahifada menyu bor" deb xabar beradi. Sahifa kodi o'zgarmadi.
+ *   • Router startTransition rejimida (App.jsx) — yangi sahifa tayyor bo'lguncha eski sahifa ko'rinib turadi.
+ *   • Platformaga qarab: iOS — Liquid Glass tomchi (linza) BITTA shakl bilan suriladi; Android/boshqalar —
+ *     avvalgi ko'rinish (prujinali kapsula + Chromium sinishi), linzasiz.
  */
+
+/* ── Sahifalarda menyu bormi (spacer'lar soni) ── */
+let slots = 0;
+const subs = new Set();
+const emit = () => subs.forEach((f) => f());
+const subscribe = (f) => { subs.add(f); return () => subs.delete(f); };
+const getSlots = () => slots;
+
 /*
  * --bottom-nav-h = menyu egallagan balandlik XAVFSIZ ZONASIZ (iste'molchilar unga `+ var(--tg-bottom-offset)` qo'shadi):
- * 6 (tepa) + 58 (kapsula) + max(10, zona + 2) (past) − zona.  Zona 20 px → 66 px; zona 0 → 74 px.
+ * Pastki oraliq: 10px + zona × 0.35. Balandlik (6 + 58 + oraliq) − zona → 74px − zona × 0.65.
  */
-// Pastki oraliq: 10px + zona × 0.35 (iOS home indikatoriga qarab; Android'da zona 0 → 10px). Savat paneli shu bilan hisoblanadi:
-// balandlik (6 + 58 + oraliq) − zona  →  CSS: 74px − zona × 0.65 ; consumer'lar `+ zona` qo'shadi.
 export const BOTTOM_NAV_H = 'calc(74px - var(--tg-bottom-offset, 0px) * 0.65)';
-// Oxirgi faol tab (sahifalar o'rtasida eslab qolinadi: menyu har sahifada qayta chiziladi)
-let lastActive = -1;
 
-/* Tanlov tebranishi (iOS 26 linzasi tab ustidan o'tganda): Telegram'da — HapticFeedback, Android brauzerda — 6 ms vibratsiya */
+/**
+ * Sahifadagi menyu o'rni (spacer). Sahifalar avvalgidek <BottomNav/> yozadi — haqiqiy menyuni NavHost chizadi.
+ */
+export function BottomNav() {
+  useEffect(() => { installScrollCompact(); }, []);
+  // Menyu bor sahifada savat/operator kapsula ustida turadi; menyusiz sahifada (savat) pastga tushadi
+  useEffect(() => {
+    const root = document.documentElement;
+    slots += 1; emit();
+    root.style.setProperty('--nav-top', 'calc(var(--nav-gap) + var(--cap-h))');
+    root.style.setProperty('--bottom-nav-h', BOTTOM_NAV_H);
+    return () => {
+      slots = Math.max(0, slots - 1); emit();
+      if (slots === 0) {
+        root.style.setProperty('--nav-top', 'var(--nav-gap)');
+        root.style.setProperty('--bottom-nav-h', '0px');
+      }
+    };
+  }, []);
+  return <div className="bottom-nav bottom-nav--slot" aria-hidden="true" />;
+}
+
+/* Tanlov tebranishi (iOS linzasi tab ustidan o'tganda): Telegram — HapticFeedback, Android brauzer — 6 ms */
 function selectionHaptic() {
   const hf = getTelegram()?.HapticFeedback;
   if (hf?.selectionChanged) { hf.selectionChanged(); return; }
   try { navigator.vibrate?.(6); } catch { /* iOS Safari vibratsiyani qo'llamaydi */ }
 }
-export function BottomNav() {
-  useEffect(() => { installScrollCompact(); }, []);
-  // Menyu bor sahifada savat/operator kapsula ustida turadi; menyusiz sahifada (restoran, savat) pastga tushadi
-  useEffect(() => {
-    const root = document.documentElement;
-    root.style.setProperty('--nav-top', 'calc(var(--nav-gap) + var(--cap-h))');
-    return () => root.style.setProperty('--nav-top', 'var(--nav-gap)');
-  }, []);
 
-  // Pastki menyu bor-yo'qligini bildiramiz. Savat paneli shu qiymatga
-  // tayanadi — menyusiz sahifada (restoran, savat) pastga tushadi.
+const IOS = isIOSDevice();
+const reducedMotion = () => typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+/** iOS: matn kiritilayotganda menyu klaviatura ortida qoladi (iOS'ning o'z tab bar'i kabi) — ustiga chiqib qolmaydi. */
+function useIOSKeyboardOpen() {
+  const [open, setOpen] = useState(false);
   useEffect(() => {
-    const root = document.documentElement;
-    root.style.setProperty('--bottom-nav-h', BOTTOM_NAV_H);
-    return () => root.style.setProperty('--bottom-nav-h', '0px');
+    if (!IOS) return undefined;
+    const isField = (el) => !!el && (el.isContentEditable || (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)
+      && !/^(button|checkbox|radio|range|submit|reset|file|color|image)$/i.test(el.type || '')));
+    let t = 0;
+    const onIn = (e) => { if (isField(e.target)) { clearTimeout(t); setOpen(true); } };
+    const onOut = () => { clearTimeout(t); t = setTimeout(() => setOpen(isField(document.activeElement)), 120); };
+    document.addEventListener('focusin', onIn);
+    document.addEventListener('focusout', onOut);
+    return () => { clearTimeout(t); document.removeEventListener('focusin', onIn); document.removeEventListener('focusout', onOut); };
   }, []);
+  return open;
+}
+
+export function NavHost() {
+  const count = useSyncExternalStore(subscribe, getSlots, getSlots);
+  // Sahifalar almashayotgan bir lahzada (eski spacer ketdi, yangisi hali kelmadi) menyu o'chib-yonmasin
+  const [visible, setVisible] = useState(count > 0);
+  useEffect(() => {
+    if (count > 0) { setVisible(true); return undefined; }
+    const t = setTimeout(() => setVisible(false), 160);
+    return () => clearTimeout(t);
+  }, [count]);
+  const kb = useIOSKeyboardOpen();
 
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const t = useT();
   const cartCount = useCart((s) => s.totalCount());
-  // Profil uchun Telegram rasmi — bo'lmasa ikonka ko'rsatiladi
   const photoUrl = useUser((st) => st.user.photoUrl);
   // Market'da "Bosh" — Market bosh sahifasi (Lokma Go'ga tashlab yubormaydi)
   const market = useSection((s) => s.section === 'market');
@@ -67,54 +118,73 @@ export function BottomNav() {
   const targetOf = (tab) => (tab.path === '/' ? homePath : tab.path);
   const activeIndex = tabs.findIndex((tab) => pathname === targetOf(tab));
 
-  // Har sahifa o'z menyusini chizadi (menyu qayta yaratiladi) — shuning uchun kapsula oldingi faol tabdan boshlanadi va yangisiga
-  // PRUJINA bilan suriladi: bitta menyu bo'lib ko'rinadi, almashish "hip" bo'ladi. Harakat paytida shisha suyuq egiladi.
-  const [shown, setShown] = useState(lastActive >= 0 && activeIndex >= 0 ? lastActive : activeIndex);
+  const [shown, setShown] = useState(activeIndex);
   const navRef = useRef(null);
   const pillRef = useRef(null);
   const pillIn = useRef(null);
   const glare = useRef(null);
   const glass = useRef(null);
-  useEffect(() => {
-    glass.current = attachRefraction(navRef.current);
-    return () => { glass.current?.dispose(); glass.current = null; };
-  }, []);
-  // iOS 26 linzasi: barmoq bilan surib tanlash (hamma qurilmada bir xil). Eng so'nggi navigatsiya funksiyasi ref'da
+  const lens = useRef(null);
+  const prevActive = useRef(activeIndex);
+
+  // Android/boshqalar: Chromium sinishi (iOS'da supportsRefraction=false). iOS: linza.
   const selectRef = useRef(null);
   selectRef.current = (i) => { const tab = tabs[i]; if (tab) navigate(targetOf(tab)); };
   useEffect(() => {
-    const lens = attachLens(navRef.current, { onSelect: (i) => selectRef.current?.(i), haptic: selectionHaptic });
-    return () => lens.dispose();
+    if (IOS) {
+      lens.current = attachLens(navRef.current, { onSelect: (i) => selectRef.current?.(i), haptic: selectionHaptic });
+      return () => { lens.current?.dispose(); lens.current = null; };
+    }
+    glass.current = attachRefraction(navRef.current);
+    return () => { glass.current?.dispose(); glass.current = null; };
   }, []);
+
+  // iOS: tab almashishi — kapsula darhol yangi joyga (yashirin), tomchi esa eskisidan yangisiga suriladi. Bo'yashdan OLDIN.
+  useLayoutEffect(() => {
+    if (!IOS) return;
+    const from = prevActive.current;
+    prevActive.current = activeIndex;
+    if (from === activeIndex) return;
+    lens.current?.slide(from, activeIndex);
+    setShown(activeIndex);
+  }, [activeIndex]);
+
+  // Android: avvalgi prujinali kapsula (WAAPI) + yorug' chiziq + shisha egilishi
   useEffect(() => {
-    if (activeIndex < 0) return undefined;
-    if (shown === activeIndex) { lastActive = activeIndex; return undefined; }
+    if (IOS || activeIndex < 0) return undefined;
+    if (shown === activeIndex) return undefined;
     const from = shown;
-    let raf2 = 0;
-    const raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(() => {
-        setShown(activeIndex);
-        lastActive = activeIndex;
-        const wrap = pillRef.current; const el = pillIn.current; const gl = glare.current;
-        if (!wrap || typeof wrap.animate !== 'function' || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
-        const sp = springKeyframes(from, activeIndex);
-        const opt = { duration: sp.ms, easing: 'linear' };
-        wrap.animate(sp.move, opt);
-        el?.animate(sp.stretch, opt);
-        const dir = activeIndex > from ? 1 : -1;
-        gl?.animate(
-          [{ opacity: 0, transform: `translateX(${-70 * dir}%)` }, { opacity: 1, offset: 0.35 }, { opacity: 0, transform: `translateX(${70 * dir}%)` }],
-          { duration: 560, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
-        );
-        glass.current?.pulse(sp.ms);
-      });
-    });
-    return () => { cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
+    setShown(activeIndex);
+    const wrap = pillRef.current; const el = pillIn.current; const gl = glare.current;
+    if (from < 0 || !wrap || typeof wrap.animate !== 'function' || reducedMotion()) return undefined;
+    const sp = springKeyframes(from, activeIndex);
+    const opt = { duration: sp.ms, easing: 'linear' };
+    wrap.animate(sp.move, opt);
+    el?.animate(sp.stretch, opt);
+    const dir = activeIndex > from ? 1 : -1;
+    gl?.animate(
+      [{ opacity: 0, transform: `translateX(${-70 * dir}%)` }, { opacity: 1, offset: 0.35 }, { opacity: 0, transform: `translateX(${70 * dir}%)` }],
+      { duration: 560, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+    );
+    glass.current?.pulse(sp.ms);
+    return undefined;
   }, [activeIndex, shown]);
 
+  const hidden = !visible || kb;
   return (
-    <nav className="bottom-nav" aria-label="Lokma">
-      <div ref={navRef} className="fnav" style={{ '--fn-i': Math.max(shown, 0), '--fn-n': tabs.length }} data-active={activeIndex >= 0 ? 'true' : 'false'} data-testid="floating-nav">
+    <nav
+      className={`bottom-nav bottom-nav--host${hidden ? ' is-hidden' : ''}`}
+      aria-label="Lokma"
+      aria-hidden={hidden ? 'true' : undefined}
+      inert={hidden ? '' : undefined}
+    >
+      <div
+        ref={navRef}
+        className={`fnav${IOS ? ' fnav--ios' : ''}`}
+        style={{ '--fn-i': Math.max(IOS ? activeIndex : shown, 0), '--fn-n': tabs.length }}
+        data-active={activeIndex >= 0 ? 'true' : 'false'}
+        data-testid="floating-nav"
+      >
         <span ref={pillRef} className="fnav__pill" aria-hidden="true"><span ref={pillIn} className="fnav__pill-in"><span ref={glare} className="fnav__pill-gl" /></span></span>
         {tabs.map((tab, i) => {
           const active = i === activeIndex;
@@ -123,7 +193,7 @@ export function BottomNav() {
             <button
               key={tab.path}
               type="button"
-              onClick={() => navigate(targetOf(tab))}
+              onClick={() => { if (!active) navigate(targetOf(tab)); }}
               className={`fnav__tab ${active ? 'is-active' : ''}`}
               aria-label={label}
               aria-current={active ? 'page' : undefined}

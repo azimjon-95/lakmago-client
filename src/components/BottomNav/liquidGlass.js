@@ -10,6 +10,19 @@
 const NS = 'http://www.w3.org/2000/svg';
 let uid = 0;
 
+/** iOS/iPadOS (har qanday brauzer, Telegram, Capacitor ilova — hammasi WebKit). iPadOS 13+ "Macintosh" deb tanishtiradi. */
+export function isIOSDevice() {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  return /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && (navigator.maxTouchPoints || 0) > 1);
+}
+
+/** Prujina holati t soniyada (0 → 1): stiffness 300, damping 28 — kapsula va linza uchun bir xil. */
+export function springPos(t, stiffness = 300, damping = 28) {
+  const w0 = Math.sqrt(stiffness); const zeta = damping / (2 * w0); const wd = w0 * Math.sqrt(Math.max(1 - zeta * zeta, 0.0001));
+  return 1 - Math.exp(-zeta * w0 * t) * (Math.cos(wd * t) + (zeta * w0 / wd) * Math.sin(wd * t));
+}
+
 export function supportsRefraction() {
   if (typeof window === 'undefined' || typeof document === 'undefined') return false;
   const ua = navigator.userAgent || '';
@@ -109,8 +122,7 @@ export function attachRefraction(nav, { scale = 84, bezel = 26 } = {}) {
  */
 export function springKeyframes(from, to, { stiffness = 300, damping = 28, steps = 44, maxMs = 620 } = {}) {
   const dist = to - from;
-  const w0 = Math.sqrt(stiffness); const zeta = damping / (2 * w0); const wd = w0 * Math.sqrt(Math.max(1 - zeta * zeta, 0.0001));
-  const pos = (t) => 1 - Math.exp(-zeta * w0 * t) * (Math.cos(wd * t) + (zeta * w0 / wd) * Math.sin(wd * t));
+  const pos = (t) => springPos(t, stiffness, damping);
   const T = maxMs / 1000;
   const move = []; const stretch = [];
   const vmax = 1.8;                                        // normalizatsiya (≈ eng yuqori tezlik, tab/soniya)
@@ -126,15 +138,14 @@ export function springKeyframes(from, to, { stiffness = 300, damping = 28, steps
 }
 
 /*
- * ═══ LINZA (iOS 26 Liquid Glass tab bar) — HAMMA dvigatelda bir xil (WebKit/iOS, Chromium/Android, Telegram) ═══
- * Tab bosilganda yoki menyu bo'ylab barmoq surilganda tanlov kapsulasi TINIQ SHISHA TOMCHIGA (linza) aylanadi:
- *   • linza menyudan sal kattaroq (yuqori/pastga chiqib turadi), barmoqqa ergashadi;
- *   • ostidagi ikonka va yorliqlar KATTALASHADI (lupa) — masofaga qarab silliq (lensScales);
- *   • har yangi tab ustiga o'tganda — yengil tebranish (haptic);
- *   • qo'yib yuborilganda eng yaqin tabga prujina bilan o'tiradi va oddiy kapsulaga qaytadi; surilgan bo'lsa — o'sha tab ochiladi.
- * Nega shunday: iOS'dagi WebKit sahifa ORTIDAGI kontentni egishni (`backdrop-filter: url()`) qo'llamaydi. Linza esa
- * menyuning O'Z kontentini (ikonkalar) transform bilan kattalashtiradi — bu har bir dvigatelda bir xil ishlaydi.
- * Harakat kamaytirilgan (prefers-reduced-motion) bo'lsa linza o'chiq — oddiy bosish ishlaydi.
+ * ═══ LINZA — iOS 26 Liquid Glass tab bar (FAQAT iOS; Android'da avvalgi kapsula) ═══
+ * Menyu ilovada BITTA va doimiy (NavHost) — sahifa almashganda qayta yaratilmaydi, shuning uchun linza uzilmaydi.
+ *   • Tab almashganda (bosish yoki orqaga) — slide(from, to): tanlov TINIQ SHISHA TOMCHISIGA aylanib, prujina bilan
+ *     yangi tabga suriladi; yo'lidagi ikonkalar kattalashib o'tadi (lensScales), keyin oddiy rangli kapsulaga o'tiradi.
+ *     Ekranda bir vaqtda faqat BITTA shakl harakatlanadi (eski prujinali kapsula iOS'da ishlatilmaydi).
+ *   • Menyu bo'ylab barmoq surish — tomchi barmoqqa ergashadi, har yangi tabda yengil tebranish, qo'yib yuborilganda
+ *     eng yaqin tab ochiladi.
+ * Hammasi transform/opacity bilan (WebKit `backdrop-filter: url()` ni qo'llamaydi). Harakat kamaytirilgan bo'lsa — o'chiq.
  */
 const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
 
@@ -153,8 +164,8 @@ export function nearestIndex(x, centers) {
   return best;
 }
 
-export function attachLens(nav, { onSelect, haptic, dragThreshold = 8 } = {}) {
-  const noop = { dispose() {} };
+export function attachLens(nav, { onSelect, haptic, dragThreshold = 8, slideMs = 560 } = {}) {
+  const noop = { slide() { return false; }, dispose() {} };
   if (!nav || typeof window === 'undefined' || typeof nav.addEventListener !== 'function') return noop;
   if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return noop;
   const lens = document.createElement('span');
@@ -163,7 +174,7 @@ export function attachLens(nav, { onSelect, haptic, dragThreshold = 8 } = {}) {
   lens.innerHTML = '<span class="fnav__lens-gl"></span>';
   nav.append(lens);
 
-  let st = null; let suppressClick = false; let settle = 0;
+  let st = null; let suppressClick = false; let settle = 0; let anim = 0; let skipSlideTo = -1;
   const tabsOf = () => Array.from(nav.querySelectorAll('.fnav__tab'));
   const geo = () => {
     const r = nav.getBoundingClientRect();
@@ -178,13 +189,35 @@ export function attachLens(nav, { onSelect, haptic, dragThreshold = 8 } = {}) {
     const s = lensScales(x, g.cs, g.w * 0.95);
     g.ts.forEach((t, i) => t.style.setProperty('--fn-mag', s[i].toFixed(3)));
   };
+  const show = () => { clearTimeout(settle); nav.classList.add('is-lens', 'is-dragging'); };
   const release = () => {
+    cancelAnimationFrame(anim);
     clearTimeout(settle);
     nav.classList.remove('is-dragging');
     settle = setTimeout(() => {
       nav.classList.remove('is-lens');
       tabsOf().forEach((t) => t.style.removeProperty('--fn-mag'));
-    }, 220);
+    }, 200);
+  };
+
+  /** Tanlovni from → to tabga tomchi bilan suradi. true — linza ko'rsatildi (kapsula yashirin turishi kerak). */
+  const slide = (from, to) => {
+    if (skipSlideTo === to) { skipSlideTo = -1; return false; }  // surib tanlangan — tomchi allaqachon o'sha yerda
+    if (from < 0 || to < 0 || from === to || st) return false;
+    const g = geo();
+    if (!g.cs[from] && g.cs[from] !== 0) return false;
+    cancelAnimationFrame(anim);
+    show();
+    const x0 = g.cs[from]; const x1 = g.cs[to];
+    place(x0, g);
+    const t0 = performance.now();
+    const tick = (now) => {
+      const k = Math.min(1, (now - t0) / slideMs);
+      place(x0 + (x1 - x0) * springPos((k * slideMs) / 1000), g);
+      if (k < 1) anim = requestAnimationFrame(tick); else { place(x1, g); release(); }
+    };
+    anim = requestAnimationFrame(tick);
+    return true;
   };
 
   const onDown = (e) => {
@@ -194,17 +227,15 @@ export function attachLens(nav, { onSelect, haptic, dragThreshold = 8 } = {}) {
     const g = geo();
     const i = g.ts.indexOf(tab);
     if (i < 0) return;
-    clearTimeout(settle);
     st = { id: e.pointerId, x0: e.clientX, dragging: false, idx: i, g };
-    place(g.cs[i], g);
-    nav.classList.add('is-lens');
   };
   const onMove = (e) => {
     if (!st || e.pointerId !== st.id) return;
     if (!st.dragging) {
       if (Math.abs(e.clientX - st.x0) < dragThreshold) return;
       st.dragging = true;
-      nav.classList.add('is-dragging');
+      cancelAnimationFrame(anim);
+      show();
       try { nav.setPointerCapture(e.pointerId); } catch { /* */ }
     }
     const g = st.g;
@@ -216,15 +247,16 @@ export function attachLens(nav, { onSelect, haptic, dragThreshold = 8 } = {}) {
   const onUp = (e) => {
     if (!st || e.pointerId !== st.id) return;
     const s = st; st = null;
-    place(s.g.cs[s.idx], s.g);              // eng yaqin tabga o'tiradi (CSS prujina)
+    if (!s.dragging) return;                 // oddiy bosish — click navigatsiya qiladi, tomchi slide() bilan suriladi
+    place(s.g.cs[s.idx], s.g);
     release();
-    if (s.dragging) {
-      suppressClick = true;                 // surishdan keyingi "click" ikkinchi marta ochmasin
-      setTimeout(() => { suppressClick = false; }, 400);
-      onSelect?.(s.idx);
-    }
+    suppressClick = true;                    // surishdan keyingi "click" ikkinchi marta ochmasin
+    setTimeout(() => { suppressClick = false; }, 400);
+    skipSlideTo = s.idx;
+    setTimeout(() => { if (skipSlideTo === s.idx) skipSlideTo = -1; }, 1500);
+    onSelect?.(s.idx);
   };
-  const onCancel = (e) => { if (st && e.pointerId === st.id) { st = null; release(); } };
+  const onCancel = (e) => { if (st && e.pointerId === st.id) { const was = st.dragging; st = null; if (was) release(); } };
   const onClick = (e) => { if (suppressClick) { suppressClick = false; e.preventDefault(); e.stopPropagation(); } };
 
   nav.addEventListener('pointerdown', onDown);
@@ -233,8 +265,9 @@ export function attachLens(nav, { onSelect, haptic, dragThreshold = 8 } = {}) {
   nav.addEventListener('pointercancel', onCancel);
   nav.addEventListener('click', onClick, true);
   return {
+    slide,
     dispose() {
-      clearTimeout(settle);
+      clearTimeout(settle); cancelAnimationFrame(anim);
       nav.removeEventListener('pointerdown', onDown);
       nav.removeEventListener('pointermove', onMove);
       nav.removeEventListener('pointerup', onUp);

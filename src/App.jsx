@@ -39,6 +39,7 @@ import { initSectionTheme } from '@/store/section';
 import { DISTRICT_SELECTOR_ENABLED } from '@/lib/districtFlags';
 import { DistrictEngine } from '@/hooks/useDistrictEngine';
 import { LocationPrompt } from '@/components/LocationPrompt/LocationPrompt';
+import { NavHost } from '@/components/BottomNav/BottomNav';
 
 
 // Global suzuvchi elementlar (buyurtma nishoni + chat) — faqat
@@ -222,7 +223,11 @@ function AppInner({ authMode = 'telegram' }) {
   return (
     <QueryClientProvider client={queryClient}>
       {showSplash && <Splash onDone={finishSplash} />}
-      <BrowserRouter>
+      {/*
+        v7_startTransition: sahifa almashishi startTransition ichida — lazy sahifa yuklanguncha ESKI sahifa ko'rinib turadi
+        (avval Suspense butun ekranni oq spinner bilan almashtirardi: menyu, tuman dvigateli va oynalar o'chib-yonardi).
+      */}
+      <BrowserRouter future={{ v7_startTransition: true }}>
         <ErrorBoundary>
         <Suspense fallback={<div className="app-shell" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="spinner" /></div>}>
           <StartParamHandler />
@@ -256,6 +261,8 @@ function AppInner({ authMode = 'telegram' }) {
           </Routes>
         </Suspense>
         </ErrorBoundary>
+        {/* Pastki menyu — ilovada BITTA, sahifa almashganda qayta yaratilmaydi (sahifalardagi <BottomNav/> — faqat joy egallovchi) */}
+        <NavHost />
         <FloatingLayer />
         {/* Admin bloklagan mijoz — butun ekranli oyna (sababi bilan) */}
         <BlockedGate />

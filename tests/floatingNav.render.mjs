@@ -12,11 +12,19 @@ try {
   const h = React.createElement;
   const { MemoryRouter } = await import('react-router-dom');
   const { I18nProvider } = await server.ssrLoadModule('/src/i18n/index.jsx');
-  const { BottomNav, BOTTOM_NAV_H } = await server.ssrLoadModule('/src/components/BottomNav/BottomNav.jsx');
+  const { BottomNav, NavHost, BOTTOM_NAV_H } = await server.ssrLoadModule('/src/components/BottomNav/BottomNav.jsx');
   const { useSection } = await server.ssrLoadModule('/src/store/section.js');
   const { useCart } = await server.ssrLoadModule('/src/store/cart.js');
   const { useUser } = await server.ssrLoadModule('/src/store/user.js');
-  const render = (path) => renderToString(h(MemoryRouter, { initialEntries: [path] }, h(I18nProvider, null, h(BottomNav)))).replace(/<!-- -->/g, '');
+  const render = (path) => renderToString(h(MemoryRouter, { initialEntries: [path] }, h(I18nProvider, null, h(NavHost)))).replace(/<!-- -->/g, '');
+  // Sahifadagi <BottomNav/> — faqat joy egallovchi; haqiqiy menyu App'dagi bitta <NavHost/> (o'tishda o'chib-yonmaydi)
+  const slot = renderToString(h(MemoryRouter, null, h(I18nProvider, null, h(BottomNav))));
+  check('sahifadagi BottomNav — bo‘sh joy egallovchi (tugmasiz), menyu NavHost’da', slot.includes('bottom-nav--slot') && !slot.includes('<button'));
+  const app = readFileSync('src/App.jsx', 'utf8');
+  check('App: NavHost Suspense’dan TASHQARIDA bitta marta; router startTransition rejimida', app.includes('v7_startTransition: true') && (app.match(/<NavHost \/>/g) || []).length === 1 && app.indexOf('<NavHost />') > app.indexOf('</Suspense>'));
+  check('menyu (fixed) — sahifa ichida emas, ilovada', readFileSync('src/components/BottomNav/BottomNav.css', 'utf8').includes('.bottom-nav--host {') && /\.bottom-nav--host \{[^}]*position: fixed/.test(readFileSync('src/components/BottomNav/BottomNav.css', 'utf8')));
+  const lg = readFileSync('src/components/BottomNav/floating-nav.css', 'utf8');
+  check('iOS uslublari faqat .fnav--ios da (Android — avvalgi ko‘rinish: qirra halqasi, surish, kattalashish yo‘q)', lg.includes('.fnav--ios::after') && !/^\.fnav::after/m.test(lg) && lg.includes('.fnav--ios { touch-action: none; }') && !/^\s*touch-action: none;/m.test(lg.split('.fnav--ios {')[0]) && lg.includes('.fnav--ios .fnav__ic {'));
 
   let html = render('/orders');
   check('4 ta tab: ikonka + yorliq (fnav__lb), nomlari aria-label/title da', (html.match(/<button/g) || []).length === 4 && ['Bosh', 'Qidiruv', 'Buyurtmalar', 'Profil'].every((x) => html.includes(`aria-label="${x}"`) && html.includes(`title="${x}"`) && html.includes(`class="fnav__lb">${x}<`)));
