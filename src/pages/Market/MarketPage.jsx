@@ -23,7 +23,7 @@ import { MarketStoreCard } from '@/components/MarketStoreCard/MarketStoreCard';
 import { MarketStoreSort } from '@/components/MarketStoreSort/MarketStoreSort';
 import { sortStores, recommendedStoreId, marketOrigin } from '@/lib/marketSort';
 import { useDeviceLocation } from '@/store/deviceLocation';
-import { getCurrentPosition } from '@/lib/location';
+import { quickPosition as getCurrentPosition } from '@/lib/quickFix';
 import { DishGridCard } from '@/components/DishGridCard';
 import { MARKET_HOME_CATEGORIES, homeCatLabel } from '@/data/marketHomeCategories';
 import '@/pages/Home/Home.css';

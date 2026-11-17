@@ -3,6 +3,7 @@ import { Geolocation } from '@capacitor/geolocation';
 import { getTelegram } from './telegram';
 import { LocationError, withTimeout } from './location';
 import { locationPermissionState } from './locationPermission';
+import { rememberFix } from './fixCollector.js';
 
 /*
  * ═══ TUMAN ANIQLASH UCHUN YAGONA GEOLOKATSIYA XIZMATI (Web / Telegram / iOS / Android) ═══
@@ -36,9 +37,13 @@ export async function probeAccess() {
 }
 
 export async function coarsePosition(timeoutMs = 10_000) {
-  const toFix = (pos) => (pos?.coords && Number.isFinite(pos.coords.latitude) && Number.isFinite(pos.coords.longitude)
-    ? { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Number.isFinite(pos.coords.accuracy) ? pos.coords.accuracy : null, ts: pos.timestamp || Date.now() }
-    : null);
+  const toFix = (pos) => {
+    const f = pos?.coords && Number.isFinite(pos.coords.latitude) && Number.isFinite(pos.coords.longitude)
+      ? { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Number.isFinite(pos.coords.accuracy) ? pos.coords.accuracy : null, ts: pos.timestamp || Date.now() }
+      : null;
+    if (f) rememberFix(f);
+    return f;
+  };
   const opts = { enableHighAccuracy: false, timeout: timeoutMs, maximumAge: 10 * 60_000 };
   if (Capacitor.isNativePlatform()) {
     try { return toFix(await withTimeout(Geolocation.getCurrentPosition(opts), timeoutMs + 1500, null)); } catch (e) { throw asLocationError(e); }

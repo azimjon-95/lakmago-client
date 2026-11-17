@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Icon } from '@/components/Icon';
 import { api } from '@/api';
-import { getCurrentPosition, reverseGeocodeViaYandex } from '@/lib/location';
+import { reverseGeocodeViaYandex, PRECISE_LOCATION_M } from '@/lib/location';
+import { quickPosition, lastKnownFix } from '@/lib/quickFix';
+import { districtCenter, REGION_CENTER } from '@/lib/districtCenters';
+import { useDistrict } from '@/store/district';
 import { loadYmaps } from '@/lib/yandexMaps';
 import { haptic } from '@/lib/telegram';
 import { useT } from '@/i18n';
 
-// Toshkent markazi — joylashuv aniqlanmagunicha shu ko'rsatiladi
-const DEFAULT_CENTER = [41.311081, 69.240562];
 
 /**
  * 2-bosqichdan kirilgan karta orqali manzil tanlash.
@@ -36,6 +37,8 @@ export function MapAddressPicker({ start = null, onPick, onBack }) {
   const mapRef = useRef(null);
   const debounceRef = useRef(null);
   const reqIdRef = useRef(0);
+  // Mijoz xaritaga tegdimi — tekkan bo'lsa fonda kelgan GPS xaritani uning qo'lidan "tortib olmaydi"
+  const touchedRef = useRef(false);
 
   const [status, setStatus] = useState('loading');   // loading | ready | error
   const [error, setError] = useState('');
@@ -67,16 +70,69 @@ export function MapAddressPicker({ start = null, onPick, onBack }) {
   const onBoundsChange = useCallback(() => {
     if (!mapRef.current) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    // Mijoz kartani surdi — ogohlantirish vazifasini bajardi
-    setApproxM(null);
+    // Mijoz kartani O'ZI surdi — ogohlantirish vazifasini bajardi (dastur surgani hisobga olinmaydi)
+    if (touchedRef.current) setApproxM(null);
     debounceRef.current = setTimeout(() => {
       const [lat, lng] = mapRef.current.getCenter();
       resolveAddress(lat, lng);
     }, 350);
   }, [resolveAddress]);
 
+  /*
+   * ═══ XARITA DARHOL OCHILADI (GPS kutilmaydi) ═══
+   *
+   * AVVAL: "Kartadan tanlang" bosilganda xarita GPS natijasini KUTIB, keyingina chizilardi (15–25 s bo'sh
+   * aylanuvchi belgi — mijozlar shikoyati). Bundan tashqari standart markaz Toshkent edi.
+   *
+   * ENDI: xarita Yandex skripti tayyor bo'lishi bilan chiziladi; boshlang'ich ko'rinish (kutmasdan):
+   *   1) chaqiruvchi bergan nuqta (taxminiy joy yoki tahrirlash);
+   *   2) oxirgi 10 daqiqada olingan joy (tuman aniqlash/oldingi urinish) — faqat xotirada;
+   *   3) tanlangan tuman markazi (zoom 14) yoki Namangan.
+   * Aniq joy FONDA olinadi (xarita bilan PARALLEL) va kelganda — agar mijoz xaritaga hali tegmagan bo'lsa —
+   * igna o'sha joyga silliq suriladi. Tegib ulgurgan bo'lsa joyidan qo'zg'atilmaydi ("Mening joyim" tugmasi bor).
+   */
   useEffect(() => {
     let dead = false;
+    const ctl = new AbortController();
+    const box = boxRef.current;
+    const onTouch = () => { touchedRef.current = true; };
+    box?.addEventListener('pointerdown', onTouch, { passive: true });
+    box?.addEventListener('touchstart', onTouch, { passive: true });
+
+    let center = null;
+    let zoom = 17;
+    let exact = false;       // boshlang'ich nuqta haqiqiy joymi (manzilini so'rash mantiqli)
+    if (start && Number.isFinite(start.lat) && Number.isFinite(start.lng)) {
+      center = [start.lat, start.lng];
+      exact = true;
+    } else {
+      const lk = lastKnownFix();
+      if (lk) {
+        center = [lk.lat, lk.lng];
+        exact = true;
+        if (Number.isFinite(lk.accuracy) && lk.accuracy > PRECISE_LOCATION_M) setApproxM(Math.round(lk.accuracy));
+      } else {
+        center = districtCenter(useDistrict.getState().activeDistrictId) || REGION_CENTER;
+        zoom = 14;
+      }
+    }
+
+    // Fonda aniq joy (chaqiruvchi nuqta bergan bo'lsa — qayta so'ralmaydi, mijoz ikkinchi marta kutmasin)
+    let fix = null;
+    const applyFix = (pos) => {
+      const map = mapRef.current;
+      if (!map || dead || touchedRef.current) return;
+      map.setCenter([pos.lat, pos.lng], 17, { duration: 300 });
+      setApproxM(Number.isFinite(pos.accuracy) && pos.accuracy > PRECISE_LOCATION_M ? Math.round(pos.accuracy) : null);
+      resolveAddress(pos.lat, pos.lng);
+    };
+    if (!start) {
+      setLocating(true);
+      quickPosition({ signal: ctl.signal })
+        .then((pos) => { if (dead) return; fix = pos; applyFix(pos); })
+        .catch(() => { /* ruxsat yo'q / signal yo'q — mijoz xaritani o'zi suradi */ })
+        .finally(() => { if (!dead) setLocating(false); });
+    }
 
     (async () => {
       try {
@@ -91,33 +147,15 @@ export function MapAddressPicker({ start = null, onPick, onBack }) {
         const ymaps = await loadYmaps(cfg.mapsKey);
         if (dead || !boxRef.current) return;
 
-        /*
-         * Boshlang'ich nuqta ustuvorligi:
-         *   1) chaqiruvchi bergan (taxminiy joy yoki tahrirlash);
-         *   2) joriy joylashuv;
-         *   3) Toshkent markazi.
-         * Chaqiruvchi nuqta bergan bo'lsa geolokatsiya QAYTA
-         * so'ralmaydi — mijoz ikkinchi marta kutib o'tirmasin.
-         */
-        let center = DEFAULT_CENTER;
-        if (start && Number.isFinite(start.lat) && Number.isFinite(start.lng)) {
-          center = [start.lat, start.lng];
-        } else {
-          try {
-            const pos = await getCurrentPosition();
-            if (!dead) {
-              center = [pos.lat, pos.lng];
-              if (Number.isFinite(pos.accuracy) && pos.accuracy > 80) {
-                setApproxM(Math.round(pos.accuracy));
-              }
-            }
-          } catch { /* ruxsat yo'q — standart markaz */ }
+        // GPS xaritadan oldin kelgan bo'lsa — to'g'ridan-to'g'ri o'sha joydan ochamiz
+        if (fix) {
+          center = [fix.lat, fix.lng]; zoom = 17; exact = true;
+          setApproxM(Number.isFinite(fix.accuracy) && fix.accuracy > PRECISE_LOCATION_M ? Math.round(fix.accuracy) : null);
         }
-        if (dead) return;
 
         const map = new ymaps.Map(boxRef.current, {
           center,
-          zoom: 17,
+          zoom,
           controls: ['zoomControl'],
         }, {
           /*
@@ -131,7 +169,8 @@ export function MapAddressPicker({ start = null, onPick, onBack }) {
         map.events.add('boundschange', onBoundsChange);
 
         setStatus('ready');
-        resolveAddress(center[0], center[1]);
+        // Tuman markazi — taxminiy ko'rinish, "manzil" emas: mijozga "Kartani suring" ko'rinadi
+        if (exact) resolveAddress(center[0], center[1]);
       } catch (e) {
         if (!dead) { setStatus('error'); setError(e.message || 'Xarita yuklanmadi'); }
       }
@@ -139,6 +178,9 @@ export function MapAddressPicker({ start = null, onPick, onBack }) {
 
     return () => {
       dead = true;
+      ctl.abort();
+      box?.removeEventListener('pointerdown', onTouch);
+      box?.removeEventListener('touchstart', onTouch);
       if (debounceRef.current) clearTimeout(debounceRef.current);
       mapRef.current?.destroy();
       mapRef.current = null;
@@ -150,10 +192,11 @@ export function MapAddressPicker({ start = null, onPick, onBack }) {
     haptic();
     setLocating(true);
     try {
-      const { lat, lng, accuracy } = await getCurrentPosition();
+      const { lat, lng, accuracy } = await quickPosition();
+      touchedRef.current = false;   // dastur suradi — "taxminiy" ogohlantirishi o'chib ketmasin
       mapRef.current?.setCenter([lat, lng], 17, { duration: 300 });
       resolveAddress(lat, lng);
-      if (Number.isFinite(accuracy) && accuracy > 80) setApproxM(Math.round(accuracy));
+      setApproxM(Number.isFinite(accuracy) && accuracy > PRECISE_LOCATION_M ? Math.round(accuracy) : null);
     } catch { /* ruxsat berilmadi — jim */ }
     finally { setLocating(false); }
   };

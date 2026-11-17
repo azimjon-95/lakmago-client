@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Icon } from '@/components/Icon';
-import { getCurrentPosition, reverseGeocode, isPrecise, canOpenLocationSettings, openLocationSettings } from '@/lib/location';
+import { reverseGeocodeViaYandex, isPrecise, canOpenLocationSettings, openLocationSettings } from '@/lib/location';
+import { quickPosition, warmPosition } from '@/lib/quickFix';
 import { haptic } from '@/lib/telegram';
 import { useT } from '@/i18n';
 
@@ -19,13 +20,19 @@ export function LocationPermission({ onDetected, onApproximate, onManual, onClos
   const [err, setErr] = useState(null);
   const [errCode, setErrCode] = useState(null);
 
+  /*
+   * TEZLIK: ruxsat ALLAQACHON berilgan bo'lsa (oyna ko'rsatilmaydi), joy shu ekran ochilishi bilan fonda olinadi —
+   * mijoz tugmani bosguncha ko'pincha tayyor. Ruxsat berilmagan bo'lsa hech narsa so'ralmaydi (faqat tugma bosilganda).
+   */
+  useEffect(() => { warmPosition(); }, []);
+
   const detect = async () => {
     haptic();
     setErr(null);
     setErrCode(null);
     setLoading(true);
     try {
-      const pos = await getCurrentPosition();
+      const pos = await quickPosition();
 
       /*
        * Joy faqat TAXMINAN aniqlangan bo'lsa (Wi-Fi/tarmoq),
@@ -38,7 +45,8 @@ export function LocationPermission({ onDetected, onApproximate, onManual, onClos
         return;
       }
 
-      const addr = await reverseGeocode(pos.lat, pos.lng);
+      // Yandex (server proksi) — O'zbekiston manzillarini aniqroq va tezroq biladi; ishlamasa o'zi Nominatim'ga o'tadi
+      const addr = await reverseGeocodeViaYandex(pos.lat, pos.lng);
       onDetected({ lat: pos.lat, lng: pos.lng, ...addr });
     } catch (e) {
       setErr(ERR_KEY[e.code] ? t(ERR_KEY[e.code]) : (e.message || t('locErrUnavailable')));

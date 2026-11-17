@@ -4,6 +4,7 @@ import { getTelegram } from './telegram';
 import { api } from '@/api';
 import { Capacitor } from '@capacitor/core';
 import { Geolocation } from '@capacitor/geolocation';
+import { rememberFix } from './fixCollector.js';
 
 // 1) Joriy koordinatani olish
 // Qaytaradi: { lat, lng } yoki xato tashlaydi
@@ -84,7 +85,7 @@ function validCoords(lat, lng) {
  * @returns {{ pos: {lat,lng,accuracy}|null, denied: boolean }}
  *   denied — ruxsat so'ralgan, lekin berilmagan (foydalanuvchi sozlamadan yoqishi kerak).
  */
-async function telegramPosition() {
+export async function telegramPosition() {
   const lm = getTelegram()?.LocationManager;
   if (!lm) return { pos: null, denied: false };
   try {
@@ -313,7 +314,13 @@ function browserPosition(signal) {
   });
 }
 
-export async function getCurrentPosition({ signal } = {}) {
+export async function getCurrentPosition(opts = {}) {
+  const pos = await getCurrentPositionRaw(opts);
+  rememberFix(pos);
+  return pos;
+}
+
+async function getCurrentPositionRaw({ signal } = {}) {
   const { pos: tg, denied } = await telegramPosition();
 
   // Telegram yetarlicha aniq natija berdi
@@ -356,6 +363,7 @@ export async function getCurrentPosition({ signal } = {}) {
 export function watchFixes(onFix, onError) {
   const emit = (coords, ts) => {
     if (!coords || !validCoords(coords.latitude, coords.longitude)) return;
+    rememberFix({ lat: coords.latitude, lng: coords.longitude, accuracy: coords.accuracy });
     onFix({ lat: coords.latitude, lng: coords.longitude, accuracy: Number.isFinite(coords.accuracy) ? coords.accuracy : null, ts: ts || Date.now() });
   };
   if (Capacitor.isNativePlatform()) {
