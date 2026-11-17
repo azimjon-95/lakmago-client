@@ -116,7 +116,40 @@ export function NavHost() {
   const market = useSection((s) => s.section === 'market');
   const homePath = market ? '/market' : '/';
   const targetOf = (tab) => (tab.path === '/' ? homePath : tab.path);
-  const activeIndex = tabs.findIndex((tab) => pathname === targetOf(tab));
+  const routeIndex = tabs.findIndex((tab) => pathname === targetOf(tab));
+  /*
+   * DARHOL JAVOB (Telegram kabi): tab bosilgan zahoti tanlov siljiydi — yangi sahifa yuklanishini kutmaydi
+   * (router startTransition rejimida manzil sahifa tayyor bo'lgandagina o'zgaradi; avval menyu ~330 ms "qotib" turardi).
+   * Sahifa ochilgach (yoki 4 s ichida ochilmasa) yana manzilga tayanadi.
+   */
+  const [pending, setPending] = useState(-1);
+  useEffect(() => { setPending(-1); }, [routeIndex, pathname]);
+  useEffect(() => {
+    if (pending < 0) return undefined;
+    const tm = setTimeout(() => setPending(-1), 4000);
+    return () => clearTimeout(tm);
+  }, [pending]);
+  const activeIndex = pending >= 0 ? pending : routeIndex;
+  const activeRef = useRef(activeIndex);
+  activeRef.current = activeIndex;
+  // Ikonka animatsiyasi: har yangi tanlovda bir marta (key orqali boshidan)
+  const [pop, setPop] = useState({ i: -1, n: 0 });
+  const prevPop = useRef(activeIndex);
+  useEffect(() => {
+    if (prevPop.current === activeIndex) return;
+    const first = prevPop.current < 0 && activeIndex >= 0 && pop.n === 0;
+    prevPop.current = activeIndex;
+    if (activeIndex >= 0 && !first) {
+      setPop((p) => ({ i: activeIndex, n: p.n + 1 }));
+      selectionHaptic();
+    }
+  }, [activeIndex]); // eslint-disable-line react-hooks/exhaustive-deps
+  const go = (i) => {
+    const tab = tabs[i];
+    if (!tab || i === activeRef.current) return;
+    setPending(i);
+    navigate(targetOf(tab));
+  };
 
   const [shown, setShown] = useState(activeIndex);
   const navRef = useRef(null);
@@ -129,10 +162,14 @@ export function NavHost() {
 
   // Android/boshqalar: Chromium sinishi (iOS'da supportsRefraction=false). iOS: linza.
   const selectRef = useRef(null);
-  selectRef.current = (i) => { const tab = tabs[i]; if (tab) navigate(targetOf(tab)); };
+  selectRef.current = go;
   useEffect(() => {
     if (IOS) {
-      lens.current = attachLens(navRef.current, { onSelect: (i) => selectRef.current?.(i), haptic: selectionHaptic });
+      lens.current = attachLens(navRef.current, {
+        onSelect: (i) => selectRef.current?.(i),
+        haptic: selectionHaptic,
+        getActive: () => activeRef.current,
+      });
       return () => { lens.current?.dispose(); lens.current = null; };
     }
     glass.current = attachRefraction(navRef.current);
@@ -193,14 +230,18 @@ export function NavHost() {
             <button
               key={tab.path}
               type="button"
-              onClick={() => { if (!active) navigate(targetOf(tab)); }}
+              onClick={() => go(i)}
               className={`fnav__tab ${active ? 'is-active' : ''}`}
               aria-label={label}
               aria-current={active ? 'page' : undefined}
               title={label}
               data-testid={`fnav-${tab.icon}`}
             >
-              <span className="fnav__ic">
+              <span
+                key={active && pop.i === i ? `p${pop.n}` : 'ic'}
+                className={`fnav__ic${active && pop.i === i ? ' is-pop' : ''}`}
+                data-ic={tab.icon}
+              >
                 {tab.path === '/profile' && photoUrl ? (
                   <img src={photoUrl} alt="" className="fnav__photo" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                 ) : (

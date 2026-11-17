@@ -41,12 +41,28 @@ function fmtDate(d) {
   return `${formatUzDate(date)}, ${time}`;
 }
 
+/*
+ * Oxirgi ro'yxat XOTIRADA (foydalanuvchi bo'yicha): menyudan qaytib kirilganda «Yuklanmoqda...» bo'sh ekrani o'rniga
+ * ro'yxat DARHOL ko'rinadi (Telegram kabi), yangisi fonda olinadi. Diskka yozilmaydi; boshqa akkauntga ko'rinmaydi.
+ */
+let ordersCache = { uid: null, list: null };
+
 export function OrdersPage() {
   const navigate = useNavigate();
   const t = useT();
   const userId = useUser((s) => s.user?._id || s.user?.id);
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const cached = ordersCache.list && ordersCache.uid === (userId || null) ? ordersCache.list : null;
+  const [orders, setOrdersState] = useState(cached || []);
+  const [loading, setLoading] = useState(!cached);
+  const uidRef = useRef(userId || null);
+  uidRef.current = userId || null;
+  const setOrders = useCallback((next) => {
+    setOrdersState((prev) => {
+      const v = typeof next === 'function' ? next(prev) : next;
+      ordersCache = { uid: uidRef.current, list: v };
+      return v;
+    });
+  }, []);
   const [openId, setOpenId] = useState(null);
 
   const load = useCallback(() => {
@@ -54,7 +70,7 @@ export function OrdersPage() {
       .then((list) => setOrders(Array.isArray(list) ? list : []))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [setOrders]);
 
   useEffect(() => { load(); }, [load]);
 

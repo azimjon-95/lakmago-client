@@ -31,12 +31,13 @@ export function FloatingNav({ tabs, active, onSelect, haptic, theme = 'wedding' 
    * Platforma: iOS — Liquid Glass tomchi (linza), bitta shakl suriladi; Android/boshqalar — prujinali kapsula + Chromium sinishi.
    */
   const latest = useRef(null);
-  latest.current = { tabs, onSelect, haptic };
+  latest.current = { tabs, onSelect, haptic, active };
   useEffect(() => {
     if (IOS) {
       lens.current = attachLens(navRef.current, {
         onSelect: (i) => { const { tabs: ts, onSelect: cb } = latest.current; if (ts[i]) cb?.(ts[i].id); },
         haptic: () => latest.current.haptic?.(),
+        getActive: () => latest.current.tabs.findIndex((t) => t.id === latest.current.active),
       });
       return () => { lens.current?.dispose(); lens.current = null; };
     }
