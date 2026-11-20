@@ -202,3 +202,25 @@ button.co-pill:active { transform: scale(0.97); }
   .co-phone .co-pill svg { display: none; }
   .co-time { padding: 10px; }
 }
+
+/* ───── Har qanday kenglik / shrift: matn kartadan chiqmasin, belgilar siqilmasin ───── */
+.co-opt__title, .co-opt__sub, .co-time__text b, .co-time__text small, .co-hint__title, .co-hint__sub { overflow-wrap: anywhere; }
+.co-opt__media, .co-opt__check, .co-check, .co-scooter { flex: none; }
+.co-time > svg, .co-time__end, .co-rowbtn > svg, .co-hint > svg { flex: none; }
+.co-time > svg:last-child { margin-left: 4px; }
+.co-opt, .co-time { height: 100%; }          /* qatordagi ikki karta bir xil balandlikda */
+.co-grid2 { align-items: stretch; }
+.co-opt.is-active .co-opt__body { padding-right: 12px; }
+
+@media (max-width: 360px) {
+  .co-opt { gap: 7px; padding: 9px; min-height: 66px; }
+  .co-opt__media { width: 32px; height: 32px; }
+  .co-opt__media > svg { max-width: 100%; max-height: 100%; }
+  .co-scooter { width: 34px; height: 34px; }
+  .co-grid2--time { grid-template-columns: 1.1fr 1fr; }
+}
+/* Juda tor (≤ 330px) yoki matn dizaynga qaytarib bo'lmaganda (data-tz katta) — variantlar ustma-ust */
+@media (max-width: 330px) {
+  .co-grid2 { grid-template-columns: 1fr; }
+  .co-grid2--time { grid-template-columns: 1fr; }
+}

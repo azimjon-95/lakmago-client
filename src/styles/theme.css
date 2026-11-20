@@ -160,6 +160,7 @@
 
 html {
   color-scheme: light;
+  -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
   /* Pastga/tepaga chetdan oshib "sakrash" (rubber-band) effektini
      o'chiradi — bu effekt Telegram WebView'da ba'zan orqadagi
      eski/tasodifiy kontentni (masalan splash video kadrini)

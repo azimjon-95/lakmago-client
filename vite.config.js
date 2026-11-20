@@ -1,11 +1,13 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import fontScale from './build/postcssFontScale.mjs';
 
 // Client 5173-portda ishlaydi. /api va /bot so'rovlari backend (4000)ga uzatiladi.
 // Backend o'chiq bo'lsa, api/index.js mock ma'lumotga tushadi.
 export default defineConfig({
   plugins: [react()],
+  css: { postcss: { plugins: [fontScale()] } },
   resolve: {
     alias: { '@': path.resolve(__dirname, './src') },
   },
