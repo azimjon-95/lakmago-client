@@ -40,6 +40,8 @@ import { DISTRICT_SELECTOR_ENABLED } from '@/lib/districtFlags';
 import { DistrictEngine } from '@/hooks/useDistrictEngine';
 import { LocationPrompt } from '@/components/LocationPrompt/LocationPrompt';
 import { NavHost } from '@/components/BottomNav/BottomNav';
+import { isIOSDevice } from '@/components/BottomNav/liquidGlass';
+import { installRepaintKick, scheduleRepaintKick } from '@/lib/repaintKick';
 
 
 // Global suzuvchi elementlar (buyurtma nishoni + chat) — faqat
@@ -57,6 +59,14 @@ function FloatingLayer() {
       {(isHome || isMarketPage) && <SupportChat />}
     </>
   );
+}
+
+// iOS: sahifa almashgach (orqaga ham) slayderlar oq qolmasin — lib/repaintKick.js
+function RepaintKick() {
+  const { pathname } = useLocation();
+  useEffect(() => { if (isIOSDevice()) installRepaintKick(); }, []);
+  useEffect(() => { if (isIOSDevice()) scheduleRepaintKick(); }, [pathname]);
+  return null;
 }
 
 export default function App() {
@@ -279,6 +289,7 @@ function AppInner({ authMode = 'telegram' }) {
         </ErrorBoundary>
         {/* Pastki menyu — ilovada BITTA, sahifa almashganda qayta yaratilmaydi (sahifalardagi <BottomNav/> — faqat joy egallovchi) */}
         <NavHost />
+        <RepaintKick />
         <FloatingLayer />
         {/* Admin bloklagan mijoz — butun ekranli oyna (sababi bilan) */}
         <BlockedGate />
