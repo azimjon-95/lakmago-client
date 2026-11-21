@@ -98,6 +98,5 @@ export const profileFromLogin = (data) => ({
   photoUrl: data.user?.photoUrl,
   phone: data.user?.phone,
   addresses: data.user?.addresses,
-  isDemo: Boolean(data.user?.isDemo),
   _id: data.user?._id,
 });

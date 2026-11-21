@@ -136,7 +136,6 @@ export function AuthGateModal({ open, onSuccess, onClose, reason = 'order' }) {
       phone: currentUser.phone ?? profile.phone ?? null,
       addresses: currentUser.addresses?.length ? currentUser.addresses : profile.addresses ?? [],
       verified: true,
-      isDemo: Boolean(profile.isDemo),
     });
     setAuthStatus('done');
     finishWithAddressSync(profile);

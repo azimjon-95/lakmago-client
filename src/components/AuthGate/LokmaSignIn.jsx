@@ -6,9 +6,7 @@ import {
   applyLoginTokens, clearTgLoginCache, openExternal, pollTgLogin, prefetchTgLogin, profileFromLogin,
 } from '@/lib/tgLinkAuth';
 import './LokmaSignIn.css';
-import { DemoLoginForm } from './DemoLoginForm';
 import { AppleSignInButton } from './AppleSignInButton';   // Sign in with Apple (faqat iOS ilova; Telegram kirishidan mustaqil)
-import { useCapabilities, isNativeApp } from '@/lib/capabilities';
 
 /*
  * ═══ LOKMA GO — KREATIV KIRISH (native ilova va brauzer) ═══
@@ -35,10 +33,6 @@ export function LokmaSignIn({ reason = 'order', onLoggedIn, onOtherMethod }) {
   const [left, setLeft] = useState(0);
   const [name, setName] = useState('');
   const [showReopen, setShowReopen] = useState(false);
-  // App Store tekshiruvi uchun demo kirish: faqat iOS/Android ilova VA server yoqqanda (capabilities); haqiqiy mijozlar ko'rmaydi
-  const [showDemo, setShowDemo] = useState(false);
-  const caps = useCapabilities();
-  const demoAvailable = caps.demoLogin && isNativeApp();
 
   const req = useRef(null);
   const alive = useRef(true);
@@ -146,18 +140,7 @@ export function LokmaSignIn({ reason = 'order', onLoggedIn, onOtherMethod }) {
   const sub = t(reason === 'profile' ? 'lsi_sub_profile' : 'lsi_sub_order');
 
   /* ───────────── Muvaffaqiyat ───────────── */
-  const onDemoOk = (data) => {
-    applyLoginTokens(data);
-    clearTgLoginCache();
-    const profile = profileFromLogin(data);
-    setName(profile.firstName || '');
-    setShowDemo(false);
-    setPhase('success');
-    haptic?.('success');
-    setTimeout(() => { if (alive.current) doneRef.current?.(profile); }, 900);
-  };
-
-  // Apple orqali kirish natijasi (faqat iOS): demo/Telegram bilan bir xil token va profil qo'llash
+  // Apple orqali kirish natijasi (faqat iOS): Telegram bilan bir xil token va profil qo'llash
   const onAppleOk = (data) => {
     applyLoginTokens(data);
     clearTgLoginCache();
@@ -232,9 +215,6 @@ export function LokmaSignIn({ reason = 'order', onLoggedIn, onOtherMethod }) {
     );
   }
 
-  /* ───────────── Demo kirish formasi ───────────── */
-  if (showDemo && phase === 'idle') return <DemoLoginForm onBack={() => setShowDemo(false)} onSuccess={onDemoOk} />;
-
   /* ───────────── Boshlang'ich ───────────── */
   return (
     <div className="lsi">
@@ -261,7 +241,6 @@ export function LokmaSignIn({ reason = 'order', onLoggedIn, onOtherMethod }) {
       <AppleSignInButton onSuccess={onAppleOk} />
       <p className="lsi-secure"><Icon name="shieldCheck" size={14} color="var(--muted)" /> {t('lsi_secure')}</p>
       {onOtherMethod && <button type="button" className="lsi-link-btn lsi-link-btn--muted" onClick={onOtherMethod}>{t('lsi_other')}</button>}
-      {demoAvailable && <button type="button" className="lsi-link-btn lsi-link-btn--muted lsi-link-btn--demo" onClick={() => setShowDemo(true)} data-testid="demo-enter">{t('demo_enter')}</button>}
     </div>
   );
 }
