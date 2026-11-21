@@ -3,7 +3,7 @@
 
 .ot {
   position: fixed; inset: 0; z-index: 60; overflow: hidden; background: #EEF1EC;
-  --ot-top: calc(var(--tg-top-offset, 0px) + 8px);
+  --ot-top: calc(var(--tg-top-offset, 0px) + 2px);
   --ot-bottom: var(--tg-bottom-offset, 0px);
   --ot-sheet: 44vh;
   --ot-orange: #FF6A13;
