@@ -1,7 +1,7 @@
 /* ============ Buyurtmalar ============ */
 .orders { padding-bottom: 0; }
 .orders-header {
-  padding: 14px 16px;
+  padding: 2px 16px 14px;
   font-size: 18px; font-weight: 600; color: var(--ink);
   border-bottom: 1px solid var(--line);
   background: var(--surface);

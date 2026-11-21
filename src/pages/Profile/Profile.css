@@ -2,7 +2,7 @@
 .profile { padding-bottom: 0; background: var(--canvas); }
 
 .profile-card {
-  margin: 16px;
+  margin: 2px 16px 16px;
   background: var(--brand-tint);
   border-radius: 18px;
   padding: 18px;

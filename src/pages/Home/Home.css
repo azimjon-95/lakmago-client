@@ -5,7 +5,7 @@
 /* Bitta qator: manzil (chap, qisqaradi) · tuman (o'rta, ixcham) · til (o'ng). Hech qachon o'ramaydi va gorizontal skroll bermaydi. */
 .home-header {
   display: flex; align-items: center; flex-wrap: nowrap; gap: 8px;
-  padding: 14px 16px 8px; min-width: 0;
+  padding: 2px 16px 8px; min-width: 0;   /* tepasi 2 px: Telegram tugmalariga yaqin */
 }
 .home-header__addr { text-align: left; flex: 1 1 0; min-width: 0; }
 .home-header__addr-label {
