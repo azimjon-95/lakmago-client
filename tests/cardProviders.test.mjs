@@ -23,5 +23,5 @@ test('noto\'g\'ri javob xavfsiz: bo\'sh ro\'yxat', () => {
 test('savat shu filtrdan foydalanadi va demo hisob kartadan chetlatilgan', async () => {
   const { readFileSync } = await import('node:fs');
   const cart = readFileSync(new URL('../src/pages/Cart/CartPage.jsx', import.meta.url), 'utf8');
-  assert.ok(cart.includes('filterCardProviders(st?.available)') && cart.includes('!user?.isDemo'));
+  assert.ok(cart.includes('filterCardProviders(st?.available)'));
 });

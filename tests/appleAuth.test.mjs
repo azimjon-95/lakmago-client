@@ -103,9 +103,11 @@ test('Apple moduli Telegram auth modullariga BOG\'LIQ EMAS (faqat getDeviceId o\
   assert.deepEqual(users.sort(), ['components/AuthGate/LokmaSignIn.jsx'], `Apple modulini kutilmagan joy import qiladi: ${users}`);
 });
 
-test('LokmaSignIn: Telegram kirish oqimi saqlangan; Apple faqat QO\'SHIMCHA (tugma idle holatda, Telegram CTA va demo tugmasidan keyin/oldin)', () => {
+test('LokmaSignIn: Telegram kirish oqimi saqlangan; Apple faqat QO\'SHIMCHA (tugma idle holatda, Telegram CTA'dan keyin)', () => {
   const s = src('src/components/AuthGate/LokmaSignIn.jsx');
-  for (const k of ['prefetchTgLogin', 'pollTgLogin', 'openExternal(r.appLink)', 'applyLoginTokens(data)', "fail('cancelled')", 'onOtherMethod', 'DemoLoginForm', 'const go = async () =>']) assert.ok(s.includes(k), `Telegram/demo oqimi o'zgargan: ${k}`);
+  for (const k of ['prefetchTgLogin', 'pollTgLogin', 'openExternal(r.appLink)', 'applyLoginTokens(data)', "fail('cancelled')", 'onOtherMethod', 'const go = async () =>']) assert.ok(s.includes(k), `Telegram oqimi o'zgargan: ${k}`);
+  // Demo kirish butunlay olib tashlangan — qaytib kelmasin
+  assert.ok(!/demo/i.test(s), 'LokmaSignIn ichida demo qoldig\'i bor');
   assert.equal((s.match(/<AppleSignInButton/g) || []).length, 1);
   // tugma boshlang'ich (idle) ko'rinishda, Telegram CTA'dan keyin
   const idle = s.slice(s.lastIndexOf("/* ───"), s.indexOf('export function GuestHero'));

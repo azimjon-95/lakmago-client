@@ -5,11 +5,11 @@ import { API_BASE } from '@/api';
 /*
  * ═══ ILOVA IMKONIYATLARI (serverdan) ═══
  *
- * Yangi imkoniyatlar (demo kirish, hisobni o'chirish) FAQAT server `GET /app/capabilities` da ochiq aytgandagina
+ * Yangi imkoniyatlar (hisobni o'chirish) FAQAT server `GET /app/capabilities` da ochiq aytgandagina
  * ko'rsatiladi. ESKI server bu yo'lni bilmaydi (404 / HTML) — hammasi YASHIRIN qoladi: frontend serverdan oldin
  * chiqarilsa ham haqiqiy mijozlarga hech narsa o'zgarmaydi.
  */
-const NONE = { demoLogin: false, accountDeletion: false, demoAccountDeletion: false };
+const NONE = { accountDeletion: false };
 let pending = null;
 
 export function loadCapabilities(force = false) {
@@ -21,7 +21,7 @@ export function loadCapabilities(force = false) {
       const res = await fetch(`${API_BASE}/app/capabilities`, { signal: ctrl.signal, headers: { Accept: 'application/json' } });
       if (!res.ok) return { ...NONE };                      // eski server: 404
       const j = await res.json().catch(() => null);          // SPA zaxira sahifasi (HTML) — JSON emas
-      return { demoLogin: j?.demoLogin === true, accountDeletion: j?.accountDeletion === true, demoAccountDeletion: j?.demoAccountDeletion === true };
+      return { accountDeletion: j?.accountDeletion === true };
     } catch {
       pending = null;                                        // tarmoq xatosi — keyingi safar qayta urinadi
       return { ...NONE };

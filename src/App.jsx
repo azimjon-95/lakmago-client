@@ -181,7 +181,6 @@ function AppInner({ authMode = 'telegram' }) {
         phoneVerified: Boolean(profile.phoneVerified),
         addresses: latest.addresses.length ? latest.addresses : profile.addresses ?? [],
         verified: true,
-        isDemo: Boolean(profile.isDemo),   // App Store demo hisobi (server /users/me beradi)
         // Admin naqd to'lovni o'chirgan bo'lsa — savatda faqat karta (sababi bilan)
         cashDisabled: profile.cashDisabled?.active
           ? { active: true, reason: profile.cashDisabled.reason || '', at: profile.cashDisabled.at || null }

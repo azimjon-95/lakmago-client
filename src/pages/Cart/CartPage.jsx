@@ -515,7 +515,7 @@ export function CartPage() {
     const load = (retry = true) => api.getPaymentStatus()
       .then((st) => {
         if (cancelled) return;
-        setProviders(CARD_PAYMENT_ENABLED && !user?.isDemo ? filterCardProviders(st?.available) : []);   // demo hisob: faqat naqd (hech narsa olinmaydi)
+        setProviders(CARD_PAYMENT_ENABLED ? filterCardProviders(st?.available) : []);
         setProvidersFailed(false);
         setProvidersLoaded(true);
       })
@@ -528,7 +528,7 @@ export function CartPage() {
 
     load();
     return () => { cancelled = true; };
-  }, [user?.isDemo]);   // demo belgisi keyinroq (auth tugagach) aniqlansa — qayta hisoblanadi
+  }, []);
 
   /*
    * ═══ SAQLANGAN KARTALAR OLIB TASHLANDI ═══

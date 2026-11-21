@@ -29,7 +29,6 @@ function getInitialUser() {
       phone: null,
       addresses: [],
       defaultAddressId: null,
-      isDemo: false,
       verified: false
     };
   }
@@ -47,7 +46,6 @@ function getInitialUser() {
     addresses: [],
     defaultAddressId: null,
     favorites: { restaurants: [], dishes: [] },
-    isDemo: false,
     verified: false
   };
 }

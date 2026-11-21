@@ -6,7 +6,7 @@ import { clearTgLoginCache } from '@/lib/tgLinkAuth';
 /*
  * Hisobdan CHIQISH (va hisob o'chirilgandan keyin): hamma narsa tozalanadi, ilova MEHMON holatiga qaytadi.
  *  • server sessiyasi bekor qilinadi, tokenlar o'chadi (store.logout);
- *  • savat tozalanadi (keyingi hisobga oldingi savat o'tib ketmasin — ayniqsa demo ↔ haqiqiy);
+ *  • savat tozalanadi (keyingi hisobga oldingi savat o'tib ketmasin);
  *  • TanStack kesh tozalanadi (oldingi foydalanuvchining buyurtmalari/profili ko'rinmasin);
  *  • kirish oynasining vaqtinchalik holati tozalanadi.
  */
