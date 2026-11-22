@@ -7,7 +7,8 @@ import { useDistrict, useDistrictMeta } from '@/store/district';
  * faol tuman tanlangan va server uni qo'llab-quvvatlaydi. Aks holda URL AYNAN avvalgidek.
  * Faqat GET va faqat katalog ro'yxatlari (restoran sahifasi, menyu, buyurtma va boshqalarga tegmaydi).
  */
-const CATALOG_PATHS = /^\/(restaurants|market\/stores|market\/products|dishes\/(trending|discounted|all)|promotions)(\?|$)/;
+// banners va ads/banner — bosh sahifa slayderi faqat tanlangan tumanniki (eski server parametrni e'tiborsiz qoldiradi)
+const CATALOG_PATHS = /^\/(restaurants|market\/stores|market\/products|dishes\/(trending|discounted|all)|promotions|banners|ads\/banner)(\?|$)/;
 
 export function activeCatalogDistrict() {
   if (!DISTRICT_SELECTOR_ENABLED) return null;
@@ -26,4 +27,4 @@ export function withCatalogDistrict(path, method) {
 }
 
 /** Tuman almashganda tozalanadigan (qayta yuklanadigan) katalog so'rovlari — kursor ham noldan boshlanadi. */
-export const CATALOG_QUERY_PREFIXES = [['restaurants'], ['dishes', 'trending'], ['dishes', 'discounted'], ['dishes', 'all'], ['dishes', 'feed'], ['market', 'stores'], ['market', 'products'], ['promotions']];
+export const CATALOG_QUERY_PREFIXES = [['restaurants'], ['dishes', 'trending'], ['dishes', 'discounted'], ['dishes', 'all'], ['dishes', 'feed'], ['market', 'stores'], ['market', 'products'], ['promotions'], ['banners'], ['ads', 'banner']];
