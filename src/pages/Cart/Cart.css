@@ -252,6 +252,7 @@
   padding: 2px 16px 6px;
   /* proximity — surilganda majburan tortmaydi, tabiiy his */
   scroll-snap-type: x proximity;
+  scroll-padding-inline: 16px;
 }
 /* Tavsiya kartasi — iOS uslubi */
 .upsell-card {

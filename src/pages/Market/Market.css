@@ -91,6 +91,7 @@
   padding: 12px 16px 14px;
   overflow-x: auto;
   scroll-snap-type: x proximity;
+  scroll-padding-inline: 16px;
 }
 .market-cat {
   flex: none; width: 70px;
