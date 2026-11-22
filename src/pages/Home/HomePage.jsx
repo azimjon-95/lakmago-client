@@ -4,7 +4,8 @@ import { Icon } from '@/components/Icon';
 import { BannerSlider } from '@/components/BannerSlider';
 import { RestaurantCard } from '@/components/RestaurantCard';
 import { DishScrollCard } from '@/components/DishScrollCard';
-import { DishGridCard } from '@/components/DishGridCard';
+import { HomeDishCard } from '@/components/HomeDishCard/HomeDishCard';
+import { HomeDishCardSkeleton } from '@/components/HomeDishCard/HomeDishCardSkeleton';
 import { DishModal } from '@/components/DishModal';
 import { AdModal } from '@/components/AdModal';
 import { BottomNav } from '@/components/BottomNav';
@@ -440,11 +441,12 @@ export function HomePage() {
             action={t('all')}
             onAction={() => openDiscover('discount')}
           />
-          <div className="home-dishes-row no-scrollbar">
+          <div className="home-dishes-row home-dishes-row--cards no-scrollbar">
             {discountLoading
-              ? Array.from({ length: 4 }).map((_, i) => <DishScrollCardSkeleton key={i} />)
+              ? Array.from({ length: 4 }).map((_, i) => <HomeDishCardSkeleton key={i} />)
               : discountedShown.map((d) => (
-                  <DishGridCard
+                  <HomeDishCard
+                    variant="discount"
                     key={d.id || d._id}
                     dish={d}
                     onClick={openModal}
@@ -463,11 +465,12 @@ export function HomePage() {
             action={t('all')}
             onAction={() => openDiscover('recommended')}
           />
-          <div className="home-dishes-row no-scrollbar" ref={recStream.rowRef}>
+          <div className="home-dishes-row home-dishes-row--cards no-scrollbar" ref={recStream.rowRef}>
             {regularLoading
-              ? Array.from({ length: 6 }).map((_, i) => <DishScrollCardSkeleton key={i} />)
+              ? Array.from({ length: 4 }).map((_, i) => <HomeDishCardSkeleton key={i} />)
               : recommended.map((d) => (
-                  <DishGridCard
+                  <HomeDishCard
+                    variant="recommend"
                     key={d.id || d._id}
                     dish={d}
                     onClick={openModal}
@@ -476,14 +479,15 @@ export function HomePage() {
                 ))}
             {/* Davomi — oxiriga qo'shib boriladi, mavjud kartalar joyidan qimirlamaydi */}
             {!regularLoading && recStream.extra.map((d) => (
-              <DishGridCard
+              <HomeDishCard
+                variant="recommend"
                 key={d.id || d._id}
                 dish={d}
                 onClick={openModal}
                 closed={recStream.closedIds.has(String(d.id || d._id))}
               />
             ))}
-            {recStream.loading && Array.from({ length: 2 }).map((_, i) => <DishScrollCardSkeleton key={`more-${i}`} />)}
+            {recStream.loading && Array.from({ length: 2 }).map((_, i) => <HomeDishCardSkeleton key={`more-${i}`} />)}
             {/*
               Kuzatuvchi nuqta DOIM chiziladi (hasMore'ga bog'lanmagan):
               aks holda tasma tugab, keyin kategoriya almashsa u yangi

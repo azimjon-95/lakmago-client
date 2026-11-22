@@ -1,0 +1,164 @@
+/*
+ * Bosh sahifa taom kartasi — «Super Chegirmalar» / «Tavsiya qilamiz».
+ * Pastki panel rasmga to'lqinsimon chiziq bilan qo'shilib ketadi.
+ * Karta kengligi ekranga qarab (≈ 2.3 ta karta ko'rinadi, keyingisi biroz chiqib turadi).
+ */
+.hdc {
+  --hc-w: clamp(150px, 41vw, 176px);
+  --hc-cream-top: #FFF7EC;
+  --hc-cream: #FFF1E2;
+  --hc-orange: #FF7600;
+  --hc-orange-2: #FF8A00;
+  --hc-red: #E91D35;
+  --hc-gold: #FFBD32;
+  --hc-wave: 16px;
+
+  flex: none;
+  width: var(--hc-w);
+  scroll-snap-align: start;
+  position: relative;
+  display: flex; flex-direction: column;
+  border-radius: 22px;
+  overflow: hidden;
+  background: var(--hc-cream);
+  box-shadow: 0 2px 6px rgba(120, 70, 20, 0.08), 0 10px 22px rgba(120, 70, 20, 0.13);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.14s ease;
+}
+.hdc:active { transform: scale(0.98); }
+.hdc:focus-visible { outline: 2px solid var(--hc-orange); outline-offset: 2px; }
+
+/* ── Rasm ── */
+.hdc__photo {
+  position: relative;
+  aspect-ratio: 1 / 0.78;
+  background: #F3E4D2;
+  overflow: hidden;
+}
+.hdc__img, .hdc__img-fallback {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+}
+.hdc__img { object-fit: cover; opacity: 0; transition: opacity 0.35s ease; }
+.hdc__img.is-loaded { opacity: 1; }
+.hdc__img-fallback > div { width: 100%; height: 100%; }
+.hdc__shade {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0) 34%, rgba(0,0,0,0) 70%, rgba(0,0,0,0.10) 100%);
+}
+
+.hdc__badge {
+  position: absolute; top: 9px; left: 9px; z-index: 2;
+  display: inline-flex; align-items: center; gap: 4px;
+  height: 24px; padding: 0 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 800; letter-spacing: 0.1px;
+  color: #fff; white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+}
+.hdc__badge--discount { background: linear-gradient(135deg, #F2354A 0%, var(--hc-red) 60%, #C9142B 100%); }
+.hdc__badge--reco {
+  background: linear-gradient(135deg, #FFCB52 0%, var(--hc-gold) 60%, #F5A50F 100%);
+  color: #4A2E00; padding: 0 10px 0 8px;
+}
+
+.hdc__fav {
+  position: absolute; top: 4px; right: 4px; z-index: 2;
+  width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; background: transparent; border: 0; padding: 0;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.55));
+  transition: transform 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.hdc__fav:active { transform: scale(0.88); }
+.hdc__fav.is-on { color: #FF3B57; animation: hdc-pop 0.34s cubic-bezier(0.3, 1.6, 0.5, 1); }
+@keyframes hdc-pop { 0% { transform: scale(0.7); } 60% { transform: scale(1.22); } 100% { transform: scale(1); } }
+
+.hdc__closed {
+  position: absolute; left: 9px; bottom: calc(var(--hc-wave) + 6px); z-index: 2;
+  background: rgba(17, 24, 39, 0.78); color: #fff;
+  font-size: 10.5px; font-weight: 600;
+  padding: 3px 8px; border-radius: 999px; pointer-events: none;
+}
+.hdc.is-closed .hdc__img,
+.hdc.is-closed .hdc__img-fallback { filter: grayscale(0.6); }
+.hdc.is-closed .hdc__img.is-loaded { opacity: 0.75; }
+
+/* ── Ma'lumot paneli: yuqori chegarasi to'lqinsimon ── */
+.hdc__body {
+  position: relative;
+  flex: 1;
+  margin-top: calc(var(--hc-wave) * -1 + 1px);
+  padding: 4px 12px 12px;
+  background: linear-gradient(180deg, var(--hc-cream-top) 0%, var(--hc-cream) 100%);
+  display: flex; flex-direction: column;
+  min-width: 0;
+}
+.hdc__body::before {
+  content: '';
+  position: absolute; left: 0; right: 0; top: calc(var(--hc-wave) * -1 + 1px);
+  height: var(--hc-wave);
+  background: no-repeat center / 100% 100%
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 16' preserveAspectRatio='none'%3E%3Cpath d='M0 16V9C16 1 32 1 50 7S86 14 100 4V16Z' fill='%23FFF7EC'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.hdc__name {
+  font-size: 13.5px; font-weight: 700; color: #191919; line-height: 1.22;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.hdc__rest {
+  display: flex; align-items: center; gap: 4px;
+  margin-top: 3px;
+  font-size: 11px; color: #777; min-width: 0;
+}
+.hdc__rest svg { flex: none; }
+.hdc__rest span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
+.hdc__prices {
+  margin-top: auto; padding-top: 7px;
+  padding-right: 46px; min-height: 40px;
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 1px;
+}
+.hdc__price { font-size: 15px; font-weight: 800; color: #191919; white-space: nowrap; letter-spacing: -0.1px; }
+.hdc__price.is-sale { color: var(--hc-red); }
+.hdc__old { font-size: 11px; color: #999; text-decoration: line-through; white-space: nowrap; }
+.hdc__unit { font-size: 11px; color: #777; }
+
+.hdc__add {
+  position: absolute; right: 10px; bottom: 10px;
+  width: 38px; height: 38px; border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(145deg, var(--hc-orange-2) 0%, var(--hc-orange) 100%);
+  border: 0; padding: 0;
+  box-shadow: 0 4px 10px rgba(255, 118, 0, 0.35);
+  transition: transform 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.hdc__add:active { transform: scale(0.92); }
+.hdc.is-closed .hdc__add { background: #B8B2AA; box-shadow: none; }
+
+/* Tor ekranlar */
+@media (max-width: 340px) {
+  .hdc__name { font-size: 12.5px; }
+  .hdc__price { font-size: 13px; }
+  .hdc__prices { padding-right: 40px; }
+  .hdc__add { width: 34px; height: 34px; border-radius: 12px; right: 9px; bottom: 9px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hdc, .hdc__fav, .hdc__add, .hdc__img { transition: none; }
+  .hdc__fav.is-on { animation: none; }
+}
+
+/* ── Skeleton ── */
+.hdc-skel {
+  flex: none; width: clamp(150px, 41vw, 176px);
+  border-radius: 22px; overflow: hidden;
+  background: var(--hc-cream, #FFF1E2);
+}
+.hdc-skel__photo { display: block; width: 100%; aspect-ratio: 1 / 0.78; }
+.hdc-skel__body { padding: 12px; display: flex; flex-direction: column; gap: 8px; }

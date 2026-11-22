@@ -323,3 +323,6 @@
 /* Do'kon mahsuloti (Lokma Market): qadoq hajmi va narx birligi */
 .dgcard__pack { font-size: 11px; color: var(--muted); margin-top: 1px; }
 .dgcard__unit { font-size: 11px; font-weight: 500; color: var(--muted); }
+
+/* Super Chegirmalar / Tavsiya qilamiz — yangi kartalar (HomeDishCard): soya kesilmasin, qator oralig'i */
+.home-dishes-row--cards { gap: 12px; padding-top: 4px; padding-bottom: 32px; margin-bottom: -14px; }  /* soya kesilmasin; keyingi sarlavha joyidan siljimaydi */
