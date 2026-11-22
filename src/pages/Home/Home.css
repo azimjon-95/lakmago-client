@@ -69,6 +69,7 @@
   overflow-x: auto;
 margin-left: 13px;
   scroll-snap-type: x proximity;
+  scroll-padding-inline: 16px;
 }
 /* Kategoriya — rasm tepada, nom pastda (Uzum/Yandex uslubi) */
 .home-cat {
@@ -163,6 +164,9 @@ margin-left: 13px;
   display: flex; gap: 10px;
   padding: 14px 16px 16px;
   overflow-x: auto;
+  scroll-snap-type: x proximity;
+  /* Snap nuqtasi padding'ni hisobga olsin: birinchi karta har doim 16px'da (sarlavha bilan bir ustunda), chetga yopishmaydi */
+  scroll-padding-inline: 16px;
   /* Yengil fon — kartalar shunchaki oq sahifada "yamalgan"dek
      emas, yumshoq patnisda turgandek chiroyli ko'rinadi (soya
      bilan birga professional taassurot beradi) */
@@ -198,6 +202,8 @@ margin-left: 13px;
   overflow-x: auto;
   /* margin-left: 13px; */
   scroll-snap-type: x proximity;
+  /* Snap nuqtasi padding'ni hisobga olsin: birinchi karta har doim 16px'da (sarlavha bilan bir ustunda), chetga yopishmaydi */
+  scroll-padding-inline: 16px;
 }
 /* Taom kartasi — kichik (Uzum uslubi: ~148px) */
 .dgcard {
