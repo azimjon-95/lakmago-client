@@ -65,11 +65,12 @@
 /* Kategoriyalar */
 .home-categories {
   display: flex; gap: 14px;
-  padding: 10px 16px 14px;
+  /* Chap 12px: kategoriya 68px, doira 60px (markazda, 4px ichkarida) → doira chekkasi 16px'da,
+     sarlavha/manzil/kartalar bilan bitta ustunda */
+  padding: 10px 16px 14px 12px;
   overflow-x: auto;
-margin-left: 13px;
   scroll-snap-type: x proximity;
-  scroll-padding-inline: 16px;
+  scroll-padding-inline: 12px 16px;
 }
 /* Kategoriya — rasm tepada, nom pastda (Uzum/Yandex uslubi) */
 .home-cat {
