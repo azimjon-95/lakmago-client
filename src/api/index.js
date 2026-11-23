@@ -266,7 +266,9 @@ export const api = {
   getDishes: (restaurantId, opts) => apiFetch(`/restaurants/${restaurantId}/dishes`, opts),
 
   // Katta do'kon menyusi: bo'limlar ro'yxati (yengil) va bo'lim bo'yicha kursor-sahifa
-  getMenuIndex: (restaurantId, opts) => apiFetch(`/restaurants/${restaurantId}/menu/index`, opts),
+  // preview=N — birinchi N bo'limning 1-sahifasi shu javobda (sekin internetda so'rovlar zanjiri qisqaradi)
+  getMenuIndex: (restaurantId, { preview = 0, signal } = {}) =>
+    apiFetch(`/restaurants/${restaurantId}/menu/index${preview ? `?preview=${preview}` : ''}`, { signal }),
   getMenuItems: (restaurantId, { section = '', cursor = '', limit = 24, signal } = {}) => {
     const q = new URLSearchParams();
     if (section) q.set('section', section);

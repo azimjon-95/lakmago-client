@@ -333,3 +333,16 @@ img.review-card__avatar { object-fit: cover; }
 .restaurant .rest-more-error button:active { opacity: 0.6; }
 .restaurant .rest-more-sentinel { height: 1px; }
 .restaurant .rest-grid .rest-row__sk { aspect-ratio: 1 / 1.45; }
+
+/* Menyu yuklanayotgan bo'lim sarlavhasi (skeleton) */
+.restaurant .rest-row__sk--title,
+.rest-row__sk--title { display: block; width: 140px; height: 22px; aspect-ratio: auto; border-radius: 8px; }
+
+/*
+ * Skeleton ko'rinsin: avval rangi (--canvas) sahifa foni bilan bir xil edi va yuklanish paytida
+ * bo'limlar butunlay BO'SH ko'rinardi (mijoz "hech narsa yo'q" deb o'ylardi).
+ */
+.restaurant .rest-row__sk {
+  background: linear-gradient(180deg, #EEF1EE 0%, #E6EAE7 100%);
+  border: 1px solid var(--line, #E5E9E6);
+}

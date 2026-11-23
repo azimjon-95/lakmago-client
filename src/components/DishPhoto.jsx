@@ -33,7 +33,7 @@ export function optimizeCloudinary(url, width, fit = 'cover') {
   return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},${crop}/`);
 }
 
-export function DishPhoto({ dish, height = 96, radius = 12, iconSize = 34, fill = false, fit = 'cover', aspect = null }) {
+export function DishPhoto({ dish, height = 96, radius = 12, iconSize = 34, fill = false, fit = 'cover', aspect = null, priority = false }) {
   // aspect (masalan '1 / 0.85') berilsa — o'lcham ENIGA qarab bir xil nisbatda; aks holda qat'iy balandlik
   const sz = aspect ? { width: '100%', aspectRatio: aspect } : { height };
   // fill=true — ota elementни to'liq egallaydi (modal uchun)
@@ -49,7 +49,7 @@ export function DishPhoto({ dish, height = 96, radius = 12, iconSize = 34, fill 
     const w = fit === 'contain' ? 800 : 400;
     return (
       <div style={boxStyle}>
-        <ImgOrNoImage src={optimizeCloudinary(realUrl, w, fit)} alt={dish.name || ''} fit={fit} />
+        <ImgOrNoImage src={optimizeCloudinary(realUrl, w, fit)} alt={dish.name || ''} fit={fit} priority={priority} />
       </div>
     );
   }

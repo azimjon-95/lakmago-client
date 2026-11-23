@@ -28,11 +28,17 @@ export const useRestaurants = () =>
     queryFn: ({ signal }) => api.getRestaurants({ signal }),
   });
 
-export const useRestaurant = (id) =>
+/*
+ * preview — ro'yxat kartasidagi restoran (nomi, rasmi, ish vaqti, yetkazish...). Server javobi
+ * kelguncha sahifa shu bilan DARHOL chiziladi (spinner yo'q) va menyu so'rovi kutmasdan
+ * boshlanadi. Keshga YOZILMAYDI (placeholder) — to'liq javob kelgach almashadi.
+ */
+export const useRestaurant = (id, preview = null) =>
   useQuery({
     queryKey: ['restaurant', id],
     queryFn: ({ signal }) => api.getRestaurant(id, { signal }),
     enabled: !!id,
+    placeholderData: preview && String(preview.id || preview._id) === String(id) ? preview : undefined,
   });
 
 export const useDishes = (restaurantId) =>
@@ -146,14 +152,46 @@ export const useAllDishes = () =>
  * borilganda keyingi sahifa olinadi.
  */
 export const STORE_MENU_PAGE = 24;
+// Indeks bilan birga keladigan bo'limlar soni (ekranga birinchi tushadiganlari)
+export const STORE_MENU_PREVIEW = 3;
 
-export const useStoreMenuIndex = (restaurantId, enabled) =>
-  useQuery({
+/*
+ * Indeks + birinchi bo'limlar BITTA so'rovda (server ?preview). Kelgan sahifalar o'sha
+ * bo'limlarning infinite-query keshiga 1-sahifa sifatida yoziladi — bo'lim ekranga
+ * chiqqanda alohida so'rov kutilmaydi. Eski server preview bermasa — avvalgidek ishlaydi.
+ */
+export function storeMenuIndexQuery(qc, restaurantId) {
+  return {
     queryKey: ['store-menu', restaurantId, 'index'],
-    queryFn: ({ signal }) => api.getMenuIndex(restaurantId, { signal }),
-    enabled: !!restaurantId && !!enabled,
+    queryFn: async ({ signal }) => {
+      const res = await api.getMenuIndex(restaurantId, { preview: STORE_MENU_PREVIEW, signal });
+      const preview = res?.preview;
+      if (preview && typeof preview === 'object' && (res.previewLimit ?? STORE_MENU_PAGE) === STORE_MENU_PAGE) {
+        for (const [section, page] of Object.entries(preview)) {
+          const key = ['store-menu', restaurantId, 'items', section];
+          // Bo'limda allaqachon (ko'proq) sahifa bo'lsa — tegilmaydi
+          if (page && Array.isArray(page.items) && !qc.getQueryData(key)) {
+            qc.setQueryData(key, { pages: [page], pageParams: [''] });
+          }
+        }
+      }
+      if (res && typeof res === 'object') {
+        const { preview: _p, previewLimit: _l, ...index } = res;
+        return index;
+      }
+      return res;
+    },
     staleTime: 60_000,
+  };
+}
+
+export const useStoreMenuIndex = (restaurantId, enabled) => {
+  const qc = useQueryClient();
+  return useQuery({
+    ...storeMenuIndexQuery(qc, restaurantId),
+    enabled: !!restaurantId && !!enabled,
   });
+};
 
 export const useStoreMenuSection = (restaurantId, section, enabled) =>
   useInfiniteQuery({
@@ -167,18 +205,25 @@ export const useStoreMenuSection = (restaurantId, section, enabled) =>
 
 // Prefetch — restoran kartasiga tegilганда menyuни oldindan yuklaydi (tezkorlik).
 // Do'kon bo'lsa to'liq ro'yxat EMAS, faqat bo'limlar ro'yxati olinadi (minglab mahsulot oldindan yuklanmasin).
+/*
+ * hint — kartadagi restoran (do'konmi yoki yo'qmi ma'lum). Berilsa, restoran va menyu
+ * PARALLEL so'raladi (ilgari: avval restoran, kelgach menyu — ikki marta kutish).
+ */
 export function usePrefetchRestaurant() {
   const qc = useQueryClient();
-  return useCallback((id) => {
+  return useCallback((id, hint = null) => {
     if (!id) return;
+    const menu = (store) => {
+      if (store) {
+        qc.prefetchQuery(storeMenuIndexQuery(qc, id));
+        qc.prefetchQuery({ queryKey: ['market', 'categories'], queryFn: ({ signal }) => api.getMarketCategories({ signal }), staleTime: 60_000 });
+      } else {
+        qc.prefetchQuery({ queryKey: ['dishes', id], queryFn: ({ signal }) => api.getDishes(id, { signal }) });
+      }
+    };
+    if (hint) menu(isStoreRestaurant(hint));
     qc.ensureQueryData({ queryKey: ['restaurant', id], queryFn: ({ signal }) => api.getRestaurant(id, { signal }), revalidateIfStale: true })
-      .then((r) => {
-        if (isStoreRestaurant(r)) {
-          qc.prefetchQuery({ queryKey: ['store-menu', id, 'index'], queryFn: ({ signal }) => api.getMenuIndex(id, { signal }), staleTime: 60_000 });
-        } else {
-          qc.prefetchQuery({ queryKey: ['dishes', id], queryFn: ({ signal }) => api.getDishes(id, { signal }) });
-        }
-      })
+      .then((r) => { if (!hint) menu(isStoreRestaurant(r)); })
       .catch(() => {});
   }, [qc]);
 }

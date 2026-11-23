@@ -61,9 +61,10 @@ export const RestaurantCard = memo(function RestaurantCard({ restaurant: r, show
 
   return (
     <button
-      onClick={() => navigate(`/restaurant/${rid}`)}
-      onMouseEnter={() => prefetch(rid)}
-      onTouchStart={() => prefetch(rid)}
+      // preview: sahifa server javobini kutmasdan shu ma'lumot bilan darhol chiziladi (hooks/queries.js useRestaurant)
+      onClick={() => navigate(`/restaurant/${rid}`, { state: { preview: r } })}
+      onMouseEnter={() => prefetch(rid, r)}
+      onTouchStart={() => prefetch(rid, r)}
       className="rcard"
     >
       <div className="rcard__banner" style={{ background: style ? style.grad : r.tint }}>
