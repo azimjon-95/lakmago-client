@@ -1,4 +1,5 @@
 import { QueryClient } from '@tanstack/react-query';
+import { restorePersistedQueries, persistQueries } from './queryPersist';
 
 // Bitta umumiy kesh. Alohida modul: chiqishda (lib/session.js) oldingi foydalanuvchi ma'lumotlarini tozalash uchun.
 export const queryClient = new QueryClient({
@@ -13,3 +14,13 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+/*
+ * Ommaviy katalog keshi (restoran/menyu/do'kon bo'limlari) qurilmada saqlanadi — keyingi
+ * ochilishda sahifa darhol chiqadi, fonda yangilanadi (lib/queryPersist.js). Birinchi
+ * render'dan OLDIN tiklanadi (modul yuklanishida, sinxron).
+ */
+if (typeof window !== 'undefined') {
+  restorePersistedQueries(queryClient);
+  persistQueries(queryClient);
+}

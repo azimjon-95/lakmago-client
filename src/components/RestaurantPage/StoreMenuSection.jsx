@@ -21,7 +21,7 @@ const idOf = (d) => String(d.id || d._id);
 
 export function StoreMenuSection({
   restaurantId, sectionKey, name, count, eager = false, expanded, canExpand, onToggle,
-  expandLabel, collapseLabel, attach, onOpen, addLabel, disabled, onDisabledTap,
+  expandLabel, collapseLabel, attach, onOpen, addLabel, disabled, onDisabledTap, priorityCount = 0,
 }) {
   const wrapRef = useRef(null);
   const rowRef = useRef(null);
@@ -118,9 +118,9 @@ export function StoreMenuSection({
       >
         {loadingFirst && Array.from({ length: skeletons }).map((_, i) => <div key={`sk${i}`} className="rest-row__sk" />)}
 
-        {items.map((d) => (
+        {items.map((d, i) => (
           <DishScrollCard
-            key={idOf(d)} dish={d} onClick={onOpen} showRestaurant={false} showFav showCurrency
+            key={idOf(d)} dish={d} onClick={onOpen} showRestaurant={false} showFav showCurrency priority={i < priorityCount}
             photoAspect="1 / 0.85" addLabel={addLabel} disabled={disabled} onDisabledTap={onDisabledTap}
           />
         ))}

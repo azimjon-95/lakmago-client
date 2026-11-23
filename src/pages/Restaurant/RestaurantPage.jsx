@@ -28,6 +28,8 @@ import './Restaurant.css';
 
 const REVIEWS_TAB = '__reviews__';
 const SALE_TAB = '__sale__';
+// Do'kon bo'limlari hali kelmagan — nomsiz skeleton (avval "Boshqa mahsulotlar" deb chiqib, chalg'itardi)
+const LOADING_SECTION = '__loading__';
 // Do'kon qoidasi — server services/storeRules.js bilan bir xil (eski serverda isStore bo'lmasa ham)
 
 export function RestaurantPage() {
@@ -47,8 +49,16 @@ export function RestaurantPage() {
 
   const highlightHandled = useRef(false);
 
+  /*
+   * Kartadan kelinganda (RestaurantCard/MarketStoreCard) — ro'yxatdagi restoran ma'lumoti.
+   * Sahifa server javobini kutmasdan shu bilan chiziladi va menyu so'rovi darhol boshlanadi.
+   * Birinchi render'da bir marta olinadi: keyin location.state tozalansa ham (highlightDish) yo'qolmaydi.
+   */
+  const [previewRestaurant] = useState(() => location.state?.preview || null);
+
   // Real data — TanStack Query
-  const { data: restaurant, isLoading: restLoading, error: restError } = useRestaurant(id);
+  const { data: restaurant, isLoading: restLoading, error: restError, isPlaceholderData: restIsPreview } = useRestaurant(id, previewRestaurant);
+  // Sharhlar faqat to'liq javobda bor (kartadagi preview'da yo'q)
   const restaurantReviews = restaurant?.reviews || [];
 
   /*
@@ -146,7 +156,7 @@ export function RestaurantPage() {
   const sections = useMemo(() => {
     if (isStore) {
       // Bo'limlar ro'yxati/kategoriyalar hali kelmagan — vaqtincha bitta skeletonli guruh
-      if (!market || !menuIndex) return [[t('otherProducts'), { key: '__loading__', count: 0, loading: true }], [REVIEWS_TAB, []]];
+      if (!market || !menuIndex) return [[LOADING_SECTION, { key: '__loading__', count: 0, loading: true }], [REVIEWS_TAB, []]];
       const byKey = new Map((menuIndex.sections || []).map((s) => [s.key, s.count]));
       const out = [];
       if (menuIndex.sale > 0) out.push([SALE_TAB, { key: '__sale__', count: menuIndex.sale }]);
@@ -280,6 +290,21 @@ export function RestaurantPage() {
     return () => io.disconnect();
   }, [sections]);
 
+  /*
+   * Do'kon bo'limlari kelgan zahoti faol bo'lim tozalanadi va chiplar boshiga qaytadi:
+   * yuklanish paytida sahifa qisqa bo'lib, "Sharhlar" faol bo'lib qolardi va bo'limlar
+   * kelganda chiplar qatori oxiriga surilgan holda turardi.
+   */
+  const wasLoading = useRef(false);
+  const firstSection = sections[0]?.[0];
+  useEffect(() => {
+    if (firstSection === LOADING_SECTION) { wasLoading.current = true; return; }
+    if (!wasLoading.current) return;
+    wasLoading.current = false;
+    setActive('');
+    if (tabsRef.current) tabsRef.current.scrollLeft = 0;
+  }, [firstSection]);
+
   /** Faol chip gorizontal ro'yxatda ko'rinib tursin. */
   useEffect(() => {
     if (!active || !tabsRef.current) return;
@@ -375,16 +400,25 @@ export function RestaurantPage() {
 
       {/* Bo'limlar — ikonkali chiplar */}
       <SectionChips
-        sections={sections}
+        sections={sections.filter(([name]) => name !== LOADING_SECTION)}
         active={active}
         onPick={scrollTo}
         innerRef={tabsRef}
         kindOf={(name) => (name === REVIEWS_TAB ? 'reviews' : name === SALE_TAB ? 'sale' : 'dish')}
-        labelOf={(name) => (name === REVIEWS_TAB ? `${t('reviewsLabel')} (${restaurantReviews.length})` : name === SALE_TAB ? t('saleTab') : name)}
+        labelOf={(name) => (name === REVIEWS_TAB ? (restIsPreview ? t('reviewsLabel') : `${t('reviewsLabel')} (${restaurantReviews.length})`) : name === SALE_TAB ? t('saleTab') : name)}
       />
 
       {/* Menyu + sharhlar */}
       <div className="rest-content">
+        {/* Restoran menyusi kelguncha — skeleton (avval faqat "sharh yo'q" ko'rinib, sahifa bo'sh tuyulardi) */}
+        {!isStore && dishesLoading && (
+          <div className="rest-section" aria-busy="true" data-testid="menu-loading">
+            <div className="rp-sec__head"><span className="rest-row__sk rest-row__sk--title" /></div>
+            <div className="rest-row no-scrollbar">
+              {Array.from({ length: 3 }).map((_, i) => <div key={i} className="rest-row__sk" />)}
+            </div>
+          </div>
+        )}
         {sections.map(([name, list]) => {
           // Chegirmalar — jonli slayder (Lokma Market bilan bir xil), faqat do'konda
           if (name === SALE_TAB) {
@@ -415,7 +449,7 @@ export function RestaurantPage() {
               <div key={name} id={`sec-${name}`} className="rest-section rest-reviews">
                 <div className="rest-section__title">{t('customerReviewsTitle')}</div>
 
-                {restaurantReviews.length === 0 ? (
+                {restIsPreview ? null : restaurantReviews.length === 0 ? (
                   <div className="rest-reviews__empty">
                     Hozircha sharh yo&apos;q. Birinchi bo&apos;lib baho bering!
                   </div>
@@ -462,7 +496,7 @@ export function RestaurantPage() {
             if (list.loading) {
               return (
                 <div key={name} id={`sec-${name}`} className="rest-section">
-                  <div className="rp-sec__head"><h2 className="rp-sec__title">{name}</h2></div>
+                  <div className="rp-sec__head"><span className="rest-row__sk rest-row__sk--title" aria-hidden="true" /></div>
                   {indexError ? (
                     <div className="rest-more-error" role="alert"><span>Yuklab bo&apos;lmadi</span><button type="button" onClick={() => refetchIndex()}>Qayta urinish</button></div>
                   ) : (
@@ -479,6 +513,7 @@ export function RestaurantPage() {
                 name={name}
                 count={list.count}
                 eager={dishSectionNames.indexOf(name) < 2}
+                priorityCount={dishSectionNames.indexOf(name) === 0 ? 4 : 0}
                 expanded={isExpanded}
                 canExpand={list.count > 3}
                 onToggle={() => toggleSection(name)}
@@ -515,9 +550,10 @@ export function RestaurantPage() {
                   ? Array.from({ length: 3 }).map((_, i) => (
                       <div key={i} className="rest-row__sk" />
                     ))
-                  : list.map((d) => <DishScrollCard
+                  : list.map((d, i) => <DishScrollCard
                       key={d.id || d._id}
                       dish={d}
+                      priority={i < 4 && dishSectionNames.indexOf(name) === 0}
                       onClick={setModalDish}
                       showRestaurant={false}
                       showFav

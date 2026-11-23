@@ -19,8 +19,11 @@ test('prefetch: do\'konda minglab mahsulot oldindan yuklanmaydi (faqat bo\'limla
   const q = noComments(src('src/hooks/queries.js'));
   const fn = q.slice(q.indexOf('export function usePrefetchRestaurant'));
   assert.match(fn, /isStoreRestaurant\(r\)/);
-  assert.match(fn, /api\.getMenuIndex/);
-  assert.ok(fn.indexOf('getMenuIndex') < fn.indexOf('api.getDishes'), 'do\'kon tarmog\'i getDishes dan oldin');
+  assert.match(fn, /isStoreRestaurant\(hint\)/, 'kartadagi ma\'lumot bilan menyu restoran bilan PARALLEL');
+  // Do'kon tarmog'i — faqat indeks (+preview) so'rovi, to'liq ro'yxat emas
+  assert.ok(fn.indexOf('storeMenuIndexQuery') < fn.indexOf('api.getDishes'), 'do\'kon tarmog\'i getDishes dan oldin');
+  const idx = q.slice(q.indexOf('export function storeMenuIndexQuery'), q.indexOf('export const useStoreMenuIndex'));
+  assert.match(idx, /api\.getMenuIndex\(restaurantId, \{ preview: STORE_MENU_PREVIEW/);
 });
 
 test('bo\'lim komponenti: kursor-sahifa, skeleton, xatoda qayta urinish, takrorsiz (id)', () => {

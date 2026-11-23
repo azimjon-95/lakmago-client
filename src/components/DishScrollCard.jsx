@@ -11,7 +11,7 @@ import './cards/DishScrollCard.css';
 
 export const DishScrollCard = memo(function DishScrollCard({
   dish, onClick, showRestaurant = true, disabled = false, onDisabledTap,
-  photoHeight = 112, photoAspect = null, showFav = false, showCurrency = false, addLabel = '+',
+  photoHeight = 112, photoAspect = null, showFav = false, showCurrency = false, addLabel = '+', priority = false,
 }) {
   const addItem = useCart((s) => s.addItem);
   const { lang } = useI18n();
@@ -41,7 +41,7 @@ export const DishScrollCard = memo(function DishScrollCard({
   return (
     <button onClick={openDish} className={`dscard ${disabled ? 'is-closed' : ''}`}>
       <div className="dscard__photo">
-        <DishPhoto dish={dish} height={photoHeight} aspect={photoAspect} radius={14} iconSize={38} />
+        <DishPhoto dish={dish} height={photoHeight} aspect={photoAspect} radius={14} iconSize={38} priority={priority} />
         {discountPct && <div className="dscard__badge dscard__badge--discount">−{discountPct}%</div>}
         {dish.isHit && !discountPct && <div className="dscard__badge dscard__badge--hit">HIT</div>}
         {showFav && (

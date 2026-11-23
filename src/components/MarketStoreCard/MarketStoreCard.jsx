@@ -36,8 +36,8 @@ export const MarketStoreCard = memo(function MarketStoreCard({ restaurant: r, re
   const dist = Number.isFinite(distanceKm) ? (distanceKm < 1 ? `${Math.max(50, Math.round(distanceKm * 1000 / 50) * 50)} m` : `${distanceKm.toFixed(1).replace('.', ',')} km`) : '';
 
   return (
-    <button type="button" className={`mscard ${open ? '' : 'is-closed'}`} onClick={() => navigate(`/restaurant/${rid}`)}
-      onTouchStart={() => prefetch(rid)} onMouseEnter={() => prefetch(rid)} data-testid="market-store-card">
+    <button type="button" className={`mscard ${open ? '' : 'is-closed'}`} onClick={() => navigate(`/restaurant/${rid}`, { state: { preview: r } })}
+      onTouchStart={() => prefetch(rid, r)} onMouseEnter={() => prefetch(rid, r)} data-testid="market-store-card">
       <div className="mscard__banner">
         {img && <img src={img} alt={r.name} loading="lazy" decoding="async" onLoad={() => setLoaded(true)} className={`mscard__img ${loaded ? 'is-loaded' : ''}`} />}
         {!loaded && <RestaurantBannerFallback name={r.name} />}

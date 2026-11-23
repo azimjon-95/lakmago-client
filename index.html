@@ -170,6 +170,13 @@
     -->
     <link rel="preload" as="image" href="/splash-courier.gif" fetchpriority="high" />
 
+    <!--
+      Taom/mahsulot rasmlari Cloudinary'dan. Ulanish (DNS + TCP + TLS) HTML bilan birga
+      oldindan ochiladi — sekin mobil internetda birinchi rasmlar JSON kelishi bilan
+      darhol yuklanadi (aks holda har biri avval 2–3 aylanma ulanish kutardi).
+    -->
+    <link rel="preconnect" href="https://res.cloudinary.com" />
+    <link rel="dns-prefetch" href="https://res.cloudinary.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <!-- Yandex xarita: DNS oldindan (bepul, ulanish ochilmaydi) — "Kartadan tanlang" tezroq ochiladi -->
     <link rel="dns-prefetch" href="https://api-maps.yandex.ru" />
