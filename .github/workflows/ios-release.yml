@@ -1,0 +1,165 @@
+# ═══════════════════════════════════════════════════════════════
+# LOKMA GO — iOS: build → TestFlight (→ App Store review)
+# ═══════════════════════════════════════════════════════════════
+# Ishga tushadi:
+#   • git teg `ios-v1.2.3`  → versiya 1.2.3, TestFlight
+#   • Actions → "iOS release" → Run workflow → beta | release
+#   • (ixtiyoriy) main'ga push — faqat repo Variable IOS_AUTO_ON_MAIN=true bo'lsa
+# Sozlash (Secrets/Variables), xarajat va qoidalar: docs/IOS-DEPLOY.md
+name: iOS release
+
+on:
+  push:
+    tags: ['ios-v*']
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.js'
+      - 'capacitor.config.ts'
+      - 'ios/**'
+  workflow_dispatch:
+    inputs:
+      lane:
+        description: 'beta — faqat TestFlight; release — TestFlight + App Store "Submit for Review"'
+        type: choice
+        options: [beta, release]
+        default: beta
+      version:
+        description: 'Marketing versiya (masalan 1.2.0). Bo‘sh — loyihadagi'
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+# Bir vaqtda faqat bitta iOS yuklash (build raqamlari to'qnashmasin); navbatdagisi bekor qilinmaydi
+concurrency:
+  group: ios-release
+  cancel-in-progress: false
+
+jobs:
+  ios:
+    name: iOS → ${{ github.event_name == 'workflow_dispatch' && inputs.lane || 'beta' }}
+    # main'ga push — faqat IOS_AUTO_ON_MAIN=true bo'lsa (macOS daqiqalari qimmat: docs/IOS-DEPLOY.md)
+    if: >-
+      github.event_name != 'push' ||
+      startsWith(github.ref, 'refs/tags/ios-v') ||
+      vars.IOS_AUTO_ON_MAIN == 'true'
+    runs-on: macos-26
+    timeout-minutes: 60
+    environment: app-store
+    env:
+      # Veb-qism ilova ICHIGA joylanadi — server manzili TO'LIQ bo'lishi shart (capacitor://localhost'da '/api' ishlamaydi)
+      VITE_API_URL: ${{ vars.VITE_API_URL }}
+      VITE_SOCKET_URL: ${{ vars.VITE_SOCKET_URL }}
+      VITE_WEBAPP_NAME: ${{ vars.VITE_WEBAPP_NAME }}
+      VITE_SHARE_BASE: ${{ vars.VITE_SHARE_BASE }}
+      VITE_BOT_USERNAME: ${{ vars.VITE_BOT_USERNAME }}
+      VITE_WEDDING_URL: ${{ vars.VITE_WEDDING_URL }}
+      VITE_DISTRICT_SELECTOR_ENABLED: ${{ vars.VITE_DISTRICT_SELECTOR_ENABLED }}
+      VITE_DISTRICT_AUTO_DETECT_ENABLED: ${{ vars.VITE_DISTRICT_AUTO_DETECT_ENABLED }}
+      # __APP_BUILD__ (vite.config.js) — qurilma keshi har yangi versiyada yangilansin
+      VERCEL_GIT_COMMIT_SHA: ${{ github.sha }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sozlamalarni tekshirish
+        env:
+          HAS_KEY: ${{ secrets.ASC_KEY_P8_BASE64 != '' && secrets.ASC_KEY_ID != '' && secrets.ASC_ISSUER_ID != '' }}
+          HAS_CERT: ${{ secrets.IOS_DIST_CERT_P12_BASE64 != '' && secrets.IOS_DIST_CERT_PASSWORD != '' }}
+        run: |
+          fail=0
+          [ "$HAS_KEY" = "true" ]  || { echo "::error::App Store Connect API kaliti yo'q (ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8_BASE64)"; fail=1; }
+          [ "$HAS_CERT" = "true" ] || { echo "::error::Tarqatish sertifikati yo'q (IOS_DIST_CERT_P12_BASE64, IOS_DIST_CERT_PASSWORD)"; fail=1; }
+          case "$VITE_API_URL" in
+            https://*) ;;
+            *) echo "::error::Variable VITE_API_URL to'liq https manzil bo'lishi shart (hozir: '${VITE_API_URL:-bo‘sh}')"; fail=1 ;;
+          esac
+          exit $fail
+
+      - name: Versiya
+        id: ver
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          REF_NAME: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
+        run: |
+          v=""
+          if [ "$REF_TYPE" = "tag" ]; then v="${REF_NAME#ios-v}"; fi
+          if [ -n "$INPUT_VERSION" ]; then v="$INPUT_VERSION"; fi
+          if [ -n "$v" ] && ! echo "$v" | grep -Eq '^[0-9]+\.[0-9]+(\.[0-9]+)?$'; then
+            echo "::error::Versiya noto'g'ri: '$v' (kutilgan: 1.2 yoki 1.2.3)"; exit 1
+          fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Veb-qismni yig'ish
+        run: |
+          npm ci
+          npm run build
+
+      - name: Capacitor → iOS
+        run: npx cap sync ios
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: ios/App
+
+      - name: Swift paketlari keshi
+        uses: actions/cache@v4
+        with:
+          path: ios/App/build/SourcePackages
+          key: spm-${{ runner.os }}-${{ hashFiles('ios/App/CapApp-SPM/Package.swift', 'package-lock.json') }}
+          restore-keys: spm-${{ runner.os }}-
+
+      - name: fastlane ${{ github.event_name == 'workflow_dispatch' && inputs.lane || 'beta' }}
+        working-directory: ios/App
+        env:
+          LANE: ${{ github.event_name == 'workflow_dispatch' && inputs.lane || 'beta' }}
+          IOS_MARKETING_VERSION: ${{ steps.ver.outputs.version }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+          IOS_DIST_CERT_P12_BASE64: ${{ secrets.IOS_DIST_CERT_P12_BASE64 }}
+          IOS_DIST_CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+          APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID || '8A38QL5HR2' }}
+          IOS_BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID || 'uz.lokma.go' }}
+          FASTLANE_SKIP_UPDATE_CHECK: '1'
+          FASTLANE_HIDE_CHANGELOG: '1'
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: '120'
+        run: bundle exec fastlane ios "$LANE"
+
+      - name: IPA va dSYM (14 kun)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lokmago-ios-${{ github.run_number }}
+          path: |
+            ios/App/build/*.ipa
+            ios/App/build/*.dSYM.zip
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Build loglari (xato bo'lsa)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build-logs-${{ github.run_number }}
+          path: ~/Library/Logs/gym
+          retention-days: 7
+          if-no-files-found: ignore

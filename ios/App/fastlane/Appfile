@@ -1,0 +1,3 @@
+# Qiymatlar CI muhit o'zgaruvchilaridan (docs/IOS-DEPLOY.md). Bu yerda sir YO'Q.
+app_identifier(ENV.fetch("IOS_BUNDLE_ID", "uz.lokma.go"))
+team_id(ENV.fetch("APPLE_TEAM_ID", "8A38QL5HR2"))
