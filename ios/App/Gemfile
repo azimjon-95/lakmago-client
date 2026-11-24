@@ -1,0 +1,4 @@
+# iOS avtomatik deploy (TestFlight / App Store) — qarang: docs/IOS-DEPLOY.md
+source "https://rubygems.org"
+
+gem "fastlane", "~> 2.228"

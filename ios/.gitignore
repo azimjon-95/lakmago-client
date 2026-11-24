@@ -11,3 +11,15 @@ capacitor-cordova-ios-plugins
 # Generated Config files
 App/App/capacitor.config.json
 App/App/config.xml
+
+# fastlane (CI artefaktlari — repoga tushmaydi)
+App/fastlane/report.xml
+App/fastlane/Preview.html
+App/fastlane/screenshots
+App/fastlane/test_output
+App/build
+*.ipa
+*.dSYM.zip
+*.mobileprovision
+*.p12
+*.p8
