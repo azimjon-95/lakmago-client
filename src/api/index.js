@@ -2,6 +2,7 @@
 // Mock/demo rejim yo'q: barcha ma'lumot serverdan keladi.
 
 import { withCatalogDistrict } from '@/lib/catalogDistrict';
+import { clientHeaders, clientReady } from '@/lib/clientInfo';
 import { useRestrictions } from '@/store/restrictions';
 import { resilientFetch } from '@/lib/resilientFetch';
 
@@ -84,6 +85,8 @@ function normalizeIds(data) {
 async function doFetch(path, { signal, ...options } = {}) {
   const url = `${API_BASE}${path}`;
   let res;
+  // Native ilovada versiya/qurilma ID tayyor bo'lsin (ko'pi bilan ~0.8 s, faqat birinchi so'rovlarda)
+  await clientReady;
   try {
     /*
      * resilientFetch: 15 s vaqt chegarasi + o'qish so'rovlarida
@@ -95,6 +98,7 @@ async function doFetch(path, { signal, ...options } = {}) {
       signal,
       headers: {
         'Content-Type': 'application/json',
+        ...clientHeaders(),   // qayerdan: ios | android | telegram | web (lib/clientInfo.js)
         ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
         ...(options.headers || {}),
       },
@@ -267,6 +271,8 @@ export const api = {
 
   // Katta do'kon menyusi: bo'limlar ro'yxati (yengil) va bo'lim bo'yicha kursor-sahifa
   // preview=N — birinchi N bo'limning 1-sahifasi shu javobda (sekin internetda so'rovlar zanjiri qisqaradi)
+  // Ilova versiyasi va do'kon havolalari (majburiy/ixtiyoriy yangilanish, "ilovani yuklab olish")
+  getAppConfig: (opts) => apiFetch('/app/config', opts),
   getMenuIndex: (restaurantId, { preview = 0, signal } = {}) =>
     apiFetch(`/restaurants/${restaurantId}/menu/index${preview ? `?preview=${preview}` : ''}`, { signal }),
   getMenuItems: (restaurantId, { section = '', cursor = '', limit = 24, signal } = {}) => {

@@ -686,6 +686,16 @@ export const translations = {
     districtNoneUncertain: "Siz ikki tuman chegarasidasiz — tumanni tanlang",
     districtNoneLowAcc: "Joylashuv aniqligi past — tumanni tanlang yoki qayta urinib ko'ring",
     districtNoResults: "Topilmadi",
+    // Ilova yangilanishi va "ilovani yuklab olish" (lib/appUpdate.js, components/AppUpdate)
+    updateForceTitle: 'Ilovani yangilang',
+    updateForceText: 'Bu versiya endi ishlamaydi. Buyurtma berishni davom ettirish uchun ilovaning yangi versiyasini o‘rnating.',
+    updatePromptTitle: 'Yangi versiya chiqdi',
+    updatePromptText: 'Ilovani yangilang — tezroq ishlaydi va yangi imkoniyatlar qo‘shildi.',
+    updateNow: 'Yangilash',
+    updateLater: 'Keyinroq',
+    updateReadyText: 'Yangilanish yuklab olindi',
+    updateRestart: 'Qayta ishga tushirish',
+    installAppCta: 'Ilovani yuklab olish',
   },
 
   uzc: {
@@ -1339,6 +1349,16 @@ export const translations = {
     districtNoneUncertain: "Сиз икки туман чегарасидасиз — туманни танланг",
     districtNoneLowAcc: "Жойлашув аниқлиги паст — туманни танланг ёки қайта уриниб кўринг",
     districtNoResults: "Топилмади",
+    // Ilova yangilanishi va "ilovani yuklab olish" (lib/appUpdate.js, components/AppUpdate)
+    updateForceTitle: 'Иловани янгиланг',
+    updateForceText: 'Бу версия энди ишламайди. Буюртма беришни давом эттириш учун илованинг янги версиясини ўрнатинг.',
+    updatePromptTitle: 'Янги версия чиқди',
+    updatePromptText: 'Иловани янгиланг — тезроқ ишлайди ва янги имкониятлар қўшилди.',
+    updateNow: 'Янгилаш',
+    updateLater: 'Кейинроқ',
+    updateReadyText: 'Янгиланиш юклаб олинди',
+    updateRestart: 'Қайта ишга тушириш',
+    installAppCta: 'Иловани юклаб олиш',
   },
 
   ru: {
@@ -1990,6 +2010,16 @@ export const translations = {
     districtNoneUncertain: "Вы на границе двух районов — выберите район",
     districtNoneLowAcc: "Низкая точность геолокации — выберите район или попробуйте снова",
     districtNoResults: "Ничего не найдено",
+    // Ilova yangilanishi va "ilovani yuklab olish" (lib/appUpdate.js, components/AppUpdate)
+    updateForceTitle: 'Обновите приложение',
+    updateForceText: 'Эта версия больше не поддерживается. Чтобы продолжить заказывать, установите новую версию приложения.',
+    updatePromptTitle: 'Вышла новая версия',
+    updatePromptText: 'Обновите приложение — оно стало быстрее и появились новые возможности.',
+    updateNow: 'Обновить',
+    updateLater: 'Позже',
+    updateReadyText: 'Обновление загружено',
+    updateRestart: 'Перезапустить',
+    installAppCta: 'Скачать приложение',
   },
 };
 
