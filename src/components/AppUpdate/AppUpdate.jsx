@@ -6,10 +6,14 @@ import { clientInfo, isNativeApp } from '@/lib/clientInfo';
 import {
   completeFlexible, decide, flexibleUpdate, immediateUpdate, openStore, readSnooze, storeInfo, writeSnooze,
 } from '@/lib/appUpdate';
+import { applyIfIdle, checkLiveUpdate } from '@/lib/liveUpdate';
 import './AppUpdate.css';
 
 /*
  * ═══ ILOVA YANGILANISHI — faqat native iOS / Android ═══
+ * Tartib: (1) majburiy (min versiya) → (2) JIM yangilanish (veb-qism, lib/liveUpdate.js —
+ * mijoz sezmaydi) → (3) jim bo'lmasa (yangi native qism kerak / xato) — do'kon orqali:
+ * Android Google Play fonda, iPhone taklif.
  * Qachon tekshiriladi: ilova ochilgach (splash tugab, biroz kutib) va fondan qaytganda
  * (majburiy — har safar, ixtiyoriy — 6 soatda bir). Qarorlar: lib/appUpdate.js decide().
  *
@@ -36,9 +40,10 @@ export function AppUpdate() {
     if (!isNativeApp() || busy.current) return;
     busy.current = true;
     try {
-      const [cfg, info] = await Promise.all([
+      const [cfg, info, live] = await Promise.all([
         api.getAppConfig().catch(() => cfgRef.current),
         storeInfo().catch(() => null),
+        soft ? checkLiveUpdate() : Promise.resolve('skip'),
       ]);
       cfgRef.current = cfg || cfgRef.current;
       const platform = clientInfo().channel;
@@ -56,6 +61,8 @@ export function AppUpdate() {
       }
       if (!soft) return;
       lastSoft.current = Date.now();
+      // Jim yangilanish yuklandi — keyingi ochilishda o'zi qo'llanadi, mijozdan hech narsa so'ralmaydi
+      if (live === 'ready') return;
       if (res.action === 'flexible' && !flexibleStarted.current) {
         flexibleStarted.current = true;
         flexibleUpdate(() => setReady(true)).catch(() => { flexibleStarted.current = false; });
@@ -74,14 +81,24 @@ export function AppUpdate() {
     return () => clearTimeout(tm);
   }, [check]);
 
-  // Fondan qaytganda: majburiy — har safar, ixtiyoriy — 6 soatda bir
+  // Fondan qaytganda: uzoq (10+ daq) turgan va bosh sahifada bo'lsa — tayyor jim yangilanish qo'llanadi;
+  // majburiy tekshiruv — har safar, ixtiyoriy — 6 soatda bir
+  const pathRef = useRef(location.pathname);
+  useEffect(() => { pathRef.current = location.pathname; }, [location.pathname]);
   useEffect(() => {
     if (!isNativeApp()) return undefined;
-    let handle;
-    import('@capacitor/app').then(({ App }) => App.addListener('resume', () => {
-      check({ soft: Date.now() - lastSoft.current > SOFT_EVERY_MS });
-    })).then((h) => { handle = h; }).catch(() => {});
-    return () => { handle?.remove?.(); };
+    const handles = [];
+    let pausedAt = 0;
+    import('@capacitor/app').then(async ({ App }) => {
+      handles.push(await App.addListener('pause', () => { pausedAt = Date.now(); }));
+      handles.push(await App.addListener('resume', async () => {
+        const away = pausedAt ? Date.now() - pausedAt : 0;
+        pausedAt = 0;
+        if (await applyIfIdle({ backgroundMs: away, onHome: pathRef.current === '/' })) return; // qayta yuklanmoqda
+        check({ soft: Date.now() - lastSoft.current > SOFT_EVERY_MS });
+      }));
+    }).catch(() => {});
+    return () => { handles.forEach((h) => h?.remove?.()); };
   }, [check]);
 
   const later = () => { writeSnooze(state.version, state.days); setState({ action: 'none' }); };

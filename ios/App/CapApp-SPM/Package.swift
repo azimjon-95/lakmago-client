@@ -17,6 +17,7 @@ let package = Package(
         .package(name: "CapacitorDevice", path: "../../../node_modules/@capacitor/device"),
         .package(name: "CapacitorGeolocation", path: "../../../node_modules/@capacitor/geolocation"),
         .package(name: "CapawesomeCapacitorAppUpdate", path: "../../../node_modules/@capawesome/capacitor-app-update"),
+        .package(name: "CapgoCapacitorUpdater", path: "../../../node_modules/@capgo/capacitor-updater"),
         .package(name: "CapacitorNativeSettings", path: "../../../node_modules/capacitor-native-settings")
     ],
     targets: [
@@ -30,6 +31,7 @@ let package = Package(
                 .product(name: "CapacitorDevice", package: "CapacitorDevice"),
                 .product(name: "CapacitorGeolocation", package: "CapacitorGeolocation"),
                 .product(name: "CapawesomeCapacitorAppUpdate", package: "CapawesomeCapacitorAppUpdate"),
+                .product(name: "CapgoCapacitorUpdater", package: "CapgoCapacitorUpdater"),
                 .product(name: "CapacitorNativeSettings", package: "CapacitorNativeSettings")
             ]
         )

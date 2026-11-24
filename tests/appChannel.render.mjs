@@ -64,6 +64,37 @@ try {
   check('do‘kon havolasi sozlanmagan — oyna o‘tkaziladi', none.length === 1);
   check('oddiy oynalar o‘zgarmaydi', (await P.resolveInstallPromos([list[0]], { native: false, getConfig: async () => { throw new Error('x'); } })).length === 1);
 
+  console.log('\n[5] Jim yangilanish (veb-qism)');
+  const L = await server.ssrLoadModule('/src/lib/liveUpdate.js');
+  const files = [{ file_name: 'index.html', file_hash: 'a'.repeat(64) }, { file_name: 'assets/app.js', file_hash: 'b'.repeat(64) }];
+  const m = { version: 'abc1234def5678', native: 'fp1', files };
+  check('yangi versiya, native bir xil → yuklash', L.decideLive({ manifest: m, current: 'old1234567', nativeFp: 'fp1' }) === 'download');
+  check('shu versiya → hech narsa', L.decideLive({ manifest: m, current: 'abc1234def5678', nativeFp: 'fp1' }) === 'none');
+  check('native izi boshqa (yangi plagin) → do‘kon orqali', L.decideLive({ manifest: m, current: 'old1234567', nativeFp: 'fp2' }) === 'native_required');
+  check('2 marta ishga tushmagan versiya → tashlab qo‘yiladi', L.decideLive({ manifest: m, current: 'old1234567', nativeFp: 'fp1', failed: { version: m.version, attempts: 2 } }) === 'none');
+  check('1 marta xato — yana urinadi', L.decideLive({ manifest: m, current: 'old1234567', nativeFp: 'fp1', failed: { version: m.version, attempts: 1 } }) === 'download');
+  check('index.html yo‘q / buzuq manifest → hech narsa', L.decideLive({ manifest: { ...m, files: [files[1]] }, current: 'x', nativeFp: 'fp1' }) === 'none' && L.decideLive({ manifest: { version: '../../x' }, nativeFp: 'fp1' }) === 'none' && L.decideLive({ manifest: null }) === 'none');
+  const pm = L.toPluginManifest({ files: [...files, { file_name: '../etc/passwd', file_hash: 'c'.repeat(64) }, { file_name: '/abs', file_hash: 'd'.repeat(64) }, { file_name: 'x.js', file_hash: 'bad' }, { file_name: 'img/a b.png', file_hash: 'e'.repeat(64) }] }, 'https://lokma.uz');
+  check('manifest: yo‘l chetga chiqa olmaydi, xesh sha256', pm.length === 3 && !pm.some((x) => x.file_name.includes('..') || x.file_name.startsWith('/')));
+  check('manifest: to‘liq https URL (bo‘shliq kodlangan)', pm[0].download_url === 'https://lokma.uz/index.html' && pm[2].download_url === 'https://lokma.uz/img/a%20b.png');
+  check('qo‘llash: fonda 10+ daqiqa va bosh sahifa sharti', L.APPLY_AFTER_BACKGROUND_MS === 600000 && (await L.applyIfIdle({ backgroundMs: 9e9, onHome: true })) === false /* veb — no-op */);
+
+  const { buildOta } = await import(new URL('../scripts/build-ota.mjs', import.meta.url).href);
+  const fs = await import('node:fs'); const os = await import('node:os'); const path = await import('node:path');
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ota-'));
+  fs.mkdirSync(path.join(tmp, 'assets')); fs.writeFileSync(path.join(tmp, 'index.html'), '<html></html>'); fs.writeFileSync(path.join(tmp, 'assets', 'a.js'), 'x');
+  const skip = await buildOta({ dist: tmp, env: { VITE_API_URL: '/api', VERCEL_GIT_COMMIT_SHA: 'abcdef123456' }, nativeFp: 'fp' });
+  check('build: VITE_API_URL nisbiy → manifest YARATILMAYDI (ilova serverga ulana olmay qolmasin)', Boolean(skip.skipped) && !fs.existsSync(path.join(tmp, 'ota')));
+  const ok = await buildOta({ dist: tmp, env: { VITE_API_URL: 'https://api.lokma.uz/api', VERCEL_GIT_COMMIT_SHA: 'abcdef123456' }, nativeFp: 'fp' });
+  const again = await buildOta({ dist: tmp, env: { VITE_API_URL: 'https://api.lokma.uz/api', VERCEL_GIT_COMMIT_SHA: 'abcdef123456' }, nativeFp: 'fp' });
+  check('build: manifest (sha256, native izi), ota/ o‘zini qo‘shmaydi', ok.manifest?.files.length === 2 && again.manifest.files.length === 2 && /^[a-f0-9]{64}$/.test(ok.manifest.files[0].file_hash) && ok.manifest.native === 'fp');
+  const cap = src('capacitor.config.ts');
+  check('plagin: avtomatik rejim va Capgo serverlari O‘CHIQ, avtomatik qaytish 10 s', /autoUpdate: false/.test(cap) && /statsUrl: ''/.test(cap) && /updateUrl: ''/.test(cap) && /appReadyTimeout: 10000/.test(cap) && /resetWhenUpdate: true/.test(cap));
+  check('ochilishda notifyAppReady + tayyor versiya (main.jsx)', /liveUpdateBoot\(\);/.test(src('src/main.jsx')));
+  check('npm run build manifestni ham yaratadi', /"build": "vite build && node scripts\/build-ota\.mjs"/.test(src('package.json')));
+  const upd = src('src/components/AppUpdate/AppUpdate.jsx');
+  check('tartib: jim yangilanish tayyor bo‘lsa — mijozga taklif yo‘q', /if \(live === 'ready'\) return;/.test(upd));
+
   console.log('\n[4] Tarjimalar');
   const { translations: T } = await server.ssrLoadModule('/src/i18n/translations.js');
   const n = [T.uz, T.uzc, T.ru].map((b) => Object.keys(b).length);
