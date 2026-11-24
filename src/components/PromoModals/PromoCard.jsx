@@ -139,7 +139,7 @@ export function PromoCard({ promo, onClose, onAction, preview = false }) {
           )}
         </Footer>
       )}
-      {!footer && clickable && <button type="button" className="pm-foot pm-foot--bare" onClick={onAction}><span className="pm-footbox"><span className="pm-foottext">Ko‘rish</span></span></button>}
+      {!footer && clickable && <button type="button" className="pm-foot pm-foot--bare" onClick={onAction}><span className="pm-footbox"><span className="pm-foottext">{promo?.actionLabel || 'Ko‘rish'}</span></span></button>}
     </div>
   );
 }

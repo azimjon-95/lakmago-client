@@ -1,0 +1,49 @@
+/* Ilova yangilanishi — pastdan chiqadigan varaq (yopib bo'lmaydigan variant — aup--force) */
+.aup {
+  position: fixed; inset: 0; z-index: 9000;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.aup-backdrop { position: absolute; inset: 0; background: rgba(15, 23, 20, 0.45); }
+.aup--force { background: rgba(15, 23, 20, 0.6); }
+.aup-sheet {
+  position: relative;
+  width: 100%; max-width: 480px;
+  padding: 26px 20px calc(18px + env(safe-area-inset-bottom, 0px));
+  border-radius: 24px 24px 0 0;
+  background: var(--surface, #fff);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  text-align: center;
+  animation: aup-up 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.aup-badge {
+  width: 56px; height: 56px; border-radius: 18px;
+  display: grid; place-items: center;
+  font-size: 28px; font-weight: 700;
+  color: var(--brand-text, #fff);
+  background: var(--brand, #2f6b3a);
+}
+.aup-title { margin: 4px 0 0; font-size: 20px; font-weight: 700; color: var(--ink, #111); }
+.aup-text { margin: 0 0 6px; font-size: 15px; line-height: 1.45; color: var(--muted, #6b7280); max-width: 34ch; }
+.aup-btn {
+  width: 100%; min-height: 50px; border-radius: 14px;
+  font-size: 16px; font-weight: 600;
+  color: var(--ink, #111);
+  background: var(--surface-2, #f3f4f2);
+}
+.aup-btn--primary { color: var(--brand-text, #fff); background: var(--brand, #2f6b3a); }
+.aup-btn:focus-visible { outline: 3px solid var(--brand-400, #6aa874); outline-offset: 2px; }
+
+.aup-snack {
+  position: fixed; z-index: 8000;
+  left: 12px; right: 12px; bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--ink, #111); color: #fff;
+  font-size: 14px;
+  animation: aup-up 0.3s ease-out;
+}
+.aup-snack button { color: var(--brand-400, #8fd19e); font-weight: 700; white-space: nowrap; }
+
+@keyframes aup-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .aup-sheet, .aup-snack { animation: none; } }

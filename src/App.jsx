@@ -31,6 +31,7 @@ import { ActiveOrderBadge } from '@/components/ActiveOrderBadge/ActiveOrderBadge
 import { SupportChat } from '@/components/SupportChat/SupportChat';
 import { Splash } from '@/components/Splash/Splash';
 import { PromoModals } from '@/components/PromoModals/PromoModals';
+import { AppUpdate } from '@/components/AppUpdate/AppUpdate';
 import { useTelegramBack } from '@/hooks/useTelegramBack';
 import { WeddingHost } from '@/components/WeddingHost/WeddingHost';
 import { maybeAskContactOnce } from '@/lib/contactVerify';
@@ -262,6 +263,8 @@ function AppInner({ authMode = 'telegram' }) {
           <TelegramBackHandler />
           {/* Reklama oynalari: splash tugagach, bosh sahifada (kuniga bir marta, navbat bilan) */}
           {!showSplash && <PromoModals />}
+          {/* Native ilova yangilanishi (iOS/Android); veb va Telegram'da hech narsa qilmaydi */}
+          {!showSplash && <AppUpdate />}
           {/* Joylashuv olinmagan bo'lsa — bosh sahifada kichik «ulashasizmi?» oynasi (bloklamaydi) */}
           {!showSplash && DISTRICT_SELECTOR_ENABLED && <LocationPrompt />}
           <Routes>

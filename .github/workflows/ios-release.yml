@@ -104,11 +104,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
 
+      # package-lock.json repoda yo'q (.gitignore) — Vercel bilan bir xil: npm install
       - name: Veb-qismni yig'ish
         run: |
-          npm ci
+          npm install --no-audit --no-fund
           npm run build
 
       - name: Capacitor → iOS
@@ -124,7 +124,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ios/App/build/SourcePackages
-          key: spm-${{ runner.os }}-${{ hashFiles('ios/App/CapApp-SPM/Package.swift', 'package-lock.json') }}
+          key: spm-${{ runner.os }}-${{ hashFiles('ios/App/CapApp-SPM/Package.swift', 'package.json') }}
           restore-keys: spm-${{ runner.os }}-
 
       - name: fastlane ${{ github.event_name == 'workflow_dispatch' && inputs.lane || 'beta' }}

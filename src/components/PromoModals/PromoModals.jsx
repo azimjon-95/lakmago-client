@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { api } from '@/api';
 import { haptic } from '@/lib/telegram';
+import { useT } from '@/i18n';
+import { isNativeApp, storeUrlFor } from '@/lib/clientInfo';
 import { PromoCard, ensurePromoFont, promoImg } from './PromoCard';
 import { markSeen, shouldShow } from './promoSeen';
 import './PromoModals.css';
@@ -21,7 +23,24 @@ const GAP_MS = 140;         // ketma-ket oynalar orasidagi tanaffus
 const reduceMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 const track = (id, kind) => api.trackPromoModal?.(id, kind).catch(() => {});
 
+/*
+ * "Ilovani yuklab olish" (cta: install_app) oynalari: havola mijoz qurilmasiga mos do'kon
+ * (iPhone — App Store, Android — Google Play; server /app/config). Ilova ichida bunday oyna
+ * ko'rsatilmaydi (server ham filtrlaydi — bu ikkinchi himoya), havola bo'lmasa — o'tkaziladi.
+ */
+export async function resolveInstallPromos(list, { native = isNativeApp(), getConfig = () => api.getAppConfig(), label = '' } = {}) {
+  const needsStore = list.some((p) => p.cta === 'install_app');
+  if (!needsStore) return list;
+  if (native) return list.filter((p) => p.cta !== 'install_app');
+  const cfg = await getConfig().catch(() => null);
+  const url = storeUrlFor(cfg);
+  return list
+    .filter((p) => p.cta !== 'install_app' || url)
+    .map((p) => (p.cta === 'install_app' ? { ...p, link: url, actionLabel: label } : p));
+}
+
 export function PromoModals() {
+  const t = useT();
   const location = useLocation();
   const navigate = useNavigate();
   const [queue, setQueue] = useState([]);
@@ -41,8 +60,9 @@ export function PromoModals() {
       if (started.current) return;
       started.current = true;
       try {
-        const list = (await api.getPromoModals()) || [];
-        const due = list.filter((p) => shouldShow(p));
+        const raw = (await api.getPromoModals()) || [];
+        const list = await resolveInstallPromos(raw.filter((p) => shouldShow(p)), { label: t('installAppCta') });
+        const due = list;
         if (!due.length) return;
         ensurePromoFont();
         // Rasmlarni oldindan yuklaymiz — oyna ochilganda bo'sh joy ko'rinmasin
