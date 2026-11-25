@@ -364,3 +364,73 @@
   border-bottom: none;
 }
 .resv-preorder-sticky .resv-preorder-hint { margin-top: 0; }
+
+/* ═══════════ Bronni tekshirish oynasi (ReservationConfirmSheet) ═══════════
+ * Umumiy qobiq — OrderConfirmModal.css (ocm-*). Bu yerda faqat bronga xos qismlar. */
+.rcs-sheet { max-height: 92vh; }
+.rcs-scroll {
+  flex: 1; min-height: 0;
+  overflow-y: auto; overscroll-behavior: contain;
+  margin: 0 -18px; padding: 0 18px 8px;
+}
+.rcs-restaurant { font-size: 18px; font-weight: 800; color: var(--ink); line-height: 1.2; margin: 0 0 10px; }
+
+.rcs-card { background: var(--surface-2); border-radius: 16px; padding: 4px 14px; }
+.rcs-row { display: flex; align-items: center; gap: 12px; padding: 11px 0; }
+.rcs-row + .rcs-row { border-top: 1px solid var(--line); }
+.rcs-row__icon {
+  width: 30px; height: 30px; flex: none; border-radius: 10px;
+  background: var(--surface); display: flex; align-items: center; justify-content: center;
+}
+.rcs-row__body { flex: 1; min-width: 0; }
+.rcs-row__label { font-size: 11.5px; color: var(--muted); margin-bottom: 1px; }
+.rcs-row__value { font-size: 15px; color: var(--ink); overflow-wrap: anywhere; }
+.rcs-row__value b { font-weight: 700; }
+.rcs-sub { display: block; font-size: 13px; color: var(--muted); }
+.rcs-row__edit {
+  flex: none; display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 10px; border-radius: 999px;
+  background: var(--brand-tint); color: var(--brand);
+  font-size: 12.5px; font-weight: 600;
+}
+.rcs-row__edit:active:not(:disabled) { transform: scale(0.96); }
+.rcs-row__edit:disabled { opacity: 0.5; }
+
+.rcs-section { display: block; font-size: 13px; font-weight: 700; color: var(--ink); margin: 18px 0 8px; }
+.rcs-empty { font-size: 13.5px; color: var(--muted); background: var(--surface-2); border-radius: 14px; padding: 12px 14px; }
+.rcs-dishes { background: var(--surface-2); border-radius: 16px; padding: 6px 14px; }
+.rcs-dish { display: flex; align-items: baseline; gap: 8px; padding: 7px 0; font-size: 14px; color: var(--ink); }
+.rcs-dish__qty { color: var(--muted); min-width: 26px; font-variant-numeric: tabular-nums; }
+.rcs-dish__name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.rcs-dish__sum { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rcs-dish--total { border-top: 1px dashed var(--line); margin-top: 2px; font-weight: 800; }
+
+.rcs-chips { display: flex; gap: 6px; margin: 0 -18px 8px; padding: 0 18px; overflow-x: auto; scrollbar-width: none; }
+.rcs-chips::-webkit-scrollbar { display: none; }
+.rcs-chip {
+  flex: none; white-space: nowrap;
+  padding: 6px 11px; border-radius: 999px; font-size: 12.5px;
+  background: var(--surface-2); color: var(--ink); border: 1px solid var(--line);
+}
+.rcs-chip:active:not(:disabled) { transform: scale(0.97); }
+.rcs-note { position: relative; }
+.rcs-note__input {
+  width: 100%; resize: none; box-sizing: border-box;
+  padding: 12px 14px 24px; border-radius: 14px;
+  background: var(--surface-2); border: 1.5px solid transparent;
+  color: var(--ink); font: inherit; font-size: 14.5px; line-height: 1.45;
+}
+.rcs-note__input::placeholder { color: var(--muted); }
+.rcs-note__input:focus { outline: none; border-color: var(--brand); background: var(--surface); }
+.rcs-note__count { position: absolute; right: 12px; bottom: 8px; font-size: 11px; color: var(--muted); pointer-events: none; }
+
+.rcs-trust {
+  display: flex; gap: 10px; align-items: flex-start;
+  margin-top: 14px; padding: 11px 13px; border-radius: 14px;
+  background: var(--brand-tint);
+}
+.rcs-trust p { margin: 0; font-size: 12.5px; line-height: 1.45; color: var(--ink); }
+.rcs-trust svg { flex: none; margin-top: 1px; }
+.rcs-error { margin: 8px 0 0; flex: none; }
+.rcs-sheet .ocm-actions { margin-top: 12px; }
+.rcs-sheet .ocm-btn--primary { flex: 1.7; }
