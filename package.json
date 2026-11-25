@@ -24,6 +24,7 @@
     "test:store-menu": "node --test tests/storeMenu.test.mjs",
     "test:first-load": "node tests/firstLoad.render.mjs",
     "test:app-channel": "node tests/appChannel.render.mjs",
+    "test:reservation-confirm": "node tests/reservationConfirm.render.mjs",
     "test:apple": "node --test tests/appleAuth.test.mjs",
     "test:liquid-glass": "node --test tests/liquidGlass.test.mjs",
     "test:district": "node --test tests/districtSwitch.test.mjs",

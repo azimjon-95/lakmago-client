@@ -5,6 +5,7 @@ import { haptic } from '@/lib/telegram';
 import { formatSom, formatSomShort } from '@/lib/utils';
 import { usePreOrderMenu } from '@/hooks/queries';
 import { CATEGORIES } from '@/data/categories';
+import { ReservationConfirmSheet } from './ReservationConfirmSheet';
 
 /**
  * Bronga taom oldindan tanlash.
@@ -18,6 +19,9 @@ import { CATEGORIES } from '@/data/categories';
  */
 export function PreOrderScreen({
   restaurant, reservationInfo, onCancelAll, onConfirm, onBack, saving, saveError, t,
+  // Tasdiqlash oynasi uchun: kim nomiga, izoh va tanlangan taomlar (formaga qaytganda ham saqlanadi)
+  contact = { name: '', phone: '' }, note = '', onNoteChange = () => {},
+  initialSelections = {}, onSelectionsChange = () => {},
 }) {
   /*
    * BAZA narx — restoranning o'zi ko'rgan narxi. Mehmon zalga
@@ -27,8 +31,10 @@ export function PreOrderScreen({
   const {
     data: dishes = [], isLoading, isError, error, refetch,
   } = usePreOrderMenu(restaurant.id);
-  const [selections, setSelections] = useState({});
+  const [selections, setSelections] = useState(initialSelections);
   const [summaryOpen, setSummaryOpen] = useState(false);
+  // "Tasdiqlash" serverga DARHOL yubormaydi — avval tekshiruv oynasi ochiladi
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const sections = useMemo(() => {
     const byId = new Map();
@@ -60,6 +66,7 @@ export function PreOrderScreen({
       const next = { ...prev };
       if (qty <= 0) delete next[id];
       else next[id] = qty;
+      onSelectionsChange(next);
       return next;
     });
   }
@@ -164,7 +171,7 @@ export function PreOrderScreen({
       </div>
 
       <div className="resv-preorder-footer">
-        {saveError && <div className="resv-error">{saveError}</div>}
+        {saveError && !confirmOpen && <div className="resv-error">{saveError}</div>}
 
         {/* Tanlanganlar — tasdiqlashdan oldingi aniq xulosa */}
         {count > 0 && (
@@ -211,15 +218,36 @@ export function PreOrderScreen({
           </button>
           {/* Taom tanlash ixtiyoriy — tugma doim faol */}
           <button
-            onClick={() => onConfirm(selected)}
+            onClick={() => { haptic(); setConfirmOpen(true); }}
             disabled={saving}
             className="btn-primary"
             style={{ flex: 1.4 }}
           >
-            {saving ? 'Saqlanmoqda...' : count > 0 ? `Tasdiqlash · ${formatSom(total)}` : 'Tasdiqlash'}
+            {count > 0 ? `Tasdiqlash · ${formatSom(total)}` : 'Tasdiqlash'}
           </button>
         </div>
       </div>
+
+      {confirmOpen && (
+        <ReservationConfirmSheet
+          restaurantName={restaurant.name}
+          dateLabel={reservationInfo.dateLabel}
+          time={reservationInfo.time}
+          guests={reservationInfo.guests}
+          name={contact.name}
+          phone={contact.phone}
+          selected={selected}
+          total={total}
+          note={note}
+          onNoteChange={onNoteChange}
+          onClose={() => setConfirmOpen(false)}
+          onEditForm={onBack}
+          onSend={() => onConfirm(selected, note)}
+          sending={saving}
+          error={saveError}
+          t={t}
+        />
+      )}
     </div>
   );
 }

@@ -66,6 +66,9 @@ export function ReservationPage() {
   const [phone, setPhone] = useState(() => user?.phone || '');
   const [step, setStep] = useState('form');
   const [preOrderDishes, setPreOrderDishes] = useState([]);
+  // Tasdiqlash oynasidagi izoh va tanlangan taomlar — formaga qaytib-kelganda yo'qolmasin
+  const [note, setNote] = useState('');
+  const selectionsRef = useRef({});
 
   const selectedDate = days[dayIdx].date;
 
@@ -92,7 +95,7 @@ export function ReservationPage() {
 
   // Bronni serverga saqlaydi — restoran shu orqali ko'radi,
   // mijozga bot orqali eslatma keladi.
-  async function finishReservation(chosen) {
+  async function finishReservation(chosen, noteText = '') {
     if (submittingRef.current) return;
 
     /*
@@ -142,7 +145,8 @@ export function ReservationPage() {
             quantity: c.qty || 1,
             price: c.dish.price || 0,
           })),
-        note: '',
+        // Restoranga, restoran botiga va admin guruhiga boradigan qo'shimcha tavsif
+        note: String(noteText || '').trim(),
       });
       clearPendingIntent();
       setPreOrderDishes(chosen);
@@ -162,7 +166,12 @@ export function ReservationPage() {
           restaurant={restaurant}
           reservationInfo={{ dateLabel, time, guests }}
           onCancelAll={() => { haptic(); navigate(-1); }}
-          onConfirm={(chosen) => finishReservation(chosen)}
+          onConfirm={(chosen, noteText) => finishReservation(chosen, noteText)}
+          contact={{ name: name.trim(), phone: phone.trim() }}
+          note={note}
+          onNoteChange={setNote}
+          initialSelections={selectionsRef.current}
+          onSelectionsChange={(next) => { selectionsRef.current = next; }}
           saving={saving}
           saveError={saveError}
           onBack={() => setStep('form')}
