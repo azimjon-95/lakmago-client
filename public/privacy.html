@@ -4,8 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#fff8f1">
-  <meta name="description" content="Lokma Go maxfiylik siyosati — shaxsiy ma’lumotlardan foydalanish va ularni himoya qilish haqida.">
+  <meta name="description" content="Lokma Go maxfiylik siyosati — shaxsiy ma‘lumotlardan foydalanish va ularni himoya qilish haqida.">
   <title>Maxfiylik siyosati — Lokma Go</title>
+  <!-- AVTOMATIK YIG'ILADI: node scripts/build-privacy-html.mjs (qo'lda tahrirlamang — src/data/privacyContent.js ni o'zgartiring) -->
   <style>
     :root{color-scheme:light;--ink:#242321;--muted:#68645f;--orange:#ff6b12;--line:#eee4dc;--paper:#fff;--bg:#fff8f1}
     *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
@@ -19,51 +20,171 @@
   <header><div class="top"><span aria-hidden="true">●</span><span>Lokma Go</span></div></header>
   <main><article class="card">
     <h1>Maxfiylik siyosati</h1>
-    <p class="date">Amal qilish sanasi: 21-oktabr 2026</p>
-    <p>Ushbu siyosat Lokma Go ilovasi va <strong>lokma.uz</strong> xizmati orqali ma’lumotlardan qanday foydalanilishini tushuntiradi. Xizmat operatori — Lokma Go xizmati jamoasi. Maxfiylik bo‘yicha savol yoki ma’lumotlaringizni ko‘rish, tuzatish yoxud o‘chirish haqidagi so‘rovni ilova ichidagi <strong>Yordam</strong> chatiga yuboring.</p>
-    <h2>Qanday ma’lumotlar olinadi</h2>
+    <p class="date">Amal qilish sanasi: 2026-yil 26-noyabr · Tahrir 2.0</p>
+    <p>Ma‘lumotlaringiz sizniki. Qaysi ma‘lumot nega kerakligini ochiq tushuntiramiz.</p>
+    <h2 id="uz-operator">1. Kim ma‘lumotlaringizni qayta ishlaydi</h2>
+    <p>Ushbu siyosat «Lokma Go» mas‘uliyati cheklangan jamiyati («Lokma Go», «biz») tomonidan taqdim etiladigan Lokma Go va Lokma Market xizmatlariga — iOS va Android ilovalari, Telegram Mini App hamda lokma.uz veb-saytiga — tegishli.</p>
+    <p>Biz shaxsga doir ma‘lumotlar operatori (egasi) sifatida O‘zbekiston Respublikasining «Shaxsga doir ma‘lumotlar to‘g‘risida»gi Qonuni (O‘RQ-547) talablariga muvofiq ish yuritamiz.</p>
+
+    <h2 id="uz-data">2. Qanday ma‘lumotlar olinadi</h2>
     <ul>
-      <li><strong>Hisob:</strong> Telegram orqali kirilganda Telegram foydalanuvchi identifikatori, ism, foydalanuvchi nomi, profil rasmi va tanlangan til. Telefon raqami faqat o‘zingiz taqdim etganingizda.</li>
-      <li><strong>Manzil va joylashuv:</strong> kiritgan yetkazib berish manzilingiz va manzilga oid izohlar. Qurilma koordinatalari faqat joylashuvga ruxsat berganingizda olinadi; ruxsat bermasangiz, manzilni qo‘lda kiritishingiz mumkin.</li>
-      <li><strong>Buyurtma va bron:</strong> tanlangan taomlar/tovarlar, restoran, narx, buyurtma va yetkazib berish holati, to‘lov usuli hamda stol bron qilishda yuborgan ma’lumotlar.</li>
-      <li><strong>Aloqa va sozlamalar:</strong> yordam chatidagi xabarlar, sevimlilar va ayrim ilova sozlamalari.</li>
+      <li><b>Hisob:</b> Telegram orqali kirsangiz — Telegram identifikatori, ism, foydalanuvchi nomi, profil rasmi, til. Apple orqali kirsangiz — Apple bergan identifikator va (agar ruxsat bersangiz) ism. Telefon raqami — o‘zingiz kiritganda yoki buyurtma/bron uchun taqdim etganda.</li>
+      <li><b>Manzil va joylashuv:</b> kiritgan yetkazish manzillaringiz va izohlar. Qurilma joylashuvi (GPS) faqat siz tizim oynasida ruxsat berganingizda va faqat tumanni aniqlash yoki «Hozirgi joyimga yetkazish» uchun ishlatiladi. Bir martalik joylashuv saqlangan manzillaringizga o‘zi qo‘shilmaydi.</li>
+      <li><b>Buyurtma va bron:</b> taomlar/mahsulotlar, restoran yoki do‘kon, summa, yetkazish holati, to‘lov usuli va holati; bronda — sana, vaqt, mehmonlar soni, tanlangan taomlar va restoranga yozgan izohingiz.</li>
+      <li><b>To‘lov:</b> karta raqami, amal qilish muddati va CVV bizning serverlarimizda saqlanmaydi va bizga ko‘rinmaydi: ular to‘lov xizmatining (Click, Payme va boshqalar) sahifasida kiritiladi. Biz faqat to‘lov holati, summasi va xizmat bergan texnik identifikatorni olamiz.</li>
+      <li><b>Qurilma va ilova:</b> qurilmaning shaxsni aniqlamaydigan texnik identifikatori (xesh), platforma (iOS/Android/veb), ilova versiyasi, til, tuman. Bu xizmat ishlashi, yangilanishlar va xavfsizlik uchun kerak.</li>
+      <li><b>Bildirishnomalar:</b> rozilik bersangiz — qurilmaning push-tokeni (Apple yoki Google tomonidan beriladi) va bildirishnoma sozlamalaringiz.</li>
+      <li><b>Aloqa:</b> Yordam chatidagi xabarlaringiz.</li>
+      <li><b>Bonus va takliflar:</b> to‘plangan ballar, taklif havolasi orqali kelgan do‘stlar soni.</li>
     </ul>
-    <h2>Ma’lumotlardan foydalanish</h2>
-    <p>Ma’lumotlar hisobga kirish, buyurtma va bronlarni rasmiylashtirish hamda bajarish, yetkazib berishni tashkil etish, holatni ko‘rsatish, yordam so‘rovlariga javob berish, xizmat xavfsizligi va ishlashini ta’minlash uchun ishlatiladi.</p>
-    <h2>Ma’lumotlarni kimlar olishi mumkin</h2>
-    <p>Buyurtmani bajarish uchun zarur ma’lumotlar tanlangan restoran va yetkazib beruvchi/kuryerga uzatilishi mumkin. To‘lov tanlangan to‘lov provayderi orqali amalga oshiriladi; to‘lov ma’lumotlariga uning maxfiylik qoidalari ham tatbiq etiladi. Kirish, xarita yoki manzilni aniqlash funksiyalari uchun Telegram, OpenStreetMap/Nominatim va/yoki Yandex xizmatlaridan foydalanilishi mumkin. Ular ma’lumotlarni o‘z maxfiylik qoidalariga muvofiq qayta ishlaydi.</p>
-    <h2>Saqlash va himoya</h2>
-    <p>Ma’lumotlar xizmatni ko‘rsatish, buyurtmalarni bajarish va qonuniy majburiyatlarni ado etish uchun zarur muddat davomida saqlanadi. Kerak bo‘lmay qolgan ma’lumotlar o‘chiriladi yoki shaxsni aniqlab bo‘lmaydigan shaklga keltiriladi, agar qonun ularni saqlashni talab qilmasa. Ma’lumotlarni ruxsatsiz foydalanish, yo‘qotish yoki o‘zgartirishdan himoya qilish uchun tegishli choralar ko‘riladi.</p>
-    <h2>Sizning so‘rovlaringiz</h2>
-    <p>Ma’lumotlaringizni ko‘rish, tuzatish yoki o‘chirishni so‘rash uchun ilovadagi <strong>Yordam</strong> chatiga yozing. Buyurtma, hisob-kitob yoki qonun talablariga ko‘ra ayrim ma’lumotlar belgilangan muddatgacha saqlanishi mumkin.</p>
-    <h2>Bolalar</h2>
-    <p>Lokma Go bolalar uchun maxsus mo‘ljallanmagan. Voyaga yetmaganlar xizmatdan ota-ona yoki qonuniy vakil nazorati ostida foydalanishi kerak. Ota-ona farzand ma’lumotlari bo‘yicha ilovadagi <strong>Yordam</strong> chatiga murojaat qilishi mumkin.</p>
-    <h2>Siyosatdagi o‘zgarishlar</h2>
-    <p>Siyosat yangilansa, yangi tahriri shu sahifada e’lon qilinadi va amal qilish sanasi yangilanadi.</p>
+
+    <h2 id="uz-purposes">3. Nima uchun va qanday asosda foydalanamiz</h2>
+    <ul>
+      <li><b>Shartnomani bajarish:</b> buyurtma va bronni qabul qilish, restoranga/do‘konga yetkazish, yetkazib berish, to‘lovni tekshirish, holatni ko‘rsatish.</li>
+      <li><b>Sizning roziligingiz:</b> joylashuv, taom takliflari bildirishnomalari. Rozilikni istalgan vaqt qaytarib olish mumkin — bu xizmatdan foydalanishga to‘sqinlik qilmaydi.</li>
+      <li><b>Qonuniy majburiyat:</b> buxgalteriya va soliq hujjatlarini yuritish, vakolatli organlarning qonuniy so‘rovlariga javob.</li>
+      <li><b>Qonuniy manfaat:</b> firibgarlik va suiiste‘molning oldini olish, xizmat xavfsizligi, ishlashini yaxshilash.</li>
+    </ul>
+    <p>Ma‘lumotlaringizni reklama maqsadida uchinchi shaxslarga sotmaymiz va ular bilan almashmaymiz.</p>
+
+    <h2 id="uz-fraud">4. Firibgarlikdan himoya (bron va buyurtma)</h2>
+    <p>Restoranlar soxta bronlardan zarar ko‘rmasligi uchun bron yuborilganda mijozning ishonchlilik belgilari tekshiriladi: telefon raqami haqiqiyligi, sana va vaqt mantiqiyligi, takroriy va haddan ortiq bronlar, avvalgi bronlar va yetkazilgan buyurtmalar soni, Telegram foydalanuvchi nomi. Bu belgilar restoranga mijozni tanishda yordam sifatida ko‘rsatiladi.</p>
+    <p>Aniq soxta ma‘lumotlar yoki haddan ortiq urinishlar tizim tomonidan avtomatik rad etilishi mumkin. Agar noto‘g‘ri rad etilgan deb hisoblasangiz, Yordam chatiga yozing — holatni odam ko‘rib chiqadi.</p>
+
+    <h2 id="uz-sharing">5. Ma‘lumotlar kimlarga uzatiladi</h2>
+    <ul>
+      <li><b>Restoran yoki do‘kon:</b> buyurtmani bajarish uchun ismingiz, telefon, manzil, buyurtma tarkibi, izohlar.</li>
+      <li><b>Kuryer:</b> yetkazish uchun ism, telefon, manzil va buyurtma raqami.</li>
+      <li><b>To‘lov xizmatlari:</b> to‘lovni amalga oshirish uchun zarur ma‘lumotlar; ular o‘z maxfiylik qoidalariga ko‘ra ishlaydi.</li>
+      <li><b>Kirish va infratuzilma:</b> Telegram va Apple (kirish uchun), Apple va Google (push-bildirishnomalarni yetkazish uchun), xarita va manzilni aniqlash xizmatlari, hosting va texnik xizmat ko‘rsatuvchilar. Ularga faqat vazifasi uchun zarur minimal ma‘lumot beriladi.</li>
+      <li><b>Davlat organlari:</b> faqat qonunda belgilangan asosda va hajmda.</li>
+    </ul>
+
+    <h2 id="uz-transfer">6. Ma‘lumotlarni chet elga uzatish</h2>
+    <p>Telegram, Apple va Google kabi xizmatlar ma‘lumotlarni O‘zbekiston tashqarisida qayta ishlashi mumkin. Bunday uzatish faqat xizmat ishlashi uchun zarur hajmda va qonun talablariga muvofiq amalga oshiriladi.</p>
+
+    <h2 id="uz-location">7. Joylashuv</h2>
+    <p>Joylashuv so‘rovi ilova ochilganda bloklovchi emas: rad etsangiz ham ilova to‘liq ishlaydi va manzilni qo‘lda kiritishingiz mumkin. Aniqlangan koordinata faqat tumanni belgilash yoki sizning buyurtmangizni yetkazish uchun ishlatiladi va avtomatik ravishda saqlangan manzilga yozilmaydi. Ruxsatni telefon sozlamalaridan istalgan payt o‘zgartirishingiz mumkin.</p>
+
+    <h2 id="uz-push">8. Bildirishnomalar</h2>
+    <p>Buyurtma holati haqidagi xabarlar xizmat xabarlari hisoblanadi. Taom takliflari (reklama xarakteridagi bildirishnomalar) faqat ilovada aniq rozilik bersangiz yuboriladi — kuniga ko‘pi bilan 2 ta. Ularni Profil → «Taom takliflari» orqali yoki telefon sozlamalaridan istalgan payt o‘chirishingiz mumkin.</p>
+
+    <h2 id="uz-retention">9. Saqlash muddati va o‘chirish</h2>
+    <p>Ma‘lumotlar maqsad uchun zarur muddat davomida saqlanadi. Akkauntni o‘chirsangiz, ismingiz, telefon raqamingiz, manzillaringiz va bonuslaringiz o‘chiriladi. Buyurtmalar tarixi hisob-kitob va qonuniy majburiyatlar uchun shaxsingizga bog‘lanmagan holda saqlanishi mumkin. Qonun talab qilgan muddat tugagach, ma‘lumotlar o‘chiriladi yoki shaxsni aniqlab bo‘lmaydigan shaklga keltiriladi.</p>
+
+    <h2 id="uz-security">10. Xavfsizlik</h2>
+    <p>Ma‘lumotlar himoyalangan (HTTPS) ulanish orqali uzatiladi; tizimga kirish huquqi cheklangan; kirish tokenlari va maxfiy kalitlar jurnallarga yozilmaydi. Hech bir tizim mutlaq xavfsiz bo‘lmaydi, ammo biz zamonaviy texnik va tashkiliy choralarni ko‘ramiz va xavfsizlikni muntazam yaxshilab boramiz.</p>
+
+    <h2 id="uz-rights">11. Sizning huquqlaringiz</h2>
+    <p>Qonunga muvofiq siz quyidagi huquqlarga egasiz:</p>
+    <ul>
+      <li>o‘z ma‘lumotlaringiz va ularning qanday qayta ishlanayotgani haqida bilib olish;</li>
+      <li>noto‘g‘ri yoki eskirgan ma‘lumotlarni tuzatishni talab qilish;</li>
+      <li>ma‘lumotlaringizni o‘chirishni yoki qayta ishlashni cheklashni so‘rash;</li>
+      <li>rozilikni istalgan vaqt qaytarib olish;</li>
+      <li>qayta ishlashga e‘tiroz bildirish;</li>
+      <li>huquqlaringiz buzilgan deb hisoblasangiz, vakolatli davlat organiga yoki sudga murojaat qilish.</li>
+    </ul>
+    <p>So‘rovingizni Yordam chati orqali yuboring. Shaxsingizni tasdiqlash uchun qo‘shimcha ma‘lumot so‘rashimiz mumkin.</p>
+
+    <h2 id="uz-children">12. Bolalar</h2>
+    <p>Xizmat 18 yoshga to‘lmaganlar uchun mo‘ljallanmagan. Voyaga yetmaganlar ilovadan ota-ona yoki qonuniy vakil nazorati ostida foydalanishi kerak. Bola ma‘lumotlari bizga ruxsatsiz berilganini bilsangiz, Yordam chatiga yozing — ularni o‘chiramiz.</p>
+
+    <h2 id="uz-changes">13. Siyosatdagi o‘zgarishlar</h2>
+    <p>Siyosat yangilansa, yangi tahriri shu sahifada e‘lon qilinadi va amal qilish sanasi o‘zgaradi. Muhim o‘zgarishlar haqida ilova orqali xabar beramiz.</p>
+
+    <h2 id="uz-contact">14. Aloqa</h2>
+    <p>Maxfiylik bo‘yicha savol, so‘rov yoki shikoyat uchun ilovadagi Yordam chatiga yozing. Operator rekvizitlari quyida keltirilgan.</p>
+    <h2>Operator rekvizitlari</h2>
+    <ul>
+      <li><strong>Operator:</strong> «Lokma Go» MChJ</li>
+      <li><strong>Sayt:</strong> lokma.uz</li>
+    </ul>
+    <p>Ushbu siyosat ilovadan foydalanishni davom ettirsangiz, o‘qilgan deb hisoblanadi. Rozilik talab qilinadigan joylarda (joylashuv, bildirishnoma) alohida rozilik so‘raymiz.</p>
     <div class="lang">РУССКИЙ</div>
     <h1>Политика конфиденциальности</h1>
-    <p class="date">Дата вступления в силу: 21 октября 2026 г.</p>
-    <p>Настоящая политика объясняет, как используются данные в приложении Lokma Go и сервисе <strong>lokma.uz</strong>. Оператор сервиса — команда сервиса Lokma Go. Вопросы о конфиденциальности, а также запросы на просмотр, исправление или удаление данных можно отправить через чат <strong>Поддержка</strong> в приложении.</p>
-    <h2>Какие данные обрабатываются</h2>
+    <p class="date">Дата вступления в силу: 26 ноября 2026 г. · Редакция 2.0</p>
+    <p>Ваши данные принадлежат вам. Открыто объясняем, какие данные и зачем нам нужны.</p>
+    <h2 id="ru-operator">1. Кто обрабатывает ваши данные</h2>
+    <p>Настоящая политика относится к сервисам Lokma Go и Lokma Market, предоставляемым обществом с ограниченной ответственностью «Lokma Go» («Lokma Go», «мы»): приложениям iOS и Android, Telegram Mini App и сайту lokma.uz.</p>
+    <p>Мы выступаем оператором персональных данных и действуем в соответствии с Законом Республики Узбекистан «О персональных данных» (ЗРУ-547).</p>
+
+    <h2 id="ru-data">2. Какие данные собираются</h2>
     <ul>
-      <li><strong>Аккаунт:</strong> при входе через Telegram — идентификатор пользователя Telegram, имя, имя пользователя, фотография профиля и выбранный язык. Номер телефона — только если вы сами его предоставили.</li>
-      <li><strong>Адрес и геопозиция:</strong> указанный вами адрес доставки и примечания к нему. Координаты устройства используются только с вашего разрешения; при отказе адрес можно ввести вручную.</li>
-      <li><strong>Заказы и бронирования:</strong> выбранные блюда/товары, ресторан, стоимость, статус заказа и доставки, способ оплаты и сведения, предоставленные при бронировании столика.</li>
-      <li><strong>Общение и настройки:</strong> сообщения в чате поддержки, избранное и некоторые настройки приложения.</li>
+      <li><b>Аккаунт:</b> при входе через Telegram — идентификатор Telegram, имя, имя пользователя, фото профиля, язык. При входе через Apple — идентификатор от Apple и (с вашего разрешения) имя. Номер телефона — когда вы сами его указываете или предоставляете для заказа/брони.</li>
+      <li><b>Адрес и геопозиция:</b> указанные вами адреса доставки и примечания. Геопозиция устройства (GPS) используется только с вашего разрешения в системном окне и только для определения района или для «Доставить на моё текущее место». Разовая геопозиция не добавляется в сохранённые адреса автоматически.</li>
+      <li><b>Заказы и брони:</b> блюда/товары, ресторан или магазин, сумма, статус доставки, способ и статус оплаты; для брони — дата, время, число гостей, выбранные блюда и ваше примечание ресторану.</li>
+      <li><b>Оплата:</b> номер карты, срок действия и CVV на наших серверах не хранятся и нам не видны: они вводятся на странице платёжного сервиса (Click, Payme и др.). Мы получаем только статус и сумму платежа и технический идентификатор от сервиса.</li>
+      <li><b>Устройство и приложение:</b> неперсонифицирующий технический идентификатор устройства (хеш), платформа (iOS/Android/веб), версия приложения, язык, район. Это нужно для работы сервиса, обновлений и безопасности.</li>
+      <li><b>Уведомления:</b> при вашем согласии — push-токен устройства (выдаётся Apple или Google) и настройки уведомлений.</li>
+      <li><b>Обращения:</b> сообщения в чате поддержки.</li>
+      <li><b>Бонусы и приглашения:</b> накопленные баллы, число друзей, пришедших по вашей ссылке.</li>
     </ul>
-    <h2>Использование данных</h2>
-    <p>Данные используются для входа в аккаунт, оформления и выполнения заказов и бронирований, организации доставки, отображения статуса, ответа на обращения в поддержку, обеспечения безопасности и работы сервиса.</p>
-    <h2>Кому данные могут передаваться</h2>
-    <p>Для выполнения заказа необходимые данные могут передаваться выбранному ресторану и службе доставки/курьеру. Оплата проходит через выбранного платёжного провайдера; к платёжным данным также применяются его правила конфиденциальности. Для входа, карты или определения адреса могут использоваться Telegram, OpenStreetMap/Nominatim и/или сервисы Yandex. Они обрабатывают данные согласно собственным политикам.</p>
-    <h2>Хранение и защита</h2>
-    <p>Данные хранятся столько, сколько необходимо для предоставления сервиса, выполнения заказов и соблюдения требований закона. Когда данные больше не нужны, они удаляются или обезличиваются, если закон не требует их дальнейшего хранения. Принимаются соответствующие меры для защиты от неправомерного использования, утраты или изменения данных.</p>
-    <h2>Ваши запросы</h2>
-    <p>Чтобы запросить просмотр, исправление или удаление данных, напишите в чат <strong>Поддержка</strong> в приложении. Некоторые сведения могут храниться установленный срок, если это необходимо для заказа, расчётов или требуется законом.</p>
-    <h2>Дети</h2>
-    <p>Lokma Go специально не предназначено для детей. Несовершеннолетним следует пользоваться сервисом под надзором родителя или законного представителя. Родитель может обратиться по поводу данных ребёнка через чат <strong>Поддержка</strong> в приложении.</p>
-    <h2>Изменения политики</h2>
-    <p>Новая редакция политики публикуется на этой странице с обновлённой датой вступления в силу.</p>
+
+    <h2 id="ru-purposes">3. Зачем и на каком основании мы используем данные</h2>
+    <ul>
+      <li><b>Исполнение договора:</b> приём заказа и брони, передача ресторану/магазину, доставка, проверка оплаты, отображение статуса.</li>
+      <li><b>Ваше согласие:</b> геопозиция, уведомления с предложениями блюд. Согласие можно отозвать в любой момент — это не мешает пользоваться сервисом.</li>
+      <li><b>Требование закона:</b> ведение бухгалтерских и налоговых документов, ответы на законные запросы уполномоченных органов.</li>
+      <li><b>Законный интерес:</b> предотвращение мошенничества и злоупотреблений, безопасность и улучшение работы сервиса.</li>
+    </ul>
+    <p>Мы не продаём ваши данные и не передаём их третьим лицам в рекламных целях.</p>
+
+    <h2 id="ru-fraud">4. Защита от мошенничества (брони и заказы)</h2>
+    <p>Чтобы рестораны не страдали от ложных броней, при отправке брони проверяются признаки надёжности клиента: достоверность телефона, логичность даты и времени, повторные и чрезмерные брони, число прошлых броней и доставленных заказов, имя пользователя Telegram. Эти признаки показываются ресторану, чтобы помочь ему понять, кто пришёл.</p>
+    <p>Явно ложные данные или чрезмерное число попыток могут быть автоматически отклонены системой. Если считаете, что отказ ошибочен, напишите в чат поддержки — ситуацию рассмотрит человек.</p>
+
+    <h2 id="ru-sharing">5. Кому передаются данные</h2>
+    <ul>
+      <li><b>Ресторан или магазин:</b> для выполнения заказа — имя, телефон, адрес, состав заказа, примечания.</li>
+      <li><b>Курьер:</b> для доставки — имя, телефон, адрес и номер заказа.</li>
+      <li><b>Платёжные сервисы:</b> данные, необходимые для оплаты; они работают по собственным правилам конфиденциальности.</li>
+      <li><b>Вход и инфраструктура:</b> Telegram и Apple (для входа), Apple и Google (для доставки push-уведомлений), сервисы карт и определения адреса, хостинг и технические подрядчики. Им передаётся только минимум, необходимый для их задачи.</li>
+      <li><b>Государственные органы:</b> только на основании и в объёме, установленных законом.</li>
+    </ul>
+
+    <h2 id="ru-transfer">6. Передача данных за рубеж</h2>
+    <p>Такие сервисы, как Telegram, Apple и Google, могут обрабатывать данные за пределами Узбекистана. Такая передача осуществляется только в объёме, необходимом для работы сервиса, и в соответствии с требованиями закона.</p>
+
+    <h2 id="ru-location">7. Геопозиция</h2>
+    <p>Запрос геопозиции при запуске не блокирует приложение: если вы откажетесь, оно будет работать полностью, а адрес можно ввести вручную. Определённые координаты используются только для выбора района или доставки вашего заказа и автоматически не записываются в сохранённый адрес. Разрешение можно изменить в настройках телефона в любой момент.</p>
+
+    <h2 id="ru-push">8. Уведомления</h2>
+    <p>Сообщения о статусе заказа — служебные. Предложения блюд (рекламные уведомления) отправляются только при вашем явном согласии в приложении — не более 2 в день. Их можно отключить в любой момент: Профиль → «Предложения блюд» или настройки телефона.</p>
+
+    <h2 id="ru-retention">9. Сроки хранения и удаление</h2>
+    <p>Данные хранятся столько, сколько нужно для цели обработки. Если вы удалите аккаунт, ваши имя, телефон, адреса и бонусы будут удалены. История заказов может храниться без привязки к вам для расчётов и исполнения требований закона. По истечении срока, установленного законом, данные удаляются или обезличиваются.</p>
+
+    <h2 id="ru-security">10. Безопасность</h2>
+    <p>Данные передаются по защищённому соединению (HTTPS); доступ к системе ограничен; токены входа и секретные ключи не записываются в журналы. Абсолютно безопасных систем не существует, но мы применяем современные технические и организационные меры и постоянно совершенствуем защиту.</p>
+
+    <h2 id="ru-rights">11. Ваши права</h2>
+    <p>В соответствии с законом вы вправе:</p>
+    <ul>
+      <li>узнать, какие ваши данные и как обрабатываются;</li>
+      <li>требовать исправления неточных или устаревших данных;</li>
+      <li>просить удалить данные или ограничить их обработку;</li>
+      <li>отозвать согласие в любой момент;</li>
+      <li>возразить против обработки;</li>
+      <li>если считаете, что ваши права нарушены, обратиться в уполномоченный государственный орган или суд.</li>
+    </ul>
+    <p>Отправьте запрос через чат поддержки. Для подтверждения личности мы можем запросить дополнительные сведения.</p>
+
+    <h2 id="ru-children">12. Дети</h2>
+    <p>Сервис не предназначен для лиц младше 18 лет. Несовершеннолетние могут пользоваться приложением под присмотром родителя или законного представителя. Если вам известно, что данные ребёнка переданы нам без разрешения, напишите в чат поддержки — мы их удалим.</p>
+
+    <h2 id="ru-changes">13. Изменения политики</h2>
+    <p>При обновлении политики новая редакция публикуется на этой странице, а дата вступления в силу меняется. О существенных изменениях сообщим через приложение.</p>
+
+    <h2 id="ru-contact">14. Контакты</h2>
+    <p>По вопросам конфиденциальности, запросам и жалобам напишите в чат поддержки в приложении. Реквизиты оператора приведены ниже.</p>
+    <h2>Реквизиты оператора</h2>
+    <ul>
+      <li><strong>Оператор:</strong> «Lokma Go» MChJ</li>
+      <li><strong>Сайт:</strong> lokma.uz</li>
+    </ul>
+    <p>Продолжая пользоваться приложением, вы подтверждаете, что ознакомились с политикой. Там, где нужно согласие (геопозиция, уведомления), мы спрашиваем его отдельно.</p>
   </article></main>
-  <footer>© 2026 Lokma Go</footer>
+  <footer>© 2026 «Lokma Go» MChJ</footer>
 </body>
 </html>

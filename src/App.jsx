@@ -14,6 +14,8 @@ const FavoritesPage = lazy(() => import('@/pages/Favorites/FavoritesPage').then(
 const MyReservationsPage = lazy(() => import('@/pages/Reservation/MyReservationsPage').then((m) => ({ default: m.MyReservationsPage })));
 const ReservationPage = lazy(() => import('@/pages/Reservation/ReservationPage').then((m) => ({ default: m.ReservationPage })));
 const ProfilePage = lazy(() => import('@/pages/Profile/ProfilePage').then((m) => ({ default: m.ProfilePage })));
+const HelpPage = lazy(() => import('@/pages/Help/HelpPage').then((m) => ({ default: m.HelpPage })));
+const PrivacyPage = lazy(() => import('@/pages/Legal/PrivacyPage').then((m) => ({ default: m.PrivacyPage })));
 const SearchPage = lazy(() => import('@/pages/Search/SearchPage').then((m) => ({ default: m.SearchPage })));
 const DiscoverDishesPage = lazy(() => import('@/pages/Discover/DiscoverDishesPage').then((m) => ({ default: m.DiscoverDishesPage })));
 const MarketPage = lazy(() => import('@/pages/Market/MarketPage').then((m) => ({ default: m.MarketPage })));
@@ -289,6 +291,8 @@ function AppInner({ authMode = 'telegram' }) {
             <Route path="/weddings/venue/:slug" element={<WeddingsPage />} />
             <Route path="/orders" element={<OrdersPage />} />
                           <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/help" element={<HelpPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
           </Routes>
         </Suspense>
         </ErrorBoundary>

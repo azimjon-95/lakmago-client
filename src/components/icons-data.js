@@ -72,6 +72,11 @@ export const ICONS = {
   filter: [['path', { d: 'M4 6h16' }], ['path', { d: 'M4 12h10' }], ['path', { d: 'M4 18h6' }], ['circle', { cx: '17', cy: '12', r: '2' }], ['circle', { cx: '13', cy: '18', r: '2' }], ['circle', { cx: '9', cy: '6', r: '2' }]],
   user: [['path', { d: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2' }], ['circle', { cx: '12', cy: '7', r: '4' }]],
   info: [['circle', { cx: '12', cy: '12', r: '10' }], ['path', { d: 'M12 16v-4' }], ['path', { d: 'M12 8h.01' }]],
+  // Yordam / maxfiylik sahifalari (Lucide)
+  sparkles: [['path', { d: 'M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z' }], ['path', { d: 'M20 3v4' }], ['path', { d: 'M22 5h-4' }], ['path', { d: 'M4 17v2' }], ['path', { d: 'M5 18H3' }]],
+  helpCircle: [['circle', { cx: '12', cy: '12', r: '10' }], ['path', { d: 'M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3' }], ['path', { d: 'M12 17h.01' }]],
+  lock: [['rect', { width: '18', height: '11', x: '3', y: '11', rx: '2', ry: '2' }], ['path', { d: 'M7 11V7a5 5 0 0 1 10 0v4' }]],
+  fileText: [['path', { d: 'M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z' }], ['path', { d: 'M14 2v4a2 2 0 0 0 2 2h4' }], ['path', { d: 'M10 9H8' }], ['path', { d: 'M16 13H8' }], ['path', { d: 'M16 17H8' }]],
   // Telegram paper-plane — to'ldirilgan shakl (fill bilan chiziladi)
   telegram: [['path', { d: 'M21.94 3.3a1 1 0 0 0-1.06-.16L2.5 10.9a1 1 0 0 0 .07 1.86l4.4 1.5 1.7 5.2a1 1 0 0 0 1.66.4l2.5-2.4 4.5 3.3a1 1 0 0 0 1.57-.6l3.4-15.9a1 1 0 0 0-.36-.96zM9.6 14.2l-.5 3.6-1.1-3.4 8.8-6.3z', fill: 'currentColor', stroke: 'none' }]]
 };

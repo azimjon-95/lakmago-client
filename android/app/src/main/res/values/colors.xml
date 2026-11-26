@@ -2,4 +2,6 @@
 <resources>
     <!-- Bildirishnoma ikonkasi rangi (brend to'q sarig'i) -->
     <color name="notify_accent">#FF5A00</color>
+    <!-- Ishga tushirish ekrani foni — veb Splash.css va iOS LaunchScreen bilan bir xil -->
+    <color name="splash_bg">#032A37</color>
 </resources>

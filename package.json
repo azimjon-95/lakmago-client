@@ -31,7 +31,8 @@
     "test:district": "node --test tests/districtSwitch.test.mjs",
     "test:fastloc": "node --test tests/fixCollector.test.mjs",
     "test:textscale": "node tests/textScale.test.mjs",
-    "test:repaint": "node tests/repaintKick.test.mjs"
+    "test:repaint": "node tests/repaintKick.test.mjs",
+    "test:help-privacy": "node tests/helpPrivacy.render.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",

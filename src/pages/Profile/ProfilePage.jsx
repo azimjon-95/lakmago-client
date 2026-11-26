@@ -169,6 +169,15 @@ export function ProfilePage() {
 
           {/* Taom takliflari push'i — faqat iOS/Android ilovada ko'rinadi */}
           <PushToggle />
+
+          <button onClick={() => navigate('/help')} className="profile-row" data-testid="help-row">
+            <Icon name="helpCircle" size={18} color="var(--brand)" />
+            <div className="profile-row__body">
+              <div className="profile-row__value">{t('helpRowTitle')}</div>
+              <div className="profile-row__label">{t('helpRowHint')}</div>
+            </div>
+            <Icon name="chevronRight" size={17} color="var(--muted)" />
+          </button>
         </div>
       </div>
 
@@ -293,6 +302,12 @@ export function ProfilePage() {
       )}
 
       <div style={{ flex: 1 }} />
+
+      {/* Maxfiylik siyosati — kichik, sahifa oxirida (hamma uchun, mehmon ham) */}
+      <button type="button" className="profile-legal" onClick={() => navigate('/privacy')} data-testid="privacy-row">
+        <Icon name="shieldCheck" size={14} color="currentColor" /> {t('privacyRowTitle')}
+      </button>
+
       <BottomNav />
       {AuthGate}
     </div>
