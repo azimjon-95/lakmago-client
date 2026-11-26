@@ -168,7 +168,6 @@
       `preload` brauzerga uni DARHOL, eng yuqori ustuvorlik bilan
       yuklashni aytadi — JS kutilmaydi.
     -->
-    <link rel="preload" as="image" href="/brand/splash-logo.png" fetchpriority="high" />
     <link rel="preload" as="image" href="/splash-courier.gif" fetchpriority="high" />
 
     <!--
@@ -186,7 +185,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
     <!--
       BOOT-SPLASH: native ishga tushirish ekrani (iOS LaunchScreen / Android splash) bilan AYNAN bir xil kadr —
-      fon gradienti va markazdagi logo (balandlikning 15.37%). JS yuklanguncha shu turadi, so'ng React <Splash>
+      faqat fon gradienti (logo YO'Q), FAQAT iOS/Android ilovada (veb-saytda yo'q). JS yuklanguncha shu turadi, so'ng React <Splash>
       xuddi shu kadrni o'z qo'liga oladi (components/Splash). Shunda native → veb o'tishi ko'zga bilinmaydi,
       oq "chaqnash" bo'lmaydi. Splash sessiyada bir marta ko'rsatiladi (lokmago_splash_seen), boot ham shunday.
     -->
@@ -194,12 +193,11 @@
       html.boot-on, html.boot-on body { background: #032a37; }
       #boot { display: none; position: fixed; inset: 0; z-index: 9999; background: linear-gradient(180deg, #022935 0%, #04303d 50%, #073846 100%); }
       html.boot-on #boot { display: block; }
-      #boot img { position: absolute; left: 50%; top: 50%; width: 15.37vh; height: 15.37vh; transform: translate(-50%, -50%); }
     </style>
-    <script>try { if (!sessionStorage.getItem('lokmago_splash_seen')) document.documentElement.classList.add('boot-on'); } catch (e) {}</script>
+    <script>try { var C = window.Capacitor; if (C && C.isNativePlatform && C.isNativePlatform() && !sessionStorage.getItem('lokmago_splash_seen')) document.documentElement.classList.add('boot-on'); } catch (e) {}</script>
   </head>
   <body>
-    <div id="boot" aria-hidden="true"><img src="/brand/splash-logo.png" alt="" width="256" height="256" /></div>
+    <div id="boot" aria-hidden="true"></div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

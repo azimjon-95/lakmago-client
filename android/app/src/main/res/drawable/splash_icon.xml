@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  Android 12+ ishga tushirish ekrani ikonkasi: tizim uni 288dp maydonga sig'diradi va aylana (192dp) bilan kesadi.
-  28% inset logoni ~127dp qiladi (veb Splash'dagi 15.37vh ≈ 130dp bilan mos) va burchaklari kesilmaydi.
--->
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/splash_logo"
-    android:insetLeft="28%"
-    android:insetRight="28%"
-    android:insetTop="28%"
-    android:insetBottom="28%" />
+<!-- Ishga tushirish ekranida belgi YO'Q: faqat fon rangi (@color/splash_bg). Logo veb-Splash'da yumshoq paydo bo'ladi. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@android:color/transparent" />
+    <size android:width="1dp" android:height="1dp" />
+</shape>
