@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { BottomNav } from '@/components/BottomNav';
+import { PushToggle } from '@/components/PromoPush/PushToggle';
 import { LangSwitch } from '@/components/LangSwitch/LangSwitch';
 import { useUser } from '@/store/user';
 import { useT } from '@/i18n';
@@ -165,6 +166,9 @@ export function ProfilePage() {
             </div>
             <Icon name="chevronRight" size={17} color="var(--muted)" />
           </button>
+
+          {/* Taom takliflari push'i — faqat iOS/Android ilovada ko'rinadi */}
+          <PushToggle />
         </div>
       </div>
 

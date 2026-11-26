@@ -10,6 +10,9 @@
     <!-- Qurilmaning aniq GPS joylashuvini aniqlash -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
+    <!-- Bildirishnomalar (Android 13+): taom takliflari. So'rov faqat mijoz ilovadagi oynada "Ha" desa (lib/promoPush.js) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -122,6 +125,16 @@
 
         </provider>
 
+        <!-- Push (FCM): standart ikonka, rang va kanal — server o'zi ham yuboradi, bu zaxira -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_lokma" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/notify_accent" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="promo" />
     </application>
 
 </manifest>

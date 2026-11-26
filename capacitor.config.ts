@@ -5,6 +5,10 @@ const config: CapacitorConfig = {
   appName: 'Lokma Go',
   webDir: 'dist',
   plugins: {
+    // Taom takliflari: ilova ochiq turganda banner chiqmaydi (mijoz allaqachon ilovada); yopiq/fonda — tizim ko'rsatadi
+    PushNotifications: {
+      presentationOptions: ['badge'],
+    },
     /*
      * Jim yangilanish (veb-qism) — O'Z serverimizdan, bulutsiz (lib/liveUpdate.js, scripts/build-ota.mjs).
      * Plaginning avtomatik rejimi va Capgo serverlariga hech qanday so'rov O'CHIQ.

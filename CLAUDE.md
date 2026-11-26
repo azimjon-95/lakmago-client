@@ -55,7 +55,12 @@ na Telegram ichida, na brauzerda. Main Page har doim darhol ochiladi.
 `prompt` bo'lsa, ilova ochilganda (splash bilan parallel) tizim geolokatsiya oynasi ko'rsatiladi — **24 soatda ko'pi bilan
 bir marta** (`useDistrictEngine.js` → `startupAskAllowed`). Bu so'rov ilovani/splash'ni **BLOKLAMAYDI**, rad etilsa qayta
 so'ralmaydi va ilova to'liq ishlayveradi. Koordinata faqat tumanni aniqlash uchun; **manzilga yozilmaydi** (6-qoida).
-Ism, telefon, manzil, obuna va boshqa hech narsa ochilishda so'ralmaydi — istisno faqat shu.
+**Ikkinchi istisno — taom takliflari push'iga rozilik (egasi qarori, 2026-11-26):** faqat iOS/Android ilovada, ilova
+ochilgandan ~7 s keyin (boshqa oyna ochiq bo'lmasa) **BIR MARTA** `PushConsentSheet` (components/PromoPush). OS ruxsati
+faqat mijoz «Ha» bossagina so'raladi; «Hozir emas» — boshqa so'ralmaydi (Profil → «Taom takliflari»dan yoqiladi).
+Ilovani **BLOKLAMAYDI**. Veb va Telegram'da umuman yo'q. Server kuniga ko'pi bilan 2 ta yuboradi (lakmago-server services/promoPush.js).
+
+Ism, telefon, manzil, obuna va boshqa hech narsa ochilishda so'ralmaydi — istisno faqat shu ikkitasi.
 
 Auth va obuna faqat **transactional nuqtada** so'raladi:
 
