@@ -65,9 +65,16 @@ async function ensureChannel() {
 async function onToken(token) {
   if (read(OPTIN_KEY) !== '1' || !token) return;
   await clientReady;
-  try {
-    await api.registerPush({ token, lang: lang(), district: context.district || '', optIn: true, permission: 'granted' });
-  } catch { /* keyingi ochilishda qayta */ }
+  // Tarmoq uzilsa token serverga yetmay qolmasin: 4 urinish (2 s, 8 s, 30 s), keyin keyingi ochilishda
+  for (let i = 0; i < 4; i++) {
+    try {
+      await api.registerPush({ token, lang: lang(), district: context.district || '', optIn: true, permission: 'granted' });
+      return;
+    } catch {
+      if (read(OPTIN_KEY) !== '1') return;
+      await new Promise((r) => setTimeout(r, [2000, 8000, 30000][i] || 0));
+    }
+  }
 }
 
 export async function permissionState() {
