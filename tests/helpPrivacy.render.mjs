@@ -86,12 +86,11 @@ try {
   const styles = src('android/app/src/main/res/values/styles.xml');
   const act = src('android/app/src/main/java/uz/lokmago/app/MainActivity.java');
   const cap = src('capacitor.config.ts');
-  check('native va #boot kadrida logo YO‘Q; veb Splash logosi fon ustidan paydo bo‘ladi', !/<img[^>]*splash-logo/.test(html.split('<body>')[1] || '') && /splash-logo-in/.test(css) && !/android:drawable="@drawable\/splash_logo"/.test(src('android/app/src/main/res/drawable/splash_icon.xml')));
+  check('logo hech qayerda yo‘q: #boot, Splash va Android ikonkasi; boot faqat native ilovada', !/<img[^>]*splash-logo/.test(html.split('<body>')[1] || '') && !/splash__logo|LOGO_SRC/.test(css + src('src/components/Splash/Splash.jsx')) && /isNativePlatform/.test(html) && /transparent/.test(src('android/app/src/main/res/drawable/splash_icon.xml')) && !existsSync(new URL('../public/brand/splash-logo.png', import.meta.url)));
   check('fon rangi #032a37 hamma joyda (veb, boot, Android, capacitor, iOS storyboard)',
     /#032a37/i.test(css) && /#032a37/i.test(html) && /#032A37/.test(src('android/app/src/main/res/values/colors.xml')) && /#032A37/.test(cap) && /red="0\.0117/.test(sb));
   check('Android: tema (fon, ikonka, postSplashScreenTheme) + MainActivity installSplashScreen', /windowSplashScreenBackground/.test(styles) && /postSplashScreenTheme/.test(styles) && /installSplashScreen/.test(act) && /setOnExitAnimationListener/.test(act));
   check('Android: ishga tushirish ekrani ikonkasi shaffof (faqat fon)', /transparent/.test(src('android/app/src/main/res/drawable/splash_icon.xml')));
-  check('veb logo fayli bor', existsSync(new URL('../public/brand/splash-logo.png', import.meta.url)));
   check('boot kadr sessiyada bir marta (lokmago_splash_seen) va React olib tashlaydi', /lokmago_splash_seen/.test(html) && /getElementById\('boot'\)/.test(src('src/components/Splash/Splash.jsx')));
   check('reduced-motion hurmat qilinadi (Help, Legal, Splash, Profil)', [css, src('src/pages/Help/Help.css'), src('src/pages/Legal/Legal.css'), src('src/pages/Profile/Profile.css')].every((x) => /prefers-reduced-motion/.test(x)));
 } finally { await server.close(); }
