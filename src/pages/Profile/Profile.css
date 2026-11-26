@@ -314,3 +314,26 @@
 .pcards-empty__title { font-size: 14px; font-weight: 600; color: var(--ink); }
 .pcards-empty__hint { font-size: 12px; color: var(--muted); margin-top: 1px; }
 
+
+
+/* Maxfiylik siyosati — kichik havola */
+.profile-legal {
+  align-self: center; display: inline-flex; align-items: center; gap: 6px;
+  margin: 6px 0 18px; padding: 8px 14px; border: 0; border-radius: 999px; background: var(--surface-2);
+  font: inherit; font-size: 12.5px; font-weight: 600; color: var(--muted);
+  transition: transform 160ms var(--ease), color 200ms var(--ease);
+}
+.profile-legal:active { transform: scale(0.96); color: var(--ink); }
+
+/* Bo'limlar ketma-ket yumshoq ochiladi */
+.profile > .profile-section, .profile > .profile-hero, .profile > .referral-card {
+  animation: profile-rise 480ms var(--ease) both;
+}
+.profile > :nth-child(2) { animation-delay: 30ms; }
+.profile > :nth-child(3) { animation-delay: 90ms; }
+.profile > :nth-child(4) { animation-delay: 150ms; }
+.profile > :nth-child(5) { animation-delay: 210ms; }
+.profile > :nth-child(6) { animation-delay: 270ms; }
+.profile > :nth-child(n+7) { animation-delay: 320ms; }
+@keyframes profile-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .profile > * { animation: none !important; } }

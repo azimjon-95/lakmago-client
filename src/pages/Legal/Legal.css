@@ -1,0 +1,88 @@
+/* ============ Maxfiylik siyosati ============ */
+.legal { background: var(--canvas); padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px)); }
+
+.lg-hero {
+  position: relative; overflow: hidden; margin: 16px 16px 18px; padding: 26px 20px 22px; border-radius: 24px; text-align: center; color: #fff;
+  background: linear-gradient(155deg, #032a37 0%, #04404f 55%, #0a5a52 100%);
+  animation: lg-rise 560ms var(--ease) both;
+}
+.lg-hero__glow {
+  position: absolute; width: 260px; height: 260px; top: -110px; right: -80px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 140, 40, 0.45), rgba(255, 140, 40, 0) 70%);
+  animation: lg-glow 6s ease-in-out infinite;
+}
+.lg-shield {
+  position: relative; width: 66px; height: 66px; margin: 0 auto 14px; display: grid; place-items: center; border-radius: 22px;
+  background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  animation: lg-pop 700ms 150ms cubic-bezier(0.34, 1.5, 0.5, 1) both;
+}
+.lg-shield__body { stroke-dasharray: 80; stroke-dashoffset: 80; animation: lg-draw 900ms 350ms var(--ease) forwards; }
+.lg-shield__tick { stroke-dasharray: 10; stroke-dashoffset: 10; animation: lg-draw 450ms 1150ms var(--ease) forwards; }
+.lg-hero__title { position: relative; margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.01em; }
+.lg-hero__sub { position: relative; margin: 8px auto 0; max-width: 32ch; font-size: 13.5px; line-height: 1.45; color: rgba(255, 255, 255, 0.82); }
+.lg-hero__meta { position: relative; display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: center; margin-top: 14px; font-size: 12px; color: rgba(255, 255, 255, 0.7); }
+.lg-hero__meta b { color: #fff; font-weight: 700; }
+
+.lg-block { margin: 0 16px 16px; }
+.lg-block__title { margin: 0 0 10px 2px; font-size: 13px; font-weight: 700; color: var(--muted); }
+
+.lg-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.lg-card {
+  padding: 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface);
+  animation: lg-rise 480ms var(--ease) both; animation-delay: calc(var(--i, 0) * 70ms);
+}
+.lg-card__ic { display: grid; place-items: center; width: 34px; height: 34px; margin-bottom: 10px; border-radius: 11px; background: var(--brand-tint); }
+.lg-card__t { font-size: 14px; font-weight: 700; color: var(--ink); }
+.lg-card__d { margin-top: 4px; font-size: 12.5px; line-height: 1.45; color: var(--muted); }
+.lg-cards--rights { margin-top: 14px; }
+@media (max-width: 340px) { .lg-cards { grid-template-columns: 1fr; } }
+
+/* Mundarija — yopishqoq, gorizontal suriladi */
+.lg-toc {
+  position: sticky; top: calc(var(--tg-top-offset) + 52px); z-index: 5;
+  display: flex; gap: 8px; overflow-x: auto; padding: 8px 16px; margin: 0 0 8px;
+  background: linear-gradient(var(--canvas) 78%, rgba(255, 255, 255, 0)); scrollbar-width: none;
+}
+.lg-toc::-webkit-scrollbar { display: none; }
+.lg-chip {
+  flex: none; padding: 8px 13px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface);
+  font: inherit; font-size: 12.5px; font-weight: 600; color: var(--muted); white-space: nowrap;
+  transition: background-color 250ms var(--ease), color 250ms var(--ease), border-color 250ms var(--ease), transform 160ms var(--ease);
+}
+.lg-chip:active { transform: scale(0.96); }
+.lg-chip.is-on { background: var(--brand); border-color: var(--brand); color: #fff; }
+
+/* Matn */
+.lg-doc { margin: 0 16px; display: flex; flex-direction: column; gap: 12px; }
+.lg-sec { padding: 18px 16px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); scroll-margin-top: calc(var(--tg-top-offset) + 112px); }
+.lg-sec__title { margin: 0 0 8px; font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.3; }
+.lg-sec__p { margin: 8px 0 0; font-size: 14.5px; line-height: 1.62; color: var(--ink); }
+.lg-sec__ul { margin: 8px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 9px; }
+.lg-sec__ul li { position: relative; padding-left: 18px; font-size: 14.5px; line-height: 1.58; color: var(--ink); }
+.lg-sec__ul li::before { content: ''; position: absolute; left: 3px; top: 0.62em; width: 6px; height: 6px; border-radius: 50%; background: var(--brand); }
+.lg-sec__ul b { font-weight: 700; }
+
+.lg-company { margin-top: 16px; }
+.lg-dl { margin: 0; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); overflow: hidden; }
+.lg-dl > div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 16px; font-size: 14px; }
+.lg-dl > div + div { border-top: 1px solid var(--line); }
+.lg-dl dt { color: var(--muted); }
+.lg-dl dd { margin: 0; font-weight: 600; color: var(--ink); text-align: right; word-break: break-word; }
+.lg-note { margin: 14px 2px; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+.lg-contact { width: 100%; }
+
+/* Ko'ringanda paydo bo'lish */
+.lg-reveal { opacity: 0; transform: translateY(14px); transition: opacity 520ms var(--ease), transform 520ms var(--ease); }
+.lg-reveal.is-in { opacity: 1; transform: none; }
+
+@keyframes lg-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes lg-pop { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
+@keyframes lg-draw { to { stroke-dashoffset: 0; } }
+@keyframes lg-glow { 0%, 100% { opacity: 0.7; transform: scale(1); } 50% { opacity: 1; transform: scale(1.12); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .legal *, .legal *::before, .legal *::after { animation-duration: 1ms !important; animation-delay: 0s !important; transition-duration: 1ms !important; }
+  .lg-reveal { opacity: 1; transform: none; }
+  .lg-shield__body, .lg-shield__tick { stroke-dashoffset: 0; }
+}

@@ -23,7 +23,7 @@ import './Splash.css';
  *             sekin bo'lsa yoki server javob bermasa ham ilova
  *             ochiladi: bosh sahifada skeletlar bor, bo'sh ekran emas.
  *
- * Amalda: tez internetda ~1.2s, sekinda 3.5s.
+ * Amalda: tez internetda ~1.8s (logo → kuryer animatsiyasi ko‘rinib ulgursin), sekinda 3.5s.
  *
  * ─── MEDIA ───
  *
@@ -32,9 +32,12 @@ import './Splash.css';
  * avtomatik GIF'ga qaytadi — kodga tegish shart emas.
  */
 
-const MIN_MS = 1200;
+const MIN_MS = 1800;
 const MAX_MS = 3500;
 const FADE_MS = 400;
+/* Logo bosqichi (native ekranning davomi) shuncha turadi, so'ng kuryer animatsiyasiga yumshoq o'tadi */
+const LOGO_MS = 750;
+const LOGO_SRC = '/brand/splash-logo.png';
 
 /*
  * Video manbalari. Brauzer birinchi qo'llab-quvvatlaganini oladi
@@ -60,6 +63,7 @@ export function Splash({ onDone }) {
   const queryClient = useQueryClient();
 
   const [leaving, setLeaving] = useState(false);
+  const [media, setMedia] = useState(false);   // false — logo (native ekran bilan bir xil kadr), true — kuryer
   const [useGif, setUseGif] = useState(videoUnavailable);
 
   const doneRef = useRef(false);
@@ -113,6 +117,15 @@ export function Splash({ onDone }) {
     const startedAt = Date.now();
     const timers = [];
 
+    // index.html'dagi boot-kadr (native ekran bilan bir xil) — React kadri chizilgach olib tashlanadi: o'tish sezilmaydi
+    const raf = requestAnimationFrame(() => requestAnimationFrame(() => {
+      try {
+        document.getElementById('boot')?.remove();
+        document.documentElement.classList.remove('boot-on');
+      } catch { /* */ }
+    }));
+    timers.push(setTimeout(() => setMedia(true), LOGO_MS));
+
     // So'rovlar darhol boshlanadi — media yuklanishini kutmaydi
     prefetch().then(() => {
       // Ma'lumot tayyor: MIN_MS to'lgan bo'lsa darhol, aks holda kutamiz
@@ -126,7 +139,7 @@ export function Splash({ onDone }) {
     // Favqulodda zaxira: oq ekranda qolib ketmasin
     timers.push(setTimeout(finish, MAX_MS + FADE_MS + 600));
 
-    return () => timers.forEach(clearTimeout);
+    return () => { cancelAnimationFrame(raf); timers.forEach(clearTimeout); };
   }, [prefetch, leave, finish]);
 
   /** Video topilmadi yoki ochilmadi — GIF'ga qaytamiz. */
@@ -136,7 +149,8 @@ export function Splash({ onDone }) {
   }, []);
 
   return (
-    <div className={`splash ${leaving ? 'splash--leaving' : ''}`} aria-hidden="true">
+    <div className={`splash ${media ? 'splash--media' : ''} ${leaving ? 'splash--leaving' : ''}`} aria-hidden="true">
+      <img className="splash__logo" src={LOGO_SRC} alt="" draggable="false" decoding="sync" />
       {useGif ? (
         <img
           className="splash__media"

@@ -79,3 +79,37 @@
     transition-duration: 150ms;
   }
 }
+
+/*
+ * ═══ NATIVE → VEB O'TISH ═══
+ * Birinchi kadr (logo) native ishga tushirish ekrani (iOS LaunchScreen / Android splash) va index.html'dagi #boot bilan
+ * PIKSELMA-PIKSEL bir xil: fon gradienti + markazdagi logo, balandlikning 15.37% (iOS rasmida ham shu nisbat).
+ * Shuning uchun shu kadrga hech qanday kirish animatsiyasi BERILMAYDI (aks holda sakrash bo'ladi).
+ * Keyin: logo bir marta "nafas oladi", so'ng kuryer animatsiyasiga yumshoq o'tadi (.splash--media).
+ */
+.splash__logo {
+  position: absolute; left: 50%; top: 50%;
+  width: 15.37vh; height: 15.37vh;
+  transform: translate(-50%, -50%);
+  transform-origin: center;
+  pointer-events: none; user-select: none; -webkit-user-select: none;
+  animation: splash-breathe 900ms cubic-bezier(0.4, 0, 0.2, 1) 120ms 1 both;
+  transition: opacity 450ms ease, transform 550ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+}
+.splash--media .splash__logo { opacity: 0; transform: translate(-50%, -50%) scale(0.82); animation: none; }
+
+/* Kuryer: logo ostida yuklanib turadi, logo ketgach yumshoq paydo bo'ladi */
+.splash__media { opacity: 0; transform: scale(1.025); transition: opacity 550ms ease 120ms, transform 800ms cubic-bezier(0.2, 0.8, 0.2, 1) 120ms; }
+.splash--media .splash__media { opacity: 1; transform: none; }
+
+@keyframes splash-breathe {
+  0%   { transform: translate(-50%, -50%) scale(1); }
+  45%  { transform: translate(-50%, -50%) scale(1.08); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash__logo { animation: none; }
+  .splash__media, .splash--media .splash__media { transform: none; transition-duration: 150ms; }
+}

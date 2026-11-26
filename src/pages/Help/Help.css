@@ -1,0 +1,113 @@
+/* ============ Yordam: ko'p beriladigan savollar ============ */
+.help {
+  background: var(--canvas);
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  /* Bo'lim rangi: Lokma Go — to'q sariq (standart), Market — yashil. Almashganda yumshoq o'tadi */
+  --h-brand: #FF5C00; --h-tint: #FFF1E8; --h-deep: #E8590C;
+  transition: background-color 400ms var(--ease);
+}
+.help--market { --h-brand: #1F9D55; --h-tint: #E8F7EE; --h-deep: #178045; }
+.help .btn-primary { background: var(--h-brand); transition: background-color 350ms var(--ease), transform 160ms var(--ease); }
+.help .btn-primary:active { transform: scale(0.98); }
+
+/* Qarshi olish bloki */
+.help__hero {
+  display: flex; align-items: center; gap: 14px;
+  margin: 16px 16px 14px; padding: 16px;
+  border-radius: 20px; background: var(--h-tint);
+  transition: background-color 400ms var(--ease);
+  animation: help-rise 520ms var(--ease) both;
+}
+.help__orb {
+  width: 46px; height: 46px; border-radius: 16px; flex: none;
+  display: grid; place-items: center; color: #fff;
+  background: var(--h-brand);
+  box-shadow: 0 8px 18px -6px var(--h-brand);
+  transition: background-color 400ms var(--ease), box-shadow 400ms var(--ease);
+  animation: help-bob 3.6s ease-in-out 600ms infinite;
+}
+.help__orb svg { color: #fff !important; }
+.help__hello { font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.25; }
+.help__sub { margin-top: 3px; font-size: 13px; color: var(--muted); line-height: 1.35; }
+
+/* Bo'lim almashtirgich — sirpanuvchi "tabletka" */
+.help__seg {
+  position: relative; display: grid; grid-template-columns: 1fr 1fr;
+  margin: 0 16px 14px; padding: 4px; border-radius: 16px;
+  background: var(--surface-2);
+  animation: help-rise 520ms 60ms var(--ease) both;
+}
+.help__seg-pill {
+  position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px);
+  border-radius: 12px; background: var(--surface);
+  box-shadow: 0 2px 10px rgba(16, 24, 40, 0.12);
+  transition: transform 380ms cubic-bezier(0.34, 1.3, 0.5, 1);
+}
+.help__seg[data-tab='market'] .help__seg-pill { transform: translateX(100%); }
+.help__seg button {
+  position: relative; z-index: 1; padding: 11px 8px; border: 0; background: none;
+  font: inherit; font-size: 14px; font-weight: 600; color: var(--muted);
+  transition: color 250ms var(--ease);
+}
+.help__seg button.is-on { color: var(--h-deep); }
+
+/* Savollar */
+.help__list { list-style: none; margin: 0 16px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.help-item {
+  border: 1px solid var(--line); border-radius: 16px; background: var(--surface); overflow: hidden;
+  animation: help-rise 460ms var(--ease) both; animation-delay: calc(var(--i) * 45ms + 80ms);
+  transition: border-color 250ms var(--ease), box-shadow 300ms var(--ease), background-color 250ms var(--ease);
+}
+.help-item.is-open { border-color: var(--h-brand); box-shadow: 0 10px 26px -14px var(--h-brand); }
+.help-item__q {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;
+  padding: 15px 16px; border: 0; background: none; text-align: left;
+  font: inherit; font-size: 15px; font-weight: 600; line-height: 1.35; color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+}
+.help-item__q:active { background: var(--surface-2); }
+.help-item__chev {
+  width: 28px; height: 28px; flex: none; display: grid; place-items: center; border-radius: 50%;
+  background: var(--surface-2); color: var(--muted);
+  transition: transform 380ms cubic-bezier(0.34, 1.3, 0.5, 1), background-color 250ms var(--ease), color 250ms var(--ease);
+}
+.help-item.is-open .help-item__chev { transform: rotate(180deg); background: var(--h-tint); color: var(--h-deep); }
+
+.help-item__panel {
+  display: grid; grid-template-rows: 0fr;
+  transition: grid-template-rows 380ms var(--ease);
+}
+.help-item.is-open .help-item__panel { grid-template-rows: 1fr; }
+.help-item__inner { overflow: hidden; min-height: 0; padding: 0 16px; opacity: 0; transform: translateY(-4px); transition: opacity 260ms var(--ease), transform 380ms var(--ease), padding 380ms var(--ease); }
+.help-item.is-open .help-item__inner { opacity: 1; transform: none; padding: 0 16px 16px; transition-delay: 60ms, 60ms, 0s; }
+.help-item__a { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--ink); }
+.help-item__tip {
+  display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; padding: 10px 12px;
+  border-radius: 12px; background: var(--h-tint); font-size: 13px; line-height: 1.45; color: var(--ink);
+  transition: background-color 400ms var(--ease);
+}
+.help-item__tip b { color: var(--h-deep); font-weight: 700; }
+.help-item__tip-ic { margin-top: 1px; display: grid; }
+.help-item__tip-ic svg { color: var(--h-brand) !important; }
+
+/* Pastki aloqa */
+.help__contact {
+  margin: 18px 16px 0; padding: 18px; border-radius: 20px; text-align: center;
+  background: var(--surface-2);
+  animation: help-rise 520ms 200ms var(--ease) both;
+}
+.help__contact-title { font-size: 16px; font-weight: 700; color: var(--ink); }
+.help__contact p { margin: 6px 0 14px; font-size: 13.5px; line-height: 1.45; color: var(--muted); }
+.help__contact-btn { width: 100%; }
+.help__link {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; padding: 6px 8px;
+  border: 0; background: none; font: inherit; font-size: 13px; font-weight: 600; color: var(--muted);
+}
+.help__link:active { color: var(--ink); }
+
+@keyframes help-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes help-bob { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-3px) rotate(-4deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .help *, .help *::before, .help *::after { animation-duration: 1ms !important; animation-delay: 0s !important; transition-duration: 1ms !important; }
+}

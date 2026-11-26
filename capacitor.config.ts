@@ -4,6 +4,8 @@ const config: CapacitorConfig = {
   appId: 'uz.lokma.go',
   appName: 'Lokma Go',
   webDir: 'dist',
+  // Veb-ko'rinish foni = ishga tushirish ekrani foni: native ekran tugagach oq "chaqnash" bo'lmasin (Splash.css bilan bir xil)
+  backgroundColor: '#032A37',
   plugins: {
     // Taom takliflari: ilova ochiq turganda banner chiqmaydi (mijoz allaqachon ilovada); yopiq/fonda — tizim ko'rsatadi
     PushNotifications: {
