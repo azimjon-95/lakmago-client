@@ -32,11 +32,11 @@ import './Splash.css';
  * avtomatik GIF'ga qaytadi — kodga tegish shart emas.
  */
 
-const MIN_MS = 1800;
+const MIN_MS = 2200;
 const MAX_MS = 3500;
 const FADE_MS = 400;
-/* Logo bosqichi (native ekranning davomi) shuncha turadi, so'ng kuryer animatsiyasiga yumshoq o'tadi */
-const LOGO_MS = 750;
+/* Logo bosqichi (fon native ekran bilan bir xil, logo undan paydo bo'ladi) shuncha turadi, so'ng kuryer animatsiyasiga yumshoq o'tadi */
+const LOGO_MS = 1300;
 const LOGO_SRC = '/brand/splash-logo.png';
 
 /*
