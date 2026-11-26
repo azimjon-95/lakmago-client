@@ -273,6 +273,10 @@ export const api = {
   // preview=N — birinchi N bo'limning 1-sahifasi shu javobda (sekin internetda so'rovlar zanjiri qisqaradi)
   // Ilova versiyasi va do'kon havolalari (majburiy/ixtiyoriy yangilanish, "ilovani yuklab olish")
   getAppConfig: (opts) => apiFetch('/app/config', opts),
+  // Taom takliflari push'i (faqat ilova): token, rozilik/til/tuman, bildirishnoma bosildi
+  registerPush: (body) => apiFetch('/app/push/register', { method: 'POST', body: JSON.stringify(body) }),
+  pushPrefs: (body) => apiFetch('/app/push/prefs', { method: 'POST', body: JSON.stringify(body) }),
+  pushOpened: (body) => apiFetch('/app/push/opened', { method: 'POST', body: JSON.stringify(body) }),
   getMenuIndex: (restaurantId, { preview = 0, signal } = {}) =>
     apiFetch(`/restaurants/${restaurantId}/menu/index${preview ? `?preview=${preview}` : ''}`, { signal }),
   getMenuItems: (restaurantId, { section = '', cursor = '', limit = 24, signal } = {}) => {

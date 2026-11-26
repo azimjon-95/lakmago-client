@@ -32,6 +32,7 @@ import { SupportChat } from '@/components/SupportChat/SupportChat';
 import { Splash } from '@/components/Splash/Splash';
 import { PromoModals } from '@/components/PromoModals/PromoModals';
 import { AppUpdate } from '@/components/AppUpdate/AppUpdate';
+import { PromoPush } from '@/components/PromoPush/PromoPush';
 import { useTelegramBack } from '@/hooks/useTelegramBack';
 import { WeddingHost } from '@/components/WeddingHost/WeddingHost';
 import { maybeAskContactOnce } from '@/lib/contactVerify';
@@ -265,6 +266,8 @@ function AppInner({ authMode = 'telegram' }) {
           {!showSplash && <PromoModals />}
           {/* Native ilova yangilanishi (iOS/Android); veb va Telegram'da hech narsa qilmaydi */}
           {!showSplash && <AppUpdate />}
+          {/* Taom takliflari push'i (iOS/Android): bosilganda taomga o'tish va BIR MARTA rozilik oynasi (bloklamaydi) */}
+          {!showSplash && <PromoPush />}
           {/* Joylashuv olinmagan bo'lsa — bosh sahifada kichik «ulashasizmi?» oynasi (bloklamaydi) */}
           {!showSplash && DISTRICT_SELECTOR_ENABLED && <LocationPrompt />}
           <Routes>
