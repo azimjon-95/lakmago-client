@@ -27,3 +27,6 @@ assert.ok(mk.indexOf('const openAll = useCallback') < mk.indexOf('if (!featLoadi
 const hs = readFileSync(new URL('../src/components/HomeSections/HomeSections.jsx', import.meta.url), 'utf8');
 assert.match(hs, /tapHaptic\(\)/);
 console.log('market hook order + tiles haptic OK');
+const app = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
+assert.match(app, /<ScrollToTop \/>/);
+console.log('ScrollToTop mounted OK');
