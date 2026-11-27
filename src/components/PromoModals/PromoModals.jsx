@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { api } from '@/api';
-import { haptic } from '@/lib/telegram';
+import { tapHaptic } from '@/lib/tapHaptic';
 import { useT } from '@/i18n';
 import { isNativeApp, storeUrlFor } from '@/lib/clientInfo';
 import { PromoCard, ensurePromoFont, promoImg } from './PromoCard';
@@ -21,7 +21,7 @@ const CLOSE_MS = 420;
 const GAP_MS = 140;         // ketma-ket oynalar orasidagi tanaffus
 
 const reduceMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-const track = (id, kind) => api.trackPromoModal?.(id, kind).catch(() => {});
+const track = (id, kind, btn) => api.trackPromoModal?.(id, kind, btn).catch(() => {});
 
 /*
  * "Ilovani yuklab olish" (cta: install_app) oynalari: havola mijoz qurilmasiga mos do'kon
@@ -56,7 +56,8 @@ export function PromoModals() {
   // Bir sessiyada bir marta: bosh sahifada, biroz kutib, faol oynalarni olamiz
   useEffect(() => {
     if (!onHome || started.current) return undefined;
-    const t = setTimeout(async () => {
+    // DIQQAT: taymer nomi `t` EMAS — u useT() tarjima funksiyasini yopib qo'yardi ("t is not a function" → reklama hech qachon chiqmasdi)
+    const timer = setTimeout(async () => {
       if (started.current) return;
       started.current = true;
       try {
@@ -73,7 +74,7 @@ export function PromoModals() {
         setPhase('in');
       } catch { /* tarmoq xatosi — reklama ko'rsatilmaydi, ilova ishlayveradi */ }
     }, START_DELAY);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [onHome]);
 
   const current = queue[idx];
@@ -89,7 +90,7 @@ export function PromoModals() {
 
   const close = useCallback((all = false) => {
     if (phase !== 'open' && phase !== 'in') return;
-    haptic?.();
+    tapHaptic();
     setPhase('out');
     later(() => {
       const next = idx + 1;
@@ -102,16 +103,18 @@ export function PromoModals() {
     }, reduceMotion() ? 160 : CLOSE_MS);
   }, [phase, idx, queue.length]);
 
-  const act = useCallback(() => {
-    if (!current?.link) return;
-    track(current.id, 'click');
-    const link = current.link;
+  // Havola ochish: butun rasm / pastki yozuv (btn yo'q) yoki pastdagi tugma (btn = 0 | 1)
+  const open = useCallback((link, btn) => {
+    if (!link) return;
+    track(current?.id, 'click', btn);
     close(true);
     later(() => {
       if (link.startsWith('/')) navigate(link);
       else window.Telegram?.WebApp?.openLink ? window.Telegram.WebApp.openLink(link) : window.open(link, '_blank', 'noopener');
     }, reduceMotion() ? 160 : CLOSE_MS);
   }, [current, close, navigate]);
+  const act = useCallback(() => open(current?.link), [open, current]);
+  const onButton = useCallback((i, b) => open(b?.link, i), [open]);
 
   // Esc — yopish; ochiq paytda sahifa aylanmasin
   const visible = phase !== 'idle' && queue.length > 0;
@@ -141,7 +144,7 @@ export function PromoModals() {
       <div className="pmx-backdrop" onClick={() => close()} />
       {current && phase !== 'gap' && (
         <div key={current.key} className={`pmx-stage pmx-stage--${phase}`}>
-          <PromoCard promo={current} onClose={() => close()} onAction={act} />
+          <PromoCard promo={current} onClose={() => close()} onAction={act} onButton={onButton} />
         </div>
       )}
       {queue.length > 1 && (

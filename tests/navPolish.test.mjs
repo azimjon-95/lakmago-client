@@ -30,3 +30,8 @@ console.log('market hook order + tiles haptic OK');
 const app = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
 assert.match(app, /<ScrollToTop \/>/);
 console.log('ScrollToTop mounted OK');
+const pm = readFileSync(new URL('../src/components/PromoModals/PromoModals.jsx', import.meta.url), 'utf8');
+assert.ok(!/const t = setTimeout\(async/.test(pm), 'taymer `t` nomi tarjima funksiyasini yopib qo‘ymasin (reklama chiqmay qolgan edi)');
+const pc = readFileSync(new URL('../src/components/PromoModals/PromoCard.jsx', import.meta.url), 'utf8');
+assert.match(pc, /t === 'image' \? \(promo\?\.buttons/);
+console.log('promo modal timer + buttons OK');

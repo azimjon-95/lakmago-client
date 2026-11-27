@@ -253,7 +253,7 @@ export const api = {
   quoteGifts: (body) => apiFetch('/gift-bonus/quote', { method: 'POST', body: JSON.stringify(body) }),
   // Reklama oynalari (admin boshqaradi): faol ro'yxat va ko'rildi/bosildi soni
   getPromoModals: () => apiFetch('/promo-modals/active'),
-  trackPromoModal: (id, kind) => apiFetch(`/promo-modals/${id}/track`, { method: 'POST', body: JSON.stringify({ kind }) }),
+  trackPromoModal: (id, kind, btn) => apiFetch(`/promo-modals/${id}/track`, { method: 'POST', body: JSON.stringify(Number.isInteger(btn) ? { kind, btn } : { kind }) }),
   // Lokma Market sahifasi bannerlari (admin: Bannerlar → "Lokma Market")
   getMarketBanners: (opts) => apiFetch('/banners?placement=market', opts),
   // Restoran/taom reklamalari — admin tasdiqlagan, bosh sahifa banneriga qo'shiladi
