@@ -1,3 +1,4 @@
+import { forgetHome } from '@/lib/lastHome';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInfiniteQuery } from '@tanstack/react-query';
@@ -170,6 +171,15 @@ export function MarketPage() {
     </header>
   );
 
+  /*
+   * HOOK TARTIBI: bu useCallback erta `return`dan OLDIN turishi SHART. Avval u `return`dan keyin edi — funksiyalar yuklangach
+   * (market o'chiq / xato) hook'lar soni kamayib, React #300 "Nimadir noto'g'ri ketdi" chiqardi (sovuq ochilishda).
+   */
+  const openAll = useCallback(() => navigate('/market/products'), [navigate]);
+  // Market mijozga mavjud bo'lmasa, "oxirgi bo'lim" xotirasi har ochilganda bo'sh sahifaga olib kelmasin
+  const unavailable = !featLoading && !allowed;
+  useEffect(() => { if (unavailable) forgetHome('market'); }, [unavailable]);
+
   if (!featLoading && !allowed) {
     return (
       <div className="app-shell market">
@@ -185,8 +195,7 @@ export function MarketPage() {
   }
 
   const nothing = !storesLoading && !storesError && stores.length === 0;
-  // "Barchasi" — barcha mahsulotlar alohida sahifada
-  const openAll = useCallback(() => navigate('/market/products'), [navigate]);
+  // "Barchasi" — barcha mahsulotlar alohida sahifada (openAll — yuqorida, hook tartibi uchun)
 
   return (
     <div className="app-shell market">

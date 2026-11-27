@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useSection } from '@/store/section';
-import { getStartParam } from '@/lib/telegram';
+import { getStartParam, setTelegramSurfaceColor } from '@/lib/telegram';
 
 /*
  * ═══ OXIRGI BO'LIM XOTIRASI: Lokma Go / Lokma Market / Lokma To'yxonalari ═══
@@ -17,6 +17,14 @@ import { getStartParam } from '@/lib/telegram';
  */
 const KEY = 'lokma_last_home_v1';
 const PATHS = { go: '/', market: '/market', weddings: '/weddings' };
+
+const WSURF_KEY = 'lokma_wedding_surface_v1';
+export function readWeddingSurface() {
+  try { const v = localStorage.getItem(WSURF_KEY); return /^#[0-9a-f]{6}$/i.test(v || '') ? v : '#1E1A16'; } catch { return '#1E1A16'; }
+}
+export function saveWeddingSurface(color) {
+  try { if (/^#[0-9a-f]{6}$/i.test(color)) localStorage.setItem(WSURF_KEY, color); } catch { /* bloklangan */ }
+}
 
 export function homeOfPath(pathname) {
   if (pathname === '/') return 'go';
@@ -46,8 +54,15 @@ export function restoreLastHome() {
     const h = readLastHome();
     if (h === 'go') return;
     useSection.getState().setSection(h === 'market' ? 'market' : 'go');
+    // To'yxonalar: Telegram tepa qismi oxirgi marta ko'rilgan rangda (sahifa o'zi keyin aniqlaydi)
+    if (h === 'weddings') setTelegramSurfaceColor(readWeddingSurface());
     window.history.replaceState(window.history.state, '', PATHS[h] + window.location.search + window.location.hash);
   } catch { /* xotira yordamchi: xato bo'lsa ilova odatdagidek ochiladi */ }
+}
+
+/** Bo'lim mijozga mavjud emas (o'chirilgan) — xotira shu bo'limda bo'lsa Lokma Go'ga qaytariladi. */
+export function forgetHome(name) {
+  try { if (localStorage.getItem(KEY) === name) localStorage.setItem(KEY, 'go'); } catch { /* bloklangan */ }
 }
 
 /** Router ichida: bo'lim bosh sahifasi ochilganda eslab qoladi. */

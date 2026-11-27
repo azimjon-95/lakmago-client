@@ -63,13 +63,26 @@
         var tg = window.Telegram && window.Telegram.WebApp;
         if (!tg) return;
 
+        // Eslab qolingan bo'lim rangi: ochilishdayoq tepa qism to'g'ri rangda (oqdan yashilga "o'ynamasin")
+        var surf = function () {
+          try {
+            var p = location.pathname, h = localStorage.getItem('lokma_last_home_v1');
+            if (p.indexOf('/market') === 0 || (p === '/' && h === 'market')) return '#016029';
+            if (p.indexOf('/weddings') === 0 || (p === '/' && h === 'weddings')) {
+              var w = localStorage.getItem('lokma_wedding_surface_v1');
+              return /^#[0-9a-f]{6}$/i.test(w || '') ? w : '#1E1A16';
+            }
+          } catch (e) {}
+          return '#FFFFFF';
+        };
+
         var apply = function () {
           // Pastga/tepaga surib yopish yoki kichraytirishni bloklaymiz
           // (Bot API 7.7+). Ilovadan chiqish faqat Закрыть tugmasi orqali.
           try { tg.disableVerticalSwipes && tg.disableVerticalSwipes(); } catch (e) {}
 
           // Status bar foni oq -> Telegram ikonlarni to'q chizishi kerak
-          try { tg.setHeaderColor && tg.setHeaderColor('#FFFFFF'); } catch (e) {}
+          try { tg.setHeaderColor && tg.setHeaderColor(surf()); } catch (e) {}
           try { tg.setBackgroundColor && tg.setBackgroundColor('#FFFFFF'); } catch (e) {}
         };
 

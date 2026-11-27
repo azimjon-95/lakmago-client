@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { useT } from '@/i18n';
 import { useSection } from '@/store/section';
+import { tapHaptic } from '@/lib/tapHaptic';
 import './HomeSections.css';
 
 /*
@@ -40,7 +41,7 @@ function Tile({ variant, img, title, sub, onClick }) {
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={() => { tapHaptic(); onClick?.(); }}
       aria-label={`${title}. ${sub || ''}`}
       className={`home-section-tile home-section-tile--${variant}`}
       style={{ '--hs-photo': `url("${PHOTO[variant]}")` }}

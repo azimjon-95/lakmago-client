@@ -6,6 +6,7 @@ import { useWeddingFrame } from '@/store/weddingFrame';
 import { useI18n } from '@/i18n';
 import { useFeatures } from '@/hooks/queries';
 import { setTelegramSurfaceColor, applySectionTheme } from '@/lib/telegram';
+import { saveWeddingSurface } from '@/lib/lastHome';
 import '@/components/WeddingHost/WeddingHost.css';
 
 /*
@@ -49,7 +50,9 @@ export function WeddingsPage() {
    */
   useEffect(() => {
     if (!allowed) return;
-    setTelegramSurfaceColor(WEDDING_SURFACE[tone] ?? WEDDING_SURFACE.dark);
+    const color = WEDDING_SURFACE[tone] ?? WEDDING_SURFACE.dark;
+    setTelegramSurfaceColor(color);
+    saveWeddingSurface(color);
   }, [allowed, tone]);
 
   if (!isLoading && !allowed) {

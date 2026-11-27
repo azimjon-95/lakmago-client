@@ -22,3 +22,8 @@ const prof = readFileSync(new URL('../src/pages/Profile/ProfilePage.jsx', import
 assert.ok(!prof.includes('className="page-header"'));
 assert.match(prof, /SHOW_ACCOUNT_DELETE = false/);
 console.log('profile OK');
+const mk = readFileSync(new URL('../src/pages/Market/MarketPage.jsx', import.meta.url), 'utf8');
+assert.ok(mk.indexOf('const openAll = useCallback') < mk.indexOf('if (!featLoading && !allowed)'), 'hook erta return dan oldin bo‘lishi shart (React #300)');
+const hs = readFileSync(new URL('../src/components/HomeSections/HomeSections.jsx', import.meta.url), 'utf8');
+assert.match(hs, /tapHaptic\(\)/);
+console.log('market hook order + tiles haptic OK');

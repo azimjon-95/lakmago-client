@@ -133,6 +133,9 @@ export function applySectionTheme(section) {
 }
 
 export function setTelegramSurfaceColor(color) {
+  // Veb (Android Chrome/PWA): brauzer tepa qatori ham shu rangda
+  try { document.querySelector('meta[name="theme-color"]')?.setAttribute('content', color); } catch { /* DOM yo'q */ }
+
   const tg = getTelegram();
   if (!tg) return;
   try {
