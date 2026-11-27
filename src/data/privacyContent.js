@@ -32,7 +32,7 @@ const UZ = {
     ['Ko‘rish va tuzatish', 'Profil bo‘limida ism, telefon va manzillaringizni o‘zingiz ko‘rasiz va tahrirlaysiz.'],
     ['O‘chirish', 'Yordam chatiga yozing — so‘rovingiz bo‘yicha shaxsiy ma‘lumotlaringiz o‘chiriladi.'],
     ['Rozilikni qaytarish', 'Taom takliflari — Profilda bir bosishda o‘chadi. Joylashuv — telefon sozlamalaridan.'],
-    ['Savol va e‘tiroz', 'Yordam chatiga yozing — o‘qib, qonunda belgilangan muddatda javob beramiz.'],
+    ['Savol va e‘tiroz', 'Yordam chatiga yozing — Lokma Go xodimlari qonunda belgilangan muddatda javob beradi.'],
   ],
   sections: [
     { id: 'operator', title: '1. Kim ma‘lumotlaringizni qayta ishlaydi', blocks: [
@@ -62,7 +62,7 @@ const UZ = {
     ] },
     { id: 'fraud', title: '4. Firibgarlikdan himoya (bron va buyurtma)', blocks: [
       { p: 'Restoranlar soxta bronlardan zarar ko‘rmasligi uchun bron yuborilganda mijozning ishonchlilik belgilari tekshiriladi: telefon raqami haqiqiyligi, sana va vaqt mantiqiyligi, takroriy va haddan ortiq bronlar, avvalgi bronlar va yetkazilgan buyurtmalar soni, Telegram foydalanuvchi nomi. Bu belgilar restoranga mijozni tanishda yordam sifatida ko‘rsatiladi.' },
-      { p: 'Aniq soxta ma‘lumotlar yoki haddan ortiq urinishlar tizim tomonidan avtomatik rad etilishi mumkin. Agar noto‘g‘ri rad etilgan deb hisoblasangiz, Yordam chatiga yozing — holatni odam ko‘rib chiqadi.' },
+      { p: 'Aniq soxta ma‘lumotlar yoki haddan ortiq urinishlar tizim tomonidan avtomatik rad etilishi mumkin. Agar noto‘g‘ri rad etilgan deb hisoblasangiz, Yordam chatiga yozing — Lokma Go xodimlari holatni ko‘rib chiqadi.' },
     ] },
     { id: 'sharing', title: '5. Ma‘lumotlar kimlarga uzatiladi', blocks: [
       { ul: [
@@ -169,7 +169,7 @@ const RU = {
     ] },
     { id: 'fraud', title: '4. Защита от мошенничества (брони и заказы)', blocks: [
       { p: 'Чтобы рестораны не страдали от ложных броней, при отправке брони проверяются признаки надёжности клиента: достоверность телефона, логичность даты и времени, повторные и чрезмерные брони, число прошлых броней и доставленных заказов, имя пользователя Telegram. Эти признаки показываются ресторану, чтобы помочь ему понять, кто пришёл.' },
-      { p: 'Явно ложные данные или чрезмерное число попыток могут быть автоматически отклонены системой. Если считаете, что отказ ошибочен, напишите в чат поддержки — ситуацию рассмотрит человек.' },
+      { p: 'Явно ложные данные или чрезмерное число попыток могут быть автоматически отклонены системой. Если считаете, что отказ ошибочен, напишите в чат поддержки — ситуацию рассмотрят сотрудники Lokma Go.' },
     ] },
     { id: 'sharing', title: '5. Кому передаются данные', blocks: [
       { ul: [
