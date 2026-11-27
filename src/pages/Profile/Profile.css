@@ -1,5 +1,5 @@
 /* ============ Profil ============ */
-.profile { padding-bottom: 0; background: var(--canvas); }
+.profile { padding-top: calc(var(--tg-top-offset, 0px) + 14px); padding-bottom: 0; background: var(--canvas); }
 
 .profile-card {
   margin: 2px 16px 16px;

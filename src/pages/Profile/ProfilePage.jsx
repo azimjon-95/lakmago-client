@@ -16,6 +16,9 @@ import { useCapabilities } from '@/lib/capabilities';
 import { signOut } from '@/lib/session';
 import './Profile.css';
 
+// Hozircha yashirin (egasi qarori, 2026-11-27). Qaytarish uchun true qiling. Eslatma: App Store 5.1.1(v) hisob o'chirishni talab qiladi.
+const SHOW_ACCOUNT_DELETE = false;
+
 export function ProfilePage() {
   const navigate = useNavigate();
   const favCount = useUser((st) =>
@@ -91,10 +94,6 @@ export function ProfilePage() {
 
   return (
     <div className="app-shell profile">
-      <header className="page-header">
-        <button onClick={() => navigate('/')} aria-label={t('back')}><Icon name="arrowLeft" size={22} color="var(--ink)" /></button>
-        <h1>{t('profile')}</h1>
-      </header>
 
       {isGuest ? (
         <GuestHero onSignIn={() => ensureAuth({ reason: 'profile' })} />
@@ -278,7 +277,7 @@ export function ProfilePage() {
               <div className="profile-row__body"><div className="profile-row__value">{t('logout')}</div></div>
               <Icon name="chevronRight" size={17} color="var(--muted)" />
             </button>
-            {caps.accountDeletion && (
+            {SHOW_ACCOUNT_DELETE && caps.accountDeletion && (
               <button type="button" onClick={() => setConfirm('delete')} className="profile-row" data-testid="delete-row">
                 <Icon name="trash" size={18} color="#DC2626" />
                 <div className="profile-row__body">

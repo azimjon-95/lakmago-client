@@ -36,7 +36,7 @@ const GO_UZ = [
     a: 'Profil → «Taom takliflari» tugmasini bosing — o‘chadi. Xohlagan payt shu yerdan qayta yoqishingiz mumkin. Biz kuniga ko‘pi bilan 2 ta xabar yuboramiz.',
     tip: 'Buyurtma holati haqidagi xabarlarga bu ta‘sir qilmaydi.' },
   { q: 'Hisobimni qanday o‘chiraman?',
-    a: 'Profil → «Hisob» bo‘limida «Akkauntni o‘chirish» bor. Ism, telefon, manzil va bonuslaringiz butunlay o‘chadi. Faol buyurtmangiz bo‘lsa, avval u yetkazilishini kuting.',
+    a: 'Yordam chatiga yozing — so‘rovingiz bo‘yicha ism, telefon, manzil va bonuslaringiz o‘chiriladi. Faol buyurtmangiz bo‘lsa, avval u yetkazilishini kuting.',
     tip: 'Chiqib ketish uchun hisobni o‘chirish shart emas — «Chiqish» tugmasi yetarli.' },
 ];
 
@@ -99,7 +99,7 @@ const GO_RU = [
     a: 'Профиль → «Предложения блюд» — нажмите, и они выключатся. Включить обратно можно там же. Мы присылаем не более 2 сообщений в день.',
     tip: 'На уведомления о статусе заказа это не влияет.' },
   { q: 'Как удалить аккаунт?',
-    a: 'В Профиле, в разделе «Аккаунт», есть «Удалить аккаунт». Имя, телефон, адреса и бонусы удаляются полностью. Если есть активный заказ — сначала дождитесь доставки.',
+    a: 'Напишите в чат поддержки — по вашему запросу имя, телефон, адреса и бонусы будут удалены. Если есть активный заказ — сначала дождитесь доставки.',
     tip: 'Чтобы просто выйти, удалять аккаунт не нужно — достаточно «Выйти».' },
 ];
 

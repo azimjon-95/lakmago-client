@@ -7,7 +7,7 @@ import { useCart } from '@/store/cart';
 import { useUser } from '@/store/user';
 import { useT } from '@/i18n';
 import { useSection } from '@/store/section';
-import { getTelegram } from '@/lib/telegram';
+import { tapHaptic, scrollToTopSmooth } from '@/lib/tapHaptic';
 import './BottomNav.css';
 
 const tabs = [
@@ -69,12 +69,8 @@ export function BottomNav() {
   return <div className="bottom-nav bottom-nav--slot" aria-hidden="true" />;
 }
 
-/* Tanlov tebranishi (iOS linzasi tab ustidan o'tganda): Telegram — HapticFeedback, Android brauzer — 6 ms */
-function selectionHaptic() {
-  const hf = getTelegram()?.HapticFeedback;
-  if (hf?.selectionChanged) { hf.selectionChanged(); return; }
-  try { navigator.vibrate?.(6); } catch { /* iOS Safari vibratsiyani qo'llamaydi */ }
-}
+/* Tanlov tebranishi (iOS linzasi tab ustidan o'tganda) */
+const selectionHaptic = () => tapHaptic('select');
 
 const IOS = isIOSDevice();
 const reducedMotion = () => typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -141,12 +137,14 @@ export function NavHost() {
     prevPop.current = activeIndex;
     if (activeIndex >= 0 && !first) {
       setPop((p) => ({ i: activeIndex, n: p.n + 1 }));
-      selectionHaptic();
     }
   }, [activeIndex]); // eslint-disable-line react-hooks/exhaustive-deps
   const go = (i) => {
     const tab = tabs[i];
-    if (!tab || i === activeRef.current) return;
+    if (!tab) return;
+    // Aktiv tab qayta bosilsa — sahifa yumshoq tepaga ko'tariladi (boshqa ilovalar kabi)
+    if (i === activeRef.current) { tapHaptic(); scrollToTopSmooth(); return; }
+    tapHaptic();
     setPending(i);
     navigate(targetOf(tab));
   };

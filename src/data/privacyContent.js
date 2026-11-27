@@ -30,7 +30,7 @@ const UZ = {
   ],
   rights: [
     ['Ko‘rish va tuzatish', 'Profil bo‘limida ism, telefon va manzillaringizni o‘zingiz ko‘rasiz va tahrirlaysiz.'],
-    ['O‘chirish', 'Profil → Hisob → «Akkauntni o‘chirish». Shaxsiy ma‘lumotlaringiz o‘chadi.'],
+    ['O‘chirish', 'Yordam chatiga yozing — so‘rovingiz bo‘yicha shaxsiy ma‘lumotlaringiz o‘chiriladi.'],
     ['Rozilikni qaytarish', 'Taom takliflari — Profilda bir bosishda o‘chadi. Joylashuv — telefon sozlamalaridan.'],
     ['Savol va e‘tiroz', 'Yordam chatiga yozing — o‘qib, qonunda belgilangan muddatda javob beramiz.'],
   ],
@@ -83,7 +83,7 @@ const UZ = {
       { p: 'Buyurtma holati haqidagi xabarlar xizmat xabarlari hisoblanadi. Taom takliflari (reklama xarakteridagi bildirishnomalar) faqat ilovada aniq rozilik bersangiz yuboriladi — kuniga ko‘pi bilan 2 ta. Ularni Profil → «Taom takliflari» orqali yoki telefon sozlamalaridan istalgan payt o‘chirishingiz mumkin.' },
     ] },
     { id: 'retention', title: '9. Saqlash muddati va o‘chirish', blocks: [
-      { p: 'Ma‘lumotlar maqsad uchun zarur muddat davomida saqlanadi. Akkauntni o‘chirsangiz, ismingiz, telefon raqamingiz, manzillaringiz va bonuslaringiz o‘chiriladi. Buyurtmalar tarixi hisob-kitob va qonuniy majburiyatlar uchun shaxsingizga bog‘lanmagan holda saqlanishi mumkin. Qonun talab qilgan muddat tugagach, ma‘lumotlar o‘chiriladi yoki shaxsni aniqlab bo‘lmaydigan shaklga keltiriladi.' },
+      { p: 'Ma‘lumotlar maqsad uchun zarur muddat davomida saqlanadi. Akkauntni o‘chirishni so‘rasangiz (Yordam chatiga yozing), ismingiz, telefon raqamingiz, manzillaringiz va bonuslaringiz o‘chiriladi. Buyurtmalar tarixi hisob-kitob va qonuniy majburiyatlar uchun shaxsingizga bog‘lanmagan holda saqlanishi mumkin. Qonun talab qilgan muddat tugagach, ma‘lumotlar o‘chiriladi yoki shaxsni aniqlab bo‘lmaydigan shaklga keltiriladi.' },
     ] },
     { id: 'security', title: '10. Xavfsizlik', blocks: [
       { p: 'Ma‘lumotlar himoyalangan (HTTPS) ulanish orqali uzatiladi; tizimga kirish huquqi cheklangan; kirish tokenlari va maxfiy kalitlar jurnallarga yozilmaydi. Hech bir tizim mutlaq xavfsiz bo‘lmaydi, ammo biz zamonaviy texnik va tashkiliy choralarni ko‘ramiz va xavfsizlikni muntazam yaxshilab boramiz.' },
@@ -137,7 +137,7 @@ const RU = {
   ],
   rights: [
     ['Просмотр и правка', 'В Профиле вы сами видите и меняете имя, телефон и адреса.'],
-    ['Удаление', 'Профиль → Аккаунт → «Удалить аккаунт». Ваши персональные данные будут удалены.'],
+    ['Удаление', 'Напишите в чат поддержки — по вашему запросу персональные данные будут удалены.'],
     ['Отзыв согласия', 'Предложения блюд — отключаются в Профиле в один клик. Геопозиция — в настройках телефона.'],
     ['Вопросы и возражения', 'Напишите в чат поддержки — ответим в срок, установленный законом.'],
   ],
@@ -190,7 +190,7 @@ const RU = {
       { p: 'Сообщения о статусе заказа — служебные. Предложения блюд (рекламные уведомления) отправляются только при вашем явном согласии в приложении — не более 2 в день. Их можно отключить в любой момент: Профиль → «Предложения блюд» или настройки телефона.' },
     ] },
     { id: 'retention', title: '9. Сроки хранения и удаление', blocks: [
-      { p: 'Данные хранятся столько, сколько нужно для цели обработки. Если вы удалите аккаунт, ваши имя, телефон, адреса и бонусы будут удалены. История заказов может храниться без привязки к вам для расчётов и исполнения требований закона. По истечении срока, установленного законом, данные удаляются или обезличиваются.' },
+      { p: 'Данные хранятся столько, сколько нужно для цели обработки. Если вы запросите удаление аккаунта (напишите в чат поддержки), ваши имя, телефон, адреса и бонусы будут удалены. История заказов может храниться без привязки к вам для расчётов и исполнения требований закона. По истечении срока, установленного законом, данные удаляются или обезличиваются.' },
     ] },
     { id: 'security', title: '10. Безопасность', blocks: [
       { p: 'Данные передаются по защищённому соединению (HTTPS); доступ к системе ограничен; токены входа и секретные ключи не записываются в журналы. Абсолютно безопасных систем не существует, но мы применяем современные технические и организационные меры и постоянно совершенствуем защиту.' },

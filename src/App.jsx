@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, lazy, Suspense } from 'react';
+import { HomeMemory } from '@/lib/lastHome';
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -260,6 +261,7 @@ function AppInner({ authMode = 'telegram' }) {
         <ErrorBoundary>
         <Suspense fallback={<div className="app-shell" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span className="spinner" /></div>}>
           <StartParamHandler />
+          <HomeMemory />
           {/* Katalog tumani (flag o'chiq bo'lsa umuman chizilmaydi). Splash bilan parallel ishlaydi va uni kuttirmaydi; avto rejimda
               ruxsat so'ralmagan bo'lsa GPS oynasi 24 soatda bir marta (CLAUDE.md 2-qoida istisnosi). */}
           {DISTRICT_SELECTOR_ENABLED && <DistrictEngine />}

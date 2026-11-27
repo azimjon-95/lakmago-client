@@ -6,6 +6,7 @@ import { startTextScale } from './lib/textScale';
 import { startAppIconSync } from './lib/appIcon';
 import { liveUpdateBoot } from './lib/liveUpdate';
 import { pushBoot } from './lib/promoPush';
+import { restoreLastHome } from './lib/lastHome';
 
 // Android shrift masshtabini render'dan OLDIN o'lchaymiz (lib/textScale.js)
 startTextScale();
@@ -17,6 +18,9 @@ liveUpdateBoot();
 // Native ilova: bildirishnoma bosilganini render'dan OLDIN tinglaymiz (sovuq ochilishda ham taom sahifasi ochilsin).
 // Rozilik bo'lmasa hech narsa so'ramaydi. Veb/Telegram'da hech narsa qilmaydi (lib/promoPush.js).
 pushBoot();
+
+// Oxirgi bo'lim (Go / Market / To'yxonalar) — router ishga tushishidan oldin (lib/lastHome.js)
+restoreLastHome();
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
